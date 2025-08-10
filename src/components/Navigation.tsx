@@ -19,15 +19,15 @@ export default function Navigation({
           <div className="flex items-center space-x-2">
             <Button variant={currentView === 'home' ? 'default' : 'ghost'} onClick={() => onViewChange('home')} className="transition-fast">
               <Workflow className="w-4 h-4 mr-2" />
-              Overview
+              Home
             </Button>
             <Button variant={currentView === 'admin' ? 'default' : 'ghost'} onClick={() => onViewChange('admin')} className="transition-fast">
               <Settings className="w-4 h-4 mr-2" />
-              Admin
+              Project Manager
             </Button>
             <Button variant={currentView === 'user' ? 'default' : 'ghost'} onClick={() => onViewChange('user')} className="transition-fast">
               <Users className="w-4 h-4 mr-2" />
-              User
+              My Projects
             </Button>
           </div>
         </div>

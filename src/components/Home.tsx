@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Users, ArrowRight, CheckCircle, GitBranch, Target } from "lucide-react";
+import { Shield, Users, ArrowRight, CheckCircle, Route, Target, TrendingUp } from "lucide-react";
 import heroImage from "@/assets/hero-workflow.jpg";
 
 interface HomeProps {
@@ -10,19 +10,19 @@ interface HomeProps {
 export default function Home({ onViewChange }: HomeProps) {
   const features = [
     {
-      icon: GitBranch,
-      title: "Three-Level Organization",
-      description: "Organize workflows with Phases, Operations, and Steps for maximum clarity."
+      icon: Shield,
+      title: "Build with Confidence",
+      description: "Never wonder if you're doing it right. Our proven processes ensure professional-quality results every time."
     },
     {
-      icon: Target,
-      title: "Step-by-Step Guidance",
-      description: "Guide users through processes with multimedia content and clear instructions."
+      icon: Route,
+      title: "Clear Step-by-Step Guidance",
+      description: "Follow our detailed guides with videos, photos, and pro tips that make complex projects manageable."
     },
     {
-      icon: CheckCircle,
-      title: "Progress Tracking",
-      description: "Track completion and maintain accountability across all workflow stages."
+      icon: TrendingUp,
+      title: "Track Your Progress",
+      description: "Stay motivated and on track with built-in progress tracking and quality checkpoints."
     }
   ];
 
@@ -35,25 +35,28 @@ export default function Home({ onViewChange }: HomeProps) {
             <div className="space-y-8">
               <div className="space-y-4">
                 <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-                  Streamline Your{" "}
+                  Confidently Get the{" "}
                   <span className="bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
-                    Workflows
+                    Results You Want
                   </span>
                 </h1>
-                <p className="text-xl text-muted-foreground max-w-lg">
-                  Create, manage, and execute step-by-step processes with multimedia guidance. 
-                  Perfect for teams that need structured workflow management.
+                <h2 className="text-2xl lg:text-3xl font-semibold text-muted-foreground mb-4">
+                  Your Personal Project Partner for Home Improvement Success
+                </h2>
+                <p className="text-xl text-muted-foreground max-w-2xl">
+                  Get guided step-by-step processes, digital tools, equipment lists, videos, easy-to-follow guides, 
+                  critical focus zones, quality checkpoints, and access to professional one-on-one video calls.
                 </p>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
-                  onClick={() => onViewChange('admin')}
+                  onClick={() => onViewChange('user')}
                   size="lg" 
                   className="gradient-primary text-white shadow-elegant hover:shadow-lg transition-smooth"
                 >
-                  <Settings className="w-5 h-5 mr-2" />
-                  Create Workflows
+                  <Target className="w-5 h-5 mr-2" />
+                  Start My Project
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
                 <Button 
@@ -62,8 +65,7 @@ export default function Home({ onViewChange }: HomeProps) {
                   size="lg"
                   className="transition-smooth border-primary/20 hover:border-primary"
                 >
-                  <Users className="w-5 h-5 mr-2" />
-                  Follow Process
+                  Browse Projects
                 </Button>
               </div>
             </div>
@@ -86,10 +88,10 @@ export default function Home({ onViewChange }: HomeProps) {
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold">
               Everything You Need for{" "}
-              <span className="text-primary">Workflow Management</span>
+              <span className="text-primary">Home Improvement Success</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Powerful features designed to make process management intuitive and efficient.
+              Professional guidance and tools that give you confidence to tackle any home project.
             </p>
           </div>
           
@@ -119,19 +121,19 @@ export default function Home({ onViewChange }: HomeProps) {
           <Card className="gradient-primary border-0 text-white text-center shadow-elegant">
             <CardContent className="py-16">
               <h2 className="text-3xl lg:text-4xl font-bold mb-4">
-                Ready to Transform Your Processes?
+                Ready to Tackle Your Next Home Project?
               </h2>
               <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-                Start creating structured workflows today and watch your team's productivity soar.
+                Join thousands of homeowners who've successfully completed their projects with confidence using Project Partner's guided approach.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
-                  onClick={() => onViewChange('admin')}
+                  onClick={() => onViewChange('user')}
                   variant="secondary"
                   size="lg"
                   className="bg-white text-primary hover:bg-white/90 transition-smooth"
                 >
-                  Get Started
+                  Start My First Project
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </div>
