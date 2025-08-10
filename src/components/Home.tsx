@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Shield, Users, ArrowRight, CheckCircle, Route, Target, TrendingUp } from "lucide-react";
 import generalDiyImage from "@/assets/general-diy.png";
 
@@ -8,6 +9,12 @@ interface HomeProps {
 }
 
 export default function Home({ onViewChange }: HomeProps) {
+  const projects = [
+    "Interior painting", "Tile flooring", "LVP flooring", "Tile backsplash", 
+    "Landscaping", "Power washing", "Smart home", "Drywall", 
+    "Lighting", "Home maintenance"
+  ];
+
   const features = [
     {
       icon: Shield,
@@ -67,6 +74,27 @@ export default function Home({ onViewChange }: HomeProps) {
                 >
                   Browse Projects
                 </Button>
+              </div>
+
+              {/* Projects Carousel */}
+              <div className="w-full max-w-4xl">
+                <Carousel className="w-full" opts={{ align: "start", loop: true }}>
+                  <CarouselContent className="-ml-1">
+                    {projects.map((project, index) => (
+                      <CarouselItem key={index} className="pl-1 basis-1/3 md:basis-1/4 lg:basis-1/5">
+                        <div className="p-1">
+                          <Card className="border-primary/20 bg-card/50 hover:bg-card transition-smooth">
+                            <CardContent className="flex items-center justify-center p-4">
+                              <span className="text-sm font-medium text-center leading-tight">
+                                {project}
+                              </span>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                </Carousel>
               </div>
             </div>
             
