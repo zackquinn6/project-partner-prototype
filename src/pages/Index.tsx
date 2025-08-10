@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Home from "@/components/Home";
-import AdminView from "@/components/AdminView";
+import { AdminView } from "@/components/AdminView";
 import UserView from "@/components/UserView";
 
 const Index = () => {

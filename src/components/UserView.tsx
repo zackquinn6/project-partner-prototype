@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video } from "lucide-react";
-import { WorkflowStep } from "./AdminView";
+import { WorkflowStep } from "@/interfaces/Project";
 
 // Sample data - in a real app this would come from a backend
 const sampleSteps: WorkflowStep[] = [
@@ -16,10 +16,9 @@ const sampleSteps: WorkflowStep[] = [
     description: 'Conduct interviews with key stakeholders to understand project requirements and expectations.',
     contentType: 'text',
     content: 'Prepare a comprehensive list of open-ended questions focusing on:\n\n• Project goals and objectives\n• Budget and timeline constraints\n• Success criteria and KPIs\n• Potential risks and challenges\n• Stakeholder expectations\n\nTip: Schedule 60-90 minutes for each interview and record with permission.',
-    order: 1,
     materials: [
-      { id: '1', name: 'Interview Template', quantity: '1', description: 'Structured question template', category: 'Document' },
-      { id: '2', name: 'Recording Device', quantity: '1', description: 'Audio recording equipment', category: 'Equipment' }
+      { id: '1', name: 'Interview Template', description: 'Structured question template', category: 'Other', required: true },
+      { id: '2', name: 'Recording Device', description: 'Audio recording equipment', category: 'Hardware', required: false }
     ],
     tools: [
       { id: '1', name: 'Calendar App', description: 'For scheduling meetings', category: 'Software', required: true },
@@ -36,11 +35,10 @@ const sampleSteps: WorkflowStep[] = [
     operation: 'Requirements Gathering',
     step: 'Document Requirements',
     description: 'Create comprehensive documentation of all gathered requirements using our template.',
-    contentType: 'link',
+    contentType: 'document',
     content: 'https://docs.google.com/document/d/example-requirements-template',
-    order: 2,
     materials: [
-      { id: '3', name: 'Requirements Template', quantity: '1', description: 'Standard documentation template', category: 'Document' }
+      { id: '3', name: 'Requirements Template', description: 'Standard documentation template', category: 'Other', required: true }
     ],
     tools: [
       { id: '3', name: 'Word Processor', description: 'Google Docs, Word, or similar', category: 'Software', required: true }
@@ -57,7 +55,6 @@ const sampleSteps: WorkflowStep[] = [
     description: 'Review the system architecture diagram and understand the technical approach.',
     contentType: 'image',
     content: 'https://via.placeholder.com/800x400/6366f1/ffffff?text=System+Architecture+Diagram',
-    order: 3,
     materials: [],
     tools: [
       { id: '4', name: 'Diagramming Tool', description: 'Lucidchart, Draw.io, or similar', category: 'Software', required: true }
@@ -74,7 +71,6 @@ const sampleSteps: WorkflowStep[] = [
     description: 'Watch the tutorial video on setting up your development environment.',
     contentType: 'video',
     content: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    order: 4,
     materials: [],
     tools: [
       { id: '5', name: 'Code Editor', description: 'VS Code, WebStorm, or similar', category: 'Software', required: true },
@@ -92,7 +88,6 @@ const sampleSteps: WorkflowStep[] = [
     description: 'Begin implementing the core features as outlined in the requirements document.',
     contentType: 'text',
     content: 'Focus on implementing these core features in order:\n\n1. User authentication and authorization\n2. Data models and database setup\n3. Core business logic\n4. User interface components\n5. API endpoints and integration\n\nRemember to write tests for each feature as you implement them.',
-    order: 5,
     materials: [],
     tools: [
       { id: '7', name: 'Testing Framework', description: 'Jest, Vitest, or similar', category: 'Software', required: true },
@@ -134,7 +129,7 @@ export default function UserView() {
 
   const renderContent = (step: WorkflowStep) => {
     switch (step.contentType) {
-      case 'link':
+      case 'document':
         return (
             <div className="space-y-4">
               <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
@@ -305,9 +300,6 @@ export default function UserView() {
                     {currentStep.materials.map((material) => (
                       <div key={material.id} className="p-3 bg-background/50 rounded-lg">
                         <div className="font-medium">{material.name}</div>
-                        {material.quantity && (
-                          <div className="text-sm text-muted-foreground">Quantity: {material.quantity}</div>
-                        )}
                         {material.category && (
                           <Badge variant="outline" className="text-xs mt-1">{material.category}</Badge>
                         )}
