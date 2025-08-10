@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Shield, Users, ArrowRight, CheckCircle, Route, Target, TrendingUp } from "lucide-react";
 import generalDiyImage from "@/assets/general-diy.png";
+import Autoplay from "embla-carousel-autoplay";
 
 interface HomeProps {
   onViewChange: (view: 'admin' | 'user') => void;
@@ -76,36 +77,38 @@ export default function Home({ onViewChange }: HomeProps) {
                 </Button>
               </div>
 
-              {/* Projects Carousel */}
-              <div className="w-full max-w-4xl">
-                <Carousel className="w-full" opts={{ align: "start", loop: true }}>
-                  <CarouselContent className="-ml-1">
-                    {projects.map((project, index) => (
-                      <CarouselItem key={index} className="pl-1 basis-1/3 md:basis-1/4 lg:basis-1/5">
-                        <div className="p-1">
-                          <Card className="border-primary/20 bg-card/50 hover:bg-card transition-smooth">
-                            <CardContent className="flex items-center justify-center p-4">
-                              <span className="text-sm font-medium text-center leading-tight">
-                                {project}
-                              </span>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                </Carousel>
-              </div>
-            </div>
-            
-            <div className="relative">
-              <img 
-                src={generalDiyImage} 
-                alt="General DIY" 
-                className="w-full h-auto rounded-2xl shadow-card transition-smooth hover:shadow-elegant"
-              />
             </div>
           </div>
+        </div>
+        
+        {/* Projects Carousel - Full Width */}
+        <div className="w-full bg-gradient-to-r from-card/20 to-card/40 py-8">
+          <Carousel 
+            className="w-full" 
+            opts={{ align: "start", loop: true }}
+            plugins={[
+              Autoplay({
+                delay: 2000,
+                stopOnInteraction: true,
+              }),
+            ]}
+          >
+            <CarouselContent className="-ml-1">
+              {projects.map((project, index) => (
+                <CarouselItem key={index} className="pl-1 basis-1/4 md:basis-1/5 lg:basis-1/6">
+                  <div className="p-1">
+                    <Card className="border-primary/20 bg-card/70 hover:bg-card transition-smooth">
+                      <CardContent className="flex items-center justify-center p-4">
+                        <span className="text-sm font-medium text-center leading-tight">
+                          {project}
+                        </span>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
         </div>
       </section>
 
