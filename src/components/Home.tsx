@@ -41,12 +41,7 @@ export default function Home({
                   Your Personal Guide for Home Improvement Success
                 </h2>
                 <p className="text-xl text-muted-foreground max-w-2xl">
-                  <strong>Confident Results, One Step at a Time</strong><br />
-                  Toolio's workflow app delivers the clarity and support DIYers deserve:<br />
-                  • 🔧 Step-by-Step Plans – Expert-curated sequences, tools, and videos that simplify complex projects<br />
-                  • 📍 Progress Tracking & Accountability – Stay motivated with check-ins, completion markers, and a built-in project partner<br />
-                  • 🎥 Pro Guidance On Demand – One-on-one video calls with seasoned experts whenever you hit a wall<br />
-                  No wasted weekends. No mystery steps. Just smart help from start to done.
+                  expert-guided steps, progress tracking, and access to pro help—so DIYers stay focused, avoid missteps, and confidently finish what they started.
                 </p>
               </div>
               
