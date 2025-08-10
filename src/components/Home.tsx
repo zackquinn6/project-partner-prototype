@@ -41,7 +41,7 @@ export default function Home({ onViewChange }: HomeProps) {
                   </span>
                 </h1>
                 <h2 className="text-2xl lg:text-3xl font-semibold text-muted-foreground mb-4">
-                  Your Personal Project Partner for Home Improvement Success
+                  Your Personal Guide for Home Improvement Success
                 </h2>
                 <p className="text-xl text-muted-foreground max-w-2xl">
                   Get guided step-by-step processes, digital tools, equipment lists, videos, easy-to-follow guides, 
