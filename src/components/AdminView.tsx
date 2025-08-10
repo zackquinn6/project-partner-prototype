@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Trash2, Plus, Check, X, ChevronRight, ChevronDown } from 'lucide-react';
+import { Edit, Trash2, Plus, Check, X, ChevronRight, ChevronDown, Package, Wrench, FileOutput } from 'lucide-react';
 import { toast } from 'sonner';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 interface EditingState {
   type: 'phase' | 'operation' | 'step' | null;
   id: string | null;
@@ -450,17 +451,89 @@ export const AdminView: React.FC = () => {
                 </Select> : <Badge variant="outline" className="capitalize">{step.contentType}</Badge>}
             </TableCell>
             <TableCell>
-              <div className="flex gap-1">
-                <Badge variant="secondary" className="text-xs">
-                  {step.materials?.length || 0}M
-                </Badge>
-                <Badge variant="secondary" className="text-xs">
-                  {step.tools?.length || 0}T
-                </Badge>
-                <Badge variant="secondary" className="text-xs">
-                  {step.outputs?.length || 0}O
-                </Badge>
-              </div>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="resources" className="border-none">
+                  <AccordionTrigger className="py-2 hover:no-underline">
+                    <div className="flex gap-1">
+                      <Badge variant="secondary" className="text-xs">
+                        {step.materials?.length || 0}M
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        {step.tools?.length || 0}T
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        {step.outputs?.length || 0}O
+                      </Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-3 pt-2">
+                    {(step.materials && step.materials.length > 0) && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Package className="w-4 h-4 text-blue-600" />
+                          <span className="font-medium text-sm">Materials</span>
+                        </div>
+                        <ul className="space-y-1 ml-6">
+                          {step.materials.map((material, index) => (
+                            <li key={index} className="text-sm text-muted-foreground">
+                              {material.name}
+                              <span className="text-xs block text-muted-foreground/80">
+                                {material.description}
+                              </span>
+                              <Badge variant="outline" className="text-xs mt-1">
+                                {material.category}
+                              </Badge>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {(step.tools && step.tools.length > 0) && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Wrench className="w-4 h-4 text-orange-600" />
+                          <span className="font-medium text-sm">Tools</span>
+                        </div>
+                        <ul className="space-y-1 ml-6">
+                          {step.tools.map((tool, index) => (
+                            <li key={index} className="text-sm text-muted-foreground">
+                              {tool.name}
+                              <span className="text-xs block text-muted-foreground/80">
+                                {tool.description}
+                              </span>
+                              <Badge variant="outline" className="text-xs mt-1">
+                                {tool.category}
+                              </Badge>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {(step.outputs && step.outputs.length > 0) && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileOutput className="w-4 h-4 text-green-600" />
+                          <span className="font-medium text-sm">Outputs</span>
+                        </div>
+                        <ul className="space-y-1 ml-6">
+                          {step.outputs.map((output, index) => (
+                            <li key={index} className="text-sm text-muted-foreground">
+                              {output.name}
+                              {output.description && (
+                                <span className="text-xs block text-muted-foreground/80">
+                                  {output.description}
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </TableCell>
             <TableCell>
               <div className="flex gap-1">
