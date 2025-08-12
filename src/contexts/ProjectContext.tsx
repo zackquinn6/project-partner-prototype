@@ -32,6 +32,9 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       description: 'Complete software development lifecycle',
       createdAt: new Date(),
       updatedAt: new Date(),
+      startDate: new Date('2024-01-15'),
+      endDate: new Date('2024-06-30'),
+      status: 'in-progress' as const,
       phases: [
         {
           id: '1',
@@ -73,6 +76,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       description: 'Complete tile flooring installation project from planning to finish',
       createdAt: new Date(),
       updatedAt: new Date(),
+      startDate: new Date('2024-02-01'),
+      status: 'open' as const,
       phases: [
         {
           id: 'plan-phase',

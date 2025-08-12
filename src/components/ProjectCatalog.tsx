@@ -164,6 +164,8 @@ const ProjectCatalog: React.FC = () => {
       description: template.description,
       createdAt: new Date(),
       updatedAt: new Date(),
+      startDate: new Date(),
+      status: 'open' as const,
       phases: [] // Start with empty phases, user can build from template
     };
 
