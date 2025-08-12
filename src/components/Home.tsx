@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Shield, Users, ArrowRight, CheckCircle, Route, Target, TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import generalDiyImage from "@/assets/general-diy.png";
 import Autoplay from "embla-carousel-autoplay";
 interface HomeProps {
@@ -10,6 +11,7 @@ interface HomeProps {
 export default function Home({
   onViewChange
 }: HomeProps) {
+  const navigate = useNavigate();
   const projects = ["Interior painting", "Tile flooring", "LVP flooring", "Tile backsplash", "Landscaping", "Power washing", "Smart home", "Drywall", "Lighting", "Home maintenance"];
   const features = [{
     icon: Shield,
@@ -46,7 +48,7 @@ export default function Home({
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button onClick={() => onViewChange('user')} size="lg" className="gradient-primary text-white shadow-elegant hover:shadow-lg transition-smooth">
+                <Button onClick={() => navigate('/projects')} size="lg" className="gradient-primary text-white shadow-elegant hover:shadow-lg transition-smooth">
                   <Target className="w-5 h-5 mr-2" />
                   Start My Project
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -127,7 +129,7 @@ export default function Home({
                 Join thousands of homeowners who've successfully completed their projects with confidence using Project Partner's guided approach.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button onClick={() => onViewChange('user')} variant="secondary" size="lg" className="bg-white text-primary hover:bg-white/90 transition-smooth">
+                <Button onClick={() => navigate('/projects')} variant="secondary" size="lg" className="bg-white text-primary hover:bg-white/90 transition-smooth">
                   Start My First Project
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
