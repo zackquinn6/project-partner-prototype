@@ -12,7 +12,7 @@ import { ProjectRun } from '@/interfaces/ProjectRun';
 import { ProjectSelector } from '@/components/ProjectSelector';
 
 interface ProjectListingProps {
-  onProjectSelect?: (project: Project) => void;
+  onProjectSelect?: (project: Project | null | 'workflow') => void;
 }
 
 export default function ProjectListing({ onProjectSelect }: ProjectListingProps) {
@@ -46,7 +46,8 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
 
   const handleOpenProjectRun = (projectRun: ProjectRun) => {
     setCurrentProjectRun(projectRun);
-    onProjectSelect?.(null as any); // Pass null to indicate we're selecting a project run
+    // Signal to parent that we want to switch to workflow mode for this project run
+    onProjectSelect?.('workflow' as any);
   };
 
   const handleDeleteProjectRun = (projectRunId: string) => {
