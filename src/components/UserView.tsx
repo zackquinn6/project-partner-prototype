@@ -13,9 +13,11 @@ import { useProject } from '@/contexts/ProjectContext';
 import ProjectListing from './ProjectListing';
 interface UserViewProps {
   resetToListing?: boolean;
+  onProjectSelected?: () => void;
 }
 export default function UserView({
-  resetToListing
+  resetToListing,
+  onProjectSelected
 }: UserViewProps = {}) {
   const {
     currentProject
@@ -195,7 +197,12 @@ export default function UserView({
   }, {} as Record<string, Record<string, any[]>>) || {};
   // If no current project selected or viewing listing mode, show project listing
   if (!currentProject || viewMode === 'listing') {
-    return <ProjectListing onProjectSelect={project => setViewMode('workflow')} />;
+    return <ProjectListing 
+      onProjectSelect={project => {
+        setViewMode('workflow');
+        onProjectSelected?.();
+      }} 
+    />;
   }
 
   // If current project has no workflow steps

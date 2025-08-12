@@ -8,13 +8,14 @@ import { Play, Trash2, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProject } from '@/contexts/ProjectContext';
 import { Project } from '@/interfaces/Project';
+import { ProjectSelector } from '@/components/ProjectSelector';
 
 interface ProjectListingProps {
   onProjectSelect?: (project: Project) => void;
 }
 
 export default function ProjectListing({ onProjectSelect }: ProjectListingProps) {
-  const { projects, setCurrentProject, deleteProject } = useProject();
+  const { projects, currentProject, setCurrentProject, deleteProject } = useProject();
   const navigate = useNavigate();
 
   const calculateProgress = (project: Project) => {
@@ -68,7 +69,13 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
   };
 
   return (
-    <div className="container mx-auto px-6 py-8">
+    <div className="container mx-auto px-6 py-8 space-y-6">
+      <ProjectSelector onProjectSelected={() => {
+        if (currentProject) {
+          onProjectSelect?.(currentProject);
+        }
+      }} />
+      
       <Card className="gradient-card border-0 shadow-card">
         <CardHeader>
           <div className="flex items-center justify-between">

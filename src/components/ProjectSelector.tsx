@@ -13,9 +13,10 @@ import { Plus, FolderOpen, Edit, Save, X } from 'lucide-react';
 
 interface ProjectSelectorProps {
   isAdminMode?: boolean;
+  onProjectSelected?: () => void;
 }
 
-export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = false }) => {
+export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = false, onProjectSelected }) => {
   const { projects, currentProject, setCurrentProject, addProject, updateProject } = useProject();
   const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
   const [isProjectSetupOpen, setIsProjectSetupOpen] = useState(false);
@@ -94,6 +95,14 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
       targetEndDate: ''
     });
     setIsProjectSetupOpen(false);
+    // Navigate to workflow view
+    onProjectSelected?.();
+  };
+
+  const handleSkipSetup = () => {
+    setIsProjectSetupOpen(false);
+    // Navigate to workflow view
+    onProjectSelected?.();
   };
 
   const handleStartEditProject = () => {
@@ -439,7 +448,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
                 />
               </div>
               <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setIsProjectSetupOpen(false)}>
+                <Button variant="outline" onClick={handleSkipSetup}>
                   Skip for now
                 </Button>
                 <Button onClick={handleProjectSetupComplete}>

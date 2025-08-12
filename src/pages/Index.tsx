@@ -52,7 +52,7 @@ const Index = () => {
       case 'admin':
         return <AdminView />;
       case 'user':
-        return <UserView resetToListing={resetUserView} />;
+        return <UserView resetToListing={resetUserView} onProjectSelected={() => setCurrentView('user')} />;
       default:
         return <Home onViewChange={setCurrentView} />;
     }
