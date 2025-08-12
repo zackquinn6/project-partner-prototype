@@ -48,9 +48,9 @@ export const ProjectSelector: React.FC = () => {
 
   const handleProjectSelect = (value: string) => {
     const project = projects.find(p => p.id === value);
-    setCurrentProject(project || null);
-    if (project) {
-      setIsProjectSetupOpen(true); // Open setup dialog when selecting existing project
+    if (project && project.id !== currentProject?.id) {
+      setCurrentProject(project);
+      setIsProjectSetupOpen(true); // Open setup dialog when selecting a different project
     }
   };
 
