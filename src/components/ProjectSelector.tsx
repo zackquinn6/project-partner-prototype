@@ -36,6 +36,7 @@ export const ProjectSelector: React.FC = () => {
       startDate: new Date(),
       planEndDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days from now
       status: 'not-started' as const,
+      publishStatus: 'draft' as const,
       phases: []
     };
 

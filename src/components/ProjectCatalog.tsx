@@ -28,7 +28,7 @@ interface ProjectCatalogProps {
 
 const ProjectCatalog: React.FC<ProjectCatalogProps> = ({ isAdminMode = false }) => {
   const navigate = useNavigate();
-  const { setCurrentProject, addProject } = useProject();
+  const { setCurrentProject, addProject, projects } = useProject();
   const [isProjectSetupOpen, setIsProjectSetupOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ProjectTemplate | null>(null);
   const [projectSetupForm, setProjectSetupForm] = useState({
@@ -162,6 +162,12 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({ isAdminMode = false }) 
     }
   ];
 
+  // Filter projects to show only published templates
+  const publishedProjects = projects.filter(project => 
+    project.publishStatus === 'published' && 
+    project.id.startsWith('template-')
+  );
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'Beginner': return 'bg-green-100 text-green-800';
@@ -171,18 +177,35 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({ isAdminMode = false }) 
     }
   };
 
-  const handleSelectProject = (template: ProjectTemplate) => {
+  const getIconForCategory = (category: string) => {
+    switch (category) {
+      case 'Interior': return Palette;
+      case 'Flooring': return Layers;
+      case 'Kitchen': return Target;
+      case 'Exterior': return Home;
+      case 'Technology': return Zap;
+      case 'Electrical': return Zap;
+      case 'Maintenance': return Shield;
+      default: return Hammer;
+    }
+  };
+
+  const handleSelectProject = (project: any) => {
     if (isAdminMode) {
       // In admin mode, just navigate to admin view with this template
       const newProject = {
         id: Date.now().toString(),
-        name: template.name,
-        description: template.description,
+        name: project.name,
+        description: project.description,
         createdAt: new Date(),
         updatedAt: new Date(),
         startDate: new Date(),
         planEndDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
         status: 'not-started' as const,
+        publishStatus: 'draft' as const,
+        category: project.category,
+        difficulty: project.difficulty,
+        estimatedTime: project.estimatedTime,
         phases: []
       };
       addProject(newProject);
@@ -190,8 +213,8 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({ isAdminMode = false }) 
       navigate('/', { state: { view: 'admin' } });
     } else {
       // In user mode, show the setup dialog
-      setSelectedTemplate(template);
-      setProjectSetupForm(prev => ({ ...prev, customProjectName: template.name }));
+      setSelectedTemplate(project);
+      setProjectSetupForm(prev => ({ ...prev, customProjectName: project.name }));
       setIsProjectSetupOpen(true);
     }
   };
@@ -209,6 +232,10 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({ isAdminMode = false }) 
       startDate: new Date(),
       planEndDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days from now
       status: 'not-started' as const,
+      publishStatus: 'draft' as const,
+      category: selectedTemplate.category,
+      difficulty: selectedTemplate.difficulty,
+      estimatedTime: selectedTemplate.estimatedTime,
       phases: [] // Start with empty phases, user can build from template
     };
 
@@ -229,7 +256,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({ isAdminMode = false }) 
     navigate('/', { state: { view: 'user' } });
   };
 
-  const categories = [...new Set(projectTemplates.map(p => p.category))];
+  const categories = [...new Set(publishedProjects.map(p => p.category))];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -262,33 +289,33 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({ isAdminMode = false }) 
 
         {/* Project Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {projectTemplates.map((template) => {
-            const IconComponent = template.icon;
+          {publishedProjects.map((project) => {
+            const IconComponent = getIconForCategory(project.category || '');
             
             return (
               <Card 
-                key={template.id} 
+                key={project.id} 
                 className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 overflow-hidden"
-                onClick={() => handleSelectProject(template)}
+                onClick={() => handleSelectProject(project)}
               >
-                <div className={`h-32 bg-gradient-to-br ${template.color} relative overflow-hidden`}>
+                <div className={`h-32 bg-gradient-to-br from-primary to-orange-500 relative overflow-hidden`}>
                   <div className="absolute inset-0 bg-black/20" />
                   <div className="absolute bottom-4 left-4 text-white">
                     <IconComponent className="w-8 h-8" />
                   </div>
                   <div className="absolute top-4 right-4">
                     <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                      {template.category}
+                      {project.category}
                     </Badge>
                   </div>
                 </div>
                 
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                    {template.name}
+                    {project.name}
                   </CardTitle>
                   <CardDescription className="text-sm line-clamp-2">
-                    {template.description}
+                    {project.description}
                   </CardDescription>
                 </CardHeader>
 
@@ -296,24 +323,24 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({ isAdminMode = false }) 
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Clock className="w-4 h-4" />
-                      {template.estimatedTime}
+                      {project.estimatedTime}
                     </div>
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Layers className="w-4 h-4" />
-                      {template.phases} phases
+                      {project.phases?.length || 0} phases
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <Badge className={getDifficultyColor(template.difficulty)} variant="secondary">
-                      {template.difficulty}
+                    <Badge className={getDifficultyColor(project.difficulty || '')} variant="secondary">
+                      {project.difficulty}
                     </Badge>
                     <Button 
                       size="sm" 
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleSelectProject(template);
+                        handleSelectProject(project);
                       }}
                     >
                       Start Project

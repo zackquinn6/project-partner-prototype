@@ -30,7 +30,7 @@ interface TableRow {
 }
 
 export const AdminView: React.FC = () => {
-  const { currentProject, updateProject } = useProject();
+  const { currentProject, updateProject, projects } = useProject();
   const [currentView, setCurrentView] = useState<'table' | 'editWorkflow'>('table');
   const [editing, setEditing] = useState<EditingState>({
     type: null,
@@ -567,10 +567,10 @@ export const AdminView: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-1/3">Name</TableHead>
-                <TableHead className="w-1/3">Description</TableHead>
-                
-                
+                <TableHead className="w-1/4">Name</TableHead>
+                <TableHead className="w-1/4">Description</TableHead>
+                <TableHead className="w-1/6">Status</TableHead>
+                <TableHead className="w-1/6">Category</TableHead>
                 <TableHead className="w-32">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -582,6 +582,81 @@ export const AdminView: React.FC = () => {
                 </TableRow> : tableRows.map(row => <TableRow key={`${row.type}-${row.id}`} className="group">
                     {renderRowContent(row)}
                   </TableRow>)}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Project Templates Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Project Templates</CardTitle>
+          <CardDescription>Manage project templates available in the catalog</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Difficulty</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {projects.map((project) => (
+                <TableRow key={project.id}>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">{project.name}</div>
+                      <div className="text-sm text-muted-foreground">{project.description}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{project.category || 'Uncategorized'}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant="outline" 
+                      className={
+                        project.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
+                        project.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                        project.difficulty === 'Advanced' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }
+                    >
+                      {project.difficulty || 'Unset'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={project.publishStatus === 'published' ? 'default' : 'secondary'}
+                      className={project.publishStatus === 'published' ? 'bg-green-500 text-white' : ''}
+                    >
+                      {project.publishStatus}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        onClick={() => {
+                          const updatedProject = {
+                            ...project,
+                            publishStatus: (project.publishStatus === 'published' ? 'draft' : 'published') as 'draft' | 'published',
+                            updatedAt: new Date()
+                          };
+                          updateProject(updatedProject);
+                        }}
+                      >
+                        {project.publishStatus === 'published' ? 'Unpublish' : 'Publish'}
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </CardContent>

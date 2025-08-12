@@ -60,5 +60,9 @@ export interface Project {
   planEndDate: Date;
   endDate?: Date;
   status: 'not-started' | 'in-progress' | 'complete';
+  publishStatus: 'draft' | 'published';
+  category?: string;
+  difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
+  estimatedTime?: string;
   phases: Phase[];
 }
