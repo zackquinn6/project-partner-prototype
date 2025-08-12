@@ -23,6 +23,7 @@ export default function UserView({
 }: UserViewProps = {}) {
   const {
     currentProject,
+    currentProjectRun,
     projectRuns,
     setCurrentProjectRun
   } = useProject();
@@ -42,8 +43,11 @@ export default function UserView({
   });
   const [reportComments, setReportComments] = useState("");
 
+  // Get the active project data from either currentProject or currentProjectRun
+  const activeProject = currentProjectRun || currentProject;
+  
   // Flatten all steps from all phases and operations for navigation
-  const allSteps = currentProject?.phases.flatMap(phase => phase.operations.flatMap(operation => operation.steps.map(step => ({
+  const allSteps = activeProject?.phases.flatMap(phase => phase.operations.flatMap(operation => operation.steps.map(step => ({
     ...step,
     phaseName: phase.name,
     operationName: operation.name
@@ -60,12 +64,12 @@ export default function UserView({
     }
   }, [projectRunId, projectRuns, setCurrentProjectRun]);
 
-  // Auto-switch to workflow view when a project is selected
+  // Auto-switch to workflow view when a project or project run is selected
   useEffect(() => {
-    if (currentProject) {
+    if (currentProject || currentProjectRun) {
       setViewMode('workflow');
     }
-  }, [currentProject]);
+  }, [currentProject, currentProjectRun]);
 
   // Reset to listing view when projects view is requested
   useEffect(() => {
@@ -203,15 +207,15 @@ export default function UserView({
   };
 
   // Group steps by phase and operation for sidebar navigation
-  const groupedSteps = currentProject?.phases.reduce((acc, phase) => {
+  const groupedSteps = activeProject?.phases.reduce((acc, phase) => {
     acc[phase.name] = phase.operations.reduce((opAcc, operation) => {
       opAcc[operation.name] = operation.steps;
       return opAcc;
     }, {} as Record<string, any[]>);
     return acc;
   }, {} as Record<string, Record<string, any[]>>) || {};
-  // If no current project selected or viewing listing mode, show project listing
-  if (!currentProject || viewMode === 'listing') {
+  // If no current project or project run selected, or viewing listing mode, show project listing
+  if ((!currentProject && !currentProjectRun) || viewMode === 'listing') {
     return <ProjectListing 
       onProjectSelect={project => {
         setViewMode('workflow');

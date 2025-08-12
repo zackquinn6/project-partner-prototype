@@ -403,6 +403,14 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     }
   };
 
+  const handleSetCurrentProjectRun = (projectRun: ProjectRun | null) => {
+    setCurrentProjectRun(projectRun);
+    // Clear current project when setting a project run to use run data
+    if (projectRun) {
+      setCurrentProject(null);
+    }
+  };
+
   return (
     <ProjectContext.Provider value={{
       projects,
@@ -410,7 +418,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       currentProject,
       currentProjectRun,
       setCurrentProject,
-      setCurrentProjectRun,
+      setCurrentProjectRun: handleSetCurrentProjectRun,
       addProject,
       addProjectRun,
       updateProject,
