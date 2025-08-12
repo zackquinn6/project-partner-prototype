@@ -5,14 +5,19 @@ import { Shield, Users, ArrowRight, CheckCircle, Route, Target, TrendingUp } fro
 import { useNavigate } from "react-router-dom";
 import generalDiyImage from "@/assets/general-diy.png";
 import Autoplay from "embla-carousel-autoplay";
+
 interface HomeProps {
   onViewChange: (view: 'admin' | 'user') => void;
 }
+
 export default function Home({
   onViewChange
 }: HomeProps) {
   const navigate = useNavigate();
   const projects = ["Interior painting", "Tile flooring", "LVP flooring", "Tile backsplash", "Landscaping", "Power washing", "Smart home", "Drywall", "Lighting", "Home maintenance"];
+  // Triple projects for seamless infinite scroll
+  const infiniteProjects = [...projects, ...projects, ...projects];
+  
   const features = [{
     icon: Shield,
     title: "Build with Confidence",
@@ -26,6 +31,7 @@ export default function Home({
     title: "Track Your Progress",
     description: "Stay motivated and on track with built-in progress tracking and quality checkpoints."
   }];
+  
   return <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
@@ -62,17 +68,24 @@ export default function Home({
         
         {/* Projects Carousel - Full Width */}
         <div className="w-full bg-gradient-to-r from-card/20 to-card/40 py-8">
-          <Carousel className="w-full" opts={{
-          align: "start",
-          loop: true
-        }} plugins={[Autoplay({
-          delay: 2000,
-          stopOnInteraction: false,
-          stopOnMouseEnter: false,
-          stopOnFocusIn: false
-        })]}>
+          <Carousel 
+            className="w-full" 
+            opts={{
+              align: "start",
+              loop: true,
+              skipSnaps: false,
+              dragFree: false
+            }} 
+            plugins={[Autoplay({
+              delay: 800,
+              stopOnInteraction: false,
+              stopOnMouseEnter: false,
+              stopOnFocusIn: false,
+              playOnInit: true
+            })]}
+          >
             <CarouselContent className="-ml-1">
-              {projects.map((project, index) => <CarouselItem key={index} className="pl-1 basis-1/4 md:basis-1/5 lg:basis-1/6">
+              {infiniteProjects.map((project, index) => <CarouselItem key={`${project}-${index}`} className="pl-1 basis-1/4 md:basis-1/5 lg:basis-1/6">
                   <div className="p-1">
                     <Card className="border-primary/20 bg-card/70 hover:bg-card transition-smooth">
                       <CardContent className="flex items-center justify-center p-4">
