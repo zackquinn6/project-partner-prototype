@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
 import ProjectListing from './ProjectListing';
 interface UserViewProps {
@@ -194,54 +195,64 @@ export default function UserView({
           </Card>
 
           {/* Materials, Tools, and Outputs */}
-          {currentStep && (currentStep.materials?.length > 0 || currentStep.tools?.length > 0 || currentStep.outputs?.length > 0) && <div className="grid md:grid-cols-3 gap-6">
-              {/* Materials */}
-              {currentStep.materials?.length > 0 && <Card className="gradient-card border-0 shadow-card">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Materials Needed</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {currentStep.materials.map(material => <div key={material.id} className="p-3 bg-background/50 rounded-lg">
-                        <div className="font-medium">{material.name}</div>
-                        {material.category && <Badge variant="outline" className="text-xs mt-1">{material.category}</Badge>}
-                        {material.description && <div className="text-sm text-muted-foreground mt-1">{material.description}</div>}
-                      </div>)}
-                  </CardContent>
-                </Card>}
-
-              {/* Tools */}
-              {currentStep.tools?.length > 0 && <Card className="gradient-card border-0 shadow-card">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Tools Required</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {currentStep.tools.map(tool => <div key={tool.id} className="p-3 bg-background/50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <div className="font-medium">{tool.name}</div>
-                          {tool.required && <Badge variant="destructive" className="text-xs">Required</Badge>}
+          {currentStep && (currentStep.materials?.length > 0 || currentStep.tools?.length > 0 || currentStep.outputs?.length > 0) && <Card className="gradient-card border-0 shadow-card">
+              <CardContent className="p-6">
+                <Accordion type="multiple" className="w-full">
+                  {/* Materials */}
+                  {currentStep.materials?.length > 0 && <AccordionItem value="materials">
+                      <AccordionTrigger className="text-lg font-semibold">
+                        Materials Needed ({currentStep.materials.length})
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-3 pt-2">
+                          {currentStep.materials.map(material => <div key={material.id} className="p-3 bg-background/50 rounded-lg">
+                              <div className="font-medium">{material.name}</div>
+                              {material.category && <Badge variant="outline" className="text-xs mt-1">{material.category}</Badge>}
+                              {material.description && <div className="text-sm text-muted-foreground mt-1">{material.description}</div>}
+                            </div>)}
                         </div>
-                        {tool.category && <Badge variant="outline" className="text-xs mt-1">{tool.category}</Badge>}
-                        {tool.description && <div className="text-sm text-muted-foreground mt-1">{tool.description}</div>}
-                      </div>)}
-                  </CardContent>
-                </Card>}
+                      </AccordionContent>
+                    </AccordionItem>}
 
-              {/* Outputs */}
-              {currentStep.outputs?.length > 0 && <Card className="gradient-card border-0 shadow-card">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Outputs</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {currentStep.outputs.map(output => <div key={output.id} className="p-3 bg-background/50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <div className="font-medium">{output.name}</div>
-                          <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
+                  {/* Tools */}
+                  {currentStep.tools?.length > 0 && <AccordionItem value="tools">
+                      <AccordionTrigger className="text-lg font-semibold">
+                        Tools Required ({currentStep.tools.length})
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-3 pt-2">
+                          {currentStep.tools.map(tool => <div key={tool.id} className="p-3 bg-background/50 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <div className="font-medium">{tool.name}</div>
+                                {tool.required && <Badge variant="destructive" className="text-xs">Required</Badge>}
+                              </div>
+                              {tool.category && <Badge variant="outline" className="text-xs mt-1">{tool.category}</Badge>}
+                              {tool.description && <div className="text-sm text-muted-foreground mt-1">{tool.description}</div>}
+                            </div>)}
                         </div>
-                        <div className="text-sm text-muted-foreground mt-1">{output.description}</div>
-                      </div>)}
-                  </CardContent>
-                </Card>}
-            </div>}
+                      </AccordionContent>
+                    </AccordionItem>}
+
+                  {/* Outputs */}
+                  {currentStep.outputs?.length > 0 && <AccordionItem value="outputs">
+                      <AccordionTrigger className="text-lg font-semibold">
+                        Outputs ({currentStep.outputs.length})
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-3 pt-2">
+                          {currentStep.outputs.map(output => <div key={output.id} className="p-3 bg-background/50 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <div className="font-medium">{output.name}</div>
+                                <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
+                              </div>
+                              <div className="text-sm text-muted-foreground mt-1">{output.description}</div>
+                            </div>)}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>}
+                </Accordion>
+              </CardContent>
+            </Card>}
 
           {/* Navigation */}
           <Card className="gradient-card border-0 shadow-card">
