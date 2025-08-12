@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '@/contexts/ProjectContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ArrowLeft, Clock, Layers, Target, Hammer, Home, Palette, Zap, Shield } from 'lucide-react';
 
 interface ProjectTemplate {
@@ -22,6 +25,13 @@ interface ProjectTemplate {
 const ProjectCatalog: React.FC = () => {
   const navigate = useNavigate();
   const { setCurrentProject, addProject } = useProject();
+  const [isProjectSetupOpen, setIsProjectSetupOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<ProjectTemplate | null>(null);
+  const [projectSetupForm, setProjectSetupForm] = useState({
+    projectLeader: '',
+    accountabilityPartner: '',
+    targetEndDate: ''
+  });
 
   // Sample project templates based on the projects mentioned in Home component
   const projectTemplates: ProjectTemplate[] = [
@@ -157,11 +167,18 @@ const ProjectCatalog: React.FC = () => {
   };
 
   const handleSelectProject = (template: ProjectTemplate) => {
+    setSelectedTemplate(template);
+    setIsProjectSetupOpen(true);
+  };
+
+  const handleProjectSetupComplete = () => {
+    if (!selectedTemplate) return;
+
     // Create a new project based on the template
     const newProject = {
       id: Date.now().toString(),
-      name: template.name,
-      description: template.description,
+      name: selectedTemplate.name,
+      description: selectedTemplate.description,
       createdAt: new Date(),
       updatedAt: new Date(),
       startDate: new Date(),
@@ -172,6 +189,15 @@ const ProjectCatalog: React.FC = () => {
 
     addProject(newProject);
     setCurrentProject(newProject);
+    
+    // Reset form and close dialog
+    setProjectSetupForm({
+      projectLeader: '',
+      accountabilityPartner: '',
+      targetEndDate: ''
+    });
+    setIsProjectSetupOpen(false);
+    setSelectedTemplate(null);
     
     // Navigate back to home with user view
     navigate('/', { state: { view: 'user' } });
@@ -282,6 +308,55 @@ const ProjectCatalog: React.FC = () => {
             </Button>
           </p>
         </div>
+
+        {/* Project Setup Dialog */}
+        <Dialog open={isProjectSetupOpen} onOpenChange={setIsProjectSetupOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Let's get this project going! 🚀</DialogTitle>
+              <DialogDescription>
+                Time to set up your {selectedTemplate?.name} project team and timeline. Let's make this happen!
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="project-leader">Project Leader</Label>
+                <Input
+                  id="project-leader"
+                  placeholder="Who's leading this adventure?"
+                  value={projectSetupForm.projectLeader}
+                  onChange={(e) => setProjectSetupForm(prev => ({ ...prev, projectLeader: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="accountability-partner">Accountability Partner</Label>
+                <Input
+                  id="accountability-partner"
+                  placeholder="Who's keeping you on track?"
+                  value={projectSetupForm.accountabilityPartner}
+                  onChange={(e) => setProjectSetupForm(prev => ({ ...prev, accountabilityPartner: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="target-end-date">Target End Date</Label>
+                <Input
+                  id="target-end-date"
+                  type="date"
+                  value={projectSetupForm.targetEndDate}
+                  onChange={(e) => setProjectSetupForm(prev => ({ ...prev, targetEndDate: e.target.value }))}
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setIsProjectSetupOpen(false)}>
+                  Skip for now
+                </Button>
+                <Button onClick={handleProjectSetupComplete}>
+                  Let's do this!
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
