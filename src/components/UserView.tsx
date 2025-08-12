@@ -25,7 +25,8 @@ export default function UserView({
     currentProject,
     currentProjectRun,
     projectRuns,
-    setCurrentProjectRun
+    setCurrentProjectRun,
+    updateProjectRun
   } = useProject();
   const [viewMode, setViewMode] = useState<'listing' | 'workflow'>('listing');
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -79,6 +80,21 @@ export default function UserView({
   }, [resetToListing]);
   const currentStep = allSteps[currentStepIndex];
   const progress = allSteps.length > 0 ? (currentStepIndex + 1) / allSteps.length * 100 : 0;
+  
+  // Update project run progress whenever currentStepIndex changes
+  useEffect(() => {
+    if (currentProjectRun && allSteps.length > 0) {
+      const calculatedProgress = (currentStepIndex + 1) / allSteps.length * 100;
+      if (Math.abs(calculatedProgress - (currentProjectRun.progress || 0)) > 0.1) {
+        const updatedProjectRun = {
+          ...currentProjectRun,
+          progress: calculatedProgress,
+          updatedAt: new Date()
+        };
+        updateProjectRun(updatedProjectRun);
+      }
+    }
+  }, [currentStepIndex, currentProjectRun, allSteps.length, updateProjectRun]);
   const handleNext = () => {
     if (currentStepIndex < allSteps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
