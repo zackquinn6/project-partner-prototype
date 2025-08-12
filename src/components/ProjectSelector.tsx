@@ -355,6 +355,28 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
                           <X className="w-4 h-4 mr-2" />
                           Cancel
                         </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="destructive">
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{currentProject?.name}"? This action cannot be undone and will permanently remove all project data including phases, operations, and steps.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleDeleteProject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                Delete Project
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   ) : (
@@ -408,34 +430,10 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
                   )}
                 </div>
                 {isAdminMode && !isEditingProject && (
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={handleStartEditProject}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Project
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button size="sm" variant="destructive">
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Project</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete "{currentProject?.name}"? This action cannot be undone and will permanently remove all project data including phases, operations, and steps.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={handleDeleteProject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                            Delete Project
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
+                  <Button size="sm" variant="outline" onClick={handleStartEditProject}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Project
+                  </Button>
                 )}
               </div>
             </div>
