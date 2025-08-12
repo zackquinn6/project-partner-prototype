@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Home from "@/components/Home";
-import { AdminView } from "@/components/AdminView";
+import AdminView from "@/components/AdminView";
 import UserView from "@/components/UserView";
 import AdminPasswordGate from "@/components/AdminPasswordGate";
 
