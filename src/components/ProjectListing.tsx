@@ -8,6 +8,7 @@ import { Play, Trash2, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProject } from '@/contexts/ProjectContext';
 import { Project } from '@/interfaces/Project';
+import { ProjectRun } from '@/interfaces/ProjectRun';
 import { ProjectSelector } from '@/components/ProjectSelector';
 
 interface ProjectListingProps {
@@ -15,30 +16,14 @@ interface ProjectListingProps {
 }
 
 export default function ProjectListing({ onProjectSelect }: ProjectListingProps) {
-  const { projects, currentProject, setCurrentProject, deleteProject } = useProject();
+  const { projectRuns, currentProjectRun, setCurrentProjectRun, deleteProjectRun } = useProject();
   const navigate = useNavigate();
 
-  const calculateProgress = (project: Project) => {
-    const allSteps = project.phases.flatMap(phase => 
-      phase.operations.flatMap(operation => operation.steps)
-    );
-    if (allSteps.length === 0) return 0;
-    
-    // For demo purposes, we'll calculate based on phase completion
-    // In real implementation, you'd track completed steps
-    const completedPhases = project.phases.filter(phase => 
-      phase.operations.every(op => op.steps.length > 0)
-    ).length;
-    return allSteps.length > 0 ? (completedPhases / project.phases.length) * 100 : 0;
+  const calculateProgress = (projectRun: ProjectRun) => {
+    return projectRun.progress || 0;
   };
 
-  const getStatusFromProgress = (progress: number): Project['status'] => {
-    if (progress === 0) return 'not-started';
-    if (progress === 100) return 'complete';
-    return 'in-progress';
-  };
-
-  const getStatusColor = (status: Project['status']) => {
+  const getStatusColor = (status: ProjectRun['status']) => {
     switch (status) {
       case 'not-started':
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -59,15 +44,15 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
     }).format(new Date(date));
   };
 
-  const handleOpenProject = (project: Project) => {
-    setCurrentProject(project);
-    onProjectSelect?.(project);
+  const handleOpenProjectRun = (projectRun: ProjectRun) => {
+    setCurrentProjectRun(projectRun);
+    onProjectSelect?.(null as any); // Pass null to indicate we're selecting a project run
   };
 
-  const handleDeleteProject = (projectId: string) => {
-    deleteProject(projectId);
-    // Ensure we don't auto-select another project after deletion
-    setCurrentProject(null);
+  const handleDeleteProjectRun = (projectRunId: string) => {
+    deleteProjectRun(projectRunId);
+    // Ensure we don't auto-select another project run after deletion
+    setCurrentProjectRun(null);
     // Communicate to parent component that we want to stay in listing mode
     onProjectSelect?.(null as any);
   };
@@ -75,9 +60,7 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
   return (
     <div className="container mx-auto px-6 py-8 space-y-6">
       <ProjectSelector onProjectSelected={() => {
-        if (currentProject) {
-          onProjectSelect?.(currentProject);
-        }
+        // This creates a new project run when a template is selected
       }} />
       
       <Card className="gradient-card border-0 shadow-card">
@@ -112,20 +95,19 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
               </TableRow>
             </TableHeader>
             <TableBody>
-              {projects.map((project) => {
-                const progress = calculateProgress(project);
-                const currentStatus = getStatusFromProgress(progress);
+              {projectRuns.map((projectRun) => {
+                const progress = calculateProgress(projectRun);
                 
                 return (
-                  <TableRow key={project.id}>
+                  <TableRow key={projectRun.id}>
                     <TableCell className="font-medium">
                       <div>
-                        <div className="font-semibold">{project.name}</div>
-                        <div className="text-sm text-muted-foreground">{project.description}</div>
+                        <div className="font-semibold">{projectRun.customProjectName || projectRun.name}</div>
+                        <div className="text-sm text-muted-foreground">{projectRun.description}</div>
                       </div>
                     </TableCell>
-                    <TableCell>{formatDate(project.startDate)}</TableCell>
-                    <TableCell>{formatDate(project.planEndDate)}</TableCell>
+                    <TableCell>{formatDate(projectRun.startDate)}</TableCell>
+                    <TableCell>{formatDate(projectRun.planEndDate)}</TableCell>
                     <TableCell className="w-32">
                       <div className="space-y-1">
                         <Progress value={progress} className="h-2" />
@@ -135,19 +117,19 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(currentStatus)}>
-                        {currentStatus.replace('-', ' ')}
+                      <Badge className={getStatusColor(projectRun.status)}>
+                        {projectRun.status.replace('-', ' ')}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {project.endDate ? formatDate(project.endDate) : '-'}
+                      {projectRun.endDate ? formatDate(projectRun.endDate) : '-'}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {currentStatus !== 'complete' && (
+                        {projectRun.status !== 'complete' && (
                           <Button 
                             size="sm" 
-                            onClick={() => handleOpenProject(project)}
+                            onClick={() => handleOpenProjectRun(projectRun)}
                             className="transition-fast"
                           >
                             <Play className="w-4 h-4 mr-2" />
@@ -163,14 +145,14 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                              <AlertDialogTitle>Delete Project Run</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete "{project.name}"? This action cannot be undone.
+                                Are you sure you want to delete "{projectRun.customProjectName || projectRun.name}"? This will only delete your personal project instance, not the original template.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteProject(project.id)}>
+                              <AlertDialogAction onClick={() => handleDeleteProjectRun(projectRun.id)}>
                                 Delete
                               </AlertDialogAction>
                             </AlertDialogFooter>
