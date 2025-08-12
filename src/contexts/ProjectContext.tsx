@@ -386,10 +386,10 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       const updatedProjects = prev.filter(project => project.id !== projectId);
       console.log('updated projects after delete:', updatedProjects.map(p => p.id));
       
-      // If the deleted project was the current project, set a new current project
+      // If the deleted project was the current project, clear it instead of auto-selecting
       if (currentProject?.id === projectId) {
-        console.log('deleted project was current project, setting new current project');
-        setCurrentProject(updatedProjects[0] || null);
+        console.log('deleted project was current project, clearing current project');
+        setCurrentProject(null);
       }
       
       return updatedProjects;
