@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Home, FolderOpen, ChevronDown } from "lucide-react";
+import { Home, FolderOpen, ChevronDown, Settings } from "lucide-react";
 import { useProject } from '@/contexts/ProjectContext';
 
 interface NavigationProps {
@@ -59,6 +59,10 @@ export default function Navigation({
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
+            
+            <Button variant="ghost" size="icon" onClick={onAdminAccess} className="transition-fast">
+              <Settings className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </div>
