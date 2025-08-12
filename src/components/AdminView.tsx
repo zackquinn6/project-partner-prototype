@@ -4,6 +4,7 @@ import { WorkflowStep, Material, Tool, Output, Phase, Operation } from '@/interf
 import { ProjectSelector } from '@/components/ProjectSelector';
 import ProjectRollup from '@/components/ProjectRollup';
 import EditWorkflowView from '@/components/EditWorkflowView';
+import ProjectAnalytics from '@/components/ProjectAnalytics';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,7 +32,7 @@ interface TableRow {
 
 export const AdminView: React.FC = () => {
   const { currentProject, updateProject, projects } = useProject();
-  const [currentView, setCurrentView] = useState<'table' | 'editWorkflow'>('table');
+  const [currentView, setCurrentView] = useState<'table' | 'editWorkflow' | 'analytics'>('table');
   const [editing, setEditing] = useState<EditingState>({
     type: null,
     id: null,
@@ -536,6 +537,30 @@ export const AdminView: React.FC = () => {
     return <EditWorkflowView onBackToAdmin={() => setCurrentView('table')} />;
   }
 
+  if (currentView === 'analytics') {
+    return (
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+        <ProjectSelector isAdminMode={true} />
+        
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Project Analytics Dashboard</CardTitle>
+                <CardDescription>Performance metrics and insights across all projects</CardDescription>
+              </div>
+              <Button onClick={() => setCurrentView('table')} variant="outline">
+                Back to Workflow
+              </Button>
+            </div>
+          </CardHeader>
+        </Card>
+
+        <ProjectAnalytics />
+      </div>
+    );
+  }
+
   const tableRows = buildTableRows();
   return <div className="max-w-7xl mx-auto p-6 space-y-6">
       <ProjectSelector isAdminMode={true} />
@@ -548,6 +573,12 @@ export const AdminView: React.FC = () => {
               <CardDescription>Complete project workflow with phases, operations, and steps</CardDescription>
             </div>
             <div className="flex gap-2">
+              <Button 
+                onClick={() => setCurrentView('analytics')} 
+                variant="outline"
+              >
+                📊 Analytics
+              </Button>
               <Button 
                 onClick={() => setCurrentView('editWorkflow')} 
                 variant="outline"
