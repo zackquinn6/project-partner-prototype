@@ -524,6 +524,7 @@ export const AdminView: React.FC = () => {
   ) || [];
 
   if (!currentProject) {
+    console.log('AdminView - no currentProject, showing project selector');
     return <div className="max-w-7xl mx-auto p-6 space-y-6">
         <ProjectSelector isAdminMode={true} />
         <Card>

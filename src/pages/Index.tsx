@@ -48,6 +48,7 @@ const Index = () => {
   }
 
   const renderView = () => {
+    console.log('Index renderView - currentView:', currentView);
     switch (currentView) {
       case 'admin':
         return <AdminView />;
