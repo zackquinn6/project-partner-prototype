@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useProject } from '@/contexts/ProjectContext';
 import { WorkflowStep, Material, Tool, Output, Phase, Operation } from '@/interfaces/Project';
 import { ProjectSelector } from '@/components/ProjectSelector';
+import ProjectRollup from '@/components/ProjectRollup';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -563,5 +564,7 @@ export const AdminView: React.FC = () => {
           </Table>
         </CardContent>
       </Card>
+
+      <ProjectRollup />
     </div>;
 };
