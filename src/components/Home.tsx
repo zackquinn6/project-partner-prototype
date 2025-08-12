@@ -67,7 +67,9 @@ export default function Home({
           loop: true
         }} plugins={[Autoplay({
           delay: 2000,
-          stopOnInteraction: true
+          stopOnInteraction: false,
+          stopOnMouseEnter: false,
+          stopOnFocusIn: false
         })]}>
             <CarouselContent className="-ml-1">
               {projects.map((project, index) => <CarouselItem key={index} className="pl-1 basis-1/4 md:basis-1/5 lg:basis-1/6">
