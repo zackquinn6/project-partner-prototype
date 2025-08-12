@@ -66,6 +66,10 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
 
   const handleDeleteProject = (projectId: string) => {
     deleteProject(projectId);
+    // Ensure we don't auto-select another project after deletion
+    setCurrentProject(null);
+    // Communicate to parent component that we want to stay in listing mode
+    onProjectSelect?.(null as any);
   };
 
   return (

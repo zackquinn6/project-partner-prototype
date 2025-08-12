@@ -65,8 +65,9 @@ export default function UserView({
   }, [projectRunId, projectRuns, setCurrentProjectRun]);
 
   // Auto-switch to workflow view when a project or project run is selected
+  // but NOT when we're explicitly staying in listing mode (like after deletion)
   useEffect(() => {
-    if (currentProject || currentProjectRun) {
+    if ((currentProject || currentProjectRun) && viewMode !== 'listing') {
       setViewMode('workflow');
     }
   }, [currentProject, currentProjectRun]);
@@ -214,10 +215,16 @@ export default function UserView({
     }, {} as Record<string, any[]>);
     return acc;
   }, {} as Record<string, Record<string, any[]>>) || {};
-  // If no current project or project run selected, or viewing listing mode, show project listing
+  // If no current project or project run selected, or explicitly viewing listing mode, show project listing
   if ((!currentProject && !currentProjectRun) || viewMode === 'listing') {
     return <ProjectListing 
       onProjectSelect={project => {
+        if (project === null) {
+          // Force stay in listing mode (e.g., after deletion)
+          setViewMode('listing');
+          return;
+        }
+        // Only change to workflow mode if user explicitly selects a project
         setViewMode('workflow');
         onProjectSelected?.();
       }} 
