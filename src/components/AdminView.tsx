@@ -32,7 +32,7 @@ interface TableRow {
 
 export const AdminView: React.FC = () => {
   const { currentProject, updateProject, projects } = useProject();
-  const [currentView, setCurrentView] = useState<'table' | 'editWorkflow' | 'analytics'>('table');
+  const [currentView, setCurrentView] = useState<'table' | 'editWorkflow'>('table');
   const [editing, setEditing] = useState<EditingState>({
     type: null,
     id: null,
@@ -537,29 +537,6 @@ export const AdminView: React.FC = () => {
     return <EditWorkflowView onBackToAdmin={() => setCurrentView('table')} />;
   }
 
-  if (currentView === 'analytics') {
-    return (
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
-        <ProjectSelector isAdminMode={true} />
-        
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Project Analytics Dashboard</CardTitle>
-                <CardDescription>Performance metrics and insights across all projects</CardDescription>
-              </div>
-              <Button onClick={() => setCurrentView('table')} variant="outline">
-                Back to Workflow
-              </Button>
-            </div>
-          </CardHeader>
-        </Card>
-
-        <ProjectAnalytics />
-      </div>
-    );
-  }
 
   const tableRows = buildTableRows();
   return <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -573,12 +550,6 @@ export const AdminView: React.FC = () => {
               <CardDescription>Complete project workflow with phases, operations, and steps</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button 
-                onClick={() => setCurrentView('analytics')} 
-                variant="outline"
-              >
-                📊 Analytics
-              </Button>
               <Button 
                 onClick={() => setCurrentView('editWorkflow')} 
                 variant="outline"
@@ -618,7 +589,26 @@ export const AdminView: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* Analytics Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>📊 Project Analytics</CardTitle>
+          <CardDescription>Performance metrics and insights across all projects</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ProjectAnalytics />
+        </CardContent>
+      </Card>
 
-      <ProjectRollup />
+      {/* Tools and Materials Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>🔧 Tools and Materials</CardTitle>
+          <CardDescription>Complete rollup of all tools and materials needed for this project</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ProjectRollup />
+        </CardContent>
+      </Card>
     </div>;
 };
