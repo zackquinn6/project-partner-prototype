@@ -57,7 +57,8 @@ export interface Project {
   createdAt: Date;
   updatedAt: Date;
   startDate: Date;
+  planEndDate: Date;
   endDate?: Date;
-  status: 'open' | 'in-progress' | 'completed' | 'closed';
+  status: 'not-started' | 'in-progress' | 'complete';
   phases: Phase[];
 }

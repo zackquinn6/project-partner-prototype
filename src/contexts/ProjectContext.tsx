@@ -33,6 +33,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       createdAt: new Date(),
       updatedAt: new Date(),
       startDate: new Date('2024-01-15'),
+      planEndDate: new Date('2024-06-30'),
       endDate: new Date('2024-06-30'),
       status: 'in-progress' as const,
       phases: [
@@ -77,7 +78,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       createdAt: new Date(),
       updatedAt: new Date(),
       startDate: new Date('2024-02-01'),
-      status: 'open' as const,
+      planEndDate: new Date('2024-03-15'),
+      status: 'not-started' as const,
       phases: [
         {
           id: 'plan-phase',

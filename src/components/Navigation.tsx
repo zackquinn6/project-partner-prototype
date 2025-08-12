@@ -16,7 +16,7 @@ export default function Navigation({
   onProjectsView
 }: NavigationProps) {
   const { projects, currentProject, setCurrentProject } = useProject();
-  const openProjects = projects.filter(p => p.status === 'open' || p.status === 'in-progress');
+  const openProjects = projects.filter(p => p.status === 'not-started' || p.status === 'in-progress');
   return <nav className="border-b border-border/50 bg-card/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
