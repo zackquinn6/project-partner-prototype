@@ -40,13 +40,13 @@ export default function Home({
             <div className="space-y-8">
               <div className="space-y-4">
                 <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-                  Confidently Get the{" "}
+                  Confidently Get {" "}
                   <span className="bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
                     Results You Want
                   </span>
                 </h1>
                 <h2 className="text-2xl lg:text-3xl font-semibold text-muted-foreground mb-4">
-                  Your Personal Guide for Home Improvement Success
+                  A Guided Home Improvement Experience
                 </h2>
                 <p className="text-xl text-muted-foreground max-w-2xl">
                   expert-guided steps, progress tracking, and access to pro help—so DIYers stay focused, avoid missteps, and confidently finish what they started.
