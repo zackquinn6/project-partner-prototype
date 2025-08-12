@@ -16,9 +16,9 @@ export default function Navigation({
   onProjectsView
 }: NavigationProps) {
   const { projects, currentProject, setCurrentProject } = useProject();
-  // Filter to show only user projects (not templates) that are in progress
+  // Filter to show only user projects that are in-progress
   const openProjects = projects.filter(p => 
-    (p.status === 'not-started' || p.status === 'in-progress') && 
+    p.status === 'in-progress' && 
     p.publishStatus === 'draft' && 
     !p.id.startsWith('template-')
   );
