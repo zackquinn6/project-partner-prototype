@@ -93,7 +93,7 @@ export default function UserView() {
         <Card>
           <CardContent className="text-center py-8">
             <p className="text-muted-foreground">
-              {!currentProject ? 'Please select a project to view its workflow steps.' : 'No workflow steps found. Please add some steps in the admin view.'}
+              {!currentProject ? 'Please select a project to view its workflow steps.' : 'This project under construction - check back soon!'}
             </p>
           </CardContent>
         </Card>

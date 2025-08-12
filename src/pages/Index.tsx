@@ -4,10 +4,13 @@ import Navigation from "@/components/Navigation";
 import Home from "@/components/Home";
 import { AdminView } from "@/components/AdminView";
 import UserView from "@/components/UserView";
+import AdminPasswordGate from "@/components/AdminPasswordGate";
 
 const Index = () => {
   const location = useLocation();
   const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user'>('home');
+  const [showAdminGate, setShowAdminGate] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
   useEffect(() => {
     // Check if we're returning from project catalog with a view state
@@ -15,6 +18,28 @@ const Index = () => {
       setCurrentView(location.state.view);
     }
   }, [location.state]);
+
+  const handleAdminAccess = () => {
+    if (isAdminAuthenticated) {
+      setCurrentView('admin');
+    } else {
+      setShowAdminGate(true);
+    }
+  };
+
+  const handleAdminAuthenticated = () => {
+    setIsAdminAuthenticated(true);
+    setShowAdminGate(false);
+    setCurrentView('admin');
+  };
+
+  const handleAdminCancel = () => {
+    setShowAdminGate(false);
+  };
+
+  if (showAdminGate) {
+    return <AdminPasswordGate onAuthenticated={handleAdminAuthenticated} onCancel={handleAdminCancel} />;
+  }
 
   const renderView = () => {
     switch (currentView) {
@@ -29,7 +54,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <Navigation currentView={currentView} onViewChange={setCurrentView} />
+      <Navigation currentView={currentView} onViewChange={setCurrentView} onAdminAccess={handleAdminAccess} />
       {renderView()}
     </div>
   );

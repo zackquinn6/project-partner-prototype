@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Settings, Users, Workflow } from "lucide-react";
+
 interface NavigationProps {
   currentView: 'home' | 'admin' | 'user';
   onViewChange: (view: 'home' | 'admin' | 'user') => void;
+  onAdminAccess: () => void;
 }
 export default function Navigation({
   currentView,
-  onViewChange
+  onViewChange,
+  onAdminAccess
 }: NavigationProps) {
   return <nav className="border-b border-border/50 bg-card/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4">
@@ -21,7 +24,7 @@ export default function Navigation({
               <Workflow className="w-4 h-4 mr-2" />
               Home
             </Button>
-            <Button variant={currentView === 'admin' ? 'default' : 'ghost'} onClick={() => onViewChange('admin')} className="transition-fast">
+            <Button variant={currentView === 'admin' ? 'default' : 'ghost'} onClick={onAdminAccess} className="transition-fast">
               <Settings className="w-4 h-4 mr-2" />
               Project Manager
             </Button>
