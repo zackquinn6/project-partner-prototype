@@ -46,7 +46,10 @@ export default function Navigation({
                   openProjects.map((project) => (
                     <DropdownMenuItem 
                       key={project.id} 
-                      onClick={() => setCurrentProject(project)}
+                      onClick={() => {
+                        setCurrentProject(project);
+                        onViewChange('user');
+                      }}
                       className={`cursor-pointer ${currentProject?.id === project.id ? 'bg-primary/10 text-primary' : ''}`}
                     >
                       {project.name}
