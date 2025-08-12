@@ -46,7 +46,7 @@ export default function Navigation({
                   <ChevronDown className="w-4 h-4 ml-2" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-card border shadow-lg">
+              <DropdownMenuContent align="end" className="w-56 bg-background border border-border shadow-lg z-50">
                 {openProjects.length > 0 ? (
                   openProjects.map((project) => (
                     <DropdownMenuItem 
