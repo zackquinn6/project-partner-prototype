@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, FolderOpen, Edit, Save, X } from 'lucide-react';
+import { Plus, FolderOpen, Edit, Save, X, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface ProjectSelectorProps {
   isAdminMode?: boolean;
@@ -17,7 +18,7 @@ interface ProjectSelectorProps {
 }
 
 export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = false, onProjectSelected }) => {
-  const { projects, currentProject, setCurrentProject, addProject, updateProject } = useProject();
+  const { projects, currentProject, setCurrentProject, addProject, updateProject, deleteProject } = useProject();
   const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
   const [isProjectSetupOpen, setIsProjectSetupOpen] = useState(false);
   const [isEditingProject, setIsEditingProject] = useState(false);
@@ -148,6 +149,11 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
         publishStatus: currentProject.publishStatus
       });
     }
+  };
+
+  const handleDeleteProject = () => {
+    if (!currentProject) return;
+    deleteProject(currentProject.id);
   };
 
   return (
@@ -402,10 +408,34 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
                   )}
                 </div>
                 {isAdminMode && !isEditingProject && (
-                  <Button size="sm" variant="outline" onClick={handleStartEditProject}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit Project
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={handleStartEditProject}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Project
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="destructive">
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete "{currentProject?.name}"? This action cannot be undone and will permanently remove all project data including phases, operations, and steps.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDeleteProject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Delete Project
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 )}
               </div>
             </div>
