@@ -66,11 +66,11 @@ export default function Home({
           align: "start",
           loop: true,
           skipSnaps: false,
-          dragFree: false
+          dragFree: true
         }} plugins={[Autoplay({
-          delay: 800,
+          delay: 4000,
           stopOnInteraction: false,
-          stopOnMouseEnter: false,
+          stopOnMouseEnter: true,
           stopOnFocusIn: false,
           playOnInit: true
         })]}>
