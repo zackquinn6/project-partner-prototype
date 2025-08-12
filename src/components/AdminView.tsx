@@ -4,6 +4,7 @@ import { WorkflowStep, Material, Tool, Output, Phase, Operation } from '@/interf
 import { ProjectSelector } from '@/components/ProjectSelector';
 import ProjectRollup from '@/components/ProjectRollup';
 import EditWorkflowView from '@/components/EditWorkflowView';
+import EditableUserView from '@/components/EditableUserView';
 import ProjectAnalytics from '@/components/ProjectAnalytics';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,7 +33,7 @@ interface TableRow {
 
 export const AdminView: React.FC = () => {
   const { currentProject, updateProject, projects } = useProject();
-  const [currentView, setCurrentView] = useState<'table' | 'editWorkflow'>('table');
+  const [currentView, setCurrentView] = useState<'table' | 'editWorkflow' | 'userWorkflow'>('table');
   const [editing, setEditing] = useState<EditingState>({
     type: null,
     id: null,
@@ -533,6 +534,10 @@ export const AdminView: React.FC = () => {
       </div>;
   }
   // Render different views based on currentView
+  if (currentView === 'userWorkflow') {
+    return <EditableUserView onBackToAdmin={() => setCurrentView('table')} />;
+  }
+
   if (currentView === 'editWorkflow') {
     return <EditWorkflowView onBackToAdmin={() => setCurrentView('table')} />;
   }
@@ -551,21 +556,24 @@ export const AdminView: React.FC = () => {
             </div>
             <div className="flex gap-2">
               <Button 
-                onClick={() => setCurrentView('editWorkflow')} 
+                onClick={() => setCurrentView('userWorkflow')} 
                 variant="outline"
                 disabled={!currentProject || allSteps.length === 0}
               >
                 <Eye className="w-4 h-4 mr-2" />
-                Edit Steps
-              </Button>
-              <Button onClick={addPhase}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Phase
+                View and edit workflow
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-medium text-foreground">Workflow Structure</h3>
+            <Button onClick={addPhase} size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Phase
+            </Button>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
