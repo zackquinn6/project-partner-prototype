@@ -65,10 +65,11 @@ export default function Home({
           <Carousel className="w-full" opts={{
           align: "start",
           loop: true,
-          skipSnaps: false,
-          dragFree: true
+          skipSnaps: true,
+          dragFree: true,
+          duration: 5000
         }} plugins={[Autoplay({
-          delay: 4000,
+          delay: 50,
           stopOnInteraction: false,
           stopOnMouseEnter: true,
           stopOnFocusIn: false,
