@@ -303,11 +303,16 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
   };
 
   const deleteProject = (projectId: string) => {
-    setProjects(prev => prev.filter(project => project.id !== projectId));
-    if (currentProject?.id === projectId) {
-      const remainingProjects = projects.filter(p => p.id !== projectId);
-      setCurrentProject(remainingProjects[0] || null);
-    }
+    setProjects(prev => {
+      const updatedProjects = prev.filter(project => project.id !== projectId);
+      
+      // If the deleted project was the current project, set a new current project
+      if (currentProject?.id === projectId) {
+        setCurrentProject(updatedProjects[0] || null);
+      }
+      
+      return updatedProjects;
+    });
   };
 
   return (
