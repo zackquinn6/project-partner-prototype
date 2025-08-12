@@ -22,7 +22,11 @@ interface ProjectTemplate {
   icon: React.ComponentType<any>;
 }
 
-const ProjectCatalog: React.FC = () => {
+interface ProjectCatalogProps {
+  isAdminMode?: boolean;
+}
+
+const ProjectCatalog: React.FC<ProjectCatalogProps> = ({ isAdminMode = false }) => {
   const navigate = useNavigate();
   const { setCurrentProject, addProject } = useProject();
   const [isProjectSetupOpen, setIsProjectSetupOpen] = useState(false);
@@ -168,9 +172,28 @@ const ProjectCatalog: React.FC = () => {
   };
 
   const handleSelectProject = (template: ProjectTemplate) => {
-    setSelectedTemplate(template);
-    setProjectSetupForm(prev => ({ ...prev, customProjectName: template.name })); // Set default name
-    setIsProjectSetupOpen(true);
+    if (isAdminMode) {
+      // In admin mode, just navigate to admin view with this template
+      const newProject = {
+        id: Date.now().toString(),
+        name: template.name,
+        description: template.description,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        startDate: new Date(),
+        planEndDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+        status: 'not-started' as const,
+        phases: []
+      };
+      addProject(newProject);
+      setCurrentProject(newProject);
+      navigate('/', { state: { view: 'admin' } });
+    } else {
+      // In user mode, show the setup dialog
+      setSelectedTemplate(template);
+      setProjectSetupForm(prev => ({ ...prev, customProjectName: template.name }));
+      setIsProjectSetupOpen(true);
+    }
   };
 
   const handleProjectSetupComplete = () => {
@@ -306,72 +329,74 @@ const ProjectCatalog: React.FC = () => {
         <div className="mt-12 text-center">
           <p className="text-sm text-muted-foreground">
             More project templates coming soon! Can't find what you're looking for?{" "}
-            <Button variant="link" className="p-0 h-auto text-sm" onClick={() => navigate('/?view=admin')}>
+            <Button variant="link" className="p-0 h-auto text-sm" onClick={() => navigate('/projects?mode=admin')}>
               Create a custom project
             </Button>
           </p>
         </div>
 
-        {/* Project Setup Dialog */}
-        <Dialog open={isProjectSetupOpen} onOpenChange={setIsProjectSetupOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Let's get this project going! 🚀</DialogTitle>
-              <DialogDescription>
-                Time to set up your {selectedTemplate?.name} project team and timeline. Let's make this happen!
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="custom-project-name">Project Name</Label>
-                <Input
-                  id="custom-project-name"
-                  placeholder="Give your project a custom name"
-                  value={projectSetupForm.customProjectName}
-                  onChange={(e) => setProjectSetupForm(prev => ({ ...prev, customProjectName: e.target.value }))}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Based on: {selectedTemplate?.name}
-                </p>
+        {/* Project Setup Dialog - Only show in user mode */}
+        {!isAdminMode && (
+          <Dialog open={isProjectSetupOpen} onOpenChange={setIsProjectSetupOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Let's get this project going! 🚀</DialogTitle>
+                <DialogDescription>
+                  Time to set up your {selectedTemplate?.name} project team and timeline. Let's make this happen!
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="custom-project-name">Project Name</Label>
+                  <Input
+                    id="custom-project-name"
+                    placeholder="Give your project a custom name"
+                    value={projectSetupForm.customProjectName}
+                    onChange={(e) => setProjectSetupForm(prev => ({ ...prev, customProjectName: e.target.value }))}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Based on: {selectedTemplate?.name}
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="project-leader">Project Leader</Label>
+                  <Input
+                    id="project-leader"
+                    placeholder="Who's leading this adventure?"
+                    value={projectSetupForm.projectLeader}
+                    onChange={(e) => setProjectSetupForm(prev => ({ ...prev, projectLeader: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="accountability-partner">Accountability Partner</Label>
+                  <Input
+                    id="accountability-partner"
+                    placeholder="Who's keeping you on track?"
+                    value={projectSetupForm.accountabilityPartner}
+                    onChange={(e) => setProjectSetupForm(prev => ({ ...prev, accountabilityPartner: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="target-end-date">Target End Date</Label>
+                  <Input
+                    id="target-end-date"
+                    type="date"
+                    value={projectSetupForm.targetEndDate}
+                    onChange={(e) => setProjectSetupForm(prev => ({ ...prev, targetEndDate: e.target.value }))}
+                  />
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" onClick={() => setIsProjectSetupOpen(false)}>
+                    Skip for now
+                  </Button>
+                  <Button onClick={handleProjectSetupComplete}>
+                    Let's do this!
+                  </Button>
+                </div>
               </div>
-              <div>
-                <Label htmlFor="project-leader">Project Leader</Label>
-                <Input
-                  id="project-leader"
-                  placeholder="Who's leading this adventure?"
-                  value={projectSetupForm.projectLeader}
-                  onChange={(e) => setProjectSetupForm(prev => ({ ...prev, projectLeader: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="accountability-partner">Accountability Partner</Label>
-                <Input
-                  id="accountability-partner"
-                  placeholder="Who's keeping you on track?"
-                  value={projectSetupForm.accountabilityPartner}
-                  onChange={(e) => setProjectSetupForm(prev => ({ ...prev, accountabilityPartner: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="target-end-date">Target End Date</Label>
-                <Input
-                  id="target-end-date"
-                  type="date"
-                  value={projectSetupForm.targetEndDate}
-                  onChange={(e) => setProjectSetupForm(prev => ({ ...prev, targetEndDate: e.target.value }))}
-                />
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setIsProjectSetupOpen(false)}>
-                  Skip for now
-                </Button>
-                <Button onClick={handleProjectSetupComplete}>
-                  Let's do this!
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );
