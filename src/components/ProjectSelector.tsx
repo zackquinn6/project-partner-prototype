@@ -13,9 +13,15 @@ import { Plus, FolderOpen } from 'lucide-react';
 export const ProjectSelector: React.FC = () => {
   const { projects, currentProject, setCurrentProject, addProject } = useProject();
   const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
+  const [isProjectSetupOpen, setIsProjectSetupOpen] = useState(false);
   const [newProjectForm, setNewProjectForm] = useState({
     name: '',
     description: ''
+  });
+  const [projectSetupForm, setProjectSetupForm] = useState({
+    projectLeader: '',
+    accountabilityPartner: '',
+    targetEndDate: ''
   });
 
   const handleCreateProject = () => {
@@ -37,6 +43,25 @@ export const ProjectSelector: React.FC = () => {
     setCurrentProject(newProject);
     setNewProjectForm({ name: '', description: '' });
     setIsNewProjectOpen(false);
+    setIsProjectSetupOpen(true); // Open setup dialog after creating project
+  };
+
+  const handleProjectSelect = (value: string) => {
+    const project = projects.find(p => p.id === value);
+    setCurrentProject(project || null);
+    if (project) {
+      setIsProjectSetupOpen(true); // Open setup dialog when selecting existing project
+    }
+  };
+
+  const handleProjectSetupComplete = () => {
+    // Here you could save the setup data to the project or context
+    setProjectSetupForm({
+      projectLeader: '',
+      accountabilityPartner: '',
+      targetEndDate: ''
+    });
+    setIsProjectSetupOpen(false);
   };
 
   return (
@@ -56,10 +81,7 @@ export const ProjectSelector: React.FC = () => {
             <Label htmlFor="project-select">Current Project</Label>
             <Select 
               value={currentProject?.id || ''} 
-              onValueChange={(value) => {
-                const project = projects.find(p => p.id === value);
-                setCurrentProject(project || null);
-              }}
+              onValueChange={handleProjectSelect}
             >
               <SelectTrigger id="project-select">
                 <SelectValue placeholder="Select a project" />
@@ -129,6 +151,55 @@ export const ProjectSelector: React.FC = () => {
             </p>
           </div>
         )}
+
+        {/* Project Setup Dialog */}
+        <Dialog open={isProjectSetupOpen} onOpenChange={setIsProjectSetupOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Let's get this project going! 🚀</DialogTitle>
+              <DialogDescription>
+                Time to set up your project team and timeline. Let's make this happen!
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="project-leader">Project Leader</Label>
+                <Input
+                  id="project-leader"
+                  placeholder="Who's leading this adventure?"
+                  value={projectSetupForm.projectLeader}
+                  onChange={(e) => setProjectSetupForm(prev => ({ ...prev, projectLeader: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="accountability-partner">Accountability Partner</Label>
+                <Input
+                  id="accountability-partner"
+                  placeholder="Who's keeping you on track?"
+                  value={projectSetupForm.accountabilityPartner}
+                  onChange={(e) => setProjectSetupForm(prev => ({ ...prev, accountabilityPartner: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="target-end-date">Target End Date</Label>
+                <Input
+                  id="target-end-date"
+                  type="date"
+                  value={projectSetupForm.targetEndDate}
+                  onChange={(e) => setProjectSetupForm(prev => ({ ...prev, targetEndDate: e.target.value }))}
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setIsProjectSetupOpen(false)}>
+                  Skip for now
+                </Button>
+                <Button onClick={handleProjectSetupComplete}>
+                  Let's do this!
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
