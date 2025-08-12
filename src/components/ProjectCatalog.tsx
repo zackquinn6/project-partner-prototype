@@ -170,10 +170,10 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({ isAdminMode = false }) 
     }
   ];
 
-  // Filter projects to show only published templates
+  // Filter projects to show only published templates or all templates in admin mode
   const publishedProjects = projects.filter(project => 
-    project.publishStatus === 'published' && 
-    project.id.startsWith('template-')
+    project.id.startsWith('template-') && 
+    (project.publishStatus === 'published' || isAdminMode)
   );
 
   const getDifficultyColor = (difficulty: string) => {
@@ -200,9 +200,9 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({ isAdminMode = false }) 
 
   const handleSelectProject = (project: any) => {
     if (isAdminMode) {
-      // In admin mode, just navigate to admin view with this template
+      // In admin mode, create a new template project with template- prefix
       const newProject = {
-        id: Date.now().toString(),
+        id: `template-${Date.now()}`,
         name: project.name,
         description: project.description,
         createdAt: new Date(),
