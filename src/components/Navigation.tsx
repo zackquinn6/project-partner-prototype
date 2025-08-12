@@ -7,11 +7,13 @@ interface NavigationProps {
   currentView: 'home' | 'admin' | 'user';
   onViewChange: (view: 'home' | 'admin' | 'user') => void;
   onAdminAccess: () => void;
+  onProjectsView?: () => void;
 }
 export default function Navigation({
   currentView,
   onViewChange,
-  onAdminAccess
+  onAdminAccess,
+  onProjectsView
 }: NavigationProps) {
   const { projects, currentProject, setCurrentProject } = useProject();
   const openProjects = projects.filter(p => p.status === 'open' || p.status === 'in-progress');
@@ -28,7 +30,10 @@ export default function Navigation({
               <Home className="w-4 h-4 mr-2" />
               Home
             </Button>
-            <Button variant={currentView === 'user' ? 'default' : 'ghost'} onClick={() => onViewChange('user')} className="transition-fast">
+            <Button variant={currentView === 'user' ? 'default' : 'ghost'} onClick={() => {
+              onViewChange('user');
+              onProjectsView?.();
+            }} className="transition-fast">
               <FolderOpen className="w-4 h-4 mr-2" />
               My Projects
             </Button>

@@ -6,7 +6,11 @@ import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video } from "lucide-react";
 import { useProject } from '@/contexts/ProjectContext';
 import ProjectListing from './ProjectListing';
-export default function UserView() {
+
+interface UserViewProps {
+  resetToListing?: boolean;
+}
+export default function UserView({ resetToListing }: UserViewProps = {}) {
   const { currentProject } = useProject();
   const [viewMode, setViewMode] = useState<'listing' | 'workflow'>('listing');
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -25,6 +29,13 @@ export default function UserView() {
       setViewMode('workflow');
     }
   }, [currentProject, allSteps.length]);
+
+  // Reset to listing view when projects view is requested
+  useEffect(() => {
+    if (resetToListing) {
+      setViewMode('listing');
+    }
+  }, [resetToListing]);
 
   const currentStep = allSteps[currentStepIndex];
   const progress = allSteps.length > 0 ? (currentStepIndex + 1) / allSteps.length * 100 : 0;

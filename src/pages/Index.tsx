@@ -11,6 +11,7 @@ const Index = () => {
   const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user'>('home');
   const [showAdminGate, setShowAdminGate] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [resetUserView, setResetUserView] = useState(false);
 
   useEffect(() => {
     // Check if we're returning from project catalog with a view state
@@ -37,6 +38,11 @@ const Index = () => {
     setShowAdminGate(false);
   };
 
+  const handleProjectsView = () => {
+    setResetUserView(true);
+    setTimeout(() => setResetUserView(false), 100); // Reset after a brief moment
+  };
+
   if (showAdminGate) {
     return <AdminPasswordGate onAuthenticated={handleAdminAuthenticated} onCancel={handleAdminCancel} />;
   }
@@ -46,7 +52,7 @@ const Index = () => {
       case 'admin':
         return <AdminView />;
       case 'user':
-        return <UserView />;
+        return <UserView resetToListing={resetUserView} />;
       default:
         return <Home onViewChange={setCurrentView} />;
     }
@@ -54,7 +60,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <Navigation currentView={currentView} onViewChange={setCurrentView} onAdminAccess={handleAdminAccess} />
+      <Navigation currentView={currentView} onViewChange={setCurrentView} onAdminAccess={handleAdminAccess} onProjectsView={handleProjectsView} />
       {renderView()}
     </div>
   );
