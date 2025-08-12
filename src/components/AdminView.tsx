@@ -324,10 +324,8 @@ export const AdminView: React.FC = () => {
               }
             }))} /> : <span className="text-sm text-muted-foreground">{phase.description || 'No description'}</span>}
             </TableCell>
-            <TableCell>-</TableCell>
-            <TableCell>
-              <Badge variant="outline">{phase.operations.length} operations</Badge>
-            </TableCell>
+            
+            
             <TableCell>
               <div className="flex gap-1">
                 {isEditing ? <>
@@ -467,15 +465,13 @@ export const AdminView: React.FC = () => {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="space-y-3 pt-2">
-                    {(step.materials && step.materials.length > 0) && (
-                      <div>
+                    {step.materials && step.materials.length > 0 && <div>
                         <div className="flex items-center gap-2 mb-2">
                           <Package className="w-4 h-4 text-blue-600" />
                           <span className="font-medium text-sm">Materials</span>
                         </div>
                         <ul className="space-y-1 ml-6">
-                          {step.materials.map((material, index) => (
-                            <li key={index} className="text-sm text-muted-foreground">
+                          {step.materials.map((material, index) => <li key={index} className="text-sm text-muted-foreground">
                               {material.name}
                               <span className="text-xs block text-muted-foreground/80">
                                 {material.description}
@@ -483,21 +479,17 @@ export const AdminView: React.FC = () => {
                               <Badge variant="outline" className="text-xs mt-1">
                                 {material.category}
                               </Badge>
-                            </li>
-                          ))}
+                            </li>)}
                         </ul>
-                      </div>
-                    )}
+                      </div>}
                     
-                    {(step.tools && step.tools.length > 0) && (
-                      <div>
+                    {step.tools && step.tools.length > 0 && <div>
                         <div className="flex items-center gap-2 mb-2">
                           <Wrench className="w-4 h-4 text-orange-600" />
                           <span className="font-medium text-sm">Tools</span>
                         </div>
                         <ul className="space-y-1 ml-6">
-                          {step.tools.map((tool, index) => (
-                            <li key={index} className="text-sm text-muted-foreground">
+                          {step.tools.map((tool, index) => <li key={index} className="text-sm text-muted-foreground">
                               {tool.name}
                               <span className="text-xs block text-muted-foreground/80">
                                 {tool.description}
@@ -505,32 +497,24 @@ export const AdminView: React.FC = () => {
                               <Badge variant="outline" className="text-xs mt-1">
                                 {tool.category}
                               </Badge>
-                            </li>
-                          ))}
+                            </li>)}
                         </ul>
-                      </div>
-                    )}
+                      </div>}
                     
-                    {(step.outputs && step.outputs.length > 0) && (
-                      <div>
+                    {step.outputs && step.outputs.length > 0 && <div>
                         <div className="flex items-center gap-2 mb-2">
                           <FileOutput className="w-4 h-4 text-green-600" />
                           <span className="font-medium text-sm">Outputs</span>
                         </div>
                         <ul className="space-y-1 ml-6">
-                          {step.outputs.map((output, index) => (
-                            <li key={index} className="text-sm text-muted-foreground">
+                          {step.outputs.map((output, index) => <li key={index} className="text-sm text-muted-foreground">
                               {output.name}
-                              {output.description && (
-                                <span className="text-xs block text-muted-foreground/80">
+                              {output.description && <span className="text-xs block text-muted-foreground/80">
                                   {output.description}
-                                </span>
-                              )}
-                            </li>
-                          ))}
+                                </span>}
+                            </li>)}
                         </ul>
-                      </div>
-                    )}
+                      </div>}
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
