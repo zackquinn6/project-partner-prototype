@@ -9,9 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Edit, Save, X, Upload } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Edit, Save, X, Upload, Info } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
+import { WorkflowStep, Output } from '@/interfaces/Project';
+import { OutputDetailPopup } from './OutputDetailPopup';
 import { toast } from 'sonner';
 
 interface EditableUserViewProps {
@@ -25,6 +27,8 @@ export default function EditableUserView({ onBackToAdmin }: EditableUserViewProp
   const [checkedMaterials, setCheckedMaterials] = useState<Record<string, Set<string>>>({});
   const [checkedTools, setCheckedTools] = useState<Record<string, Set<string>>>({});
   const [checkedOutputs, setCheckedOutputs] = useState<Record<string, Set<string>>>({});
+  const [selectedOutput, setSelectedOutput] = useState<Output | null>(null);
+  const [outputPopupOpen, setOutputPopupOpen] = useState(false);
   
   // Editing state
   const [editingStep, setEditingStep] = useState<string | null>(null);
@@ -547,10 +551,23 @@ export default function EditableUserView({ onBackToAdmin }: EditableUserViewProp
                                     onCheckedChange={() => toggleOutputCheck(currentStep.id, output.id)}
                                     className="mt-1"
                                   />
-                                  <div className="flex-1">
-                                    <div className="font-medium">{output.name}</div>
-                                    {output.description && <div className="text-sm text-muted-foreground mt-1">{output.description}</div>}
-                                  </div>
+                                   <div className="flex-1">
+                                     <div className="flex items-center gap-2">
+                                       <div className="font-medium">{output.name}</div>
+                                       <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
+                                       <button
+                                         onClick={() => {
+                                           setSelectedOutput(output);
+                                           setOutputPopupOpen(true);
+                                         }}
+                                         className="p-1 rounded-full hover:bg-muted transition-colors"
+                                         title="View output details"
+                                       >
+                                         <Info className="w-3 h-3 text-muted-foreground hover:text-primary" />
+                                       </button>
+                                     </div>
+                                     {output.description && <div className="text-sm text-muted-foreground mt-1">{output.description}</div>}
+                                   </div>
                                 </div>
                               </div>
                             ))}
@@ -603,6 +620,18 @@ export default function EditableUserView({ onBackToAdmin }: EditableUserViewProp
           </Card>
         </div>
       </div>
+
+      {/* Output Detail Popup */}
+      {selectedOutput && (
+        <OutputDetailPopup
+          output={selectedOutput}
+          isOpen={outputPopupOpen}
+          onClose={() => {
+            setOutputPopupOpen(false);
+            setSelectedOutput(null);
+          }}
+        />
+      )}
     </div>
   );
 }

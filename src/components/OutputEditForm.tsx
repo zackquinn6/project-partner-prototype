@@ -1,0 +1,210 @@
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Output } from '@/interfaces/Project';
+import { Plus, X } from 'lucide-react';
+
+interface OutputEditFormProps {
+  output: Output;
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (updatedOutput: Output) => void;
+}
+
+export const OutputEditForm: React.FC<OutputEditFormProps> = ({
+  output,
+  isOpen,
+  onClose,
+  onSave
+}) => {
+  const [formData, setFormData] = useState<Output>({ ...output });
+  const [newKeyInput, setNewKeyInput] = useState('');
+
+  const handleSave = () => {
+    onSave(formData);
+    onClose();
+  };
+
+  const addKeyInput = () => {
+    if (newKeyInput.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        keyInputs: [...(prev.keyInputs || []), newKeyInput.trim()]
+      }));
+      setNewKeyInput('');
+    }
+  };
+
+  const removeKeyInput = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      keyInputs: (prev.keyInputs || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Output Details</DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-6">
+          {/* Basic Information */}
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <h3 className="font-semibold">Basic Information</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">Output Name</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g., Primed Surfaces"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="type">Output Type</Label>
+                  <Select value={formData.type} onValueChange={(value: Output['type']) => setFormData(prev => ({ ...prev, type: value }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="safety">Safety</SelectItem>
+                      <SelectItem value="performance-durability">Performance & Durability</SelectItem>
+                      <SelectItem value="major-aesthetics">Major Aesthetics</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Brief description of the output"
+                  rows={2}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Requirements */}
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <h3 className="font-semibold">Requirements</h3>
+              
+              <div>
+                <Label htmlFor="requirement">Requirement</Label>
+                <Textarea
+                  id="requirement"
+                  value={formData.requirement || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, requirement: e.target.value }))}
+                  placeholder="e.g., All surfaces evenly coated with primer..."
+                  rows={3}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quality and Issues */}
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <h3 className="font-semibold">Quality Control & Issues</h3>
+              
+              <div>
+                <Label htmlFor="potentialEffects">Potential Effects if Error</Label>
+                <Textarea
+                  id="potentialEffects"
+                  value={formData.potentialEffects || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, potentialEffects: e.target.value }))}
+                  placeholder="Describe what happens if this output is done incorrectly"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="photosOfEffects">Photos of Potential Effects</Label>
+                <Input
+                  id="photosOfEffects"
+                  value={formData.photosOfEffects || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, photosOfEffects: e.target.value }))}
+                  placeholder="URL or description of reference photos"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="qualityChecks">Quality Check Methods</Label>
+                <Textarea
+                  id="qualityChecks"
+                  value={formData.qualityChecks || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, qualityChecks: e.target.value }))}
+                  placeholder="How to measure and verify this output"
+                  rows={3}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Key Inputs */}
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <h3 className="font-semibold">Key Inputs</h3>
+              <p className="text-sm text-muted-foreground">Important variables that affect this output</p>
+              
+              <div className="space-y-3">
+                {formData.keyInputs?.map((input, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Badge variant="outline" className="flex-1 justify-between">
+                      {input}
+                      <button
+                        onClick={() => removeKeyInput(index)}
+                        className="ml-2 hover:text-destructive"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  </div>
+                ))}
+                
+                <div className="flex gap-2">
+                  <Input
+                    value={newKeyInput}
+                    onChange={(e) => setNewKeyInput(e.target.value)}
+                    placeholder="Add key input..."
+                    onKeyPress={(e) => e.key === 'Enter' && addKeyInput()}
+                  />
+                  <Button onClick={addKeyInput} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave}>
+              Save Changes
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};

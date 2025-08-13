@@ -19,10 +19,12 @@ export interface Output {
   name: string;
   description: string;
   type: 'none' | 'major-aesthetics' | 'performance-durability' | 'safety';
+  requirement?: string;
   potentialEffects?: string;
   photosOfEffects?: string;
-  mustGetRight?: string;
+  keyInputs?: string[];
   qualityChecks?: string;
+  mustGetRight?: string;
 }
 
 export interface WorkflowStep {

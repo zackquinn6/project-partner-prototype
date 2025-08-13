@@ -7,10 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, CheckCircle, ExternalLink, Image, Video, Edit, Save, X, ArrowLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle, ExternalLink, Image, Video, Edit, Save, X, ArrowLeft, Settings } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
 import { WorkflowStep, Material, Tool, Output } from '@/interfaces/Project';
+import { OutputEditForm } from './OutputEditForm';
 import { toast } from 'sonner';
 
 interface EditWorkflowViewProps {
@@ -22,6 +23,8 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [editingStep, setEditingStep] = useState<WorkflowStep | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [editingOutput, setEditingOutput] = useState<{ output: Output; stepId: string } | null>(null);
+  const [outputEditOpen, setOutputEditOpen] = useState(false);
 
   // Flatten all steps from all phases and operations for navigation
   const allSteps = currentProject?.phases.flatMap(phase => 
@@ -89,6 +92,36 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
     updateProject(updatedProject);
     setEditMode(false);
     toast.success('Step updated successfully');
+  };
+
+  const handleEditOutput = (output: Output, stepId: string) => {
+    setEditingOutput({ output, stepId });
+    setOutputEditOpen(true);
+  };
+
+  const handleSaveOutput = (updatedOutput: Output) => {
+    if (!editingOutput || !currentProject) return;
+    
+    const updatedProject = { ...currentProject };
+    
+    // Find and update the output in the project
+    for (const phase of updatedProject.phases) {
+      for (const operation of phase.operations) {
+        for (const step of operation.steps) {
+          if (step.id === editingOutput.stepId) {
+            const outputIndex = step.outputs.findIndex(o => o.id === updatedOutput.id);
+            if (outputIndex !== -1) {
+              step.outputs[outputIndex] = updatedOutput;
+            }
+          }
+        }
+      }
+    }
+    
+    updatedProject.updatedAt = new Date();
+    updateProject(updatedProject);
+    setEditingOutput(null);
+    toast.success('Output updated successfully');
   };
 
   const updateEditingStep = (field: keyof WorkflowStep, value: any) => {
@@ -363,6 +396,97 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
             </CardContent>
           </Card>
 
+          {/* Materials, Tools, and Outputs */}
+          {currentStep && (currentStep.materials?.length > 0 || currentStep.tools?.length > 0 || currentStep.outputs?.length > 0) && (
+            <Card className="gradient-card border-0 shadow-card">
+              <CardContent className="p-6">
+                <Accordion type="multiple" className="w-full">
+                  {/* Materials */}
+                  {currentStep.materials?.length > 0 && (
+                    <AccordionItem value="materials">
+                      <AccordionTrigger className="text-lg font-semibold">
+                        Materials Needed ({currentStep.materials.length})
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-3 pt-2">
+                          {currentStep.materials.map(material => (
+                            <div key={material.id} className="p-3 bg-background/50 rounded-lg">
+                              <div className="flex items-start gap-3">
+                                <div className="flex-1">
+                                  <div className="font-medium">{material.name}</div>
+                                  {material.category && <Badge variant="outline" className="text-xs mt-1">{material.category}</Badge>}
+                                  {material.description && <div className="text-sm text-muted-foreground mt-1">{material.description}</div>}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
+
+                  {/* Tools */}
+                  {currentStep.tools?.length > 0 && (
+                    <AccordionItem value="tools">
+                      <AccordionTrigger className="text-lg font-semibold">
+                        Tools Required ({currentStep.tools.length})
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-3 pt-2">
+                          {currentStep.tools.map(tool => (
+                            <div key={tool.id} className="p-3 bg-background/50 rounded-lg">
+                              <div className="flex items-start gap-3">
+                                <div className="flex-1">
+                                  <div className="font-medium">{tool.name}</div>
+                                  {tool.category && <Badge variant="outline" className="text-xs mt-1">{tool.category}</Badge>}
+                                  {tool.description && <div className="text-sm text-muted-foreground mt-1">{tool.description}</div>}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
+
+                  {/* Outputs */}
+                  {currentStep.outputs?.length > 0 && (
+                    <AccordionItem value="outputs">
+                      <AccordionTrigger className="text-lg font-semibold">
+                        Outputs ({currentStep.outputs.length})
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-3 pt-2">
+                          {currentStep.outputs.map(output => (
+                            <div key={output.id} className="p-3 bg-background/50 rounded-lg">
+                              <div className="flex items-start gap-3">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <div className="font-medium">{output.name}</div>
+                                    <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground mt-1">{output.description}</div>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditOutput(output, currentStep.id)}
+                                >
+                                  <Settings className="w-3 h-3 mr-1" />
+                                  Edit Details
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
+                </Accordion>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Navigation */}
           <div className="flex justify-between">
             <Button 
@@ -383,6 +507,19 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
           </div>
         </div>
       </div>
+
+      {/* Output Edit Form */}
+      {editingOutput && (
+        <OutputEditForm
+          output={editingOutput.output}
+          isOpen={outputEditOpen}
+          onClose={() => {
+            setOutputEditOpen(false);
+            setEditingOutput(null);
+          }}
+          onSave={handleSaveOutput}
+        />
+      )}
     </div>
   );
 }

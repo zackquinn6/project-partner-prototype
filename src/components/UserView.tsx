@@ -7,10 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Info } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
+import { Output } from '@/interfaces/Project';
 import ProjectListing from './ProjectListing';
+import { OutputDetailPopup } from './OutputDetailPopup';
 interface UserViewProps {
   resetToListing?: boolean;
   onProjectSelected?: () => void;
@@ -43,6 +45,8 @@ export default function UserView({
     instructionsUnclear: false
   });
   const [reportComments, setReportComments] = useState("");
+  const [selectedOutput, setSelectedOutput] = useState<Output | null>(null);
+  const [outputPopupOpen, setOutputPopupOpen] = useState(false);
 
   // Get the active project data from either currentProject or currentProjectRun
   const activeProject = currentProjectRun || currentProject;
@@ -442,13 +446,23 @@ export default function UserView({
                                   onCheckedChange={() => toggleOutputCheck(currentStep.id, output.id)}
                                   className="mt-1"
                                 />
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <div className="font-medium">{output.name}</div>
-                                    <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
-                                  </div>
-                                  <div className="text-sm text-muted-foreground mt-1">{output.description}</div>
-                                </div>
+                                 <div className="flex-1">
+                                   <div className="flex items-center gap-2">
+                                     <div className="font-medium">{output.name}</div>
+                                     <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
+                                     <button
+                                       onClick={() => {
+                                         setSelectedOutput(output);
+                                         setOutputPopupOpen(true);
+                                       }}
+                                       className="p-1 rounded-full hover:bg-muted transition-colors"
+                                       title="View output details"
+                                     >
+                                       <Info className="w-3 h-3 text-muted-foreground hover:text-primary" />
+                                     </button>
+                                   </div>
+                                   <div className="text-sm text-muted-foreground mt-1">{output.description}</div>
+                                 </div>
                               </div>
                             </div>)}
                         </div>
@@ -559,5 +573,17 @@ export default function UserView({
           </Card>
         </div>
       </div>
+
+      {/* Output Detail Popup */}
+      {selectedOutput && (
+        <OutputDetailPopup
+          output={selectedOutput}
+          isOpen={outputPopupOpen}
+          onClose={() => {
+            setOutputPopupOpen(false);
+            setSelectedOutput(null);
+          }}
+        />
+      )}
     </div>;
 }
