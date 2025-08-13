@@ -7,6 +7,12 @@ import interiorPaintingPlaceholder from '@/assets/interior-painting-placeholder.
 import tileFlooringPlaceholder from '@/assets/tile-flooring-placeholder.jpg';
 import drywallPlaceholder from '@/assets/drywall-placeholder.jpg';
 import powerWashingPlaceholder from '@/assets/power-washing-placeholder.jpg';
+import homeMaintenancePlaceholder from '@/assets/home-maintenance-placeholder.jpg';
+import landscapingPlaceholder from '@/assets/landscaping-placeholder.jpg';
+import lightingPlaceholder from '@/assets/lighting-placeholder.jpg';
+import lvpFlooringPlaceholder from '@/assets/lvp-flooring-placeholder.jpg';
+import smartHomePlaceholder from '@/assets/smart-home-placeholder.jpg';
+import tileBacksplashPlaceholder from '@/assets/tile-backsplash-placeholder.jpg';
 
 interface ProjectContextType {
   projects: Project[];
@@ -39,7 +45,211 @@ interface ProjectProviderProps {
 
 export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
   const [projects, setProjects] = useState<Project[]>([
-    // Keep only the fully built tile flooring project
+    // 1. Interior Painting - Detailed project with full workflow
+    {
+      id: 'template-interior-painting',
+      name: 'Interior Painting',
+      description: 'Complete interior room painting from prep to finish',
+      image: interiorPaintingPlaceholder,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      startDate: new Date(),
+      planEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week
+      status: 'not-started' as const,
+      publishStatus: 'published' as const,
+      category: 'Painting',
+      difficulty: 'Beginner',
+      estimatedTime: '3-5 days',
+      phases: [
+        {
+          id: 'painting-prep-phase',
+          name: 'Preparation',
+          description: 'Prepare room and surfaces for painting',
+          operations: [
+            {
+              id: 'room-prep-op',
+              name: 'Room Preparation',
+              description: 'Clear and protect the room for painting',
+              steps: [
+                {
+                  id: 'furniture-removal',
+                  step: 'Remove and Protect Furniture',
+                  description: 'Clear room and protect remaining items',
+                  contentType: 'text',
+                  content: 'Remove all furniture and belongings from the room when possible. For items that cannot be moved:\n\n• Move furniture to center of room\n• Cover with plastic sheeting or drop cloths\n• Secure coverings with painter\'s tape\n• Remove wall hangings, outlet covers, and switch plates\n• Store hardware in labeled bags\n\nProtect floors with:\n• Canvas drop cloths (better than plastic for walking)\n• Rosin paper for hard surfaces\n• Plastic sheeting only in low-traffic areas',
+                  materials: [
+                    { id: 'mp1', name: 'Drop Cloths', description: 'Canvas or plastic sheeting', category: 'Other', required: true },
+                    { id: 'mp2', name: 'Painter\'s Tape', description: '1.5" wide masking tape', category: 'Consumable', required: true },
+                    { id: 'mp3', name: 'Plastic Sheeting', description: 'For furniture protection', category: 'Other', required: true },
+                    { id: 'mp4', name: 'Storage Bags', description: 'For hardware and small items', category: 'Other', required: true }
+                  ],
+                  tools: [
+                    { id: 'tp1', name: 'Screwdriver Set', description: 'For removing outlet covers', category: 'Hand Tool', required: true }
+                  ],
+                  outputs: [
+                    { id: 'op1', name: 'Protected Room', description: 'Room cleared and protected for painting', type: 'performance-durability' }
+                  ]
+                },
+                {
+                  id: 'surface-cleaning',
+                  step: 'Clean Surfaces',
+                  description: 'Clean walls and trim for proper paint adhesion',
+                  contentType: 'text',
+                  content: 'Clean all surfaces to be painted:\n\n**Wall Cleaning:**\n• Dust all surfaces with microfiber cloth\n• Wash with mild detergent solution (TSP substitute)\n• Pay attention to areas around light switches and door handles\n• Rinse with clean water\n• Allow to dry completely\n\n**Grease and Stains:**\n• Kitchen walls: Use degreasing cleaner\n• Crayon marks: Gentle scrubbing with baking soda paste\n• Water stains: Prime with stain-blocking primer\n\n**Mildew (bathrooms):**\n• Clean with bleach solution (1:10 ratio)\n• Ensure good ventilation\n• Allow to dry thoroughly before painting',
+                  materials: [
+                    { id: 'mp5', name: 'TSP Substitute', description: 'Wall cleaning solution', category: 'Consumable', required: true },
+                    { id: 'mp6', name: 'Microfiber Cloths', description: 'For dusting and cleaning', category: 'Other', required: true },
+                    { id: 'mp7', name: 'Sponges', description: 'For washing walls', category: 'Other', required: true },
+                    { id: 'mp8', name: 'Bucket', description: 'For cleaning solution', category: 'Other', required: true }
+                  ],
+                  tools: [],
+                  outputs: [
+                    { id: 'op2', name: 'Clean Surfaces', description: 'Walls and trim clean and ready for painting', type: 'performance-durability', mustGetRight: 'All dirt, grease, and loose material removed' }
+                  ]
+                }
+              ]
+            },
+            {
+              id: 'surface-repair-op',
+              name: 'Surface Repair',
+              description: 'Repair holes, cracks, and imperfections',
+              steps: [
+                {
+                  id: 'hole-repair',
+                  step: 'Fill Holes and Cracks',
+                  description: 'Repair nail holes, small cracks, and imperfections',
+                  contentType: 'text',
+                  content: 'Repair different types of damage:\n\n**Small Nail Holes:**\n• Use lightweight spackling compound\n• Apply with putty knife slightly overfilled\n• Allow to dry completely\n• Sand smooth with fine grit sandpaper\n\n**Larger Holes (up to 1"):**\n• Use mesh patch or self-adhesive patch\n• Apply joint compound in thin coats\n• Sand between coats\n• Prime repaired areas\n\n**Cracks:**\n• Clean out loose material\n• Apply fiberglass tape for larger cracks\n• Cover with joint compound\n• Sand smooth when dry\n\n**Dents and Gouges:**\n• Clean area thoroughly\n• Apply wood filler for trim\n• Sand smooth and prime',
+                  materials: [
+                    { id: 'mp9', name: 'Spackling Compound', description: 'Lightweight filler for small holes', category: 'Other', required: true },
+                    { id: 'mp10', name: 'Joint Compound', description: 'For larger repairs', category: 'Other', required: true },
+                    { id: 'mp11', name: 'Mesh Patches', description: 'For holes larger than nail holes', category: 'Hardware', required: false },
+                    { id: 'mp12', name: 'Sandpaper', description: '120 and 220 grit', category: 'Consumable', required: true }
+                  ],
+                  tools: [
+                    { id: 'tp2', name: 'Putty Knives', description: '2" and 4" flexible blades', category: 'Hand Tool', required: true },
+                    { id: 'tp3', name: 'Sanding Block', description: 'For smooth finish', category: 'Hand Tool', required: true }
+                  ],
+                  outputs: [
+                    { id: 'op3', name: 'Smooth Surfaces', description: 'All holes and cracks filled and sanded smooth', type: 'major-aesthetics', mustGetRight: 'No visible imperfections after priming' }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: 'priming-phase',
+          name: 'Priming',
+          description: 'Apply primer for proper paint adhesion',
+          operations: [
+            {
+              id: 'primer-selection-op',
+              name: 'Primer Selection and Application',
+              description: 'Choose and apply appropriate primer',
+              steps: [
+                {
+                  id: 'primer-application',
+                  step: 'Apply Primer',
+                  description: 'Prime all surfaces for optimal paint adhesion',
+                  contentType: 'text',
+                  content: 'Apply primer systematically:\n\n**Primer Selection:**\n• Water-based: For most interior surfaces\n• Oil-based: For stain blocking or glossy surfaces\n• High-hide: For color changes or covering stains\n• Bonding primer: For slick surfaces like semi-gloss paint\n\n**Application Process:**\n1. Start with cut-in around edges with angled brush\n2. Use roller for main wall areas\n3. Work in 4x4 foot sections\n4. Maintain wet edge to avoid lap marks\n5. Apply thin, even coats\n\n**Quality Checks:**\n• No missed spots or thin areas\n• Uniform coverage and sheen\n• Allow full cure time before painting',
+                  materials: [
+                    { id: 'mp13', name: 'Primer', description: 'High-quality interior primer', category: 'Consumable', required: true },
+                    { id: 'mp14', name: 'Roller Covers', description: '3/8" nap for smooth surfaces', category: 'Consumable', required: true },
+                    { id: 'mp15', name: 'Paint Tray', description: 'With liner for easy cleanup', category: 'Other', required: true }
+                  ],
+                  tools: [
+                    { id: 'tp4', name: 'Angled Brush', description: '2.5" high-quality brush for cutting in', category: 'Hand Tool', required: true },
+                    { id: 'tp5', name: 'Roller Frame', description: '9" frame with extension pole capability', category: 'Hand Tool', required: true },
+                    { id: 'tp6', name: 'Extension Pole', description: '2-4 foot adjustable pole', category: 'Hand Tool', required: true }
+                  ],
+                  outputs: [
+                    { id: 'op4', name: 'Primed Surfaces', description: 'All surfaces evenly primed and ready for paint', type: 'performance-durability', mustGetRight: 'Complete, uniform coverage with no missed spots' }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: 'painting-phase',
+          name: 'Painting',
+          description: 'Apply finish paint coats',
+          operations: [
+            {
+              id: 'first-coat-op',
+              name: 'First Paint Coat',
+              description: 'Apply first coat of finish paint',
+              steps: [
+                {
+                  id: 'first-coat-application',
+                  step: 'Apply First Coat',
+                  description: 'Apply first coat of finish paint using proper technique',
+                  contentType: 'text',
+                  content: 'Apply first coat systematically:\n\n**Preparation:**\n• Stir paint thoroughly\n• Pour into paint tray (don\'t dip directly)\n• Have brush and roller ready\n\n**Cutting In:**\n• Load brush with moderate amount of paint\n• Cut in 2-3 inches from edges, trim, and corners\n• Work in 4-foot sections\n• Maintain steady hand for clean lines\n\n**Rolling Technique:**\n• Load roller evenly (not dripping)\n• Start 2 feet from corner, roll up\n• Work in W or M pattern\n• Fill in pattern with parallel strokes\n• Finish with light strokes in same direction\n• Overlap slightly into wet cut-in areas\n\n**Quality Control:**\n• Watch for drips and sags\n• Maintain wet edge\n• Check coverage in different lighting',
+                  materials: [
+                    { id: 'mp16', name: 'Interior Paint', description: 'High-quality latex paint in chosen color', category: 'Consumable', required: true }
+                  ],
+                  tools: [],
+                  outputs: [
+                    { id: 'op5', name: 'First Coat Complete', description: 'First coat applied with good coverage', type: 'major-aesthetics' }
+                  ]
+                }
+              ]
+            },
+            {
+              id: 'second-coat-op',
+              name: 'Second Paint Coat',
+              description: 'Apply final coat for complete coverage',
+              steps: [
+                {
+                  id: 'second-coat-application',
+                  step: 'Apply Second Coat',
+                  description: 'Apply final coat for complete, even coverage',
+                  contentType: 'text',
+                  content: 'Apply second coat for professional finish:\n\n**Timing:**\n• Wait for first coat to dry completely (check manufacturer specs)\n• Usually 2-4 hours for latex paint\n• Test by touching in inconspicuous area\n\n**Application:**\n• Use same technique as first coat\n• Pay attention to areas that may need extra coverage\n• Maintain consistent pressure and speed\n• Work systematically to avoid missed areas\n\n**Final Quality Check:**\n• Inspect in various lighting conditions\n• Look for missed spots, thin coverage, or lap marks\n• Touch up as needed while paint is still wet\n• Check cut-in lines for crisp, straight edges',
+                  materials: [],
+                  tools: [],
+                  outputs: [
+                    { id: 'op6', name: 'Completed Paint Job', description: 'Professional-quality painted surfaces', type: 'major-aesthetics', mustGetRight: 'Even coverage, clean lines, no visible defects' }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: 'cleanup-phase',
+          name: 'Cleanup and Finishing',
+          description: 'Complete the project with proper cleanup',
+          operations: [
+            {
+              id: 'cleanup-op',
+              name: 'Project Cleanup',
+              description: 'Clean up and restore room',
+              steps: [
+                {
+                  id: 'cleanup-restoration',
+                  step: 'Clean Up and Restore',
+                  description: 'Complete cleanup and room restoration',
+                  contentType: 'text',
+                  content: 'Complete the project professionally:\n\n**While Paint is Wet:**\n• Remove painter\'s tape at 45-degree angle\n• Clean brushes and rollers immediately\n• Dispose of materials properly\n\n**Tool Cleanup:**\n• Wash brushes and rollers with appropriate cleaner\n• Store brushes properly to maintain shape\n• Clean paint trays and buckets\n\n**Room Restoration:**\n• Remove drop cloths carefully\n• Reinstall outlet covers and switch plates\n• Replace wall hangings and decorations\n• Move furniture back into position\n• Vacuum any debris\n\n**Final Inspection:**\n• Check all painted surfaces in different lighting\n• Touch up any missed spots\n• Ensure clean, professional appearance\n• Store leftover paint with project details',
+                  materials: [
+                    { id: 'mp17', name: 'Brush Cleaner', description: 'For cleaning brushes and tools', category: 'Other', required: true }
+                  ],
+                  tools: [],
+                  outputs: [
+                    { id: 'op7', name: 'Completed Room', description: 'Room fully painted and restored to use', type: 'major-aesthetics' }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    // 2. Tile Flooring - Keep existing detailed project
     {
       id: 'template-tile-flooring',
       name: 'Tile Flooring',
@@ -302,7 +512,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
         }
       ]
     },
-    // New projects to be created
+    // 3. Drywall Installation & Finishing
     {
       id: 'template-drywall',
       name: 'Drywall Installation & Finishing',
@@ -313,28 +523,13 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       startDate: new Date(),
       planEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week
       status: 'not-started' as const,
-      publishStatus: 'draft' as const,
+      publishStatus: 'published' as const,
       category: 'Interior',
       difficulty: 'Intermediate',
       estimatedTime: '3-5 days',
       phases: []
     },
-    {
-      id: 'template-interior-painting',
-      name: 'Interior Painting',
-      description: 'Professional interior painting techniques for walls and trim',
-      image: interiorPaintingPlaceholder,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      startDate: new Date(),
-      planEndDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days
-      status: 'not-started' as const,
-      publishStatus: 'published' as const,
-      category: 'Interior',
-      difficulty: 'Beginner',
-      estimatedTime: '2-3 days',
-      phases: []
-    },
+    // 4. Power Washing
     {
       id: 'template-power-washing',
       name: 'Power Washing',
@@ -347,6 +542,108 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       status: 'not-started' as const,
       publishStatus: 'published' as const,
       category: 'Exterior',
+      difficulty: 'Beginner',
+      estimatedTime: '1-2 days',
+      phases: []
+    },
+    // 5. Kitchen Tile Backsplash
+    {
+      id: 'template-tile-backsplash',
+      name: 'Kitchen Tile Backsplash',
+      description: 'Install decorative tile backsplash in kitchen',
+      image: tileBacksplashPlaceholder,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      startDate: new Date(),
+      planEndDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
+      status: 'not-started' as const,
+      publishStatus: 'published' as const,
+      category: 'Kitchen',
+      difficulty: 'Intermediate',
+      estimatedTime: '2-3 days',
+      phases: []
+    },
+    // 6. LVP Flooring Installation
+    {
+      id: 'template-lvp-flooring',
+      name: 'LVP Flooring Installation',
+      description: 'Install luxury vinyl plank flooring throughout home',
+      image: lvpFlooringPlaceholder,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      startDate: new Date(),
+      planEndDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days
+      status: 'not-started' as const,
+      publishStatus: 'published' as const,
+      category: 'Flooring',
+      difficulty: 'Intermediate',
+      estimatedTime: '3-5 days',
+      phases: []
+    },
+    // 7. Smart Home Setup
+    {
+      id: 'template-smart-home',
+      name: 'Smart Home Setup',
+      description: 'Install and configure smart home devices and automation',
+      image: smartHomePlaceholder,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      startDate: new Date(),
+      planEndDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), // 4 days
+      status: 'not-started' as const,
+      publishStatus: 'published' as const,
+      category: 'Technology',
+      difficulty: 'Advanced',
+      estimatedTime: '2-4 days',
+      phases: []
+    },
+    // 8. Lighting Installation
+    {
+      id: 'template-lighting',
+      name: 'Lighting Installation',
+      description: 'Install new light fixtures and electrical outlets',
+      image: lightingPlaceholder,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      startDate: new Date(),
+      planEndDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
+      status: 'not-started' as const,
+      publishStatus: 'published' as const,
+      category: 'Electrical',
+      difficulty: 'Advanced',
+      estimatedTime: '1-3 days',
+      phases: []
+    },
+    // 9. Landscaping & Garden
+    {
+      id: 'template-landscaping',
+      name: 'Landscaping & Garden',
+      description: 'Design and install landscaping with plants and hardscaping',
+      image: landscapingPlaceholder,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      startDate: new Date(),
+      planEndDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10 days
+      status: 'not-started' as const,
+      publishStatus: 'published' as const,
+      category: 'Exterior',
+      difficulty: 'Intermediate',
+      estimatedTime: '1-2 weeks',
+      phases: []
+    },
+    // 10. Home Maintenance Checklist
+    {
+      id: 'template-home-maintenance',
+      name: 'Home Maintenance Checklist',
+      description: 'Seasonal home maintenance and preventive care tasks',
+      image: homeMaintenancePlaceholder,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      startDate: new Date(),
+      planEndDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days
+      status: 'not-started' as const,
+      publishStatus: 'published' as const,
+      category: 'Maintenance',
       difficulty: 'Beginner',
       estimatedTime: '1-2 days',
       phases: []
