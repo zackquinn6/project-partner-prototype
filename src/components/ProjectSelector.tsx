@@ -19,6 +19,10 @@ interface ProjectSelectorProps {
 
 export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = false, onProjectSelected }) => {
   const { projects, currentProject, setCurrentProject, addProject, updateProject, deleteProject } = useProject();
+  
+  // Debug logging
+  console.log('ProjectSelector - projects count:', projects.length, 'isAdminMode:', isAdminMode);
+  console.log('Projects available:', projects.map(p => ({ name: p.name, publishStatus: p.publishStatus })));
   const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
   const [isProjectSetupOpen, setIsProjectSetupOpen] = useState(false);
   const [isEditingProject, setIsEditingProject] = useState(false);
@@ -184,7 +188,11 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
               </SelectTrigger>
               <SelectContent>
                 {projects
-                  .filter(project => isAdminMode ? true : project.publishStatus === 'published')
+                  .filter(project => {
+                    const shouldInclude = isAdminMode ? true : project.publishStatus === 'published';
+                    console.log('Project filter:', project.name, 'publishStatus:', project.publishStatus, 'include:', shouldInclude);
+                    return shouldInclude;
+                  })
                   .map((project) => (
                     <SelectItem key={project.id} value={project.id}>
                       {project.name}
