@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '@/contexts/ProjectContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +7,20 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Clock, Layers, Target, Hammer, Home, Palette, Zap, Shield } from 'lucide-react';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuCheckboxItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { ArrowLeft, Clock, Layers, Target, Hammer, Home, Palette, Zap, Shield, Search, Filter } from 'lucide-react';
 interface ProjectTemplate {
   id: string;
   name: string;
@@ -42,6 +55,12 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
     targetEndDate: ''
   });
 
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
+  const [selectedEffortLevels, setSelectedEffortLevels] = useState<string[]>([]);
+
   // Reset dialog state when switching to admin mode
   React.useEffect(() => {
     if (isAdminMode) {
@@ -54,6 +73,79 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
 
   // Filter projects to show only published templates or all templates in admin mode
   const publishedProjects = projects.filter(project => project.id.startsWith('template-') && (project.publishStatus === 'published' || isAdminMode));
+
+  // Get unique filter options
+  const availableCategories = useMemo(() => 
+    [...new Set(publishedProjects.map(p => p.category).filter(Boolean))], 
+    [publishedProjects]
+  );
+  
+  const availableDifficulties = useMemo(() => 
+    [...new Set(publishedProjects.map(p => p.difficulty).filter(Boolean))], 
+    [publishedProjects]
+  );
+  
+  const availableEffortLevels = useMemo(() => 
+    [...new Set(publishedProjects.map(p => p.effortLevel).filter(Boolean))], 
+    [publishedProjects]
+  );
+
+  // Filtered projects based on search and filters
+  const filteredProjects = useMemo(() => {
+    return publishedProjects.filter(project => {
+      // Search filter
+      const matchesSearch = !searchTerm || 
+        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.category?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Category filter
+      const matchesCategory = selectedCategories.length === 0 || 
+        (project.category && selectedCategories.includes(project.category));
+
+      // Difficulty filter
+      const matchesDifficulty = selectedDifficulties.length === 0 || 
+        (project.difficulty && selectedDifficulties.includes(project.difficulty));
+
+      // Effort level filter
+      const matchesEffortLevel = selectedEffortLevels.length === 0 || 
+        (project.effortLevel && selectedEffortLevels.includes(project.effortLevel));
+
+      return matchesSearch && matchesCategory && matchesDifficulty && matchesEffortLevel;
+    });
+  }, [publishedProjects, searchTerm, selectedCategories, selectedDifficulties, selectedEffortLevels]);
+
+  // Filter handlers
+  const handleCategoryToggle = (category: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const handleDifficultyToggle = (difficulty: string) => {
+    setSelectedDifficulties(prev => 
+      prev.includes(difficulty) 
+        ? prev.filter(d => d !== difficulty)
+        : [...prev, difficulty]
+    );
+  };
+
+  const handleEffortLevelToggle = (effortLevel: string) => {
+    setSelectedEffortLevels(prev => 
+      prev.includes(effortLevel) 
+        ? prev.filter(e => e !== effortLevel)
+        : [...prev, effortLevel]
+    );
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setSelectedCategories([]);
+    setSelectedDifficulties([]);
+    setSelectedEffortLevels([]);
+  };
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'Beginner':
@@ -211,7 +303,6 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       }
     });
   };
-  const categories = [...new Set(publishedProjects.map(p => p.category))];
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
@@ -224,7 +315,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
           </div>
         </div>
 
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4">
             Choose Your{" "}
             <span className="bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
@@ -234,20 +325,164 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Select an expertly crafted workflow to get started with confidence</p>
         </div>
 
+        {/* Filters Header Bar */}
+        <div className="bg-card border rounded-lg p-6 mb-8 space-y-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+            {/* Search */}
+            <div className="relative flex-1 min-w-0">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Search projects..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full lg:w-auto justify-between">
+                  <span className="flex items-center gap-2">
+                    <Filter className="w-4 h-4" />
+                    Category {selectedCategories.length > 0 && `(${selectedCategories.length})`}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                {availableCategories.map((category) => (
+                  <DropdownMenuCheckboxItem
+                    key={category}
+                    checked={selectedCategories.includes(category)}
+                    onCheckedChange={() => handleCategoryToggle(category)}
+                  >
+                    {category}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Skill Level Filter */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full lg:w-auto justify-between">
+                  <span className="flex items-center gap-2">
+                    <Filter className="w-4 h-4" />
+                    Skill Level {selectedDifficulties.length > 0 && `(${selectedDifficulties.length})`}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                {availableDifficulties.map((difficulty) => (
+                  <DropdownMenuCheckboxItem
+                    key={difficulty}
+                    checked={selectedDifficulties.includes(difficulty)}
+                    onCheckedChange={() => handleDifficultyToggle(difficulty)}
+                  >
+                    {difficulty}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Effort Level Filter */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full lg:w-auto justify-between">
+                  <span className="flex items-center gap-2">
+                    <Filter className="w-4 h-4" />
+                    Effort Level {selectedEffortLevels.length > 0 && `(${selectedEffortLevels.length})`}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                {availableEffortLevels.map((effortLevel) => (
+                  <DropdownMenuCheckboxItem
+                    key={effortLevel}
+                    checked={selectedEffortLevels.includes(effortLevel)}
+                    onCheckedChange={() => handleEffortLevelToggle(effortLevel)}
+                  >
+                    {effortLevel}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Clear Filters */}
+            {(searchTerm || selectedCategories.length > 0 || selectedDifficulties.length > 0 || selectedEffortLevels.length > 0) && (
+              <Button variant="ghost" onClick={clearAllFilters} className="text-muted-foreground">
+                Clear All
+              </Button>
+            )}
+          </div>
+
+          {/* Active filters display */}
+          {(selectedCategories.length > 0 || selectedDifficulties.length > 0 || selectedEffortLevels.length > 0) && (
+            <div className="flex flex-wrap gap-2">
+              {selectedCategories.map((category) => (
+                <Badge key={category} variant="secondary" className="flex items-center gap-1">
+                  {category}
+                  <button
+                    onClick={() => handleCategoryToggle(category)}
+                    className="ml-1 text-xs hover:text-destructive"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
+              {selectedDifficulties.map((difficulty) => (
+                <Badge key={difficulty} variant="secondary" className="flex items-center gap-1">
+                  {difficulty}
+                  <button
+                    onClick={() => handleDifficultyToggle(difficulty)}
+                    className="ml-1 text-xs hover:text-destructive"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
+              {selectedEffortLevels.map((effortLevel) => (
+                <Badge key={effortLevel} variant="secondary" className="flex items-center gap-1">
+                  {effortLevel}
+                  <button
+                    onClick={() => handleEffortLevelToggle(effortLevel)}
+                    className="ml-1 text-xs hover:text-destructive"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Results Summary */}
+        <div className="mb-6 text-sm text-muted-foreground">
+          Showing {filteredProjects.length} of {publishedProjects.length} projects
+        </div>
+
         {/* Project Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {publishedProjects.length === 0 ? <div className="col-span-full text-center py-12">
+          {filteredProjects.length === 0 ? <div className="col-span-full text-center py-12">
               <p className="text-muted-foreground mb-4">
-                {isAdminMode ? "No template projects exist yet. Create your first template project to get started." : "No published projects available yet. Check back soon!"}
+                {publishedProjects.length === 0 
+                  ? (isAdminMode ? "No template projects exist yet. Create your first template project to get started." : "No published projects available yet. Check back soon!")
+                  : "No projects match your current filters. Try adjusting your search or filters."
+                }
               </p>
-              {isAdminMode && <Button onClick={() => navigate('/', {
+              {publishedProjects.length === 0 && isAdminMode && <Button onClick={() => navigate('/', {
             state: {
               view: 'admin'
             }
           })}>
                   Create First Template
                 </Button>}
-            </div> : publishedProjects.map(project => {
+              {filteredProjects.length === 0 && publishedProjects.length > 0 && (
+                <Button variant="outline" onClick={clearAllFilters}>
+                  Clear All Filters
+                </Button>
+              )}
+            </div> : filteredProjects.map(project => {
           const IconComponent = getIconForCategory(project.category || '');
           return <Card key={project.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 overflow-hidden" onClick={() => handleSelectProject(project)}>
                   <div className={`h-32 bg-gradient-to-br from-primary to-orange-500 relative overflow-hidden`}>
