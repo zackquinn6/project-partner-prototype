@@ -15,6 +15,7 @@ import { useProject } from '@/contexts/ProjectContext';
 import { WorkflowStep, Output } from '@/interfaces/Project';
 import { OutputDetailPopup } from './OutputDetailPopup';
 import { AccountabilityMessagePopup } from './AccountabilityMessagePopup';
+import { HelpPopup } from './HelpPopup';
 import { toast } from 'sonner';
 
 interface EditableUserViewProps {
@@ -32,6 +33,7 @@ export default function EditableUserView({ onBackToAdmin }: EditableUserViewProp
   const [outputPopupOpen, setOutputPopupOpen] = useState(false);
   const [accountabilityPopupOpen, setAccountabilityPopupOpen] = useState(false);
   const [messageType, setMessageType] = useState<'phase-complete' | 'issue-report'>('phase-complete');
+  const [helpPopupOpen, setHelpPopupOpen] = useState(false);
   
   // Editing state
   const [editingStep, setEditingStep] = useState<string | null>(null);
@@ -403,8 +405,9 @@ export default function EditableUserView({ onBackToAdmin }: EditableUserViewProp
 
         {/* Main Content */}
         <div className="lg:col-span-3 space-y-6">
-          {/* Header */}
-          <Card className="gradient-card border-0 shadow-card">
+          {/* Header with Help Button */}
+          <div className="flex justify-between items-start gap-4">
+            <Card className="gradient-card border-0 shadow-card flex-1">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -454,6 +457,14 @@ export default function EditableUserView({ onBackToAdmin }: EditableUserViewProp
               </div>
             </CardHeader>
           </Card>
+          <Button 
+            variant="outline" 
+            onClick={() => setHelpPopupOpen(true)}
+            className="whitespace-nowrap bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
+          >
+            Stuck? Get Help
+          </Button>
+          </div>
 
           {/* Content */}
           <Card className="gradient-card border-0 shadow-card">
@@ -685,6 +696,12 @@ export default function EditableUserView({ onBackToAdmin }: EditableUserViewProp
         messageType={messageType}
         progress={progress}
         projectName={currentProject?.name}
+      />
+      
+      {/* Help Popup */}
+      <HelpPopup
+        isOpen={helpPopupOpen}
+        onClose={() => setHelpPopupOpen(false)}
       />
     </div>
   );

@@ -14,6 +14,7 @@ import { Output } from '@/interfaces/Project';
 import ProjectListing from './ProjectListing';
 import { OutputDetailPopup } from './OutputDetailPopup';
 import { AccountabilityMessagePopup } from './AccountabilityMessagePopup';
+import { HelpPopup } from './HelpPopup';
 interface UserViewProps {
   resetToListing?: boolean;
   onProjectSelected?: () => void;
@@ -48,6 +49,7 @@ export default function UserView({
   const [reportComments, setReportComments] = useState("");
   const [selectedOutput, setSelectedOutput] = useState<Output | null>(null);
   const [outputPopupOpen, setOutputPopupOpen] = useState(false);
+  const [helpPopupOpen, setHelpPopupOpen] = useState(false);
   const [accountabilityPopupOpen, setAccountabilityPopupOpen] = useState(false);
   const [messageType, setMessageType] = useState<'phase-complete' | 'issue-report'>('phase-complete');
 
@@ -347,8 +349,9 @@ export default function UserView({
 
         {/* Main Content */}
         <div className="lg:col-span-3 space-y-6">
-          {/* Header */}
-          <Card className="gradient-card border-0 shadow-card">
+          {/* Header with Help Button */}
+          <div className="flex justify-between items-start gap-4">
+            <Card className="gradient-card border-0 shadow-card flex-1">
             <CardHeader>
               <div className="flex items-center gap-2 mb-2">
                 <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
@@ -362,9 +365,17 @@ export default function UserView({
               <CardTitle className="text-2xl">{currentStep?.step}</CardTitle>
               {currentStep?.description && <CardDescription className="text-base">
                   {currentStep.description}
-                </CardDescription>}
+                 </CardDescription>}
             </CardHeader>
           </Card>
+          <Button 
+            variant="outline" 
+            onClick={() => setHelpPopupOpen(true)}
+            className="whitespace-nowrap bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
+          >
+            Stuck? Get Help
+          </Button>
+          </div>
 
           {/* Content */}
           <Card className="gradient-card border-0 shadow-card">
@@ -632,6 +643,12 @@ export default function UserView({
         messageType={messageType}
         progress={progress}
         projectName={activeProject?.name}
+      />
+      
+      {/* Help Popup */}
+      <HelpPopup
+        isOpen={helpPopupOpen}
+        onClose={() => setHelpPopupOpen(false)}
       />
     </div>;
 }
