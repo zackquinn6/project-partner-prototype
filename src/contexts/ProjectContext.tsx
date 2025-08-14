@@ -670,9 +670,26 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
   };
 
   const updateProjectRun = (projectRun: ProjectRun) => {
-    setProjectRuns(prev => prev.map(pr => pr.id === projectRun.id ? projectRun : pr));
+    // Auto-update status based on progress
+    const updatedProjectRun = {
+      ...projectRun,
+      status: determineStatusFromProgress(projectRun.progress || 0) as ProjectRun['status']
+    };
+    
+    setProjectRuns(prev => prev.map(pr => pr.id === projectRun.id ? updatedProjectRun : pr));
     if (currentProjectRun?.id === projectRun.id) {
-      setCurrentProjectRun(projectRun);
+      setCurrentProjectRun(updatedProjectRun);
+    }
+  };
+
+  // Helper function to determine status based on progress
+  const determineStatusFromProgress = (progress: number): string => {
+    if (progress >= 100) {
+      return 'complete';
+    } else if (progress > 0) {
+      return 'in-progress';
+    } else {
+      return 'not-started';
     }
   };
 

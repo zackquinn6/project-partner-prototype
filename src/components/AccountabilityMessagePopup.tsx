@@ -1,7 +1,8 @@
 import React from 'react';
-import { Dialog, DialogContent } from './ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
 import { Button } from './ui/button';
 import { X } from 'lucide-react';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 interface AccountabilityMessagePopupProps {
   isOpen: boolean;
@@ -29,6 +30,12 @@ export function AccountabilityMessagePopup({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-sm p-0 bg-transparent border-none shadow-none">
+        <VisuallyHidden>
+          <DialogTitle>Accountability Partner Message</DialogTitle>
+          <DialogDescription>
+            {messageType === 'phase-complete' ? 'Phase completion notification' : 'Issue reporting notification'}
+          </DialogDescription>
+        </VisuallyHidden>
         <div className="relative">
           <Button
             onClick={onClose}
