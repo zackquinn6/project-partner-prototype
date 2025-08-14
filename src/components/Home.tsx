@@ -166,6 +166,38 @@ export default function Home({
         </div>
       </section>
 
+      {/* Tool Rentals Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-6">
+          <Card className="gradient-card border-0 shadow-card">
+            <CardContent className="py-16 text-center">
+              <div className="flex flex-col items-center space-y-6">
+                <img 
+                  src="/lovable-uploads/682ce2ee-7a0b-483e-b97a-472ce801a4ee.png" 
+                  alt="Toolio" 
+                  className="h-16 w-auto"
+                />
+                <div className="space-y-4">
+                  <h2 className="text-3xl lg:text-4xl font-bold">
+                    Tool Rentals by <span className="text-primary">Toolio</span>
+                  </h2>
+                  <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                    Seamless integration to equip your project
+                  </p>
+                  <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                    Get professional-grade tools delivered right to your door. Our partnership with Toolio ensures you have everything you need to complete your project successfully.
+                  </p>
+                </div>
+                <Button variant="outline" size="lg" className="mt-6">
+                  Browse Tool Rentals
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20">
         <div className="container mx-auto px-6">
