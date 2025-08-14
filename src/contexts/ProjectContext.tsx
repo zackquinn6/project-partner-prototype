@@ -14,6 +14,16 @@ import lvpFlooringPlaceholder from '@/assets/lvp-flooring-placeholder.jpg';
 import smartHomePlaceholder from '@/assets/smart-home-placeholder.jpg';
 import tileBacksplashPlaceholder from '@/assets/tile-backsplash-placeholder.jpg';
 
+// Import painting workflow images
+import roomPrepImage from '@/assets/painting/room-prep.jpg';
+import surfaceCleaningImage from '@/assets/painting/surface-cleaning.jpg';
+import holeRepairImage from '@/assets/painting/hole-repair.jpg';
+import primerApplicationImage from '@/assets/painting/primer-application.jpg';
+import paintApplicationImage from '@/assets/painting/paint-application.jpg';
+import cuttingInImage from '@/assets/painting/cutting-in.jpg';
+import cleanupImage from '@/assets/painting/cleanup.jpg';
+import beforeAfterImage from '@/assets/painting/before-after.jpg';
+
 interface ProjectContextType {
   projects: Project[];
   projectRuns: ProjectRun[];
@@ -75,7 +85,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
                   id: 'furniture-removal',
                   step: 'Remove and Protect Furniture',
                   description: 'Clear room and protect remaining items',
-                  contentType: 'text',
+                  contentType: 'image',
+                  image: roomPrepImage,
                   content: 'Remove all furniture and belongings from the room when possible. For items that cannot be moved:\n\n• Move furniture to center of room\n• Cover with plastic sheeting or drop cloths\n• Secure coverings with painter\'s tape\n• Remove wall hangings, outlet covers, and switch plates\n• Store hardware in labeled bags\n\nProtect floors with:\n• Canvas drop cloths (better than plastic for walking)\n• Rosin paper for hard surfaces\n• Plastic sheeting only in low-traffic areas',
                   materials: [
                     { id: 'mp1', name: 'Drop Cloths', description: 'Canvas or plastic sheeting', category: 'Other', required: true },
@@ -94,7 +105,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
                   id: 'surface-cleaning',
                   step: 'Clean Surfaces',
                   description: 'Clean walls and trim for proper paint adhesion',
-                  contentType: 'text',
+                  contentType: 'image',
+                  image: surfaceCleaningImage,
                   content: 'Clean all surfaces to be painted:\n\n**Wall Cleaning:**\n• Dust all surfaces with microfiber cloth\n• Wash with mild detergent solution (TSP substitute)\n• Pay attention to areas around light switches and door handles\n• Rinse with clean water\n• Allow to dry completely\n\n**Grease and Stains:**\n• Kitchen walls: Use degreasing cleaner\n• Crayon marks: Gentle scrubbing with baking soda paste\n• Water stains: Prime with stain-blocking primer\n\n**Mildew (bathrooms):**\n• Clean with bleach solution (1:10 ratio)\n• Ensure good ventilation\n• Allow to dry thoroughly before painting',
                   materials: [
                     { id: 'mp5', name: 'TSP Substitute', description: 'Wall cleaning solution', category: 'Consumable', required: true },
@@ -118,7 +130,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
                   id: 'hole-repair',
                   step: 'Fill Holes and Cracks',
                   description: 'Repair nail holes, small cracks, and imperfections',
-                  contentType: 'text',
+                  contentType: 'image',
+                  image: holeRepairImage,
                   content: 'Repair different types of damage:\n\n**Small Nail Holes:**\n• Use lightweight spackling compound\n• Apply with putty knife slightly overfilled\n• Allow to dry completely\n• Sand smooth with fine grit sandpaper\n\n**Larger Holes (up to 1"):**\n• Use mesh patch or self-adhesive patch\n• Apply joint compound in thin coats\n• Sand between coats\n• Prime repaired areas\n\n**Cracks:**\n• Clean out loose material\n• Apply fiberglass tape for larger cracks\n• Cover with joint compound\n• Sand smooth when dry\n\n**Dents and Gouges:**\n• Clean area thoroughly\n• Apply wood filler for trim\n• Sand smooth and prime',
                   materials: [
                     { id: 'mp9', name: 'Spackling Compound', description: 'Lightweight filler for small holes', category: 'Other', required: true },
@@ -152,7 +165,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
                   id: 'primer-application',
                   step: 'Apply Primer',
                   description: 'Prime all surfaces for optimal paint adhesion',
-                  contentType: 'text',
+                  contentType: 'image',
+                  image: primerApplicationImage,
                   content: 'Apply primer systematically:\n\n**Primer Selection:**\n• Water-based: For most interior surfaces\n• Oil-based: For stain blocking or glossy surfaces\n• High-hide: For color changes or covering stains\n• Bonding primer: For slick surfaces like semi-gloss paint\n\n**Application Process:**\n1. Start with cut-in around edges with angled brush\n2. Use roller for main wall areas\n3. Work in 4x4 foot sections\n4. Maintain wet edge to avoid lap marks\n5. Apply thin, even coats\n\n**Quality Checks:**\n• No missed spots or thin areas\n• Uniform coverage and sheen\n• Allow full cure time before painting',
                   materials: [
                     { id: 'mp13', name: 'Primer', description: 'High-quality interior primer', category: 'Consumable', required: true },
@@ -186,7 +200,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
                   id: 'first-coat-application',
                   step: 'Apply First Coat',
                   description: 'Apply first coat of finish paint using proper technique',
-                  contentType: 'text',
+                  contentType: 'image',
+                  image: paintApplicationImage,
                   content: 'Apply first coat systematically:\n\n**Preparation:**\n• Stir paint thoroughly\n• Pour into paint tray (don\'t dip directly)\n• Have brush and roller ready\n\n**Cutting In:**\n• Load brush with moderate amount of paint\n• Cut in 2-3 inches from edges, trim, and corners\n• Work in 4-foot sections\n• Maintain steady hand for clean lines\n\n**Rolling Technique:**\n• Load roller evenly (not dripping)\n• Start 2 feet from corner, roll up\n• Work in W or M pattern\n• Fill in pattern with parallel strokes\n• Finish with light strokes in same direction\n• Overlap slightly into wet cut-in areas\n\n**Quality Control:**\n• Watch for drips and sags\n• Maintain wet edge\n• Check coverage in different lighting',
                   materials: [
                     { id: 'mp16', name: 'Interior Paint', description: 'High-quality latex paint in chosen color', category: 'Consumable', required: true }
@@ -207,7 +222,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
                   id: 'second-coat-application',
                   step: 'Apply Second Coat',
                   description: 'Apply final coat for complete, even coverage',
-                  contentType: 'text',
+                  contentType: 'image',
+                  image: cuttingInImage,
                   content: 'Apply second coat for professional finish:\n\n**Timing:**\n• Wait for first coat to dry completely (check manufacturer specs)\n• Usually 2-4 hours for latex paint\n• Test by touching in inconspicuous area\n\n**Application:**\n• Use same technique as first coat\n• Pay attention to areas that may need extra coverage\n• Maintain consistent pressure and speed\n• Work systematically to avoid missed areas\n\n**Final Quality Check:**\n• Inspect in various lighting conditions\n• Look for missed spots, thin coverage, or lap marks\n• Touch up as needed while paint is still wet\n• Check cut-in lines for crisp, straight edges',
                   materials: [],
                   tools: [],
@@ -233,7 +249,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
                   id: 'cleanup-restoration',
                   step: 'Clean Up and Restore',
                   description: 'Complete cleanup and room restoration',
-                  contentType: 'text',
+                  contentType: 'image',
+                  image: cleanupImage,
                   content: 'Complete the project professionally:\n\n**While Paint is Wet:**\n• Remove painter\'s tape at 45-degree angle\n• Clean brushes and rollers immediately\n• Dispose of materials properly\n\n**Tool Cleanup:**\n• Wash brushes and rollers with appropriate cleaner\n• Store brushes properly to maintain shape\n• Clean paint trays and buckets\n\n**Room Restoration:**\n• Remove drop cloths carefully\n• Reinstall outlet covers and switch plates\n• Replace wall hangings and decorations\n• Move furniture back into position\n• Vacuum any debris\n\n**Final Inspection:**\n• Check all painted surfaces in different lighting\n• Touch up any missed spots\n• Ensure clean, professional appearance\n• Store leftover paint with project details',
                   materials: [
                     { id: 'mp17', name: 'Brush Cleaner', description: 'For cleaning brushes and tools', category: 'Other', required: true }

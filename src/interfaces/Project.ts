@@ -33,6 +33,7 @@ export interface WorkflowStep {
   description: string;
   contentType: 'text' | 'video' | 'image' | 'document';
   content: string;
+  image?: string;
   materials: Material[];
   tools: Tool[];
   outputs: Output[];

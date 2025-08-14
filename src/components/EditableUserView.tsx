@@ -278,7 +278,10 @@ export default function EditableUserView({ onBackToAdmin }: EditableUserViewProp
               <Image className="w-5 h-5 text-primary" />
               <span className="font-medium">Visual Reference</span>
             </div>
-            <img src={step.content} alt={step.step} className="w-full rounded-lg shadow-card max-w-2xl" />
+            {step.image && <img src={step.image} alt={step.step} className="w-full rounded-lg shadow-card max-w-2xl" />}
+            <div className="prose prose-sm max-w-none">
+              <div className="whitespace-pre-wrap">{step.content}</div>
+            </div>
           </div>
         );
       case 'video':
