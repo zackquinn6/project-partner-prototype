@@ -69,7 +69,7 @@ export default function Home({
           dragFree: true,
           duration: 10000
         }} plugins={[Autoplay({
-          delay: 50,
+          delay: 3000,
           stopOnInteraction: false,
           stopOnMouseEnter: true,
           stopOnFocusIn: false,
