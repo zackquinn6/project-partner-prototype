@@ -527,6 +527,20 @@ export const AdminView: React.FC = () => {
   if (!currentProject) {
     console.log('AdminView - no currentProject, showing project selector');
     return <div className="max-w-7xl mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <p className="text-muted-foreground">Manage projects, workflows, and user permissions</p>
+          </div>
+          <Button 
+            onClick={() => setCurrentView('userRoles')} 
+            variant="outline"
+          >
+            <Shield className="w-4 h-4 mr-2" />
+            User Roles
+          </Button>
+        </div>
+        
         <ProjectSelector isAdminMode={true} />
         <Card>
           <CardContent className="text-center py-8">
