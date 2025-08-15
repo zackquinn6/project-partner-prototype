@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Edit, Save, X, Upload, Info, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Edit, Save, X, Upload, Info, ChevronDown, ChevronUp, FileText } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
 import { WorkflowStep, Output } from '@/interfaces/Project';
@@ -17,6 +17,7 @@ import { OutputDetailPopup } from './OutputDetailPopup';
 import { AccountabilityMessagePopup } from './AccountabilityMessagePopup';
 import { HelpPopup } from './HelpPopup';
 import { PhaseCompletionPopup } from './PhaseCompletionPopup';
+import { SignatureCapture } from './SignatureCapture';
 import { toast } from 'sonner';
 
 interface EditableUserViewProps {
@@ -39,6 +40,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
   const [phaseCompletionPopupOpen, setPhaseCompletionPopupOpen] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState<any>(null);
   const [collapsedPhases, setCollapsedPhases] = useState<Set<string>>(new Set());
+  const [signatures, setSignatures] = useState<Record<string, string>>({});
   
   // Editing state
   const [editingStep, setEditingStep] = useState<string | null>(null);
@@ -157,6 +159,12 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
   // Check if all outputs are completed (required for step completion)
   const areAllOutputsCompleted = (step: typeof currentStep) => {
     if (!step || !step.outputs || step.outputs.length === 0) return true;
+    
+    // Special validation for safety agreement step - require signature
+    if (step.id === 'safety-agreement-step') {
+      return signatures[step.id] !== undefined;
+    }
+    
     const stepOutputs = checkedOutputs[step.id] || new Set();
     return step.outputs.every(output => stepOutputs.has(output.id));
   };
@@ -291,20 +299,6 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
 
     // Regular content display
     switch (step.contentType) {
-      case 'document':
-        return (
-          <div className="space-y-4">
-            <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <ExternalLink className="w-5 h-5 text-orange-600" />
-                <span className="font-medium text-orange-800">External Resource</span>
-              </div>
-              <a href={step.content} target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-800 underline break-all">
-                {step.content}
-              </a>
-            </div>
-          </div>
-        );
       case 'image':
         return (
           <div className="space-y-4">
@@ -328,6 +322,39 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
             <div className="aspect-video rounded-lg overflow-hidden shadow-card">
               <iframe src={step.content} className="w-full h-full" allowFullScreen title={step.step} />
             </div>
+          </div>
+        );
+      case 'document':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center gap-2 mb-4">
+              <FileText className="w-5 h-5 text-primary" />
+              <span className="font-medium">Document</span>
+            </div>
+            <div className="prose max-w-none bg-muted/20 p-6 rounded-lg border">
+              <div className="whitespace-pre-wrap text-foreground leading-relaxed">
+                {step.content}
+              </div>
+            </div>
+            
+            {/* Add signature capture for safety agreement step */}
+            {step.id === 'safety-agreement-step' && (
+              <div className="mt-6">
+                <SignatureCapture
+                  onSignatureComplete={(signature) => {
+                    setSignatures(prev => ({ ...prev, [step.id]: signature }));
+                    toast.success('Signature captured successfully');
+                  }}
+                  onClear={() => {
+                    setSignatures(prev => {
+                      const newSignatures = { ...prev };
+                      delete newSignatures[step.id];
+                      return newSignatures;
+                    });
+                  }}
+                />
+              </div>
+            )}
           </div>
         );
       default:

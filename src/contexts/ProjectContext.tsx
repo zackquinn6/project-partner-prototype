@@ -56,6 +56,66 @@ interface ProjectProviderProps {
   children: ReactNode;
 }
 
+// Helper function to create standard introduction phase
+const createIntroductionPhase = (projectName: string, projectDescription: string) => ({
+  id: 'introduction-phase',
+  name: 'Project Introduction',
+  description: 'Project overview and safety requirements',
+  operations: [
+    {
+      id: 'project-overview-op',
+      name: 'Project Overview',
+      description: 'Understanding the project scope and requirements',
+      steps: [
+        {
+          id: 'project-overview-step',
+          step: 'Project Overview',
+          description: 'Review project details, timeline, and requirements',
+          contentType: 'text' as const,
+          content: `Welcome to your ${projectName} project! This comprehensive guide will walk you through completing your project safely and professionally.\n\n**Project Scope:**\n• ${projectDescription}\n• Professional techniques and best practices\n• Step-by-step guidance from start to finish\n\n**What You'll Accomplish:**\n• Learn proper preparation and execution techniques\n• Master professional methods and safety practices\n• Achieve quality results that last\n• Complete the project safely and efficiently\n\n**Before You Begin:**\n• Review all project phases and operations\n• Ensure you have adequate time to complete each phase\n• Gather all required materials and tools\n• Prepare your workspace for safety and efficiency\n\n**Project Success Tips:**\n• Follow each step in the recommended order\n• Don't skip preparation phases - they ensure quality results\n• Take time to understand each technique before proceeding\n• Ask for clarification if any step is unclear\n• Prioritize safety throughout the entire project\n\nTake time to familiarize yourself with each phase before beginning. Success depends on proper preparation and following the recommended techniques.`,
+          materials: [],
+          tools: [],
+          outputs: [
+            {
+              id: 'overview-complete',
+              name: 'Project Understanding',
+              description: 'Full understanding of project scope and timeline',
+              type: 'none' as const,
+              requirement: 'Reviewed and understood project phases, timeline, and requirements'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'safety-agreement-op',
+      name: 'Safety & Liability Agreement',
+      description: 'Safety requirements and liability acknowledgment',
+      steps: [
+        {
+          id: 'safety-agreement-step',
+          step: 'Safety & Liability Agreement',
+          description: 'Review and sign safety requirements and liability agreement',
+          contentType: 'document' as const,
+          content: '## **Toolio Project Partner – Safety & Liability Agreement**\n\n### 1. Purpose\nToolio\'s Project Partner service is designed to **enable and support** Customers in the successful completion of their own home improvement or DIY projects. Toolio provides tools, resources, and commercially feasible project guidance but **does not** perform the project itself.\n\n### 2. Customer Responsibility\nThe Customer is the **owner and responsible party** for the project, including:\n- Planning, decision‑making, and execution of all project tasks\n- Ensuring compliance with applicable laws, codes, and regulations\n- Providing a safe environment for the use of any tools, equipment, or materials\n\n### 3. Toolio\'s Commitment\nToolio will:\n- Provide all commercially feasible support, tools, and resources as agreed for the project\n- Offer guidance, safety information, and best‑practice recommendations for tool and equipment use\n- Respond promptly to reasonable Customer requests for clarification or assistance within the agreed scope of service\n\n### 4. No Liability\nThe Customer acknowledges and agrees that Toolio is **not liable** for:\n- Any injuries, accidents, or health issues arising from the project\n- Property damage to Customer premises, third‑party property, or rented equipment\n- Incomplete, delayed, or abandoned projects\n- Cost overruns, budget discrepancies, or economic loss\n- Any other direct, indirect, incidental, or consequential loss or damage related to the project\n\n### 5. Risk Assumption\nBy engaging the Toolio Project Partner service, the Customer:\n- Accepts all risks associated with the planning, execution, and completion of the project\n- Agrees to use all tools and equipment in a safe, responsible manner consistent with manufacturer guidelines\n- Agrees to obtain and maintain any necessary permits, inspections, or professional assistance\n\n### 6. Indemnification\nThe Customer agrees to defend, indemnify, and hold harmless Toolio, its employees, contractors, and affiliates from any claims, demands, damages, or expenses (including attorney\'s fees) arising out of or related to the project.\n\n### 7. Governing Law\nThis Agreement shall be governed by and construed in accordance with the laws of the state in which the project is undertaken, without regard to its conflict‑of‑laws principles.\n\n**By purchasing and using the Toolio Project Partner service, the Customer acknowledges they have read, understood, and agreed to the terms of this Safety & Liability Agreement.**',
+          materials: [],
+          tools: [],
+          outputs: [
+            {
+              id: 'safety-agreement-signed',
+              name: 'Safety Agreement Completed',
+              description: 'Safety and liability agreement reviewed and electronically signed',
+              type: 'safety' as const,
+              requirement: 'Electronic signature captured acknowledging understanding and agreement to safety and liability terms',
+              mustGetRight: 'Legal agreement must be signed before proceeding with project'
+            }
+          ]
+        }
+      ]
+    }
+  ]
+});
+
 export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
   const [projects, setProjects] = useState<Project[]>([
     // 1. Interior Painting - Detailed project with full workflow
@@ -74,6 +134,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       difficulty: 'Beginner',
       estimatedTime: '3-5 days',
       phases: [
+        createIntroductionPhase('Interior Painting', 'Complete interior room painting from prep to finish'),
         {
           id: 'painting-prep-phase',
           name: 'Preparation',
