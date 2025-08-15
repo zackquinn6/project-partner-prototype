@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface DIYSurveyPopupProps {
   open: boolean;
@@ -15,6 +17,8 @@ interface DIYSurveyPopupProps {
 
 export default function DIYSurveyPopup({ open, onOpenChange }: DIYSurveyPopupProps) {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
   const [answers, setAnswers] = useState({
     skillLevel: "",
     avoidProjects: [] as string[],
@@ -26,13 +30,53 @@ export default function DIYSurveyPopup({ open, onOpenChange }: DIYSurveyPopupPro
   const totalSteps = 5;
   const progress = (currentStep / totalSteps) * 100;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Survey complete
-      onOpenChange(false);
-      console.log("Survey completed:", answers);
+      // Survey complete - save to database
+      setIsSubmitting(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { error } = await supabase
+            .from('profiles')
+            .update({
+              skill_level: answers.skillLevel,
+              avoid_projects: answers.avoidProjects,
+              physical_capability: answers.physicalCapability,
+              space_type: answers.spaceType,
+              current_goal: answers.currentGoal,
+              survey_completed_at: new Date().toISOString()
+            })
+            .eq('user_id', user.id);
+
+          if (error) {
+            console.error('Error saving survey:', error);
+            toast({
+              title: "Error saving survey",
+              description: "Please try again later.",
+              variant: "destructive"
+            });
+            return;
+          }
+
+          toast({
+            title: "Thanks for sharing!",
+            description: "Your preferences have been saved.",
+          });
+        }
+        onOpenChange(false);
+      } catch (error) {
+        console.error('Error completing survey:', error);
+        toast({
+          title: "Error saving survey",
+          description: "Please try again later.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -125,12 +169,14 @@ export default function DIYSurveyPopup({ open, onOpenChange }: DIYSurveyPopupPro
             </div>
             <div className="space-y-3">
               {[
+                "Demo & heavy lifting",
+                "Drywall finishing",
+                "Painting",
+                "Electrical",
                 "Plumbing",
-                "Electrical", 
-                "Heavy lifting / landscaping",
-                "Precision work (tiling, trim)",
-                "Permit/code-required stuff",
-                "I'm open to anything with guidance"
+                "Precision & high patience: tiling, trim",
+                "Permit-required stuff",
+                "Open to anything!"
               ].map((project) => (
                 <Card key={project} className="hover:border-primary/50 transition-colors">
                   <CardContent className="p-4">
@@ -165,7 +211,7 @@ export default function DIYSurveyPopup({ open, onOpenChange }: DIYSurveyPopupPro
                     <RadioGroupItem value="light" id="light" />
                     <Label htmlFor="light" className="flex-1 cursor-pointer">
                       <div className="font-semibold">Light-duty only</div>
-                      <div className="text-sm text-muted-foreground">(short sessions - every improvement counts!)</div>
+                      <div className="text-sm text-muted-foreground">I prefer short sessions - but hey every improvement counts!</div>
                     </Label>
                   </div>
                 </CardContent>
@@ -177,7 +223,7 @@ export default function DIYSurveyPopup({ open, onOpenChange }: DIYSurveyPopupPro
                     <RadioGroupItem value="medium" id="medium" />
                     <Label htmlFor="medium" className="flex-1 cursor-pointer">
                       <div className="font-semibold">Medium-duty</div>
-                      <div className="text-sm text-muted-foreground">(can lift 60+ lbs, moderate stamina)</div>
+                      <div className="text-sm text-muted-foreground">I can lift 60lb+ and enough stamina for 1/2-day projects</div>
                     </Label>
                   </div>
                 </CardContent>
@@ -189,7 +235,7 @@ export default function DIYSurveyPopup({ open, onOpenChange }: DIYSurveyPopupPro
                     <RadioGroupItem value="heavy" id="heavy" />
                     <Label htmlFor="heavy" className="flex-1 cursor-pointer">
                       <div className="font-semibold">Heavy-duty</div>
-                      <div className="text-sm text-muted-foreground">(full-day projects, big tools—bring it on)</div>
+                      <div className="text-sm text-muted-foreground">I can run full-day projects with heavy lifting</div>
                     </Label>
                   </div>
                 </CardContent>
@@ -202,16 +248,16 @@ export default function DIYSurveyPopup({ open, onOpenChange }: DIYSurveyPopupPro
         return (
           <div className="space-y-6">
             <div className="text-center space-y-2">
-              <h3 className="text-2xl font-bold">🏡 What kind of space are you working with?</h3>
+              <h3 className="text-2xl font-bold">🏡 Do you rent or own?</h3>
               <p className="text-muted-foreground">Select one:</p>
             </div>
             <RadioGroup value={answers.spaceType} onValueChange={(value) => setAnswers(prev => ({ ...prev, spaceType: value }))}>
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
-                    <RadioGroupItem value="apartment" id="apartment" />
-                    <Label htmlFor="apartment" className="flex-1 cursor-pointer">
-                      <div className="font-semibold">Apartment / condo</div>
+                    <RadioGroupItem value="rent" id="rent" />
+                    <Label htmlFor="rent" className="flex-1 cursor-pointer">
+                      <div className="font-semibold">Rent</div>
                     </Label>
                   </div>
                 </CardContent>
@@ -220,9 +266,9 @@ export default function DIYSurveyPopup({ open, onOpenChange }: DIYSurveyPopupPro
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
-                    <RadioGroupItem value="owned" id="owned" />
-                    <Label htmlFor="owned" className="flex-1 cursor-pointer">
-                      <div className="font-semibold">Owned home</div>
+                    <RadioGroupItem value="own" id="own" />
+                    <Label htmlFor="own" className="flex-1 cursor-pointer">
+                      <div className="font-semibold">Own</div>
                     </Label>
                   </div>
                 </CardContent>
@@ -241,10 +287,9 @@ export default function DIYSurveyPopup({ open, onOpenChange }: DIYSurveyPopupPro
             <RadioGroup value={answers.currentGoal} onValueChange={(value) => setAnswers(prev => ({ ...prev, currentGoal: value }))}>
               {[
                 "Fix something broken",
-                "Upgrade a space I use often",
-                "Build something from scratch", 
-                "Learn a new skill",
-                "Prep for seasonal tasks"
+                "Upgrade",
+                "Renovate",
+                "Maintain"
               ].map((goal) => (
                 <Card key={goal} className="hover:border-primary/50 transition-colors cursor-pointer">
                   <CardContent className="p-4">
@@ -273,7 +318,7 @@ export default function DIYSurveyPopup({ open, onOpenChange }: DIYSurveyPopupPro
           <div className="flex items-center justify-center space-x-2">
             <Sparkles className="w-6 h-6 text-primary" />
             <DialogTitle className="text-2xl font-bold gradient-text">
-              🛠️ Toolio DIY Starter Pack
+              Let's get to know ya
             </DialogTitle>
             <Sparkles className="w-6 h-6 text-primary" />
           </div>
@@ -302,10 +347,10 @@ export default function DIYSurveyPopup({ open, onOpenChange }: DIYSurveyPopupPro
           
           <Button 
             onClick={handleNext} 
-            disabled={!canProceed()}
+            disabled={!canProceed() || isSubmitting}
             className="flex items-center space-x-2 gradient-primary text-white"
           >
-            <span>{currentStep === totalSteps ? "Complete" : "Next"}</span>
+            <span>{isSubmitting ? "Saving..." : currentStep === totalSteps ? "Complete" : "Next"}</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
