@@ -235,9 +235,9 @@ export default function UserView({
                 <ExternalLink className="w-5 h-5 text-orange-600" />
                 <span className="font-medium text-orange-800">External Resource</span>
               </div>
-              <a href={step.content} target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-800 underline break-all">
+              <div className="text-foreground break-all">
                 {step.content}
-              </a>
+              </div>
             </div>
           </div>;
       case 'image':
