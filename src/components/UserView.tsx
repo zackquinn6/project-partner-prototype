@@ -501,7 +501,7 @@ export default function UserView({
                                 />
                                  <div className="flex-1">
                                    <div className="flex items-center gap-2">
-                                     <div className="font-medium">{output.name}</div>
+                                     <div className="font-medium">Project Overview</div>
                                      <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
                                      <button
                                        onClick={() => {
