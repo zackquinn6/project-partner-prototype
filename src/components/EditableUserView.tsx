@@ -9,13 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Edit, Save, X, Upload, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Edit, Save, X, Upload, Info, ChevronDown, ChevronUp } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
 import { WorkflowStep, Output } from '@/interfaces/Project';
 import { OutputDetailPopup } from './OutputDetailPopup';
 import { AccountabilityMessagePopup } from './AccountabilityMessagePopup';
 import { HelpPopup } from './HelpPopup';
+import { PhaseCompletionPopup } from './PhaseCompletionPopup';
 import { toast } from 'sonner';
 
 interface EditableUserViewProps {
@@ -35,6 +36,9 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
   const [accountabilityPopupOpen, setAccountabilityPopupOpen] = useState(false);
   const [messageType, setMessageType] = useState<'phase-complete' | 'issue-report'>('phase-complete');
   const [helpPopupOpen, setHelpPopupOpen] = useState(false);
+  const [phaseCompletionPopupOpen, setPhaseCompletionPopupOpen] = useState(false);
+  const [selectedPhase, setSelectedPhase] = useState<any>(null);
+  const [collapsedPhases, setCollapsedPhases] = useState<Set<string>>(new Set());
   
   // Editing state
   const [editingStep, setEditingStep] = useState<string | null>(null);
@@ -174,6 +178,35 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
   const getAllStepsInPhase = (phase: any) => {
     if (!phase) return [];
     return phase.operations.flatMap((operation: any) => operation.steps);
+  };
+
+  const togglePhaseCollapse = (phaseId: string) => {
+    setCollapsedPhases(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(phaseId)) {
+        newSet.delete(phaseId);
+      } else {
+        newSet.add(phaseId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleCompletePhase = (phase: any) => {
+    setSelectedPhase(phase);
+    setPhaseCompletionPopupOpen(true);
+  };
+
+  const handlePhaseCompleted = () => {
+    if (!selectedPhase) return;
+    
+    // Mark all steps in the phase as completed
+    const phaseSteps = getAllStepsInPhase(selectedPhase);
+    const newCompletedSteps = new Set([...completedSteps, ...phaseSteps.map(step => step.id)]);
+    setCompletedSteps(newCompletedSteps);
+    
+    setMessageType('phase-complete');
+    setAccountabilityPopupOpen(true);
   };
 
   const handleComplete = () => {
@@ -374,35 +407,73 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
             </div>
 
             <div className="space-y-4">
-              {Object.entries(groupedSteps).map(([phase, operations]) => (
-                <div key={phase} className="space-y-2">
-                  <h4 className="font-semibold text-primary">{phase}</h4>
-                  {Object.entries(operations).map(([operation, opSteps]) => (
-                    <div key={operation} className="ml-2 space-y-1">
-                      <h5 className="text-sm font-medium text-muted-foreground">{operation}</h5>
-                      {opSteps.map(step => {
-                        const stepIndex = allSteps.findIndex(s => s.id === step.id);
-                        return (
-                          <div 
-                            key={step.id} 
-                            className={`ml-2 p-2 rounded text-sm cursor-pointer transition-fast ${
-                              step.id === currentStep?.id ? 'bg-primary/10 text-primary border border-primary/20' : 
-                              completedSteps.has(step.id) ? 'bg-green-50 text-green-700 border border-green-200' : 
-                              'hover:bg-muted/50'
-                            }`} 
-                            onClick={() => setCurrentStepIndex(stepIndex)}
-                          >
-                            <div className="flex items-center gap-2">
-                              {completedSteps.has(step.id) && <CheckCircle className="w-4 h-4" />}
-                              <span className="truncate">{step.step}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
+              {currentProject.phases.map((phase) => {
+                const phaseSteps = getAllStepsInPhase(phase);
+                const completedPhaseSteps = phaseSteps.filter(step => completedSteps.has(step.id));
+                const isPhaseComplete = phaseSteps.length > 0 && completedPhaseSteps.length === phaseSteps.length;
+                const isCollapsed = collapsedPhases.has(phase.id);
+                
+                return (
+                  <div key={phase.id} className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div 
+                        className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors flex-1"
+                        onClick={() => togglePhaseCollapse(phase.id)}
+                      >
+                        {isCollapsed ? (
+                          <ChevronRight className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                        <h4 className="font-semibold text-primary">{phase.name}</h4>
+                        {isPhaseComplete && <CheckCircle className="w-4 h-4 text-green-600" />}
+                        <span className="text-xs text-muted-foreground">
+                          ({completedPhaseSteps.length}/{phaseSteps.length})
+                        </span>
+                      </div>
+                      {!isAdminEditing && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCompletePhase(phase)}
+                          className="text-xs px-2 py-1 h-6"
+                        >
+                          Complete Phase
+                        </Button>
+                      )}
                     </div>
-                  ))}
-                </div>
-              ))}
+                    
+                    {!isCollapsed && (
+                      <div className="ml-6 space-y-2">
+                        {phase.operations.map((operation) => (
+                          <div key={operation.id} className="space-y-1">
+                            <h5 className="text-sm font-medium text-muted-foreground">{operation.name}</h5>
+                            {operation.steps.map(step => {
+                              const stepIndex = allSteps.findIndex(s => s.id === step.id);
+                              return (
+                                <div 
+                                  key={step.id} 
+                                  className={`ml-2 p-2 rounded text-sm cursor-pointer transition-fast ${
+                                    step.id === currentStep?.id ? 'bg-primary/10 text-primary border border-primary/20' : 
+                                    completedSteps.has(step.id) ? 'bg-green-50 text-green-700 border border-green-200' : 
+                                    'hover:bg-muted/50'
+                                  }`} 
+                                  onClick={() => setCurrentStepIndex(stepIndex)}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    {completedSteps.has(step.id) && <CheckCircle className="w-4 h-4" />}
+                                    <span className="truncate">{step.step}</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -708,6 +779,16 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
       <HelpPopup
         isOpen={helpPopupOpen}
         onClose={() => setHelpPopupOpen(false)}
+      />
+
+      {/* Phase Completion Popup */}
+      <PhaseCompletionPopup
+        open={phaseCompletionPopupOpen}
+        onOpenChange={setPhaseCompletionPopupOpen}
+        phase={selectedPhase}
+        checkedOutputs={checkedOutputs}
+        onOutputToggle={toggleOutputCheck}
+        onPhaseComplete={handlePhaseCompleted}
       />
     </div>
   );
