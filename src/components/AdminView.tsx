@@ -6,6 +6,7 @@ import ProjectRollup from '@/components/ProjectRollup';
 import EditWorkflowView from '@/components/EditWorkflowView';
 import EditableUserView from '@/components/EditableUserView';
 import ProjectAnalytics from '@/components/ProjectAnalytics';
+import { UserRoleManager } from '@/components/UserRoleManager';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Trash2, Plus, Check, X, ChevronRight, ChevronDown, Package, Wrench, FileOutput, Eye } from 'lucide-react';
+import { Edit, Trash2, Plus, Check, X, ChevronRight, ChevronDown, Package, Wrench, FileOutput, Eye, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
@@ -33,7 +34,7 @@ interface TableRow {
 
 export const AdminView: React.FC = () => {
   const { currentProject, updateProject, projects } = useProject();
-  const [currentView, setCurrentView] = useState<'table' | 'editWorkflow' | 'userWorkflow'>('table');
+  const [currentView, setCurrentView] = useState<'table' | 'editWorkflow' | 'userWorkflow' | 'userRoles'>('table');
   const [editing, setEditing] = useState<EditingState>({
     type: null,
     id: null,
@@ -545,6 +546,32 @@ export const AdminView: React.FC = () => {
 
 
   const tableRows = buildTableRows();
+
+  if (currentView === 'editWorkflow') {
+    return <EditWorkflowView onBack={() => setCurrentView('table')} />;
+  }
+
+  if (currentView === 'userWorkflow') {
+    return <EditableUserView onBack={() => setCurrentView('table')} />;
+  }
+
+  if (currentView === 'userRoles') {
+    return (
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">User Role Management</h1>
+          <Button 
+            onClick={() => setCurrentView('table')} 
+            variant="outline"
+          >
+            Back to Projects
+          </Button>
+        </div>
+        <UserRoleManager />
+      </div>
+    );
+  }
+
   return <div className="max-w-7xl mx-auto p-6 space-y-6">
       <ProjectSelector isAdminMode={true} />
 
@@ -552,10 +579,17 @@ export const AdminView: React.FC = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Workflow Structure</CardTitle>
-              <CardDescription>Complete project workflow with phases, operations, and steps</CardDescription>
+              <CardTitle>Admin Dashboard</CardTitle>
+              <CardDescription>Manage projects, workflows, and user permissions</CardDescription>
             </div>
             <div className="flex gap-2">
+              <Button 
+                onClick={() => setCurrentView('userRoles')} 
+                variant="outline"
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                User Roles
+              </Button>
               <Button 
                 onClick={() => setCurrentView('userWorkflow')} 
                 variant="outline"
