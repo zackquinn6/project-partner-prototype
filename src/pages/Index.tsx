@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import Navigation from "@/components/Navigation";
 import Home from "@/components/Home";
 import { AdminView } from "@/components/AdminView";
 import UserView from "@/components/UserView";
-import AdminPasswordGate from "@/components/AdminPasswordGate";
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const location = useLocation();
   const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user'>('home');
-  const [showAdminGate, setShowAdminGate] = useState(false);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [resetUserView, setResetUserView] = useState(false);
 
   useEffect(() => {
@@ -31,21 +31,11 @@ const Index = () => {
   }, [user, loading, navigate, location.state]);
 
   const handleAdminAccess = () => {
-    if (isAdminAuthenticated) {
+    if (isAdmin) {
       setCurrentView('admin');
     } else {
-      setShowAdminGate(true);
+      toast.error('Access denied. Admin role required.');
     }
-  };
-
-  const handleAdminAuthenticated = () => {
-    setIsAdminAuthenticated(true);
-    setShowAdminGate(false);
-    setCurrentView('admin');
-  };
-
-  const handleAdminCancel = () => {
-    setShowAdminGate(false);
   };
 
   const handleProjectsView = () => {
@@ -53,7 +43,7 @@ const Index = () => {
     setTimeout(() => setResetUserView(false), 100); // Reset after a brief moment
   };
 
-  if (loading) {
+  if (loading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -65,9 +55,6 @@ const Index = () => {
     return null;
   }
 
-  if (showAdminGate) {
-    return <AdminPasswordGate onAuthenticated={handleAdminAuthenticated} onCancel={handleAdminCancel} />;
-  }
 
   const renderView = () => {
     console.log('Index renderView - currentView:', currentView);

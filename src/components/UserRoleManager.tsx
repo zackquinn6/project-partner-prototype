@@ -164,8 +164,6 @@ export const UserRoleManager: React.FC = () => {
     switch (role) {
       case 'admin':
         return 'destructive';
-      case 'moderator':
-        return 'secondary';
       default:
         return 'outline';
     }
@@ -198,7 +196,6 @@ export const UserRoleManager: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="moderator">Moderator</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
