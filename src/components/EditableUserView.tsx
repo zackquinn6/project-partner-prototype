@@ -20,9 +20,10 @@ import { toast } from 'sonner';
 
 interface EditableUserViewProps {
   onBackToAdmin: () => void;
+  isAdminEditing?: boolean;
 }
 
-export default function EditableUserView({ onBackToAdmin }: EditableUserViewProps) {
+export default function EditableUserView({ onBackToAdmin, isAdminEditing = false }: EditableUserViewProps) {
   const { currentProject, updateProject } = useProject();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
@@ -642,29 +643,31 @@ export default function EditableUserView({ onBackToAdmin }: EditableUserViewProp
                   Previous
                 </Button>
                 
-                <div className="flex items-center gap-4">
-                  {currentStep && (
-                    <Button
-                      onClick={handleComplete}
-                      disabled={!areAllOutputsCompleted(currentStep)}
-                      className="bg-green-600 hover:bg-green-700"
+                {!isAdminEditing && (
+                  <div className="flex items-center gap-4">
+                    {currentStep && (
+                      <Button
+                        onClick={handleComplete}
+                        disabled={!areAllOutputsCompleted(currentStep)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Complete Step
+                      </Button>
+                    )}
+                    
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setMessageType('issue-report');
+                        setAccountabilityPopupOpen(true);
+                      }}
                     >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Complete Step
+                      <AlertTriangle className="w-4 h-4 mr-2" />
+                      Report Issue
                     </Button>
-                  )}
-                  
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      setMessageType('issue-report');
-                      setAccountabilityPopupOpen(true);
-                    }}
-                  >
-                    <AlertTriangle className="w-4 h-4 mr-2" />
-                    Report Issue
-                  </Button>
-                </div>
+                  </div>
+                )}
 
                 <Button
                   onClick={handleNext}

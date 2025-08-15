@@ -536,7 +536,7 @@ export const AdminView: React.FC = () => {
   }
   // Render different views based on currentView
   if (currentView === 'userWorkflow') {
-    return <EditableUserView onBackToAdmin={() => setCurrentView('table')} />;
+    return <EditableUserView onBackToAdmin={() => setCurrentView('table')} isAdminEditing={true} />;
   }
 
   if (currentView === 'editWorkflow') {
