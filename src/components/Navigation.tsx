@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Home, FolderOpen, ChevronDown, Settings } from "lucide-react";
+import { Home, FolderOpen, ChevronDown, Settings, LogOut } from "lucide-react";
 import { useProject } from '@/contexts/ProjectContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NavigationProps {
   currentView: 'home' | 'admin' | 'user';
@@ -16,6 +17,7 @@ export default function Navigation({
   onProjectsView
 }: NavigationProps) {
   const { projectRuns, currentProjectRun, setCurrentProjectRun } = useProject();
+  const { signOut } = useAuth();
   
   // Filter to show only project runs that are not completed (progress < 100%)
   const activeProjectRuns = projectRuns.filter(run => 
@@ -79,6 +81,9 @@ export default function Navigation({
             
             <Button variant="ghost" size="icon" onClick={onAdminAccess} className="transition-fast">
               <Settings className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={signOut} className="transition-fast">
+              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
