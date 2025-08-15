@@ -544,17 +544,6 @@ export const AdminView: React.FC = () => {
     return <EditWorkflowView onBackToAdmin={() => setCurrentView('table')} />;
   }
 
-
-  const tableRows = buildTableRows();
-
-  if (currentView === 'editWorkflow') {
-    return <EditWorkflowView onBack={() => setCurrentView('table')} />;
-  }
-
-  if (currentView === 'userWorkflow') {
-    return <EditableUserView onBack={() => setCurrentView('table')} />;
-  }
-
   if (currentView === 'userRoles') {
     return (
       <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -571,6 +560,8 @@ export const AdminView: React.FC = () => {
       </div>
     );
   }
+
+  const tableRows = buildTableRows();
 
   return <div className="max-w-7xl mx-auto p-6 space-y-6">
       <ProjectSelector isAdminMode={true} />
