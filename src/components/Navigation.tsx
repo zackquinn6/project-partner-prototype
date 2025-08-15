@@ -5,8 +5,8 @@ import { useProject } from '@/contexts/ProjectContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface NavigationProps {
-  currentView: 'home' | 'admin' | 'user';
-  onViewChange: (view: 'home' | 'admin' | 'user') => void;
+  currentView: 'home' | 'admin' | 'user' | 'editWorkflow';
+  onViewChange: (view: 'home' | 'admin' | 'user' | 'editWorkflow') => void;
   onAdminAccess: () => void;
   onProjectsView?: () => void;
 }

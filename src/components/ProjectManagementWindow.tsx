@@ -42,7 +42,7 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
     projects
   } = useProject();
   
-  const [currentView, setCurrentView] = useState<'table' | 'editWorkflow' | 'userWorkflow'>('table');
+  const [currentView, setCurrentView] = useState<'table' | 'editWorkflow'>('table');
   const [editing, setEditing] = useState<EditingState>({
     type: null,
     id: null,
@@ -513,24 +513,23 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
     switch (currentView) {
       case 'editWorkflow':
         return <EditWorkflowView onBackToAdmin={() => setCurrentView('table')} />;
-      case 'userWorkflow':
-        return <EditableUserView onBackToAdmin={() => setCurrentView('table')} isAdminEditing={true} />;
       default:
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Project Management</h2>
               <div className="flex gap-2">
-                <Button onClick={() => setCurrentView('editWorkflow')}>
+                <Button onClick={() => {
+                  onOpenChange(false);
+                  // Navigate to edit workflow in full screen
+                  window.dispatchEvent(new CustomEvent('navigate-to-edit-workflow'));
+                }}>
                   Edit Workflow
-                </Button>
-                <Button onClick={() => setCurrentView('userWorkflow')}>
-                  User View Editor
                 </Button>
               </div>
             </div>
             
-            <ProjectRollup />
+            
             
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
@@ -562,6 +561,8 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
                 </Table>
               </CardContent>
             </Card>
+            
+            <ProjectRollup />
           </div>
         );
     }

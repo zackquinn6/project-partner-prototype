@@ -5,6 +5,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import Navigation from "@/components/Navigation";
 import Home from "@/components/Home";
 import { AdminView } from "@/components/AdminView";
+import EditWorkflowView from "@/components/EditWorkflowView";
 import UserView from "@/components/UserView";
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,7 +15,7 @@ const Index = () => {
   const { isAdmin, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user' | 'editWorkflow'>('home');
   const [resetUserView, setResetUserView] = useState(false);
 
   useEffect(() => {
@@ -43,6 +44,18 @@ const Index = () => {
     setTimeout(() => setResetUserView(false), 100); // Reset after a brief moment
   };
 
+  // Listen for edit workflow navigation event
+  useEffect(() => {
+    const handleEditWorkflowNavigation = () => {
+      setCurrentView('editWorkflow');
+    };
+
+    window.addEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
+    return () => {
+      window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
+    };
+  }, []);
+
   if (loading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -63,6 +76,8 @@ const Index = () => {
         return <AdminView />;
       case 'user':
         return <UserView resetToListing={resetUserView} onProjectSelected={() => setCurrentView('user')} projectRunId={location.state?.projectRunId} />;
+      case 'editWorkflow':
+        return <EditWorkflowView onBackToAdmin={() => setCurrentView('admin')} />;
       default:
         return <Home onViewChange={setCurrentView} />;
     }
