@@ -62,7 +62,7 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
 
   // Build flat table structure from hierarchical data
   const buildTableRows = (): TableRow[] => {
-    if (!currentProject) return [];
+    if (!currentProject || !Array.isArray(currentProject.phases)) return [];
     const rows: TableRow[] = [];
     currentProject.phases.forEach(phase => {
       rows.push({
