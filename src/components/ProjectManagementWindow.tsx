@@ -136,15 +136,20 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
   // Add functions
   const addPhase = () => {
     if (!currentProject) return;
+    
+    // Ensure phases is an array
+    const currentPhases = Array.isArray(currentProject.phases) ? currentProject.phases : [];
+    
     const newPhase: Phase = {
       id: Date.now().toString(),
       name: 'New Phase',
       description: '',
       operations: []
     };
+    
     const updatedProject = {
       ...currentProject,
-      phases: [...currentProject.phases, newPhase]
+      phases: [...currentPhases, newPhase]
     };
     updateProjectData(updatedProject);
     setEditing({
@@ -158,6 +163,10 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
 
   const addOperation = (phaseId: string) => {
     if (!currentProject) return;
+    
+    // Ensure phases is an array
+    const currentPhases = Array.isArray(currentProject.phases) ? currentProject.phases : [];
+    
     const newOperation: Operation = {
       id: Date.now().toString(),
       name: 'New Operation',
@@ -166,9 +175,9 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
     };
     const updatedProject = {
       ...currentProject,
-      phases: currentProject.phases.map(phase => phase.id === phaseId ? {
+      phases: currentPhases.map(phase => phase.id === phaseId ? {
         ...phase,
-        operations: [...phase.operations, newOperation]
+        operations: [...(phase.operations || []), newOperation]
       } : phase)
     };
     updateProjectData(updatedProject);
@@ -184,6 +193,10 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
 
   const addStep = (phaseId: string, operationId: string) => {
     if (!currentProject) return;
+    
+    // Ensure phases is an array
+    const currentPhases = Array.isArray(currentProject.phases) ? currentProject.phases : [];
+    
     const newStep: WorkflowStep = {
       id: Date.now().toString(),
       step: 'New Step',
@@ -196,11 +209,11 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
     };
     const updatedProject = {
       ...currentProject,
-      phases: currentProject.phases.map(phase => phase.id === phaseId ? {
+      phases: currentPhases.map(phase => phase.id === phaseId ? {
         ...phase,
-        operations: phase.operations.map(op => op.id === operationId ? {
+        operations: (phase.operations || []).map(op => op.id === operationId ? {
           ...op,
-          steps: [...op.steps, newStep]
+          steps: [...(op.steps || []), newStep]
         } : op)
       } : phase)
     };
@@ -218,25 +231,28 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
   // Update functions
   const updateItem = (type: string, id: string, updates: any) => {
     if (!currentProject) return;
+    
+    // Ensure phases is an array
+    const currentPhases = Array.isArray(currentProject.phases) ? currentProject.phases : [];
     let updatedProject = { ...currentProject };
     
     if (type === 'phase') {
-      updatedProject.phases = updatedProject.phases.map(phase => 
+      updatedProject.phases = currentPhases.map(phase => 
         phase.id === id ? { ...phase, ...updates } : phase
       );
     } else if (type === 'operation') {
-      updatedProject.phases = updatedProject.phases.map(phase => ({
+      updatedProject.phases = currentPhases.map(phase => ({
         ...phase,
-        operations: phase.operations.map(op => 
+        operations: (phase.operations || []).map(op => 
           op.id === id ? { ...op, ...updates } : op
         )
       }));
     } else if (type === 'step') {
-      updatedProject.phases = updatedProject.phases.map(phase => ({
+      updatedProject.phases = currentPhases.map(phase => ({
         ...phase,
-        operations: phase.operations.map(op => ({
+        operations: (phase.operations || []).map(op => ({
           ...op,
-          steps: op.steps.map(step => 
+          steps: (op.steps || []).map(step => 
             step.id === id ? { ...step, ...updates } : step
           )
         }))
@@ -248,21 +264,24 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
   // Delete functions
   const deleteItem = (type: string, id: string) => {
     if (!currentProject) return;
+    
+    // Ensure phases is an array
+    const currentPhases = Array.isArray(currentProject.phases) ? currentProject.phases : [];
     let updatedProject = { ...currentProject };
     
     if (type === 'phase') {
-      updatedProject.phases = updatedProject.phases.filter(phase => phase.id !== id);
+      updatedProject.phases = currentPhases.filter(phase => phase.id !== id);
     } else if (type === 'operation') {
-      updatedProject.phases = updatedProject.phases.map(phase => ({
+      updatedProject.phases = currentPhases.map(phase => ({
         ...phase,
-        operations: phase.operations.filter(op => op.id !== id)
+        operations: (phase.operations || []).filter(op => op.id !== id)
       }));
     } else if (type === 'step') {
-      updatedProject.phases = updatedProject.phases.map(phase => ({
+      updatedProject.phases = currentPhases.map(phase => ({
         ...phase,
-        operations: phase.operations.map(op => ({
+        operations: (phase.operations || []).map(op => ({
           ...op,
-          steps: op.steps.filter(step => step.id !== id)
+          steps: (op.steps || []).filter(step => step.id !== id)
         }))
       }));
     }
