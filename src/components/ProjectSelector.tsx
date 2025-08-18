@@ -18,10 +18,15 @@ interface ProjectSelectorProps {
 }
 
 export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = false, onProjectSelected }) => {
-  const { projects, currentProject, setCurrentProject, addProject, updateProject, deleteProject } = useProject();
+  const { projects, currentProject, setCurrentProject, addProject, updateProject, deleteProject, fetchProjects, loading, isAdmin } = useProject();
+  
+  // Fetch projects when component mounts
+  React.useEffect(() => {
+    fetchProjects();
+  }, []);
   
   // Debug logging
-  console.log('ProjectSelector - projects count:', projects.length, 'isAdminMode:', isAdminMode);
+  console.log('ProjectSelector - projects count:', projects.length, 'isAdminMode:', isAdminMode, 'loading:', loading, 'isAdmin:', isAdmin);
   console.log('Projects available:', projects.map(p => ({ name: p.name, publishStatus: p.publishStatus })));
   const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
   const [isProjectSetupOpen, setIsProjectSetupOpen] = useState(false);
