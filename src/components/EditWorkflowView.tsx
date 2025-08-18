@@ -248,7 +248,7 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" onClick={onBackToAdmin} className="flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
-            Back to Admin
+            Back to Project Manager
           </Button>
         </div>
         <Card>
@@ -268,7 +268,7 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" onClick={onBackToAdmin} className="flex items-center gap-2">
           <ArrowLeft className="w-4 h-4" />
-          Back to Admin
+          Back to Project Manager
         </Button>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
