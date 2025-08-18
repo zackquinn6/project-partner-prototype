@@ -628,14 +628,14 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
               <div>
                 <label className="text-sm font-medium">Scaling Unit</label>
                 <Select 
-                  value={currentProject.scalingUnit || ''} 
-                  onValueChange={(value) => updateProjectData({...currentProject, scalingUnit: value as any})}
+                  value={currentProject.scalingUnit || 'none'} 
+                  onValueChange={(value) => updateProjectData({...currentProject, scalingUnit: value === 'none' ? undefined : value as any})}
                 >
                   <SelectTrigger className="mt-1 bg-background">
                     <SelectValue placeholder="Select scaling unit" />
                   </SelectTrigger>
                   <SelectContent className="bg-background border shadow-lg z-50">
-                    <SelectItem value="">No scaling unit</SelectItem>
+                    <SelectItem value="none">No scaling unit</SelectItem>
                     <SelectItem value="per square foot">per square foot</SelectItem>
                     <SelectItem value="per 10x10 room">per 10x10 room</SelectItem>
                     <SelectItem value="per linear foot">per linear foot</SelectItem>
