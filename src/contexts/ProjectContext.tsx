@@ -203,10 +203,10 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
           end_date: projectData.endDate?.toISOString(),
           status: projectData.status,
           publish_status: projectData.publishStatus,
-          category: projectData.category,
-          difficulty: projectData.difficulty,
-          effort_level: projectData.effortLevel,
-          estimated_time: projectData.estimatedTime,
+          category: projectData.category || null,
+          difficulty: projectData.difficulty || null,
+          effort_level: projectData.effortLevel || null,
+          estimated_time: projectData.estimatedTime || null,
           phases: JSON.stringify(projectData.phases),
           created_by: user.id
         })
@@ -300,10 +300,10 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
           end_date: project.endDate?.toISOString(),
           status: project.status,
           publish_status: project.publishStatus,
-          category: project.category,
-          difficulty: project.difficulty,
-          effort_level: project.effortLevel,
-          estimated_time: project.estimatedTime,
+          category: project.category || null,
+          difficulty: project.difficulty || null,
+          effort_level: project.effortLevel || null,
+          estimated_time: project.estimatedTime || null,
           phases: JSON.stringify(project.phases)
         })
         .eq('id', project.id);
