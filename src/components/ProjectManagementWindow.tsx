@@ -15,6 +15,7 @@ import { Edit, Trash2, Plus, Check, X, ChevronRight, ChevronDown, Package, Wrenc
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface EditingState {
   type: 'phase' | 'operation' | 'step' | null;
@@ -535,6 +536,16 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
                 <p className="mt-1 text-sm">{currentProject.estimatedTime || 'Not set'}</p>
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Estimated Time Per Unit</label>
+                <p className="mt-1 text-sm">{currentProject.estimatedTimePerUnit ? `${currentProject.estimatedTimePerUnit} hours` : 'Not set'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Scaling Unit</label>
+                <p className="mt-1 text-sm">{currentProject.scalingUnit || 'Not set'}</p>
+              </div>
+            </div>
           </div>
         )}
         {currentProject && editingProject && (
@@ -600,6 +611,38 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
                   className="mt-1"
                   placeholder="e.g., 2-4 hours"
                 />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Estimated Time Per Unit</label>
+                <Input 
+                  type="number"
+                  step="0.1"
+                  value={currentProject.estimatedTimePerUnit || ''} 
+                  onChange={(e) => updateProjectData({...currentProject, estimatedTimePerUnit: e.target.value ? parseFloat(e.target.value) : undefined})}
+                  className="mt-1"
+                  placeholder="e.g., 2.5"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Scaling Unit</label>
+                <Select 
+                  value={currentProject.scalingUnit || ''} 
+                  onValueChange={(value) => updateProjectData({...currentProject, scalingUnit: value as any})}
+                >
+                  <SelectTrigger className="mt-1 bg-background">
+                    <SelectValue placeholder="Select scaling unit" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    <SelectItem value="">No scaling unit</SelectItem>
+                    <SelectItem value="per square foot">per square foot</SelectItem>
+                    <SelectItem value="per 10x10 room">per 10x10 room</SelectItem>
+                    <SelectItem value="per linear foot">per linear foot</SelectItem>
+                    <SelectItem value="per cubic yard">per cubic yard</SelectItem>
+                    <SelectItem value="per item">per item</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="flex gap-2 pt-2">

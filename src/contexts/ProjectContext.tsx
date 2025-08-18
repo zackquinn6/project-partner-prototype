@@ -106,6 +106,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
         difficulty: project.difficulty as Project['difficulty'],
         effortLevel: project.effort_level as Project['effortLevel'],
         estimatedTime: project.estimated_time,
+        estimatedTimePerUnit: project.estimated_time_per_unit,
+        scalingUnit: project.scaling_unit as Project['scalingUnit'],
         phases: (project.phases as any) || []
       }));
 
@@ -207,6 +209,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
           difficulty: projectData.difficulty || null,
           effort_level: projectData.effortLevel || null,
           estimated_time: projectData.estimatedTime || null,
+          estimated_time_per_unit: projectData.estimatedTimePerUnit || null,
+          scaling_unit: projectData.scalingUnit || null,
           phases: JSON.stringify(projectData.phases),
           created_by: user.id
         })
@@ -304,6 +308,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
           difficulty: project.difficulty || null,
           effort_level: project.effortLevel || null,
           estimated_time: project.estimatedTime || null,
+          estimated_time_per_unit: project.estimatedTimePerUnit || null,
+          scaling_unit: project.scalingUnit || null,
           phases: JSON.stringify(project.phases)
         })
         .eq('id', project.id);

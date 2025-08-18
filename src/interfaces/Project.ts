@@ -69,5 +69,7 @@ export interface Project {
   difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
   effortLevel?: 'Low' | 'Medium' | 'High';
   estimatedTime?: string;
+  estimatedTimePerUnit?: number;
+  scalingUnit?: 'per square foot' | 'per 10x10 room' | 'per linear foot' | 'per cubic yard' | 'per item';
   phases: Phase[];
 }

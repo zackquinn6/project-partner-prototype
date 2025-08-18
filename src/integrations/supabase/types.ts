@@ -158,12 +158,14 @@ export type Database = {
           effort_level: string | null
           end_date: string | null
           estimated_time: string | null
+          estimated_time_per_unit: number | null
           id: string
           image: string | null
           name: string
           phases: Json
           plan_end_date: string
           publish_status: string
+          scaling_unit: string | null
           start_date: string
           status: string
           updated_at: string
@@ -177,12 +179,14 @@ export type Database = {
           effort_level?: string | null
           end_date?: string | null
           estimated_time?: string | null
+          estimated_time_per_unit?: number | null
           id?: string
           image?: string | null
           name: string
           phases?: Json
           plan_end_date?: string
           publish_status?: string
+          scaling_unit?: string | null
           start_date?: string
           status?: string
           updated_at?: string
@@ -196,12 +200,14 @@ export type Database = {
           effort_level?: string | null
           end_date?: string | null
           estimated_time?: string | null
+          estimated_time_per_unit?: number | null
           id?: string
           image?: string | null
           name?: string
           phases?: Json
           plan_end_date?: string
           publish_status?: string
+          scaling_unit?: string | null
           start_date?: string
           status?: string
           updated_at?: string
