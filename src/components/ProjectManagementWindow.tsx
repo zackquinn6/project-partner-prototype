@@ -48,6 +48,7 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
     id: null,
     data: null
   });
+  const [editingProject, setEditingProject] = useState(false);
   const [expandedPhases, setExpandedPhases] = useState<Set<string>>(new Set());
   const [expandedOperations, setExpandedOperations] = useState<Set<string>>(new Set());
 
@@ -489,12 +490,54 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
   const renderProjectSelector = () => (
     <Card className="mb-6">
       <CardHeader>
-        <CardTitle>Project Selection & Details</CardTitle>
-        <CardDescription>Choose a project to manage and edit its details</CardDescription>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle>Project Selection & Details</CardTitle>
+            <CardDescription>Choose a project to manage and edit its details</CardDescription>
+          </div>
+          {currentProject && !editingProject && (
+            <Button onClick={() => setEditingProject(true)} variant="outline">
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Project
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <ProjectSelector isAdminMode={true} />
-        {currentProject && (
+        {currentProject && !editingProject && (
+          <div className="mt-4 space-y-4 border-t pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Project Name</label>
+                <p className="mt-1 text-sm">{currentProject.name}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Category</label>
+                <p className="mt-1 text-sm">{currentProject.category || 'Not set'}</p>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Description</label>
+              <p className="mt-1 text-sm">{currentProject.description || 'No description'}</p>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Difficulty</label>
+                <p className="mt-1 text-sm">{currentProject.difficulty || 'Not set'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Effort Level</label>
+                <p className="mt-1 text-sm">{currentProject.effortLevel || 'Not set'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Estimated Time</label>
+                <p className="mt-1 text-sm">{currentProject.estimatedTime || 'Not set'}</p>
+              </div>
+            </div>
+          </div>
+        )}
+        {currentProject && editingProject && (
           <div className="mt-4 space-y-4 border-t pt-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -558,6 +601,16 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
                   placeholder="e.g., 2-4 hours"
                 />
               </div>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button onClick={() => setEditingProject(false)} variant="outline">
+                <Check className="w-4 h-4 mr-2" />
+                Done Editing
+              </Button>
+              <Button onClick={() => setEditingProject(false)} variant="ghost">
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
             </div>
           </div>
         )}
