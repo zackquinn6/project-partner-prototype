@@ -183,6 +183,15 @@ function extractToolsAndMaterials(project: Project): {
 } {
   const materialsMap = new Map<string, ItemUsage>();
   const toolsMap = new Map<string, ItemUsage>();
+  
+  // Ensure phases is an array before iterating
+  if (!project.phases || !Array.isArray(project.phases)) {
+    return {
+      materials: [],
+      tools: []
+    };
+  }
+  
   project.phases.forEach(phase => {
     phase.operations.forEach(operation => {
       operation.steps.forEach(step => {
