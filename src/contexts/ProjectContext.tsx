@@ -153,30 +153,58 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
         return;
       }
 
-      const transformedProjectRuns: ProjectRun[] = data.map(run => ({
-        id: run.id,
-        templateId: run.template_id,
-        name: run.name,
-        description: run.description || '',
-        createdAt: new Date(run.created_at),
-        updatedAt: new Date(run.updated_at),
-        startDate: new Date(run.start_date),
-        planEndDate: new Date(run.plan_end_date),
-        endDate: run.end_date ? new Date(run.end_date) : undefined,
-        status: run.status as 'not-started' | 'in-progress' | 'complete',
-        projectLeader: run.project_leader,
-        accountabilityPartner: run.accountability_partner,
-        customProjectName: run.custom_project_name,
-        currentPhaseId: run.current_phase_id,
-        currentOperationId: run.current_operation_id,
-        currentStepId: run.current_step_id,
-        completedSteps: (run.completed_steps as string[]) || [],
-        progress: run.progress,
-        phases: (run.phases as any) || [],
-        category: run.category,
-        difficulty: run.difficulty as Project['difficulty'],
-        estimatedTime: run.estimated_time
-      }));
+      const transformedProjectRuns: ProjectRun[] = data.map(run => {
+        // Properly parse phases JSON data
+        let phases = [];
+        if (run.phases) {
+          try {
+            phases = typeof run.phases === 'string' 
+              ? JSON.parse(run.phases) 
+              : run.phases;
+          } catch (e) {
+            console.error('Failed to parse project run phases JSON:', e);
+            phases = [];
+          }
+        }
+
+        // Properly parse completed_steps JSON data
+        let completedSteps = [];
+        if (run.completed_steps) {
+          try {
+            completedSteps = typeof run.completed_steps === 'string'
+              ? JSON.parse(run.completed_steps)
+              : run.completed_steps;
+          } catch (e) {
+            console.error('Failed to parse completed_steps JSON:', e);
+            completedSteps = [];
+          }
+        }
+
+        return {
+          id: run.id,
+          templateId: run.template_id,
+          name: run.name,
+          description: run.description || '',
+          createdAt: new Date(run.created_at),
+          updatedAt: new Date(run.updated_at),
+          startDate: new Date(run.start_date),
+          planEndDate: new Date(run.plan_end_date),
+          endDate: run.end_date ? new Date(run.end_date) : undefined,
+          status: run.status as 'not-started' | 'in-progress' | 'complete',
+          projectLeader: run.project_leader,
+          accountabilityPartner: run.accountability_partner,
+          customProjectName: run.custom_project_name,
+          currentPhaseId: run.current_phase_id,
+          currentOperationId: run.current_operation_id,
+          currentStepId: run.current_step_id,
+          completedSteps: Array.isArray(completedSteps) ? completedSteps : [],
+          progress: run.progress,
+          phases: Array.isArray(phases) ? phases : [],
+          category: run.category,
+          difficulty: run.difficulty as Project['difficulty'],
+          estimatedTime: run.estimated_time
+        };
+      });
 
       setProjectRuns(transformedProjectRuns);
     } catch (error) {
