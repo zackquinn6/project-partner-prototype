@@ -137,6 +137,8 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
   const addPhase = () => {
     if (!currentProject) return;
     
+    console.log('Adding phase - current phases:', currentProject.phases);
+    
     // Ensure phases is an array
     const currentPhases = Array.isArray(currentProject.phases) ? currentProject.phases : [];
     
@@ -147,10 +149,14 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
       operations: []
     };
     
+    console.log('New phase created:', newPhase);
+    
     const updatedProject = {
       ...currentProject,
       phases: [...currentPhases, newPhase]
     };
+    
+    console.log('Updated project phases:', updatedProject.phases);
     updateProjectData(updatedProject);
     setEditing({
       type: 'phase',
@@ -158,7 +164,7 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
       data: { ...newPhase }
     });
     setExpandedPhases(prev => new Set([...prev, newPhase.id]));
-    toast.success('Phase added');
+    // Removed duplicate toast - updateProject in context already shows one
   };
 
   const addOperation = (phaseId: string) => {
