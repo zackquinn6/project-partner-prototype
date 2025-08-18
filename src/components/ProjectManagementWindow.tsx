@@ -486,6 +486,85 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
     }
   };
 
+  const renderProjectSelector = () => (
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle>Project Selection & Details</CardTitle>
+        <CardDescription>Choose a project to manage and edit its details</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ProjectSelector isAdminMode={true} />
+        {currentProject && (
+          <div className="mt-4 space-y-4 border-t pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Project Name</label>
+                <Input 
+                  value={currentProject.name} 
+                  onChange={(e) => updateProjectData({...currentProject, name: e.target.value})}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Category</label>
+                <Input 
+                  value={currentProject.category || ''} 
+                  onChange={(e) => updateProjectData({...currentProject, category: e.target.value})}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Description</label>
+              <Textarea 
+                value={currentProject.description} 
+                onChange={(e) => updateProjectData({...currentProject, description: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium">Difficulty</label>
+                <select 
+                  value={currentProject.difficulty || ''} 
+                  onChange={(e) => updateProjectData({...currentProject, difficulty: e.target.value as any})}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">Select difficulty</option>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Effort Level</label>
+                <select 
+                  value={currentProject.effortLevel || ''} 
+                  onChange={(e) => updateProjectData({...currentProject, effortLevel: e.target.value as any})}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">Select effort</option>
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Estimated Time</label>
+                <Input 
+                  value={currentProject.estimatedTime || ''} 
+                  onChange={(e) => updateProjectData({...currentProject, estimatedTime: e.target.value})}
+                  className="mt-1"
+                  placeholder="e.g., 2-4 hours"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
   if (!currentProject) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -494,15 +573,7 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
             <DialogTitle>Project Management</DialogTitle>
           </DialogHeader>
           <div className="p-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Select a Project</CardTitle>
-                <CardDescription>Choose a project to manage its workflow, materials, and tools</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ProjectSelector isAdminMode={true} />
-              </CardContent>
-            </Card>
+            {renderProjectSelector()}
           </div>
         </DialogContent>
       </Dialog>
@@ -516,8 +587,10 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
       default:
         return (
           <div className="space-y-6">
+            {renderProjectSelector()}
+            
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Project Management</h2>
+              <h2 className="text-2xl font-bold">Project Structure</h2>
               <div className="flex gap-2">
                 <Button onClick={() => {
                   onOpenChange(false);
@@ -529,13 +602,11 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
               </div>
             </div>
             
-            
-            
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle>Project Structure</CardTitle>
-                  <CardDescription>Manage phases, operations, and steps</CardDescription>
+                  <CardTitle>Phases, Operations, and Steps</CardTitle>
+                  <CardDescription>Manage the workflow structure</CardDescription>
                 </div>
                 <Button onClick={addPhase}>
                   <Plus className="w-4 h-4 mr-2" />
