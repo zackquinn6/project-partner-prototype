@@ -687,11 +687,11 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
   if (!currentProject) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Project Management</DialogTitle>
           </DialogHeader>
-          <div className="p-6">
+          <div className="overflow-y-auto max-h-[80vh] p-6">
             {renderProjectSelector()}
           </div>
         </DialogContent>
@@ -760,11 +760,11 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Project Management</DialogTitle>
         </DialogHeader>
-        <div className="p-6">
+        <div className="overflow-y-auto max-h-[80vh] p-6">
           {renderView()}
         </div>
       </DialogContent>
