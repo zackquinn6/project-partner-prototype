@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { ProjectManagementWindow } from '@/components/ProjectManagementWindow';
 import { ProjectAnalyticsWindow } from '@/components/ProjectAnalyticsWindow';
 import { UserRolesWindow } from '@/components/UserRolesWindow';
+import { ToolsMaterialsWindow } from '@/components/ToolsMaterialsWindow';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, BarChart3, Shield } from 'lucide-react';
+import { Settings, BarChart3, Shield, Wrench } from 'lucide-react';
 
 export const AdminView: React.FC = () => {
   const [projectManagementOpen, setProjectManagementOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [userRolesOpen, setUserRolesOpen] = useState(false);
+  const [toolsMaterialsOpen, setToolsMaterialsOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -19,7 +21,7 @@ export const AdminView: React.FC = () => {
           <p className="text-lg text-muted-foreground">Manage projects, analytics, and user permissions</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setProjectManagementOpen(true)}>
             <CardHeader className="text-center">
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
@@ -70,6 +72,23 @@ export const AdminView: React.FC = () => {
               </Button>
             </CardContent>
           </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setToolsMaterialsOpen(true)}>
+            <CardHeader className="text-center">
+              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                <Wrench className="w-6 h-6 text-primary" />
+              </div>
+              <CardTitle>Tools & Materials Library</CardTitle>
+              <CardDescription>
+                Manage reusable tools and materials for projects
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" onClick={() => setToolsMaterialsOpen(true)}>
+                Open Library
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         <ProjectManagementWindow 
@@ -85,6 +104,11 @@ export const AdminView: React.FC = () => {
         <UserRolesWindow 
           open={userRolesOpen} 
           onOpenChange={setUserRolesOpen} 
+        />
+        
+        <ToolsMaterialsWindow 
+          open={toolsMaterialsOpen} 
+          onOpenChange={setToolsMaterialsOpen} 
         />
       </div>
     </div>

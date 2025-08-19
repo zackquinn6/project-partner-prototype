@@ -1,3 +1,4 @@
+// Legacy interfaces for embedded materials/tools (deprecated)
 export interface Material {
   id: string;
   name: string;
@@ -12,6 +13,40 @@ export interface Tool {
   description: string;
   category: 'Hardware' | 'Software' | 'Hand Tool' | 'Power Tool' | 'Other';
   required: boolean;
+}
+
+// New library interfaces matching database schema
+export interface LibraryTool {
+  id: string;
+  item: string;
+  description: string | null;
+  example_models: string | null;
+  photo_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LibraryMaterial {
+  id: string;
+  item: string;
+  description: string | null;
+  unit_size: string | null;
+  photo_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Workflow step references for library items
+export interface ToolReference {
+  library_tool_id: string;
+  quantity?: number;
+  notes?: string;
+}
+
+export interface MaterialReference {
+  library_material_id: string;
+  quantity?: number;
+  notes?: string;
 }
 
 export interface Output {
