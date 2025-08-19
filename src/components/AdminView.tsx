@@ -34,7 +34,7 @@ export const AdminView: React.FC = () => {
             </CardHeader>
             <CardContent>
               <Button className="w-full" onClick={() => setProjectManagementOpen(true)}>
-                Open Project Management
+                project management
               </Button>
             </CardContent>
           </Card>
