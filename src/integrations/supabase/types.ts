@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      materials: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          item: string
+          photo_url: string | null
+          unit_size: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          item: string
+          photo_url?: string | null
+          unit_size?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          item?: string
+          photo_url?: string | null
+          unit_size?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -210,6 +243,39 @@ export type Database = {
           scaling_unit?: string | null
           start_date?: string
           status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tools: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          example_models: string | null
+          id: string
+          item: string
+          photo_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          example_models?: string | null
+          id?: string
+          item: string
+          photo_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          example_models?: string | null
+          id?: string
+          item?: string
+          photo_url?: string | null
           updated_at?: string
         }
         Relationships: []
