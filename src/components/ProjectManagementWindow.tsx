@@ -522,13 +522,26 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
         <div className="flex justify-between items-start">
           <div>
             <CardTitle>Project Selection & Details</CardTitle>
-            <CardDescription>Choose a project to manage and edit its details</CardDescription>
+            <CardDescription>
+              {editingProject 
+                ? "Editing project details - make your changes below" 
+                : "Choose a project to manage and edit its details"}
+            </CardDescription>
           </div>
           {currentProject && !editingProject && (
-            <Button onClick={() => setEditingProject(true)} variant="outline">
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Project
-            </Button>
+            <div className="flex flex-col items-end gap-2">
+              <Button onClick={() => setEditingProject(true)} size="lg" className="bg-primary hover:bg-primary/90">
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Project Details
+              </Button>
+              <p className="text-xs text-muted-foreground">Click to edit time & scale settings</p>
+            </div>
+          )}
+          {currentProject && editingProject && (
+            <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-md">
+              <Edit className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Edit Mode Active</span>
+            </div>
           )}
         </div>
       </CardHeader>
