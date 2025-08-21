@@ -126,15 +126,15 @@ export default function OwnedToolsEditor({ open, onOpenChange, ownedTools, onSav
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Edit Your Tool Library</DialogTitle>
         </DialogHeader>
 
-        <div className="flex gap-6 h-[600px]">
+        <div className="flex gap-6 flex-1 min-h-0">
           {/* Available Tools Panel */}
-          <div className="flex-1 space-y-4">
-            <div className="space-y-3">
+          <div className="flex-1 space-y-4 flex flex-col">
+            <div className="space-y-3 flex-shrink-0">
               <Label className="text-sm font-medium">Add Tools from Library</Label>
               
               <div className="flex gap-2">
@@ -163,7 +163,7 @@ export default function OwnedToolsEditor({ open, onOpenChange, ownedTools, onSav
               </div>
             </div>
 
-            <div className="overflow-y-auto h-[480px] space-y-2">
+            <div className="overflow-y-auto flex-1 space-y-2">
               {isLoading ? (
                 <div className="text-center py-8 text-muted-foreground">Loading tools...</div>
               ) : filteredTools.length === 0 ? (
@@ -202,15 +202,15 @@ export default function OwnedToolsEditor({ open, onOpenChange, ownedTools, onSav
           </div>
 
           {/* Owned Tools Panel */}
-          <div className="flex-1 space-y-4">
-            <div>
+          <div className="flex-1 space-y-4 flex flex-col">
+            <div className="flex-shrink-0">
               <Label className="text-sm font-medium">Your Owned Tools</Label>
               <div className="text-xs text-muted-foreground mt-1">
                 {userTools.length} tool{userTools.length !== 1 ? 's' : ''} in your library
               </div>
             </div>
 
-            <div className="overflow-y-auto h-[520px] space-y-3">
+            <div className="overflow-y-auto flex-1 space-y-3">
               {userTools.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   No tools in your library yet. Add some from the left panel.
@@ -259,7 +259,7 @@ export default function OwnedToolsEditor({ open, onOpenChange, ownedTools, onSav
           </div>
         </div>
 
-        <div className="flex justify-between pt-4 border-t">
+        <div className="flex justify-between pt-4 border-t flex-shrink-0">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
