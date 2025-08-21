@@ -482,15 +482,21 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                             {operation.steps.map(step => {
                               const stepIndex = allSteps.findIndex(s => s.id === step.id);
                               return (
-                                <div 
-                                  key={step.id} 
-                                  className={`ml-2 p-2 rounded text-sm cursor-pointer transition-fast ${
-                                    step.id === currentStep?.id ? 'bg-primary/10 text-primary border border-primary/20' : 
-                                    completedSteps.has(step.id) ? 'bg-green-50 text-green-700 border border-green-200' : 
-                                    'hover:bg-muted/50'
-                                  }`} 
-                                  onClick={() => setCurrentStepIndex(stepIndex)}
-                                >
+                                 <div 
+                                   key={step.id} 
+                                   className={`ml-2 p-2 rounded text-sm cursor-pointer transition-fast ${
+                                     step.id === currentStep?.id ? 'bg-primary/10 text-primary border border-primary/20' : 
+                                     completedSteps.has(step.id) ? 'bg-green-50 text-green-700 border border-green-200' : 
+                                     'hover:bg-muted/50'
+                                   }`} 
+                                   onClick={() => {
+                                     if (stepIndex >= 0) {
+                                       setCurrentStepIndex(stepIndex);
+                                       // Scroll to top when navigating to a different step
+                                       window.scrollTo({ top: 0, behavior: 'smooth' });
+                                     }
+                                   }}
+                                 >
                                   <div className="flex items-center gap-2">
                                     {completedSteps.has(step.id) && <CheckCircle className="w-4 h-4" />}
                                     <span className="truncate">{step.step}</span>
@@ -563,25 +569,26 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
               </div>
             </CardHeader>
           </Card>
-          <Button 
-            variant="outline" 
-            onClick={() => setHelpPopupOpen(true)}
-            className="whitespace-nowrap bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
-          >
-            Stuck? Get Help
-          </Button>
-          
-          {/* Show ordering button if current step is the ordering step */}
-          {currentStep?.id === 'ordering-step-1' && (
+          <div className="flex gap-2 flex-wrap">
             <Button 
               variant="outline" 
-              onClick={() => setOrderingWindowOpen(true)}
-              className="whitespace-nowrap bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+              onClick={() => setHelpPopupOpen(true)}
+              className="whitespace-nowrap bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
             >
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Shop Online
+              Stuck? Get Help
             </Button>
-          )}
+            
+            {/* Show ordering button if current step is the ordering step */}
+            {currentStep?.id === 'ordering-step-1' && (
+              <Button 
+                onClick={() => setOrderingWindowOpen(true)}
+                className="whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Shop Online
+              </Button>
+            )}
+          </div>
           </div>
 
           {/* Content */}
