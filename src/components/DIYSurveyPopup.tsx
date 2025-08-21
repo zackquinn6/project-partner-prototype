@@ -378,7 +378,7 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
           <div className="flex items-center justify-center space-x-2">
             <Sparkles className="w-6 h-6 text-primary" />
             <DialogTitle className="text-2xl font-bold gradient-text">
-              {mode === 'verify' ? "Verify Your Profile" : "Let's get to know ya"}
+              {mode === 'verify' ? "Verify Your Profile" : "Build Your Profile"}
             </DialogTitle>
             <Sparkles className="w-6 h-6 text-primary" />
           </div>

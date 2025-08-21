@@ -24,6 +24,7 @@ import {
 import { ArrowLeft, Clock, Layers, Target, Hammer, Home, Palette, Zap, Shield, Search, Filter } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import DIYSurveyPopup from '@/components/DIYSurveyPopup';
+import ProfileManager from '@/components/ProfileManager';
 interface ProjectTemplate {
   id: string;
   name: string;
@@ -52,6 +53,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
   } = useProject();
   const [isProjectSetupOpen, setIsProjectSetupOpen] = useState(false);
   const [isDIYSurveyOpen, setIsDIYSurveyOpen] = useState(false);
+  const [isProfileManagerOpen, setIsProfileManagerOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [surveyMode, setSurveyMode] = useState<'new' | 'verify'>('new');
@@ -73,6 +75,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
     if (isAdminMode) {
       setIsProjectSetupOpen(false);
       setIsDIYSurveyOpen(false);
+      setIsProfileManagerOpen(false);
       setSelectedTemplate(null);
     }
   }, [isAdminMode]);
@@ -216,8 +219,8 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
         }
       });
     } else {
-      // In user mode, fetch profile data and show DIY survey with appropriate mode
-      console.log('User mode - fetching profile and showing DIY survey');
+      // In user mode, show project setup dialog first
+      console.log('User mode - showing project setup');
       
       if (!user) {
         console.log('No user found - redirecting to auth');
@@ -230,41 +233,9 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
         ...prev,
         customProjectName: project.name
       }));
-
-      // Fetch user profile to determine DIY survey mode
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('skill_level, avoid_projects, physical_capability, space_type, current_goal, survey_completed_at')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        console.log('Profile fetch result:', { data, error });
-
-        if (data && data.survey_completed_at) {
-          // User has completed survey before - show verify mode
-          setSurveyMode('verify');
-          setUserProfile({
-            skillLevel: data.skill_level,
-            avoidProjects: data.avoid_projects || [],
-            physicalCapability: data.physical_capability,
-            spaceType: data.space_type,
-            currentGoal: data.current_goal
-          });
-        } else {
-          // New user - show new mode
-          setSurveyMode('new');
-          setUserProfile(null);
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-        // On error, default to new survey
-        setSurveyMode('new');
-        setUserProfile(null);
-      }
       
-      // Always show DIY survey
-      setIsDIYSurveyOpen(true);
+      // Show project setup dialog first
+      setIsProjectSetupOpen(true);
     }
   };
 
@@ -272,22 +243,23 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
     console.log('handleDIYSurveyComplete called with:', surveyCompleted);
     setIsDIYSurveyOpen(false);
     if (surveyCompleted) {
-      // After DIY survey completion, show project setup
-      console.log('Survey completed - showing project setup');
-      setIsProjectSetupOpen(true);
+      // After DIY survey completion, proceed to workflow
+      console.log('Survey completed - proceeding to workflow');
+      proceedToWorkflow();
     } else {
       // If survey was cancelled, reset everything
       console.log('Survey cancelled - resetting');
-      setSelectedTemplate(null);
-      setProjectSetupForm({
-        customProjectName: '',
-        projectLeader: '',
-        accountabilityPartner: '',
-        targetEndDate: ''
-      });
+      resetProjectState();
     }
   };
-  const handleProjectSetupComplete = () => {
+
+  const handleProfileManagerComplete = () => {
+    console.log('ProfileManager completed - proceeding to workflow');
+    setIsProfileManagerOpen(false);
+    proceedToWorkflow();
+  };
+
+  const proceedToWorkflow = () => {
     if (!selectedTemplate) return;
 
     // Create a new project RUN based on the template
@@ -316,15 +288,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
     };
     addProjectRun(newProjectRun);
 
-    // Reset form and close dialog
-    setProjectSetupForm({
-      customProjectName: '',
-      projectLeader: '',
-      accountabilityPartner: '',
-      targetEndDate: ''
-    });
-    setIsProjectSetupOpen(false);
-    setSelectedTemplate(null);
+    resetProjectState();
 
     // Navigate to user workflow view with the project run
     navigate('/', {
@@ -333,6 +297,48 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
         projectRunId: newProjectRun.id
       }
     });
+  };
+
+  const resetProjectState = () => {
+    setProjectSetupForm({
+      customProjectName: '',
+      projectLeader: '',
+      accountabilityPartner: '',
+      targetEndDate: ''
+    });
+    setSelectedTemplate(null);
+    setUserProfile(null);
+  };
+  const handleProjectSetupComplete = async () => {
+    if (!selectedTemplate || !user) return;
+
+    // Close project setup dialog
+    setIsProjectSetupOpen(false);
+
+    // Check user profile to determine next step
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('survey_completed_at')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (data && data.survey_completed_at) {
+        // Existing user - show ProfileManager
+        setIsProfileManagerOpen(true);
+      } else {
+        // New user - show DIY survey in 'new' mode
+        setSurveyMode('new');
+        setUserProfile(null);
+        setIsDIYSurveyOpen(true);
+      }
+    } catch (error) {
+      console.error('Error checking profile:', error);
+      // Default to new survey on error
+      setSurveyMode('new');
+      setUserProfile(null);
+      setIsDIYSurveyOpen(true);
+    }
   };
   const handleSkipSetup = () => {
     if (!selectedTemplate) return;
@@ -681,6 +687,18 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
             }}
             mode={surveyMode}
             initialData={userProfile}
+          />
+        )}
+
+        {/* Profile Manager Dialog - Only show in user mode */}
+        {!isAdminMode && (
+          <ProfileManager
+            open={isProfileManagerOpen}
+            onOpenChange={(open) => {
+              if (!open) {
+                handleProfileManagerComplete();
+              }
+            }}
           />
         )}
       </div>
