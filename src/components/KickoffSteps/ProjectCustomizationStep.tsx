@@ -34,6 +34,8 @@ export const ProjectCustomizationStep: React.FC<ProjectCustomizationStepProps> =
     description: ''
   });
   const [draggedItem, setDraggedItem] = useState<DraggedPhase | null>(null);
+  const [draggedPhaseIndex, setDraggedPhaseIndex] = useState<number | null>(null);
+  const [dropZoneIndex, setDropZoneIndex] = useState<number | null>(null);
 
   // Initialize with current phases (excluding kickoff)
   useEffect(() => {
@@ -51,26 +53,65 @@ export const ProjectCustomizationStep: React.FC<ProjectCustomizationStepProps> =
   })));
   const handleDragStart = (e: React.DragEvent, phase: DraggedPhase) => {
     setDraggedItem(phase);
+    setDraggedPhaseIndex(null);
     e.dataTransfer.effectAllowed = 'copy';
   };
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
+
+  const handleSelectedPhaseDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedPhaseIndex(index);
+    setDraggedItem(null);
+    e.dataTransfer.effectAllowed = 'move';
   };
-  const handleDrop = (e: React.DragEvent) => {
+
+  const handleDragOver = (e: React.DragEvent, targetIndex?: number) => {
     e.preventDefault();
-    if (draggedItem) {
-      // Create a new phase without the source metadata
+    if (draggedPhaseIndex !== null) {
+      e.dataTransfer.dropEffect = 'move';
+      setDropZoneIndex(targetIndex ?? null);
+    } else {
+      e.dataTransfer.dropEffect = 'copy';
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex?: number) => {
+    e.preventDefault();
+    
+    if (draggedPhaseIndex !== null) {
+      // Reordering existing phase
+      const newPhases = [...selectedPhases];
+      const [draggedPhase] = newPhases.splice(draggedPhaseIndex, 1);
+      
+      const insertIndex = targetIndex !== undefined ? targetIndex : newPhases.length;
+      newPhases.splice(insertIndex, 0, draggedPhase);
+      
+      setSelectedPhases(newPhases);
+    } else if (draggedItem) {
+      // Adding new phase from library
       const newPhase: Phase = {
         id: `${draggedItem.id}-${Date.now()}`,
-        // Unique ID for this instance
         name: draggedItem.name,
         description: `${draggedItem.description} (from ${draggedItem.sourceProjectName})`,
         operations: draggedItem.operations
       };
-      setSelectedPhases(prev => [...prev, newPhase]);
-      setDraggedItem(null);
+      
+      if (targetIndex !== undefined) {
+        const newPhases = [...selectedPhases];
+        newPhases.splice(targetIndex, 0, newPhase);
+        setSelectedPhases(newPhases);
+      } else {
+        setSelectedPhases(prev => [...prev, newPhase]);
+      }
     }
+    
+    setDraggedItem(null);
+    setDraggedPhaseIndex(null);
+    setDropZoneIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setDraggedPhaseIndex(null);
+    setDropZoneIndex(null);
   };
   const handleRemovePhase = (phaseId: string) => {
     setSelectedPhases(prev => prev.filter(phase => phase.id !== phaseId));
@@ -216,7 +257,7 @@ export const ProjectCustomizationStep: React.FC<ProjectCustomizationStepProps> =
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 min-h-64 p-4 border-2 border-dashed border-muted-foreground/20 rounded-lg transition-colors" onDragOver={handleDragOver} onDrop={handleDrop}>
+            <div className="space-y-1 min-h-64 p-4 border-2 border-dashed border-muted-foreground/20 rounded-lg transition-colors" onDragOver={handleDragOver} onDrop={handleDrop} onDragEnd={handleDragEnd}>
               {/* Kickoff Phase (always first and locked) */}
               <Card className="border-green-200 bg-green-50">
                 <CardContent className="p-4">
@@ -233,30 +274,62 @@ export const ProjectCustomizationStep: React.FC<ProjectCustomizationStepProps> =
                 </CardContent>
               </Card>
 
+              {/* Drop Zone before first custom phase */}
+              <div 
+                className={`h-2 ${dropZoneIndex === 0 ? 'bg-blue-200 border-2 border-dashed border-blue-400' : ''} rounded transition-all duration-200`}
+                onDragOver={e => handleDragOver(e, 0)}
+                onDrop={e => handleDrop(e, 0)}
+              />
+
               {/* Selected Phases */}
-              {selectedPhases.map((phase, index) => <Card key={phase.id} className="group">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className="font-medium">
-                          {index + 2}. {phase.name}
-                          {phase.id.startsWith('manual-') && <Badge variant="outline" className="ml-2 text-xs border-yellow-300 text-yellow-700">
-                              Custom
-                            </Badge>}
-                        </h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {phase.description}
-                        </p>
-                        <div className="text-xs text-muted-foreground mt-2">
-                          {phase.operations.length} operation(s)
+              {selectedPhases.map((phase, index) => (
+                <div key={phase.id}>
+                  <Card 
+                    className={`group cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow ${
+                      draggedPhaseIndex === index ? 'opacity-50' : ''
+                    }`} 
+                    draggable 
+                    onDragStart={e => handleSelectedPhaseDragStart(e, index)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3 flex-1">
+                          <GripVertical className="w-4 h-4 text-muted-foreground mt-1" />
+                          <div className="flex-1">
+                            <h4 className="font-medium">
+                              {index + 2}. {phase.name}
+                              {phase.id.startsWith('manual-') && <Badge variant="outline" className="ml-2 text-xs border-yellow-300 text-yellow-700">
+                                  Custom
+                                </Badge>}
+                            </h4>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {phase.description}
+                            </p>
+                            <div className="text-xs text-muted-foreground mt-2">
+                              {phase.operations.length} operation(s)
+                            </div>
+                          </div>
                         </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleRemovePhase(phase.id)} 
+                          className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
-                      <Button variant="ghost" size="sm" onClick={() => handleRemovePhase(phase.id)} className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>)}
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Drop Zone after each phase */}
+                  <div 
+                    className={`h-2 ${dropZoneIndex === index + 1 ? 'bg-blue-200 border-2 border-dashed border-blue-400' : ''} rounded transition-all duration-200`}
+                    onDragOver={e => handleDragOver(e, index + 1)}
+                    onDrop={e => handleDrop(e, index + 1)}
+                  />
+                </div>
+              ))}
 
               {selectedPhases.length === 0 && <div className="text-center py-12 text-muted-foreground">
                   <Layers className="w-8 h-8 mx-auto mb-2 opacity-50" />
