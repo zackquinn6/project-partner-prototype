@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AdminPasswordGateProps {
   onAuthenticated: () => void;
@@ -12,101 +12,125 @@ interface AdminPasswordGateProps {
 }
 
 const AdminPasswordGate: React.FC<AdminPasswordGateProps> = ({ onAuthenticated, onCancel }) => {
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasAdminRole, setHasAdminRole] = useState<boolean | null>(null);
+  const { user, loading } = useAuth();
 
-  // Simple password - in production this would be more secure
-  const ADMIN_PASSWORD = 'admin123';
+  useEffect(() => {
+    checkAdminRole();
+  }, [user]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const checkAdminRole = async () => {
+    if (!user) {
+      setHasAdminRole(false);
+      return;
+    }
+
     setIsLoading(true);
-
-    // Simulate checking password
-    setTimeout(() => {
-      if (password === ADMIN_PASSWORD) {
-        toast.success('Access granted');
-        onAuthenticated();
+    try {
+      const { data, error } = await supabase.rpc('is_admin', { user_id: user.id });
+      
+      if (error) {
+        console.error('Error checking admin role:', error);
+        toast.error('Failed to verify admin access');
+        setHasAdminRole(false);
       } else {
-        toast.error('Incorrect password');
-        setPassword('');
+        setHasAdminRole(data);
+        if (data) {
+          toast.success('Admin access verified');
+          onAuthenticated();
+        }
       }
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      toast.error('Failed to verify admin access');
+      setHasAdminRole(false);
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="w-16 h-16 gradient-primary rounded-xl flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-8 h-8 text-white" />
-          </div>
-          <CardTitle className="text-2xl">Admin Access Required</CardTitle>
-          <CardDescription>
-            Enter the admin password to access project management
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter admin password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pr-10"
-                  autoFocus
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
-                </Button>
+  if (loading || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-8">
+            <div className="text-center">
+              <div className="w-16 h-16 gradient-primary rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <Lock className="w-8 h-8 text-white" />
               </div>
+              <p className="text-muted-foreground">Verifying admin access...</p>
             </div>
-            
-            <div className="flex gap-2">
-              <Button
-                type="button"
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-destructive/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle className="w-8 h-8 text-destructive" />
+            </div>
+            <CardTitle className="text-2xl">Authentication Required</CardTitle>
+            <CardDescription>
+              You must be logged in to access admin features
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={onCancel} 
+              className="w-full"
+              variant="outline"
+            >
+              Go Back
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (hasAdminRole === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-destructive/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle className="w-8 h-8 text-destructive" />
+            </div>
+            <CardTitle className="text-2xl">Access Denied</CardTitle>
+            <CardDescription>
+              You don't have admin privileges to access this area
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground text-center">
+                  Contact an administrator to request admin access for your account
+                </p>
+              </div>
+              <Button 
+                onClick={onCancel} 
+                className="w-full"
                 variant="outline"
-                className="flex-1"
-                onClick={onCancel}
-                disabled={isLoading}
               >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1"
-                disabled={!password || isLoading}
-              >
-                {isLoading ? 'Checking...' : 'Access Admin'}
+                Go Back
               </Button>
             </div>
-          </form>
-          
-          <div className="mt-6 p-3 bg-muted/50 rounded-lg">
-            <p className="text-xs text-muted-foreground text-center">
-              Demo password: <code className="bg-background px-2 py-1 rounded">admin123</code>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // This return shouldn't be reached if hasAdminRole is true, 
+  // as onAuthenticated() is called in the useEffect
+  return null;
 };
 
 export default AdminPasswordGate;
