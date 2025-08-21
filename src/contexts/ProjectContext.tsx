@@ -4,6 +4,7 @@ import { ProjectRun } from '@/interfaces/ProjectRun';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { toast } from '@/components/ui/use-toast';
+import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 
 interface ProjectContextType {
   projects: Project[];
@@ -288,10 +289,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
 
     try {
       // Import the utility function to add kickoff phase
-      const { addKickoffPhaseToProjectRun } = await import('@/utils/projectUtils');
-      
       // Add kickoff phase to the project run phases
-      const phasesWithKickoff = addKickoffPhaseToProjectRun(projectRunData.phases);
+      const phasesWithKickoff = addStandardPhasesToProjectRun(projectRunData.phases);
 
       const { data, error } = await supabase
         .from('project_runs')

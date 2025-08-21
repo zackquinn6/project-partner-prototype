@@ -66,17 +66,68 @@ export const createKickoffPhase = (): Phase => {
   return kickoffPhase;
 };
 
-export const addKickoffPhaseToProjectRun = (phases: Phase[]): Phase[] => {
-  // Check if kickoff phase already exists
-  const hasKickoff = phases.some(phase => phase.name === 'Kickoff');
+export const createOrderingPhase = (): Phase => {
+  const orderingSteps: WorkflowStep[] = [
+    {
+      id: 'ordering-step-1',
+      step: 'Tool & Material Ordering',
+      description: 'Order all required tools and materials for your project using the integrated shopping browser',
+      contentType: 'text' as const,
+      content: 'Use the shopping browser to purchase all required tools and materials. Check off items as you order them to track your progress.',
+      materials: [],
+      tools: [],
+      outputs: [{
+        id: 'ordering-output',
+        name: 'All Items Ordered',
+        description: 'All required tools and materials have been ordered',
+        type: 'none' as const
+      }]
+    }
+  ];
+
+  const orderingOperation: Operation = {
+    id: 'ordering-operation',
+    name: 'Tool & Material Ordering',
+    description: 'Order all project tools and materials',
+    steps: orderingSteps
+  };
+
+  const orderingPhase: Phase = {
+    id: 'ordering-phase',
+    name: 'Ordering',
+    description: 'Order all required tools and materials for the project',
+    operations: [orderingOperation]
+  };
+
+  return orderingPhase;
+};
+
+export const addStandardPhasesToProjectRun = (phases: Phase[]): Phase[] => {
+  let processedPhases = [...phases];
   
-  if (hasKickoff) {
-    return phases;
+  // Check if kickoff phase already exists
+  const hasKickoff = processedPhases.some(phase => phase.name === 'Kickoff');
+  if (!hasKickoff) {
+    processedPhases = [createKickoffPhase(), ...processedPhases];
+  }
+  
+  // Check if ordering phase already exists
+  const hasOrdering = processedPhases.some(phase => phase.name === 'Ordering');
+  if (!hasOrdering) {
+    // Insert ordering phase as second phase (after kickoff)
+    const kickoffIndex = processedPhases.findIndex(phase => phase.name === 'Kickoff');
+    if (kickoffIndex >= 0) {
+      processedPhases.splice(kickoffIndex + 1, 0, createOrderingPhase());
+    } else {
+      processedPhases.unshift(createOrderingPhase());
+    }
   }
 
-  // Add kickoff phase as the first phase
-  return [createKickoffPhase(), ...phases];
+  return processedPhases;
 };
+
+// Keep the old function for backward compatibility
+export const addKickoffPhaseToProjectRun = addStandardPhasesToProjectRun;
 
 export const isKickoffPhaseComplete = (completedSteps: string[]): boolean => {
   const kickoffStepIds = [

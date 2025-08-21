@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Edit, Save, X, Upload, Info, ChevronDown, ChevronUp, FileText } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Edit, Save, X, Upload, Info, ChevronDown, ChevronUp, FileText, ShoppingCart } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
 import { WorkflowStep, Output } from '@/interfaces/Project';
@@ -17,8 +17,10 @@ import { OutputDetailPopup } from './OutputDetailPopup';
 import { AccountabilityMessagePopup } from './AccountabilityMessagePopup';
 import { HelpPopup } from './HelpPopup';
 import { PhaseCompletionPopup } from './PhaseCompletionPopup';
+import { OrderingWindow } from './OrderingWindow';
 import { SignatureCapture } from './SignatureCapture';
 import { toast } from 'sonner';
+import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 
 interface EditableUserViewProps {
   onBackToAdmin: () => void;
@@ -41,23 +43,27 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
   const [selectedPhase, setSelectedPhase] = useState<any>(null);
   const [collapsedPhases, setCollapsedPhases] = useState<Set<string>>(new Set());
   const [signatures, setSignatures] = useState<Record<string, string>>({});
+  const [orderingWindowOpen, setOrderingWindowOpen] = useState(false);
   
   // Editing state
   const [editingStep, setEditingStep] = useState<string | null>(null);
   const [editData, setEditData] = useState<any>({});
 
   // Flatten all steps from all phases and operations for navigation
-  const allSteps = currentProject?.phases.flatMap(phase => 
-    phase.operations.flatMap(operation => 
-      operation.steps.map(step => ({
+  const allSteps = currentProject ? addStandardPhasesToProjectRun(currentProject.phases).flatMap((phase, phaseIndex) =>
+    phase.operations.flatMap((operation, operationIndex) =>
+      operation.steps.map((step, stepIndex) => ({
         ...step,
-        phaseName: phase.name,
-        operationName: operation.name,
         phaseId: phase.id,
-        operationId: operation.id
+        phaseName: phase.name,
+        operationId: operation.id,
+        operationName: operation.name,
+        phaseIndex,
+        operationIndex,
+        stepIndex
       }))
     )
-  ) || [];
+  ) : [];
 
   const currentStep = allSteps[currentStepIndex];
   const progress = allSteps.length > 0 ? completedSteps.size / allSteps.length * 100 : 0;
@@ -432,7 +438,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
             </div>
 
             <div className="space-y-4">
-              {currentProject.phases.map((phase) => {
+              {currentProject ? addStandardPhasesToProjectRun(currentProject.phases).map((phase) => {
                 const phaseSteps = getAllStepsInPhase(phase);
                 const completedPhaseSteps = phaseSteps.filter(step => completedSteps.has(step.id));
                 const isPhaseComplete = phaseSteps.length > 0 && completedPhaseSteps.length === phaseSteps.length;
@@ -498,7 +504,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                     )}
                   </div>
                 );
-              })}
+              }) : null}
             </div>
           </CardContent>
         </Card>
@@ -564,6 +570,18 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
           >
             Stuck? Get Help
           </Button>
+          
+          {/* Show ordering button if current step is the ordering step */}
+          {currentStep?.id === 'ordering-step-1' && (
+            <Button 
+              variant="outline" 
+              onClick={() => setOrderingWindowOpen(true)}
+              className="whitespace-nowrap bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Shop Online
+            </Button>
+          )}
           </div>
 
           {/* Content */}
@@ -814,6 +832,21 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
         checkedOutputs={checkedOutputs}
         onOutputToggle={toggleOutputCheck}
         onPhaseComplete={handlePhaseCompleted}
+      />
+
+      {/* Ordering Window */}
+      <OrderingWindow
+        open={orderingWindowOpen}
+        onOpenChange={setOrderingWindowOpen}
+        project={currentProject}
+        userOwnedTools={[]}
+        onOrderingComplete={() => {
+          // Mark the ordering step as complete
+          if (currentStep?.id === 'ordering-step-1') {
+            handleComplete();
+          }
+          setOrderingWindowOpen(false);
+        }}
       />
     </div>
   );
