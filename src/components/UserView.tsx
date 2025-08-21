@@ -393,9 +393,16 @@ export default function UserView({
   });
   
   // FIRST PRIORITY: If explicitly requesting listing mode, always show project listing
-  // EXCEPT if we have a projectRunId (coming from project setup flow)
-  if (resetToListing && !projectRunId) {
-    console.log("🔄 PRIORITY: Showing listing due to resetToListing=true (no projectRunId)");
+  // This should ALWAYS take precedence over everything else when "My Projects" is clicked
+  if (resetToListing) {
+    console.log("🔄 PRIORITY: resetToListing=true, forcing project listing view and clearing invalid state");
+    
+    // Clear any invalid projectRunId from location state when going to listing
+    if (projectRunId) {
+      console.log("🧹 Clearing invalid projectRunId from location state");
+      window.history.replaceState({ view: 'user' }, document.title, window.location.pathname);
+    }
+    
     return <ProjectListing 
       onProjectSelect={project => {
         console.log("Project selected from resetToListing mode:", project);
@@ -413,9 +420,35 @@ export default function UserView({
     />;
   }
   
-  // SECOND: If we have a projectRunId but no currentProjectRun loaded yet, show loading
-  if (projectRunId && !currentProjectRun) {
-    console.log("⏳ UserView: Have projectRunId but currentProjectRun not loaded yet, showing loading...");
+  // SECOND: If we have a projectRunId but no currentProjectRun loaded yet, show loading or error
+  if (projectRunId && !currentProjectRun && projectRuns.length > 0) {
+    console.log("❌ UserView: Have projectRunId but currentProjectRun not found in loaded runs");
+    console.log("Available project run IDs:", projectRuns.map(pr => pr.id));
+    console.log("Looking for projectRunId:", projectRunId);
+    
+    // Clear the invalid projectRunId and go to listing
+    console.log("🧹 Clearing invalid projectRunId and redirecting to listing");
+    window.history.replaceState({ view: 'user' }, document.title, window.location.pathname);
+    
+    return <ProjectListing 
+      onProjectSelect={project => {
+        console.log("Project selected from error recovery:", project);
+        if (project === null) {
+          setViewMode('listing');
+          return;
+        }
+        if (project === 'workflow') {
+          setViewMode('workflow');
+          return;
+        }
+        setViewMode('workflow');
+        onProjectSelected?.();
+      }} 
+    />;
+  }
+  
+  if (projectRunId && !currentProjectRun && projectRuns.length === 0) {
+    console.log("⏳ UserView: Have projectRunId but project runs not loaded yet, showing loading...");
     return (
       <div className="container mx-auto px-6 py-8">
         <div className="flex items-center justify-center min-h-96">
