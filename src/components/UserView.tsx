@@ -131,10 +131,17 @@ export default function UserView({
       const calculatedProgress = completedSteps.size / allSteps.length * 100;
       if (Math.abs(calculatedProgress - (currentProjectRun.progress || 0)) > 0.1) {
         console.log("📊 UserView: Updating progress for workflow steps (NOT during kickoff)");
+        
+        // NEVER overwrite kickoff step completion data
+        const kickoffStepIds = ['kickoff-step-1', 'kickoff-step-2', 'kickoff-step-3'];
+        const preservedKickoffSteps = currentProjectRun.completedSteps.filter(stepId => 
+          kickoffStepIds.includes(stepId)
+        );
+        
         const updatedProjectRun = {
           ...currentProjectRun,
           progress: calculatedProgress,
-          completedSteps: Array.from(completedSteps),
+          completedSteps: [...preservedKickoffSteps, ...Array.from(completedSteps)],
           updatedAt: new Date()
         };
         updateProjectRun(updatedProjectRun);
@@ -461,8 +468,8 @@ export default function UserView({
     );
   }
   
-  // THIRD: If no projects selected or explicitly in listing mode, show project listing
-  if (viewMode === 'listing' || (!currentProject && !currentProjectRun && !projectRunId)) {
+  // THIRD: If no projects at all or explicitly in listing mode, show project listing
+  if (viewMode === 'listing' || (!currentProject && !currentProjectRun && !projectRunId && projectRuns.length === 0)) {
     console.log("📋 UserView: Showing project listing (no project selected)");
     return <ProjectListing 
       onProjectSelect={project => {

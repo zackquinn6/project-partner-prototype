@@ -68,11 +68,25 @@ const Index = () => {
       setCurrentView('editWorkflow');
     };
 
+    const handleKickoffNavigation = (event: CustomEvent) => {
+      const { projectRunId } = event.detail;
+      console.log("🎯 Index: Received kickoff navigation event:", projectRunId);
+      navigate('/', {
+        state: {
+          view: 'user',
+          projectRunId: projectRunId
+        }
+      });
+    };
+
     window.addEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
+    window.addEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
+    
     return () => {
       window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
+      window.removeEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
     };
-  }, []);
+  }, [navigate]);
 
   if (loading || roleLoading) {
     return (

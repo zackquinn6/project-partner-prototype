@@ -264,7 +264,6 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
 
     // Create a new project RUN based on the template
     const newProjectRun = {
-      id: `run-${Date.now()}`,
       templateId: selectedTemplate.id,
       name: projectSetupForm.customProjectName || selectedTemplate.name,
       description: selectedTemplate.description,
@@ -290,13 +289,11 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
 
     resetProjectState();
 
-    // Navigate to user workflow view with the project run
-    navigate('/', {
-      state: {
-        view: 'user',
-        projectRunId: newProjectRun.id
-      }
-    });
+    // Navigate to user workflow view with the project run ID from database
+    console.log("🚀 ProjectCatalog: Creating project run and navigating to kickoff");
+    
+    // The addProjectRun function will handle navigation after database insertion
+    // No need to navigate here as we need the actual database-generated ID
   };
 
   const resetProjectState = () => {
@@ -345,7 +342,6 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
 
     // Create a new project RUN based on the template without setup info
     const newProjectRun = {
-      id: `run-${Date.now()}`,
       templateId: selectedTemplate.id,
       name: selectedTemplate.name,
       description: selectedTemplate.description,
@@ -375,13 +371,11 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
     setIsProjectSetupOpen(false);
     setSelectedTemplate(null);
 
-    // Navigate to user workflow view with the project run
-    navigate('/', {
-      state: {
-        view: 'user',
-        projectRunId: newProjectRun.id
-      }
-    });
+    // Navigate to user workflow view with the project run ID from database
+    console.log("🚀 ProjectCatalog: Creating project run (skip setup) and navigating to kickoff");
+    
+    // The addProjectRun function will handle navigation after database insertion
+    // No need to navigate here as we need the actual database-generated ID
   };
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto px-6 py-8">

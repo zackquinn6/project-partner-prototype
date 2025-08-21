@@ -324,10 +324,13 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
 
       await fetchProjectRuns();
       
-      toast({
-        title: "Success",
-        description: "Project run created successfully",
-      });
+      // Navigate to kickoff workflow with the actual database ID
+      if (data?.id) {
+        console.log("🎯 ProjectContext: Navigating to project run:", data.id);
+        window.dispatchEvent(new CustomEvent('navigate-to-kickoff', { 
+          detail: { projectRunId: data.id } 
+        }));
+      }
     } catch (error) {
       console.error('Error adding project run:', error);
       toast({
