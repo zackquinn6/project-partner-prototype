@@ -222,20 +222,27 @@ export default function UserView({
   const handlePhaseRatingSubmit = async (rating: number) => {
     if (!currentProjectRun) return;
 
-    // Log rating data (would save to database in real implementation)
     const ratingData = {
       phaseId: getCurrentPhase()?.id,
       phaseName: currentCompletedPhaseName,
       rating,
-      projectRunId: currentProjectRun.id,
       timestamp: new Date().toISOString()
     };
+
+    // Add to existing phase ratings array
+    const updatedPhaseRatings = [
+      ...(currentProjectRun.phase_ratings || []),
+      ratingData
+    ];
+
+    // Update project run with new rating
+    await updateProjectRun({
+      ...currentProjectRun,
+      phase_ratings: updatedPhaseRatings,
+      updatedAt: new Date()
+    });
     
     console.log("Phase Rating:", ratingData);
-    
-    // TODO: Save to database once schema is updated
-    // This would be something like:
-    // await supabase.from('phase_ratings').insert(ratingData);
     
     // Show accountability partner message after rating
     setMessageType('phase-complete');
@@ -247,18 +254,39 @@ export default function UserView({
     setPhaseRatingOpen(false);
     setIssueReportOpen(true);
   };
-  const handleReportSubmit = () => {
+  // Handle issue report submission
+  const handleReportSubmit = async () => {
+    if (!currentProjectRun) return;
+
+    const issueReportData = {
+      stepId: currentStep?.id,
+      phaseId: getCurrentPhase()?.id,
+      phaseName: getCurrentPhase()?.name,
+      step: currentStep?.step,
+      issues: reportIssues,
+      comments: reportComments,
+      timestamp: new Date().toISOString()
+    };
+
+    // Add to existing issue reports array
+    const updatedIssueReports = [
+      ...(currentProjectRun.issue_reports || []),
+      issueReportData
+    ];
+
+    // Update project run with new issue report
+    await updateProjectRun({
+      ...currentProjectRun,
+      issue_reports: updatedIssueReports,
+      updatedAt: new Date()
+    });
+
     // Show accountability partner message
     setMessageType('issue-report');
     setAccountabilityPopupOpen(true);
 
-    // Log the issue report (in a real app, this would be sent to a backend)
-    console.log("Issue Report:", {
-      stepId: currentStep?.id,
-      step: currentStep?.step,
-      issues: reportIssues,
-      comments: reportComments
-    });
+    // Log the issue report for debugging
+    console.log("Issue Report:", issueReportData);
     
     // Reset form and close dialog
     setReportIssues({

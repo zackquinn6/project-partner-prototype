@@ -29,4 +29,21 @@ export interface ProjectRun {
   category?: string;
   difficulty?: Project['difficulty'];
   estimatedTime?: string;
+  
+  // Analytics data
+  phase_ratings?: Array<{
+    phaseId: string;
+    phaseName: string;
+    rating: number; // 1-5
+    timestamp: string;
+  }>;
+  issue_reports?: Array<{
+    stepId: string;
+    phaseId: string;
+    phaseName: string;
+    step: string;
+    issues: Record<string, boolean>;
+    comments: string;
+    timestamp: string;
+  }>;
 }

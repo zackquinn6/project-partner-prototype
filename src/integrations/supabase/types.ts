@@ -122,7 +122,9 @@ export type Database = {
           end_date: string | null
           estimated_time: string | null
           id: string
+          issue_reports: Json | null
           name: string
+          phase_ratings: Json | null
           phases: Json
           plan_end_date: string
           progress: number
@@ -147,7 +149,9 @@ export type Database = {
           end_date?: string | null
           estimated_time?: string | null
           id?: string
+          issue_reports?: Json | null
           name: string
+          phase_ratings?: Json | null
           phases?: Json
           plan_end_date?: string
           progress?: number
@@ -172,7 +176,9 @@ export type Database = {
           end_date?: string | null
           estimated_time?: string | null
           id?: string
+          issue_reports?: Json | null
           name?: string
+          phase_ratings?: Json | null
           phases?: Json
           plan_end_date?: string
           progress?: number
