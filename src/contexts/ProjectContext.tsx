@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { Project } from '@/interfaces/Project';
 import { ProjectRun } from '@/interfaces/ProjectRun';
 import { supabase } from '@/integrations/supabase/client';
@@ -398,15 +398,29 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     }
   };
 
+  // Add a ref to track if an update is in progress to prevent cascading failures
+  const updateInProgressRef = useRef(false);
+
   const updateProjectRun = async (projectRun: ProjectRun) => {
     if (!user) return;
 
+    // Prevent concurrent updates that could cause cascading failures
+    if (updateInProgressRef.current) {
+      console.log("🔄 ProjectContext - Update already in progress, skipping");
+      return;
+    }
+
+    updateInProgressRef.current = true;
+
     try {
+      // Ensure progress is always an integer to prevent database errors
+      const safeProgress = Math.round(projectRun.progress || 0);
+
       console.log("🔄 ProjectContext - Updating project run:", {
         id: projectRun.id,
         completedSteps: projectRun.completedSteps,
         status: projectRun.status,
-        progress: projectRun.progress
+        progress: safeProgress
       });
 
       const { error } = await supabase
@@ -425,7 +439,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
           current_operation_id: projectRun.currentOperationId,
           current_step_id: projectRun.currentStepId,
           completed_steps: JSON.stringify(projectRun.completedSteps),
-          progress: projectRun.progress,
+          progress: safeProgress,
           phases: JSON.stringify(projectRun.phases),
           category: projectRun.category,
           difficulty: projectRun.difficulty,
@@ -438,25 +452,29 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
 
       // Update local state immediately for better UX
       setProjectRuns(prevRuns => 
-        prevRuns.map(run => run.id === projectRun.id ? projectRun : run)
+        prevRuns.map(run => run.id === projectRun.id ? { ...projectRun, progress: safeProgress } : run)
       );
       
       // Update currentProjectRun if it's the one being updated
       if (currentProjectRun?.id === projectRun.id) {
-        setCurrentProjectRun(projectRun);
+        setCurrentProjectRun({ ...projectRun, progress: safeProgress });
       }
 
       console.log("✅ ProjectContext - Project run updated successfully");
       
-      // Also fetch fresh data to ensure consistency
-      await fetchProjectRuns();
     } catch (error) {
       console.error('❌ Error updating project run:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update project run",
-        variant: "destructive",
-      });
+      
+      // Only show toast for non-network errors to prevent spam
+      if (error instanceof Error && !error.message.includes('Failed to fetch')) {
+        toast({
+          title: "Error",
+          description: "Failed to update project run",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      updateInProgressRef.current = false;
     }
   };
 
