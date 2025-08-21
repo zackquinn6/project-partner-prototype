@@ -75,7 +75,7 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
     if (!currentProjectRun) return;
 
     const stepId = kickoffSteps[stepIndex].id;
-    const newCompletedSteps = [...currentProjectRun.completedSteps];
+    const newCompletedSteps = [...(currentProjectRun.completedSteps || [])];
     
     console.log("KickoffWorkflow - Completing step:", {
       stepIndex,
@@ -95,23 +95,26 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
 
     console.log("KickoffWorkflow - Updating project run with steps:", newCompletedSteps);
 
-    // Update project run with completed step
-    await updateProjectRun({
+    // Update project run with completed step - WAIT for completion
+    const updatedProjectRun = {
       ...currentProjectRun,
       completedSteps: newCompletedSteps,
       progress: Math.round((newCompletedSteps.length / getTotalStepsCount()) * 100),
       updatedAt: new Date()
-    });
+    };
+    
+    await updateProjectRun(updatedProjectRun);
 
     console.log("KickoffWorkflow - Checking if all kickoff complete:", {
       completedKickoffStepsSize: newCompletedKickoffSteps.size,
       totalKickoffSteps: kickoffSteps.length,
-      allComplete: newCompletedKickoffSteps.size === kickoffSteps.length
+      allComplete: newCompletedKickoffSteps.size === kickoffSteps.length,
+      actualCompletedSteps: newCompletedSteps
     });
 
     // Check if all kickoff steps are complete
     if (newCompletedKickoffSteps.size === kickoffSteps.length) {
-      console.log("KickoffWorkflow - All steps complete, calling onKickoffComplete");
+      console.log("KickoffWorkflow - All steps complete, calling onKickoffComplete with updated data");
       // Mark kickoff phase as complete and allow access to other phases
       onKickoffComplete();
     } else {

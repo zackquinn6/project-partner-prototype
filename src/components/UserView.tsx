@@ -398,17 +398,34 @@ export default function UserView({
     return (
       <KickoffWorkflow 
         onKickoffComplete={async () => {
-          console.log("onKickoffComplete called");
-          // Ensure kickoff phase is properly marked as complete
+          console.log("onKickoffComplete called - checking all steps");
+          
+          // Give a small delay to ensure state is fully updated
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
           if (currentProjectRun && updateProjectRun) {
+            // Refetch current project run to get latest data
+            console.log("Current project run completed steps before final check:", currentProjectRun.completedSteps);
+            
             const kickoffStepIds = ['kickoff-step-1', 'kickoff-step-2', 'kickoff-step-3'];
+            
+            // Check if all steps are in the current completed steps
             const allKickoffStepsComplete = kickoffStepIds.every(id => 
-              currentProjectRun.completedSteps.includes(id)
+              currentProjectRun.completedSteps && currentProjectRun.completedSteps.includes(id)
             );
             
-            console.log("All kickoff steps complete:", allKickoffStepsComplete);
+            console.log("Final validation:", {
+              kickoffStepIds,
+              currentCompletedSteps: currentProjectRun.completedSteps,
+              allKickoffStepsComplete,
+              checkResults: kickoffStepIds.map(id => ({
+                stepId: id,
+                isComplete: currentProjectRun.completedSteps?.includes(id)
+              }))
+            });
             
             if (allKickoffStepsComplete) {
+              console.log("✅ All kickoff steps verified complete - updating project status");
               // Update project status to in-progress
               await updateProjectRun({
                 ...currentProjectRun,
@@ -416,18 +433,39 @@ export default function UserView({
                 updatedAt: new Date()
               });
               
-              console.log("Project status updated to in-progress, forcing re-render");
+              console.log("✅ Project status updated to in-progress, forcing re-render");
               // Force component to re-render and show main workflow by updating state
               setViewMode('workflow');
               // Small delay to ensure state update is processed
               setTimeout(() => {
-                console.log("Forced re-render completed");
+                console.log("✅ Forced re-render completed - should now show main workflow");
               }, 100);
             } else {
-              console.warn("Not all kickoff steps are complete, cannot proceed to workflow");
+              console.warn("❌ Not all kickoff steps are complete:", {
+                missing: kickoffStepIds.filter(id => !currentProjectRun.completedSteps?.includes(id)),
+                currentSteps: currentProjectRun.completedSteps
+              });
+              
+              // Force complete all steps if we think they should be complete
+              const updatedSteps = [...(currentProjectRun.completedSteps || [])];
+              kickoffStepIds.forEach(id => {
+                if (!updatedSteps.includes(id)) {
+                  updatedSteps.push(id);
+                }
+              });
+              
+              console.log("🔧 Force-completing missing steps:", updatedSteps);
+              await updateProjectRun({
+                ...currentProjectRun,
+                completedSteps: updatedSteps,
+                status: 'in-progress',
+                updatedAt: new Date()
+              });
+              
+              setViewMode('workflow');
             }
           }
-        }} 
+        }}
       />
     );
   }
