@@ -52,11 +52,15 @@ export type Database = {
           avatar_url: string | null
           avoid_projects: string[] | null
           created_at: string
-          current_goal: string | null
           display_name: string | null
           email: string | null
+          home_build_year: string | null
+          home_ownership: string | null
+          home_state: string | null
           id: string
+          owned_tools: Json | null
           physical_capability: string | null
+          preferred_learning_methods: string[] | null
           skill_level: string | null
           space_type: string | null
           survey_completed_at: string | null
@@ -67,11 +71,15 @@ export type Database = {
           avatar_url?: string | null
           avoid_projects?: string[] | null
           created_at?: string
-          current_goal?: string | null
           display_name?: string | null
           email?: string | null
+          home_build_year?: string | null
+          home_ownership?: string | null
+          home_state?: string | null
           id?: string
+          owned_tools?: Json | null
           physical_capability?: string | null
+          preferred_learning_methods?: string[] | null
           skill_level?: string | null
           space_type?: string | null
           survey_completed_at?: string | null
@@ -82,11 +90,15 @@ export type Database = {
           avatar_url?: string | null
           avoid_projects?: string[] | null
           created_at?: string
-          current_goal?: string | null
           display_name?: string | null
           email?: string | null
+          home_build_year?: string | null
+          home_ownership?: string | null
+          home_state?: string | null
           id?: string
+          owned_tools?: Json | null
           physical_capability?: string | null
+          preferred_learning_methods?: string[] | null
           skill_level?: string | null
           space_type?: string | null
           survey_completed_at?: string | null
