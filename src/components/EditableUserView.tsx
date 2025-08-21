@@ -68,6 +68,14 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
   const currentStep = allSteps[currentStepIndex];
   const progress = allSteps.length > 0 ? completedSteps.size / allSteps.length * 100 : 0;
 
+  // Debug logging for current step
+  console.log('Current step info:', {
+    id: currentStep?.id,
+    step: currentStep?.step,
+    phaseName: currentStep?.phaseName,
+    operationName: currentStep?.operationName
+  });
+
   const handleNext = () => {
     if (currentStepIndex < allSteps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
@@ -579,7 +587,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
             </Button>
             
             {/* Show ordering button if current step is the ordering step */}
-            {currentStep?.id === 'ordering-step-1' && (
+            {(currentStep?.id === 'ordering-step-1' || currentStep?.step === 'Tool & Material Ordering') && (
               <Button 
                 onClick={() => setOrderingWindowOpen(true)}
                 className="whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white"
@@ -588,6 +596,15 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                 Shop Online
               </Button>
             )}
+            
+            {/* Always show for testing - remove this after debugging */}
+            <Button 
+              onClick={() => setOrderingWindowOpen(true)}
+              className="whitespace-nowrap bg-green-600 hover:bg-green-700 text-white"
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Test Shopping (Debug)
+            </Button>
           </div>
           </div>
 
