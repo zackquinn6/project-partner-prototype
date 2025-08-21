@@ -108,16 +108,24 @@ export default function UserView({
     if (resetToListing) {
       console.log("🔄 UserView: Resetting to listing mode due to resetToListing prop");
       setViewMode('listing');
+      // Also clear any project selections to ensure clean navigation
+      setCurrentProjectRun(null);
     }
-  }, [resetToListing]);
+  }, [resetToListing, setCurrentProjectRun]);
+  
+  // Check if kickoff phase is complete for project runs - MOVED UP to fix TypeScript error
+  const isKickoffComplete = currentProjectRun ? isKickoffPhaseComplete(currentProjectRun.completedSteps) : true;
+  
   const currentStep = allSteps[currentStepIndex];
   const progress = allSteps.length > 0 ? completedSteps.size / allSteps.length * 100 : 0;
   
-  // Update project run progress whenever completed steps change
+  // Update project run progress whenever completed steps change - BUT NOT during kickoff
   useEffect(() => {
-    if (currentProjectRun && allSteps.length > 0) {
+    // CRITICAL: Don't update progress during kickoff phase - it overwrites kickoff steps!
+    if (currentProjectRun && allSteps.length > 0 && isKickoffComplete) {
       const calculatedProgress = completedSteps.size / allSteps.length * 100;
       if (Math.abs(calculatedProgress - (currentProjectRun.progress || 0)) > 0.1) {
+        console.log("📊 UserView: Updating progress for workflow steps (NOT during kickoff)");
         const updatedProjectRun = {
           ...currentProjectRun,
           progress: calculatedProgress,
@@ -126,8 +134,10 @@ export default function UserView({
         };
         updateProjectRun(updatedProjectRun);
       }
+    } else if (currentProjectRun && !isKickoffComplete) {
+      console.log("⚠️ UserView: Skipping progress update during kickoff phase");
     }
-  }, [completedSteps, currentProjectRun, allSteps.length, updateProjectRun]);
+  }, [completedSteps, currentProjectRun, allSteps.length, updateProjectRun, isKickoffComplete]);
   const handleNext = () => {
     if (currentStepIndex < allSteps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
@@ -364,8 +374,6 @@ export default function UserView({
     }, {} as Record<string, any[]>);
     return acc;
   }, {} as Record<string, Record<string, any[]>>) || {};
-  // Check if kickoff phase is complete for project runs
-  const isKickoffComplete = currentProjectRun ? isKickoffPhaseComplete(currentProjectRun.completedSteps) : true;
   
   console.log("UserView debug:", {
     resetToListing,

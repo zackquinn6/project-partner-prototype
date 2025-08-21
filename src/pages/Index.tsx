@@ -47,14 +47,14 @@ const Index = () => {
   };
 
   const handleProjectsView = () => {
-    // Only reset to listing if NOT coming from project setup flow
-    if (!location.state?.projectRunId) {
-      console.log('🔄 Index: Resetting to project listing (no projectRunId in state)');
-      setResetUserView(true);
-      setTimeout(() => setResetUserView(false), 100);
-    } else {
-      console.log('🚫 Index: NOT resetting to listing - maintaining project workflow');
-    }
+    console.log('🔄 Index: "My Projects" clicked - clearing navigation state and resetting to listing');
+    
+    // ALWAYS reset to listing when "My Projects" is clicked, regardless of current state
+    setResetUserView(true);
+    setTimeout(() => setResetUserView(false), 100);
+    
+    // ALWAYS clear the location state when "My Projects" is clicked to ensure navigation works
+    window.history.replaceState({}, document.title, window.location.pathname);
   };
 
   // Listen for edit workflow navigation event
