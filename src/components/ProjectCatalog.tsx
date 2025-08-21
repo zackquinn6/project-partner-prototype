@@ -285,15 +285,18 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       difficulty: selectedTemplate.difficulty,
       estimatedTime: selectedTemplate.estimatedTime
     };
-    addProjectRun(newProjectRun);
-
-    resetProjectState();
-
-    // Navigate to user workflow view with the project run ID from database
-    console.log("🚀 ProjectCatalog: Creating project run and navigating to kickoff");
     
-    // The addProjectRun function will handle navigation after database insertion
-    // No need to navigate here as we need the actual database-generated ID
+    // Pass navigation callback to addProjectRun
+    addProjectRun(newProjectRun, (projectRunId: string) => {
+      console.log("🎯 ProjectCatalog: Project run created, navigating to kickoff with ID:", projectRunId);
+      resetProjectState();
+      navigate('/', {
+        state: {
+          view: 'user',
+          projectRunId: projectRunId
+        }
+      });
+    });
   };
 
   const resetProjectState = () => {
@@ -359,23 +362,28 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       difficulty: selectedTemplate.difficulty,
       estimatedTime: selectedTemplate.estimatedTime
     };
-    addProjectRun(newProjectRun);
-
-    // Reset form and close dialog
-    setProjectSetupForm({
-      customProjectName: '',
-      projectLeader: '',
-      accountabilityPartner: '',
-      targetEndDate: ''
-    });
-    setIsProjectSetupOpen(false);
-    setSelectedTemplate(null);
-
-    // Navigate to user workflow view with the project run ID from database
-    console.log("🚀 ProjectCatalog: Creating project run (skip setup) and navigating to kickoff");
     
-    // The addProjectRun function will handle navigation after database insertion
-    // No need to navigate here as we need the actual database-generated ID
+    // Pass navigation callback to addProjectRun
+    addProjectRun(newProjectRun, (projectRunId: string) => {
+      console.log("🎯 ProjectCatalog: Project run created (skip setup), navigating to kickoff with ID:", projectRunId);
+      
+      // Reset form and close dialog
+      setProjectSetupForm({
+        customProjectName: '',
+        projectLeader: '',
+        accountabilityPartner: '',
+        targetEndDate: ''
+      });
+      setIsProjectSetupOpen(false);
+      setSelectedTemplate(null);
+      
+      navigate('/', {
+        state: {
+          view: 'user',
+          projectRunId: projectRunId
+        }
+      });
+    });
   };
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto px-6 py-8">

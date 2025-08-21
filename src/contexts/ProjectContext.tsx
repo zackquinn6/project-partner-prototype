@@ -15,7 +15,7 @@ interface ProjectContextType {
   setCurrentProject: (project: Project | null) => void;
   setCurrentProjectRun: (projectRun: ProjectRun | null) => void;
   addProject: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  addProjectRun: (projectRun: Omit<ProjectRun, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  addProjectRun: (projectRun: Omit<ProjectRun, 'id' | 'createdAt' | 'updatedAt'>, onSuccess?: (projectRunId: string) => void) => Promise<void>;
   updateProject: (project: Project) => Promise<void>;
   updateProjectRun: (projectRun: ProjectRun) => Promise<void>;
   deleteProject: (projectId: string) => Promise<void>;
@@ -283,7 +283,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     }
   };
 
-  const addProjectRun = async (projectRunData: Omit<ProjectRun, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addProjectRun = async (projectRunData: Omit<ProjectRun, 'id' | 'createdAt' | 'updatedAt'>, onSuccess?: (projectRunId: string) => void) => {
     if (!user) return;
 
     try {
@@ -324,9 +324,13 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
 
       await fetchProjectRuns();
       
-      // Navigate to kickoff workflow with the actual database ID
-      if (data?.id) {
-        console.log("🎯 ProjectContext: Navigating to project run:", data.id);
+      // Call the success callback with the database-generated ID
+      if (data?.id && onSuccess) {
+        console.log("🎯 ProjectContext: Calling onSuccess callback with ID:", data.id);
+        onSuccess(data.id);
+      } else if (data?.id) {
+        // Fallback: dispatch event for Index.tsx (when navigating from home)
+        console.log("🎯 ProjectContext: Dispatching navigation event for Index.tsx");
         window.dispatchEvent(new CustomEvent('navigate-to-kickoff', { 
           detail: { projectRunId: data.id } 
         }));
