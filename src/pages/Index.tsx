@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
+import { useProject } from '@/contexts/ProjectContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import Navigation from "@/components/Navigation";
 import Home from "@/components/Home";
@@ -13,6 +14,7 @@ import { toast } from 'sonner';
 const Index = () => {
   const { user, loading } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
+  const { setCurrentProject, setCurrentProjectRun } = useProject();
   const navigate = useNavigate();
   const location = useLocation();
   const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user' | 'editWorkflow'>('home');
@@ -52,14 +54,18 @@ const Index = () => {
     // Clear the location state first to ensure clean navigation
     window.history.replaceState({}, document.title, window.location.pathname);
     
+    // Immediately clear any project selections to prevent auto-switch to workflow
+    setCurrentProject(null);
+    setCurrentProjectRun(null);
+    
     // Force reset to listing when "My Projects" is clicked
     setResetUserView(true);
     
-    // Keep the reset state active longer to ensure it takes effect
+    // Keep the reset state active longer to ensure it takes effect  
     setTimeout(() => {
       console.log('🔄 Index: Clearing resetUserView after delay');
       setResetUserView(false);
-    }, 200);
+    }, 1000);
   };
 
   // Listen for edit workflow navigation event
