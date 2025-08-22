@@ -107,10 +107,19 @@ export default function UserView({
     }
   }, [currentProjectRun?.completedSteps]);
   
-  // Navigate to first incomplete step when workflow opens
+  // Navigate to first incomplete step when workflow opens - with better debugging
   useEffect(() => {
     if (viewMode === 'workflow' && allSteps.length > 0 && isKickoffComplete) {
       const firstIncompleteIndex = allSteps.findIndex(step => !completedSteps.has(step.id));
+      console.log("🎯 Step navigation debug:", {
+        totalSteps: allSteps.length,
+        completedStepsCount: completedSteps.size,
+        firstIncompleteIndex,
+        currentStepIndex,
+        firstIncompleteStep: allSteps[firstIncompleteIndex],
+        allStepIds: allSteps.map(s => ({ id: s.id, name: s.step, completed: completedSteps.has(s.id) }))
+      });
+      
       if (firstIncompleteIndex !== -1 && firstIncompleteIndex !== currentStepIndex) {
         console.log("🎯 Navigating to first incomplete step:", firstIncompleteIndex, allSteps[firstIncompleteIndex]?.step);
         setCurrentStepIndex(firstIncompleteIndex);
@@ -596,7 +605,12 @@ export default function UserView({
     processedPhases: processedPhases.length,
     phaseNames: processedPhases.map(p => p.name),
     currentStepId: currentStep?.id,
-    currentStepName: currentStep?.step
+    currentStepName: currentStep?.step,
+    currentStepIndex,
+    allStepsCount: allSteps.length,
+    completedStepsArray: Array.from(completedSteps),
+    orderingStepExists: allSteps.find(s => s.id === 'ordering-step-1'),
+    orderingStepCompleted: completedSteps.has('ordering-step-1')
   });
   
   console.log("UserView debug:", {
