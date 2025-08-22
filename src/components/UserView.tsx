@@ -145,10 +145,9 @@ export default function UserView({
     if (resetToListing) {
       console.log("🔄 UserView: Resetting to listing mode due to resetToListing prop");
       setViewMode('listing');
-      // Also clear any project selections to ensure clean navigation
-      setCurrentProjectRun(null);
+      // DON'T clear project run - this was causing the Continue button issue
     }
-  }, [resetToListing, setCurrentProjectRun]);
+  }, [resetToListing]);
 
   // Auto-switch to workflow view when a project or project run is selected (but respect resetToListing and forceListingMode)
   useEffect(() => {
