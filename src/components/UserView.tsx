@@ -312,6 +312,12 @@ export default function UserView({
   const handleStepComplete = async () => {
     if (!currentStep) return;
     
+    console.log("🎯 handleStepComplete called for step:", {
+      stepId: currentStep.id,
+      stepName: currentStep.step,
+      stepPhase: currentStep.phaseName
+    });
+    
     // Check if all outputs for this step are completed
     const stepOutputs = currentStep.outputs || [];
     const stepCheckedOutputs = checkedOutputs[currentStep.id] || new Set();
@@ -359,18 +365,34 @@ export default function UserView({
       // End time tracking for step
       endTimeTracking('step', currentStep.id);
       
-      // Check if this completes a phase
+      // Check if this completes a phase - with detailed logging
+      console.log("🔍 Checking if step completion triggers phase completion...");
       const currentPhase = getCurrentPhase();
-      const phaseSteps = getAllStepsInPhase(currentPhase);
-      const newCompletedStepsSet = new Set(newCompletedSteps);
-      const isPhaseComplete = phaseSteps.every(step => newCompletedStepsSet.has(step.id));
       
-      if (isPhaseComplete && currentPhase) {
-        console.log("🎯 Phase completed:", currentPhase.name);
-        setCurrentCompletedPhaseName(currentPhase.name);
-        // End time tracking for phase
-        endTimeTracking('phase', currentPhase.id);
-        setPhaseCompletionOpen(true);
+      if (currentPhase) {
+        console.log("🔍 Current phase found:", currentPhase.name);
+        const phaseSteps = getAllStepsInPhase(currentPhase);
+        console.log("🔍 Phase steps:", phaseSteps.map(s => ({ id: s.id, name: s.step })));
+        
+        const newCompletedStepsSet = new Set(newCompletedSteps);
+        const isPhaseComplete = phaseSteps.every(step => newCompletedStepsSet.has(step.id));
+        
+        console.log("🔍 Phase completion check:", {
+          phaseName: currentPhase.name,
+          totalPhaseSteps: phaseSteps.length,
+          completedPhaseSteps: phaseSteps.filter(step => newCompletedStepsSet.has(step.id)).length,
+          isPhaseComplete
+        });
+        
+        if (isPhaseComplete) {
+          console.log("🎯 Phase completed:", currentPhase.name);
+          setCurrentCompletedPhaseName(currentPhase.name);
+          // End time tracking for phase
+          endTimeTracking('phase', currentPhase.id);
+          setPhaseCompletionOpen(true);
+        }
+      } else {
+        console.log("❌ No current phase found for step:", currentStep.id);
       }
       
       // Move to next step
@@ -389,15 +411,33 @@ export default function UserView({
 
   // Helper functions for phase completion check
   const getCurrentPhase = () => {
-    if (!currentStep || !activeProject) return null;
+    if (!currentStep || !activeProject) {
+      console.log("🔍 getCurrentPhase: Missing currentStep or activeProject", {
+        currentStep: currentStep?.id,
+        currentStepName: currentStep?.step,
+        activeProject: !!activeProject
+      });
+      return null;
+    }
+    
+    console.log("🔍 getCurrentPhase: Searching for step", {
+      stepId: currentStep.id,
+      stepName: currentStep.step,
+      totalPhases: activeProject.phases.length
+    });
     
     for (const phase of activeProject.phases) {
-      for (const operation of phase.operations) {
+      console.log("🔍 Checking phase:", phase.name, "with", phase.operations?.length || 0, "operations");
+      for (const operation of phase.operations || []) {
+        console.log("🔍 Checking operation:", operation.name, "with", operation.steps?.length || 0, "steps");
         if (operation.steps.some(step => step.id === currentStep.id)) {
+          console.log("🎯 Found current step in phase:", phase.name);
           return phase;
         }
       }
     }
+    
+    console.log("❌ getCurrentPhase: Step not found in any phase!");
     return null;
   };
 
