@@ -88,13 +88,27 @@ Date: ${new Date().toLocaleDateString()}
     
     console.log("ProjectAgreementStep - Agreement signed, calling onComplete");
     
-    // Store the agreement in the project run
+    // Store the agreement in the project run's phases structure
     if (currentProjectRun) {
+      const updatedPhases = [...currentProjectRun.phases];
+      const kickoffPhase = updatedPhases.find(p => p.id === 'kickoff-phase');
+      
+      if (kickoffPhase) {
+        const agreementStep = kickoffPhase.operations?.[0]?.steps?.find(s => s.id === 'kickoff-step-2');
+        if (agreementStep && agreementStep.outputs?.[0]) {
+          // Store the full agreement data in the output (extending the type)
+          (agreementStep.outputs[0] as any).agreement = {
+            signedAt: new Date().toISOString(),
+            signerName: signerName,
+            signature: signature,
+            agreementText: agreementText
+          };
+        }
+      }
+
       updateProjectRun({
         ...currentProjectRun,
-        // Store agreement data in a custom field
-        // @ts-ignore - extending the interface temporarily
-        projectAgreement: agreement,
+        phases: updatedPhases,
         updatedAt: new Date()
       });
     }
