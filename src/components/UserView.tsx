@@ -976,9 +976,10 @@ export default function UserView({
                 <Button 
                   variant="destructive" 
                   onClick={() => setUnplannedWorkOpen(true)}
-                  className="w-full"
+                  className="w-full flex flex-col h-auto py-3 px-4"
                 >
-                  ❗ Add Unplanned Work
+                  <div className="text-lg font-semibold">❗ Call an audible</div>
+                  <div className="text-sm text-destructive-foreground">Add unplanned work</div>
                 </Button>
               )}
             </div>
