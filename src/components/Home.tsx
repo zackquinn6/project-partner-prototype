@@ -123,7 +123,6 @@ const Home = ({ onViewChange }: HomeProps) => {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-primary py-20 md:py-32">
-        <div className="absolute inset-0 bg-primary/90" />
         <div className="relative container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-center lg:text-left">
@@ -472,9 +471,8 @@ const Home = ({ onViewChange }: HomeProps) => {
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 bg-gradient-primary">
-        <div className="absolute inset-0 bg-primary/90" />
-        <div className="relative container mx-auto px-4 text-center">
+      <section className="py-20 bg-primary">
+        <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-6">
             🏆 Your Next DIY Win Starts Here
           </h2>

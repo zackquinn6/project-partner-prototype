@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Info, ShoppingCart, Plus, Award } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Info, ShoppingCart, Plus, Award, Eye, EyeOff } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
 import { Output } from '@/interfaces/Project';
@@ -22,6 +22,7 @@ import { KickoffWorkflow } from './KickoffWorkflow';
 import { UnplannedWorkWindow } from './UnplannedWorkWindow';
 import { CompletionCertificate } from './CompletionCertificate';
 import { ProjectSurvey } from './ProjectSurvey';
+import { ToolsMaterialsSection } from './ToolsMaterialsSection';
 import { isKickoffPhaseComplete, addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 interface UserViewProps {
   resetToListing?: boolean;
@@ -85,6 +86,9 @@ export default function UserView({
   const [unplannedWorkOpen, setUnplannedWorkOpen] = useState(false);
   const [completionCertificateOpen, setCompletionCertificateOpen] = useState(false);
   const [projectSurveyOpen, setProjectSurveyOpen] = useState(false);
+  
+  // Workflow progress visibility state
+  const [workflowProgressVisible, setWorkflowProgressVisible] = useState(true);
 
   // Check if kickoff phase is complete for project runs - MOVED UP to fix TypeScript error
   const isKickoffComplete = currentProjectRun ? isKickoffPhaseComplete(currentProjectRun.completedSteps) : true;
@@ -951,9 +955,10 @@ export default function UserView({
   }
   return (
     <div className="container mx-auto px-6 py-8">
-      <div className="grid lg:grid-cols-4 gap-8">
-        {/* Sidebar - Move Help button to top */}
-        <Card className="lg:col-span-1 gradient-card border-0 shadow-card">
+      <div className={`grid gap-8 ${workflowProgressVisible ? 'lg:grid-cols-4' : 'lg:grid-cols-1'}`}>
+        {/* Sidebar - Collapsible Workflow Progress */}
+        {workflowProgressVisible && (
+          <Card className="lg:col-span-1 gradient-card border-0 shadow-card">
           <CardHeader>
             <div className="space-y-4">
               <div>
@@ -966,10 +971,9 @@ export default function UserView({
               {/* Help button prominently at top */}
               <Button 
                 onClick={() => setHelpPopupOpen(true)}
-                className="w-full flex flex-col h-auto py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 text-center"
               >
-                <div className="text-lg font-semibold">Call the Coach</div>
-                <div className="text-sm opacity-90">Stuck? Get help now.</div>
+                <div className="text-sm font-semibold">Call the Coach</div>
               </Button>
               
               {/* Add unplanned work button */}
@@ -977,10 +981,9 @@ export default function UserView({
                 <Button 
                   variant="destructive" 
                   onClick={() => setUnplannedWorkOpen(true)}
-                  className="w-full flex flex-col h-auto py-3 px-4"
+                  className="w-full py-2 px-4 text-center"
                 >
-                  <div className="text-lg font-semibold">❗ Call an audible</div>
-                  <div className="text-sm text-destructive-foreground">Add unplanned work</div>
+                  <div className="text-sm font-semibold">❗ Call an audible</div>
                 </Button>
               )}
             </div>
@@ -1046,9 +1049,22 @@ export default function UserView({
             </div>
           </CardContent>
         </Card>
+        )}
 
         {/* Main Content */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className={`space-y-6 ${workflowProgressVisible ? 'lg:col-span-3' : 'lg:col-span-1'}`}>
+          {/* Show/Hide Progress Button */}
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setWorkflowProgressVisible(!workflowProgressVisible)}
+              className="flex items-center gap-2"
+            >
+              {workflowProgressVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {workflowProgressVisible ? 'Hide Progress' : 'Show Progress'}
+            </Button>
+          </div>
           {/* Header */}
           <Card className="gradient-card border-0 shadow-card">
             <CardHeader>
@@ -1081,6 +1097,17 @@ export default function UserView({
             </CardHeader>
           </Card>
 
+          {/* Tools & Materials Section - At Top */}
+          {currentStep && (currentStep.materials?.length > 0 || currentStep.tools?.length > 0) && (
+            <ToolsMaterialsSection
+              currentStep={currentStep}
+              checkedMaterials={checkedMaterials[currentStep.id] || new Set()}
+              checkedTools={checkedTools[currentStep.id] || new Set()}
+              onToggleMaterial={(materialId) => toggleMaterialCheck(currentStep.id, materialId)}
+              onToggleTool={(toolId) => toggleToolCheck(currentStep.id, toolId)}
+            />
+          )}
+
           {/* Content */}
           <Card className="gradient-card border-0 shadow-card">
             <CardContent className="p-8">
@@ -1088,93 +1115,12 @@ export default function UserView({
             </CardContent>
           </Card>
 
-          {/* Materials, Tools, and Outputs */}
-          {currentStep && (currentStep.materials?.length > 0 || currentStep.tools?.length > 0 || currentStep.outputs?.length > 0) && <Card className="gradient-card border-0 shadow-card">
+          {/* Outputs */}
+          {currentStep && currentStep.outputs?.length > 0 && (
+            <Card className="gradient-card border-0 shadow-card">
               <CardContent className="p-6">
-                <Accordion type="multiple" defaultValue={["materials", "tools", "outputs"]} className="w-full">
-                  {/* Materials */}
-                  {currentStep.materials?.length > 0 && (() => {
-                    const stepMaterials = checkedMaterials[currentStep.id] || new Set();
-                    const completedCount = stepMaterials.size;
-                    const totalCount = currentStep.materials.length;
-                    const isAllCompleted = completedCount === totalCount;
-                    
-                    return <AccordionItem value="materials">
-                      <AccordionTrigger className="text-lg font-semibold">
-                        <div className="flex items-center gap-2">
-                          <span>Materials Needed</span>
-                          <Badge variant={isAllCompleted ? "default" : "outline"} className={isAllCompleted ? "bg-green-500 text-white" : ""}>
-                            {completedCount}/{totalCount}
-                          </Badge>
-                          {isAllCompleted && <CheckCircle className="w-4 h-4 text-green-500" />}
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-3 pt-2">
-                          {currentStep.materials.map(material => <div key={material.id} className="p-3 bg-background/50 rounded-lg">
-                              <div className="flex items-start gap-3">
-                                <Checkbox 
-                                  id={`material-${material.id}`}
-                                  checked={stepMaterials.has(material.id)}
-                                  onCheckedChange={() => toggleMaterialCheck(currentStep.id, material.id)}
-                                  className="mt-1"
-                                />
-                                <div className="flex-1">
-                                  <div className="font-medium">{material.name}</div>
-                                  {material.category && <Badge variant="outline" className="text-xs mt-1">{material.category}</Badge>}
-                                  {material.description && <div className="text-sm text-muted-foreground mt-1">{material.description}</div>}
-                                </div>
-                              </div>
-                            </div>)}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>;
-                  })()}
-
-                  {/* Tools */}
-                  {currentStep.tools?.length > 0 && (() => {
-                    const stepTools = checkedTools[currentStep.id] || new Set();
-                    const completedCount = stepTools.size;
-                    const totalCount = currentStep.tools.length;
-                    const isAllCompleted = completedCount === totalCount;
-                    
-                    return <AccordionItem value="tools">
-                      <AccordionTrigger className="text-lg font-semibold">
-                        <div className="flex items-center gap-2">
-                          <span>Tools Required</span>
-                          <Badge variant={isAllCompleted ? "default" : "outline"} className={isAllCompleted ? "bg-green-500 text-white" : ""}>
-                            {completedCount}/{totalCount}
-                          </Badge>
-                          {isAllCompleted && <CheckCircle className="w-4 h-4 text-green-500" />}
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-3 pt-2">
-                          {currentStep.tools.map(tool => <div key={tool.id} className="p-3 bg-background/50 rounded-lg">
-                              <div className="flex items-start gap-3">
-                                <Checkbox 
-                                  id={`tool-${tool.id}`}
-                                  checked={stepTools.has(tool.id)}
-                                  onCheckedChange={() => toggleToolCheck(currentStep.id, tool.id)}
-                                  className="mt-1"
-                                />
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <div className="font-medium">{tool.name}</div>
-                                    {tool.required && <Badge variant="destructive" className="text-xs">Required</Badge>}
-                                  </div>
-                                  {tool.category && <Badge variant="outline" className="text-xs mt-1">{tool.category}</Badge>}
-                                  {tool.description && <div className="text-sm text-muted-foreground mt-1">{tool.description}</div>}
-                                </div>
-                              </div>
-                            </div>)}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>;
-                  })()}
-
-                  {/* Outputs */}
-                  {currentStep.outputs?.length > 0 && (() => {
+                <Accordion type="multiple" defaultValue={["outputs"]} className="w-full">
+                  {(() => {
                     const stepOutputs = checkedOutputs[currentStep.id] || new Set();
                     const completedCount = stepOutputs.size;
                     const totalCount = currentStep.outputs.length;
@@ -1192,7 +1138,8 @@ export default function UserView({
                       </AccordionTrigger>
                       <AccordionContent>
                         <div className="space-y-3 pt-2">
-                          {currentStep.outputs.map(output => <div key={output.id} className="p-3 bg-background/50 rounded-lg">
+                          {currentStep.outputs.map(output => (
+                            <div key={output.id} className="p-3 bg-background/50 rounded-lg">
                               <div className="flex items-start gap-3">
                                 <Checkbox 
                                   id={`output-${output.id}`}
@@ -1200,32 +1147,34 @@ export default function UserView({
                                   onCheckedChange={() => toggleOutputCheck(currentStep.id, output.id)}
                                   className="mt-1"
                                 />
-                                 <div className="flex-1">
-                                   <div className="flex items-center gap-2">
-                                     <div className="font-medium">{output.name}</div>
-                                     <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
-                                     <button
-                                       onClick={() => {
-                                         setSelectedOutput(output);
-                                         setOutputPopupOpen(true);
-                                       }}
-                                       className="p-1 rounded-full hover:bg-muted transition-colors"
-                                       title="View output details"
-                                     >
-                                       <Info className="w-3 h-3 text-muted-foreground hover:text-primary" />
-                                     </button>
-                                   </div>
-                                   <div className="text-sm text-muted-foreground mt-1">{output.description}</div>
-                                 </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <div className="font-medium">{output.name}</div>
+                                    <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
+                                    <button
+                                      onClick={() => {
+                                        setSelectedOutput(output);
+                                        setOutputPopupOpen(true);
+                                      }}
+                                      className="p-1 rounded-full hover:bg-muted transition-colors"
+                                      title="View output details"
+                                    >
+                                      <Info className="w-3 h-3 text-muted-foreground hover:text-primary" />
+                                    </button>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground mt-1">{output.description}</div>
+                                </div>
                               </div>
-                            </div>)}
+                            </div>
+                          ))}
                         </div>
                       </AccordionContent>
                     </AccordionItem>;
                   })()}
                 </Accordion>
               </CardContent>
-            </Card>}
+            </Card>
+          )}
 
           {/* Navigation */}
           <Card className="gradient-card border-0 shadow-card">

@@ -13,6 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useProject } from '@/contexts/ProjectContext';
 import { WorkflowStep, Material, Tool, Output, Phase, Operation } from '@/interfaces/Project';
 import { OutputEditForm } from './OutputEditForm';
+import { MultiContentEditor } from './MultiContentEditor';
 import { toast } from 'sonner';
 
 interface EditWorkflowViewProps {
