@@ -107,27 +107,51 @@ export default function UserView({
     }
   }, [currentProjectRun?.completedSteps]);
   
-  // Navigate to first incomplete step when workflow opens - with better debugging
+  // Navigate to first incomplete step when workflow opens - ENHANCED DEBUG VERSION
   useEffect(() => {
     if (viewMode === 'workflow' && allSteps.length > 0 && isKickoffComplete) {
       const firstIncompleteIndex = allSteps.findIndex(step => !completedSteps.has(step.id));
-      console.log("🎯 Step navigation debug:", {
+      
+      console.log("🎯 Step navigation initialization:", {
         totalSteps: allSteps.length,
         completedStepsCount: completedSteps.size,
         firstIncompleteIndex,
         currentStepIndex,
-        firstIncompleteStep: allSteps[firstIncompleteIndex],
-        allStepIds: allSteps.map(s => ({ id: s.id, name: s.step, completed: completedSteps.has(s.id) }))
+        firstIncompleteStep: allSteps[firstIncompleteIndex] ? {
+          id: allSteps[firstIncompleteIndex].id,
+          name: allSteps[firstIncompleteIndex].step,
+          phaseName: allSteps[firstIncompleteIndex].phaseName
+        } : null,
+        stepsByPhase: allSteps.reduce((acc, step, index) => {
+          if (!acc[step.phaseName]) acc[step.phaseName] = [];
+          acc[step.phaseName].push({
+            index,
+            id: step.id,
+            name: step.step,
+            completed: completedSteps.has(step.id)
+          });
+          return acc;
+        }, {} as Record<string, any[]>)
       });
       
+      // FIXED: Only auto-navigate if we haven't manually set a step
       if (firstIncompleteIndex !== -1 && firstIncompleteIndex !== currentStepIndex) {
-        console.log("🎯 Navigating to first incomplete step:", firstIncompleteIndex, allSteps[firstIncompleteIndex]?.step);
+        console.log("🎯 Auto-navigating to first incomplete step:", {
+          newIndex: firstIncompleteIndex,
+          stepName: allSteps[firstIncompleteIndex]?.step,
+          stepPhase: allSteps[firstIncompleteIndex]?.phaseName
+        });
         setCurrentStepIndex(firstIncompleteIndex);
-        // Scroll to top of page
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
+    } else {
+      console.log("🎯 Step navigation blocked:", {
+        viewMode,
+        allStepsLength: allSteps.length,
+        isKickoffComplete
+      });
     }
-  }, [viewMode, allSteps.length, isKickoffComplete, completedSteps, currentStepIndex]);
+  }, [viewMode, allSteps.length, isKickoffComplete, completedSteps]);
 
   // Load project run if projectRunId is provided
   useEffect(() => {
@@ -374,7 +398,7 @@ export default function UserView({
       // End time tracking for step
       endTimeTracking('step', currentStep.id);
       
-      // Check if this completes a phase - with detailed logging
+      // Check if this completes a phase - FIXED VERSION
       console.log("🔍 Checking if step completion triggers phase completion...");
       const currentPhase = getCurrentPhase();
       
@@ -390,7 +414,9 @@ export default function UserView({
           phaseName: currentPhase.name,
           totalPhaseSteps: phaseSteps.length,
           completedPhaseSteps: phaseSteps.filter(step => newCompletedStepsSet.has(step.id)).length,
-          isPhaseComplete
+          isPhaseComplete,
+          currentStepName: currentStep.step,
+          currentStepPhase: currentStep.phaseName
         });
         
         if (isPhaseComplete) {
@@ -399,9 +425,18 @@ export default function UserView({
           // End time tracking for phase
           endTimeTracking('phase', currentPhase.id);
           setPhaseCompletionOpen(true);
+        } else {
+          console.log("🔍 Phase not yet complete:", {
+            phaseName: currentPhase.name,
+            remainingSteps: phaseSteps.filter(step => !newCompletedStepsSet.has(step.id)).map(s => s.step)
+          });
         }
       } else {
-        console.log("❌ No current phase found for step:", currentStep.id);
+        console.log("❌ No current phase found for step:", {
+          stepId: currentStep.id,
+          stepName: currentStep.step,
+          expectedPhase: currentStep.phaseName
+        });
       }
       
       // Move to next step
@@ -418,7 +453,7 @@ export default function UserView({
     }
   };
 
-  // Helper functions for phase completion check
+  // Helper functions for phase completion check - FIXED VERSION
   const getCurrentPhase = () => {
     if (!currentStep || !activeProject) {
       console.log("🔍 getCurrentPhase: Missing currentStep or activeProject", {
@@ -429,33 +464,42 @@ export default function UserView({
       return null;
     }
     
-    // Use the same processed phases as allSteps to ensure consistency
+    // CRITICAL FIX: Use the step's stored phaseName first as it's most reliable
+    if (currentStep.phaseName) {
+      const processedPhases = addStandardPhasesToProjectRun(activeProject.phases);
+      const phaseByName = processedPhases.find(phase => phase.name === currentStep.phaseName);
+      
+      if (phaseByName) {
+        console.log("🎯 getCurrentPhase: Found phase by stored phaseName:", {
+          stepId: currentStep.id,
+          stepName: currentStep.step,
+          phaseName: currentStep.phaseName,
+          foundPhase: phaseByName.name
+        });
+        return phaseByName;
+      }
+    }
+    
+    // FALLBACK: Search through phases to find the step (should not be needed with correct data)
     const processedPhases = addStandardPhasesToProjectRun(activeProject.phases);
     
-    console.log("🔍 getCurrentPhase: Searching for step", {
+    console.log("🔍 getCurrentPhase: Fallback search for step", {
       stepId: currentStep.id,
       stepName: currentStep.step,
-      stepPhaseName: currentStep.phaseName, // Log the step's stored phase name
+      stepPhaseName: currentStep.phaseName,
       totalPhases: processedPhases.length,
       phaseNames: processedPhases.map(p => p.name)
     });
     
     for (const phase of processedPhases) {
-      console.log("🔍 Checking phase:", phase.name, "with", phase.operations?.length || 0, "operations");
       for (const operation of phase.operations || []) {
-        console.log("🔍 Checking operation:", operation.name, "with", operation.steps?.length || 0, "steps");
-        // Log all step IDs in this operation for debugging
-        const stepIds = operation.steps.map(s => s.id);
-        console.log("🔍 Operation step IDs:", stepIds);
-        
         if (operation.steps.some(step => step.id === currentStep.id)) {
-          console.log("🎯 Found current step in phase:", phase.name, "operation:", operation.name);
-          console.log("🔍 Step details:", {
+          console.log("🎯 getCurrentPhase: Found step in phase via fallback search:", {
             stepId: currentStep.id,
             stepName: currentStep.step,
             foundInPhase: phase.name,
             foundInOperation: operation.name,
-            stepStoredPhaseName: currentStep.phaseName
+            expectedPhaseName: currentStep.phaseName
           });
           return phase;
         }
@@ -463,14 +507,6 @@ export default function UserView({
     }
     
     console.log("❌ getCurrentPhase: Step not found in any phase!");
-    console.log("🔍 All available steps in project:");
-    processedPhases.forEach(phase => {
-      phase.operations.forEach(operation => {
-        operation.steps.forEach(step => {
-          console.log(`   Phase: ${phase.name}, Operation: ${operation.name}, Step: ${step.id} (${step.step})`);
-        });
-      });
-    });
     return null;
   };
 
@@ -925,19 +961,34 @@ export default function UserView({
                        completedSteps.has(step.id) ? 'bg-green-50 text-green-700 border-green-200' : 
                        'hover:bg-muted/50 border-transparent hover:border-muted-foreground/20'
                      }`} 
-                     onClick={() => {
-                       console.log('Step clicked:', step.step, 'index:', stepIndex);
-                        // Allow clicking on any step after kickoff is complete
+                      onClick={() => {
+                        console.log('🎯 Step clicked:', {
+                          stepName: step.step,
+                          stepIndex,
+                          stepId: step.id,
+                          isKickoffComplete,
+                          currentStepIndex
+                        });
+                        
+                        // FIXED: Allow clicking on any step after kickoff is complete (no progression restriction)
                         if (stepIndex >= 0 && isKickoffComplete) {
-                          console.log('Navigating to step:', stepIndex, step.step);
+                          console.log('🎯 Navigating to step:', {
+                            newIndex: stepIndex,
+                            stepName: step.step,
+                            stepId: step.id
+                          });
                           setCurrentStepIndex(stepIndex);
                           // Start time tracking for the new step
                           startTimeTracking('step', step.id);
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                         } else {
-                          console.log('Step navigation blocked - kickoff not complete or invalid index');
+                          console.log('❌ Step navigation blocked:', {
+                            reason: stepIndex < 0 ? 'Invalid step index' : 'Kickoff not complete',
+                            stepIndex,
+                            isKickoffComplete
+                          });
                         }
-                     }}>
+                      }}>
                             <div className="flex items-center gap-2">
                               {completedSteps.has(step.id) && <CheckCircle className="w-4 h-4" />}
                               <span className="truncate">{step.step}</span>
