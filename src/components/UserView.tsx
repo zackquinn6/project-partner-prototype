@@ -703,7 +703,8 @@ export default function UserView({
                      }`} 
                      onClick={() => {
                        console.log('Step clicked:', step.step, 'index:', stepIndex);
-                       if (stepIndex >= 0) {
+                       // Allow clicking on any step during workflow (not during kickoff)
+                       if (stepIndex >= 0 && isKickoffComplete) {
                          setCurrentStepIndex(stepIndex);
                          window.scrollTo({ top: 0, behavior: 'smooth' });
                        }
