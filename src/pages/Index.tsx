@@ -19,6 +19,7 @@ const Index = () => {
   const location = useLocation();
   const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user' | 'editWorkflow'>('home');
   const [resetUserView, setResetUserView] = useState(false);
+  const [forceListingMode, setForceListingMode] = useState(false);
 
   useEffect(() => {
     // Redirect to auth if not logged in
@@ -49,7 +50,7 @@ const Index = () => {
   };
 
   const handleProjectsView = () => {
-    console.log('🔄 Index: "My Projects" clicked - clearing navigation state and resetting to listing');
+    console.log('🔄 Index: "My Projects" clicked - forcing listing mode');
     
     // Clear the location state first to ensure clean navigation
     window.history.replaceState({}, document.title, window.location.pathname);
@@ -58,14 +59,19 @@ const Index = () => {
     setCurrentProject(null);
     setCurrentProjectRun(null);
     
-    // Force reset to listing when "My Projects" is clicked
+    // Force listing mode - this won't auto-clear like resetUserView
+    setForceListingMode(true);
     setResetUserView(true);
     
-    // Keep the reset state active longer to ensure it takes effect  
+    // Clear the resetUserView quickly but keep forceListingMode active
     setTimeout(() => {
-      console.log('🔄 Index: Clearing resetUserView after delay');
       setResetUserView(false);
-    }, 1000);
+    }, 100);
+  };
+
+  const handleProjectSelected = () => {
+    console.log('🎯 Index: Project selected from dropdown - clearing force listing mode');
+    setForceListingMode(false);
   };
 
   // Listen for edit workflow navigation event
@@ -120,7 +126,8 @@ const Index = () => {
           currentView: currentView
         });
         return <UserView 
-          resetToListing={resetUserView} 
+          resetToListing={resetUserView || forceListingMode} 
+          forceListingMode={forceListingMode}
           onProjectSelected={() => {
             console.log('🎯 Index: onProjectSelected called');
             setCurrentView('user');
@@ -136,7 +143,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <Navigation currentView={currentView} onViewChange={setCurrentView} onAdminAccess={handleAdminAccess} onProjectsView={handleProjectsView} />
+      <Navigation currentView={currentView} onViewChange={setCurrentView} onAdminAccess={handleAdminAccess} onProjectsView={handleProjectsView} onProjectSelected={handleProjectSelected} />
       {renderView()}
     </div>
   );

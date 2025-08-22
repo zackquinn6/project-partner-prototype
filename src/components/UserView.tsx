@@ -22,11 +22,13 @@ import { KickoffWorkflow } from './KickoffWorkflow';
 import { isKickoffPhaseComplete, addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 interface UserViewProps {
   resetToListing?: boolean;
+  forceListingMode?: boolean;
   onProjectSelected?: () => void;
   projectRunId?: string;
 }
 export default function UserView({
   resetToListing,
+  forceListingMode,
   onProjectSelected,
   projectRunId
 }: UserViewProps) {
@@ -140,11 +142,11 @@ export default function UserView({
     }
   }, [resetToListing, setCurrentProjectRun]);
 
-  // Auto-switch to workflow view when a project or project run is selected (but respect resetToListing)
+  // Auto-switch to workflow view when a project or project run is selected (but respect resetToListing and forceListingMode)
   useEffect(() => {
-    // CRITICAL: DON'T auto-switch if we're being told to reset to listing
-    if (resetToListing) {
-      console.log("🚫 UserView: Blocking auto-switch due to resetToListing");
+    // CRITICAL: DON'T auto-switch if we're being told to reset to listing OR if we're in force listing mode
+    if (resetToListing || forceListingMode) {
+      console.log("🚫 UserView: Blocking auto-switch due to resetToListing or forceListingMode");
       return;
     }
     
@@ -152,7 +154,7 @@ export default function UserView({
       console.log("🔄 UserView: Auto-switching to workflow mode");
       setViewMode('workflow');
     }
-  }, [currentProject, currentProjectRun, resetToListing]);
+  }, [currentProject, currentProjectRun, resetToListing, forceListingMode]);
   
   const currentStep = allSteps[currentStepIndex];
   const progress = allSteps.length > 0 ? completedSteps.size / allSteps.length * 100 : 0;

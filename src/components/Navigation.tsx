@@ -9,12 +9,14 @@ interface NavigationProps {
   onViewChange: (view: 'home' | 'admin' | 'user' | 'editWorkflow') => void;
   onAdminAccess: () => void;
   onProjectsView?: () => void;
+  onProjectSelected?: () => void;
 }
 export default function Navigation({
   currentView,
   onViewChange,
   onAdminAccess,
-  onProjectsView
+  onProjectsView,
+  onProjectSelected
 }: NavigationProps) {
   // Add error boundary for useProject hook
   let projectData;
@@ -74,7 +76,8 @@ export default function Navigation({
                       onClick={() => {
                         setCurrentProjectRun(projectRun);
                         onViewChange('user');
-                        // Don't call onProjectsView - we want to go directly to workflow
+                        // Clear forcing listing mode when project is selected from dropdown
+                        onProjectSelected?.();
                       }}
                       className={`cursor-pointer ${currentProjectRun?.id === projectRun.id ? 'bg-primary/10 text-primary' : ''}`}
                     >
