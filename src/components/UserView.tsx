@@ -966,9 +966,10 @@ export default function UserView({
               {/* Help button prominently at top */}
               <Button 
                 onClick={() => setHelpPopupOpen(true)}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-full flex flex-col h-auto py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white"
               >
-                Stuck? Get Help
+                <div className="text-lg font-semibold">Call the Coach</div>
+                <div className="text-sm opacity-90">Stuck? Get help now.</div>
               </Button>
               
               {/* Add unplanned work button */}

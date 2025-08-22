@@ -58,37 +58,56 @@ export const ProjectAgreementsWindow: React.FC<ProjectAgreementsWindowProps> = (
   const fetchAgreements = async () => {
     setLoading(true);
     try {
-      // Fetch project runs with signed agreements
+      // Fetch project runs and their user profiles separately for signed agreements
       const { data: projectRuns, error } = await supabase
         .from('project_runs')
-        .select('*, profiles(email, display_name)')
+        .select('*')
         .not('phases', 'is', null);
 
       if (error) throw error;
 
-      // Process project runs to extract signed agreements
-      const agreementsWithSignatures = projectRuns
-        ?.filter(run => {
-          const phases = run.phases as any[];
-          const kickoffPhase = phases?.find(p => p.id === 'kickoff-phase');
-          const agreementStep = kickoffPhase?.operations?.[0]?.steps?.find(s => s.id === 'kickoff-step-2');
-          return agreementStep?.outputs?.[0]?.agreement;
-        })
-        .map(run => {
-          const phases = run.phases as any[];
-          const kickoffPhase = phases?.find(p => p.id === 'kickoff-phase');
-          const agreementStep = kickoffPhase?.operations?.[0]?.steps?.find(s => s.id === 'kickoff-step-2');
-          const agreement = agreementStep?.outputs?.[0]?.agreement;
-          
-          return {
-            id: run.id,
-            user_id: run.user_id,
-            name: run.name,
-            created_at: run.created_at,
-            agreement,
-            profile: run.profiles
-          };
-        }) || [];
+      // Get user IDs from project runs that have signed agreements
+      const projectRunsWithAgreements = projectRuns?.filter(run => {
+        const phases = run.phases as any[];
+        const kickoffPhase = phases?.find(p => p.id === 'kickoff-phase');
+        const agreementStep = kickoffPhase?.operations?.[0]?.steps?.find(s => s.id === 'kickoff-step-2');
+        return agreementStep?.outputs?.[0]?.agreement;
+      }) || [];
+
+      if (projectRunsWithAgreements.length === 0) {
+        setAgreements([]);
+        return;
+      }
+
+      // Fetch profiles for these users
+      const userIds = projectRunsWithAgreements.map(run => run.user_id);
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, email, display_name')
+        .in('user_id', userIds);
+
+      if (profilesError) throw profilesError;
+
+      // Process project runs to extract signed agreements and merge with profiles
+      const agreementsWithSignatures = projectRunsWithAgreements.map(run => {
+        const phases = run.phases as any[];
+        const kickoffPhase = phases?.find(p => p.id === 'kickoff-phase');
+        const agreementStep = kickoffPhase?.operations?.[0]?.steps?.find(s => s.id === 'kickoff-step-2');
+        const agreement = agreementStep?.outputs?.[0]?.agreement;
+        const profile = profiles?.find(p => p.user_id === run.user_id);
+        
+        return {
+          id: run.id,
+          user_id: run.user_id,
+          name: run.name,
+          created_at: run.created_at,
+          agreement,
+          profile: profile ? {
+            email: profile.email || '',
+            display_name: profile.display_name || ''
+          } : undefined
+        };
+      });
 
       setAgreements(agreementsWithSignatures);
     } catch (error) {
