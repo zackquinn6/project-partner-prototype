@@ -435,6 +435,7 @@ export default function UserView({
     console.log("🔍 getCurrentPhase: Searching for step", {
       stepId: currentStep.id,
       stepName: currentStep.step,
+      stepPhaseName: currentStep.phaseName, // Log the step's stored phase name
       totalPhases: processedPhases.length,
       phaseNames: processedPhases.map(p => p.name)
     });
@@ -443,14 +444,33 @@ export default function UserView({
       console.log("🔍 Checking phase:", phase.name, "with", phase.operations?.length || 0, "operations");
       for (const operation of phase.operations || []) {
         console.log("🔍 Checking operation:", operation.name, "with", operation.steps?.length || 0, "steps");
+        // Log all step IDs in this operation for debugging
+        const stepIds = operation.steps.map(s => s.id);
+        console.log("🔍 Operation step IDs:", stepIds);
+        
         if (operation.steps.some(step => step.id === currentStep.id)) {
-          console.log("🎯 Found current step in phase:", phase.name);
+          console.log("🎯 Found current step in phase:", phase.name, "operation:", operation.name);
+          console.log("🔍 Step details:", {
+            stepId: currentStep.id,
+            stepName: currentStep.step,
+            foundInPhase: phase.name,
+            foundInOperation: operation.name,
+            stepStoredPhaseName: currentStep.phaseName
+          });
           return phase;
         }
       }
     }
     
     console.log("❌ getCurrentPhase: Step not found in any phase!");
+    console.log("🔍 All available steps in project:");
+    processedPhases.forEach(phase => {
+      phase.operations.forEach(operation => {
+        operation.steps.forEach(step => {
+          console.log(`   Phase: ${phase.name}, Operation: ${operation.name}, Step: ${step.id} (${step.step})`);
+        });
+      });
+    });
     return null;
   };
 

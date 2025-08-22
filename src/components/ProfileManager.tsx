@@ -174,10 +174,10 @@ export default function ProfileManager({
         <div className="flex justify-center gap-3">
           <Button onClick={handleStartEdit} className="flex items-center gap-2">
             <Edit3 className="w-4 h-4" />
-            Update Profile
+            Edit profile
           </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
+            Save Profile
           </Button>
         </div>
       </div>
