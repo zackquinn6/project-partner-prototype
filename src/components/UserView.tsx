@@ -134,15 +134,32 @@ export default function UserView({
         }, {} as Record<string, any[]>)
       });
       
-      // FIXED: Only auto-navigate if we haven't manually set a step
-      if (firstIncompleteIndex !== -1 && firstIncompleteIndex !== currentStepIndex) {
+      // CRITICAL FIX: Don't auto-navigate if user manually selected a step
+      // Only auto-navigate on initial load or when no specific step is selected
+      const shouldAutoNavigate = firstIncompleteIndex !== -1 && (
+        currentStepIndex === 0 || // Initial load
+        allSteps[currentStepIndex] && completedSteps.has(allSteps[currentStepIndex].id) // Current step is completed
+      );
+      
+      if (shouldAutoNavigate) {
         console.log("🎯 Auto-navigating to first incomplete step:", {
           newIndex: firstIncompleteIndex,
           stepName: allSteps[firstIncompleteIndex]?.step,
-          stepPhase: allSteps[firstIncompleteIndex]?.phaseName
+          stepPhase: allSteps[firstIncompleteIndex]?.phaseName,
+          reason: currentStepIndex === 0 ? 'Initial load' : 'Current step completed'
         });
         setCurrentStepIndex(firstIncompleteIndex);
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        console.log("🎯 Keeping current step:", {
+          currentIndex: currentStepIndex,
+          currentStep: allSteps[currentStepIndex] ? {
+            id: allSteps[currentStepIndex].id,
+            name: allSteps[currentStepIndex].step,
+            phase: allSteps[currentStepIndex].phaseName
+          } : null,
+          reason: 'User manually selected or no incomplete steps'
+        });
       }
     } else {
       console.log("🎯 Step navigation blocked:", {
@@ -348,7 +365,26 @@ export default function UserView({
     console.log("🎯 handleStepComplete called for step:", {
       stepId: currentStep.id,
       stepName: currentStep.step,
-      stepPhase: currentStep.phaseName
+      stepPhase: currentStep.phaseName,
+      currentStepIndex,
+      totalSteps: allSteps.length,
+      allStepNames: allSteps.map((s, i) => ({ index: i, id: s.id, name: s.step, phase: s.phaseName }))
+    });
+    
+    // CRITICAL DEBUG: Check if we're actually on the step the user thinks we're on
+    console.log("🔍 STEP MISMATCH DEBUG:", {
+      userExpectedPhase: "Ordering", // User says they're completing ordering
+      actualCurrentStep: {
+        id: currentStep.id,
+        name: currentStep.step,
+        phase: currentStep.phaseName,
+        index: currentStepIndex
+      },
+      orderingSteps: allSteps.filter(s => s.phaseName === 'Ordering').map((s, i) => ({
+        stepId: s.id,
+        stepName: s.step,
+        globalIndex: allSteps.findIndex(step => step.id === s.id)
+      }))
     });
     
     // Check if all outputs for this step are completed
