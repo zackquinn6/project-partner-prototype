@@ -72,6 +72,7 @@ const Index = () => {
   const handleProjectSelected = () => {
     console.log('🎯 Index: Project selected from dropdown - clearing force listing mode');
     setForceListingMode(false);
+    setResetUserView(false); // Also clear reset flag when project is selected
   };
 
   // Listen for edit workflow navigation event
@@ -129,7 +130,9 @@ const Index = () => {
           resetToListing={resetUserView || forceListingMode} 
           forceListingMode={forceListingMode}
           onProjectSelected={() => {
-            console.log('🎯 Index: onProjectSelected called');
+            console.log('🎯 Index: onProjectSelected called - clearing all reset flags');
+            setForceListingMode(false);
+            setResetUserView(false);
             setCurrentView('user');
           }} 
           projectRunId={location.state?.projectRunId} 

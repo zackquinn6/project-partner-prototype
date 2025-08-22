@@ -397,84 +397,106 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     }
   };
 
-  // Add a ref to track if an update is in progress to prevent cascading failures
+  // Add refs to track update state and implement debouncing
   const updateInProgressRef = useRef(false);
+  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastUpdateRef = useRef<string>('');
 
   const updateProjectRun = async (projectRun: ProjectRun) => {
     if (!user) return;
 
-    // Prevent concurrent updates that could cause cascading failures
-    if (updateInProgressRef.current) {
-      console.log("🔄 ProjectContext - Update already in progress, skipping");
+    // Create a unique key for this update to detect duplicates
+    const updateKey = `${projectRun.id}-${projectRun.progress}-${JSON.stringify(projectRun.completedSteps)}`;
+    
+    // Skip if this is the exact same update as the last one
+    if (lastUpdateRef.current === updateKey) {
+      console.log("🔄 ProjectContext - Skipping duplicate update");
       return;
     }
 
-    updateInProgressRef.current = true;
-
-    try {
-      // Ensure progress is always an integer to prevent database errors
-      const safeProgress = Math.round(projectRun.progress || 0);
-
-      console.log("🔄 ProjectContext - Updating project run:", {
-        id: projectRun.id,
-        completedSteps: projectRun.completedSteps,
-        status: projectRun.status,
-        progress: safeProgress
-      });
-
-      const { error } = await supabase
-        .from('project_runs')
-        .update({
-          name: projectRun.name,
-          description: projectRun.description,
-          start_date: projectRun.startDate.toISOString(),
-          plan_end_date: projectRun.planEndDate.toISOString(),
-          end_date: projectRun.endDate?.toISOString(),
-          status: projectRun.status,
-          project_leader: projectRun.projectLeader,
-          accountability_partner: projectRun.accountabilityPartner,
-          custom_project_name: projectRun.customProjectName,
-          current_phase_id: projectRun.currentPhaseId,
-          current_operation_id: projectRun.currentOperationId,
-          current_step_id: projectRun.currentStepId,
-          completed_steps: JSON.stringify(projectRun.completedSteps),
-          progress: safeProgress,
-          phases: JSON.stringify(projectRun.phases),
-          category: projectRun.category,
-          difficulty: projectRun.difficulty,
-          estimated_time: projectRun.estimatedTime
-        })
-        .eq('id', projectRun.id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      // Update local state immediately for better UX
-      setProjectRuns(prevRuns => 
-        prevRuns.map(run => run.id === projectRun.id ? { ...projectRun, progress: safeProgress } : run)
-      );
-      
-      // Update currentProjectRun if it's the one being updated
-      if (currentProjectRun?.id === projectRun.id) {
-        setCurrentProjectRun({ ...projectRun, progress: safeProgress });
-      }
-
-      console.log("✅ ProjectContext - Project run updated successfully");
-      
-    } catch (error) {
-      console.error('❌ Error updating project run:', error);
-      
-      // Only show toast for non-network errors to prevent spam
-      if (error instanceof Error && !error.message.includes('Failed to fetch')) {
-        toast({
-          title: "Error",
-          description: "Failed to update project run",
-          variant: "destructive",
-        });
-      }
-    } finally {
-      updateInProgressRef.current = false;
+    // Clear any pending updates
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
     }
+
+    // Debounce updates to prevent rapid-fire calls
+    updateTimeoutRef.current = setTimeout(async () => {
+      // Prevent concurrent updates that could cause cascading failures
+      if (updateInProgressRef.current) {
+        console.log("🔄 ProjectContext - Update already in progress, queuing...");
+        // Retry after a short delay
+        setTimeout(() => updateProjectRun(projectRun), 100);
+        return;
+      }
+
+      updateInProgressRef.current = true;
+      lastUpdateRef.current = updateKey;
+
+      try {
+        // Ensure progress is always an integer to prevent database errors
+        const safeProgress = Math.round(projectRun.progress || 0);
+
+        console.log("🔄 ProjectContext - Updating project run:", {
+          id: projectRun.id,
+          completedSteps: projectRun.completedSteps,
+          status: projectRun.status,
+          progress: safeProgress
+        });
+
+        const { error } = await supabase
+          .from('project_runs')
+          .update({
+            name: projectRun.name,
+            description: projectRun.description,
+            start_date: projectRun.startDate.toISOString(),
+            plan_end_date: projectRun.planEndDate.toISOString(),
+            end_date: projectRun.endDate?.toISOString(),
+            status: projectRun.status,
+            project_leader: projectRun.projectLeader,
+            accountability_partner: projectRun.accountabilityPartner,
+            custom_project_name: projectRun.customProjectName,
+            current_phase_id: projectRun.currentPhaseId,
+            current_operation_id: projectRun.currentOperationId,
+            current_step_id: projectRun.currentStepId,
+            completed_steps: JSON.stringify(projectRun.completedSteps),
+            progress: safeProgress,
+            phases: JSON.stringify(projectRun.phases),
+            category: projectRun.category,
+            difficulty: projectRun.difficulty,
+            estimated_time: projectRun.estimatedTime
+          })
+          .eq('id', projectRun.id)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        // Update local state immediately for better UX
+        setProjectRuns(prevRuns => 
+          prevRuns.map(run => run.id === projectRun.id ? { ...projectRun, progress: safeProgress } : run)
+        );
+        
+        // Update currentProjectRun if it's the one being updated
+        if (currentProjectRun?.id === projectRun.id) {
+          setCurrentProjectRun({ ...projectRun, progress: safeProgress });
+        }
+
+        console.log("✅ ProjectContext - Project run updated successfully");
+        
+      } catch (error) {
+        console.error('❌ Error updating project run:', error);
+        
+        // Only show toast for non-network errors to prevent spam
+        if (error instanceof Error && !error.message.includes('Failed to fetch')) {
+          toast({
+            title: "Error",
+            description: "Failed to update project run",
+            variant: "destructive",
+          });
+        }
+      } finally {
+        updateInProgressRef.current = false;
+      }
+    }, 300); // 300ms debounce
   };
 
   const deleteProject = async (projectId: string) => {

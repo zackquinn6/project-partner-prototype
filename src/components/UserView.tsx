@@ -309,22 +309,64 @@ export default function UserView({
     return step.outputs.every(output => stepOutputs.has(output.id));
   };
 
-  const handleComplete = () => {
-    if (currentStep && areAllOutputsCompleted(currentStep)) {
-      console.log("Completing step:", currentStep.step);
-      setCompletedSteps(prev => new Set([...prev, currentStep.id]));
+  const handleStepComplete = async () => {
+    if (!currentStep) return;
+    
+    // Check if all outputs for this step are completed
+    const stepOutputs = currentStep.outputs || [];
+    const stepCheckedOutputs = checkedOutputs[currentStep.id] || new Set();
+    const allOutputsCompleted = stepOutputs.length === 0 || stepOutputs.every(output => 
+      stepCheckedOutputs.has(output.id)
+    );
+    
+    if (allOutputsCompleted) {
+      console.log("🎯 Completing step:", currentStep.step, "ID:", currentStep.id);
       
-      // End time tracking for current step
+      // Add step to completed steps with immediate persistence
+      const newCompletedSteps = [...new Set([...completedSteps, currentStep.id])];
+      setCompletedSteps(new Set(newCompletedSteps));
+      
+      // Immediately update the project run to persist the step completion
+      if (currentProjectRun) {
+        const kickoffStepIds = ['kickoff-step-1', 'kickoff-step-2', 'kickoff-step-3'];
+        const preservedKickoffSteps = currentProjectRun.completedSteps.filter(stepId => 
+          kickoffStepIds.includes(stepId)
+        );
+        
+        const workflowCompletedSteps = newCompletedSteps.filter(stepId => !stepId.startsWith('kickoff-'));
+        const allCompletedSteps = [...preservedKickoffSteps, ...workflowCompletedSteps];
+        const uniqueCompletedSteps = [...new Set(allCompletedSteps)];
+        
+        const totalSteps = allSteps.length;
+        const calculatedProgress = (workflowCompletedSteps.length / totalSteps) * 100;
+        
+        const updatedProjectRun = {
+          ...currentProjectRun,
+          completedSteps: uniqueCompletedSteps,
+          progress: Math.round(calculatedProgress),
+          updatedAt: new Date()
+        };
+        
+        console.log("🎯 Immediately persisting step completion:", {
+          stepId: currentStep.id,
+          newCompletedSteps: uniqueCompletedSteps,
+          progress: Math.round(calculatedProgress)
+        });
+        
+        await updateProjectRun(updatedProjectRun);
+      }
+      
+      // End time tracking for step
       endTimeTracking('step', currentStep.id);
       
       // Check if this completes a phase
       const currentPhase = getCurrentPhase();
       const phaseSteps = getAllStepsInPhase(currentPhase);
-      const newCompletedSteps = new Set([...completedSteps, currentStep.id]);
-      const isPhaseComplete = phaseSteps.every(step => newCompletedSteps.has(step.id));
+      const newCompletedStepsSet = new Set(newCompletedSteps);
+      const isPhaseComplete = phaseSteps.every(step => newCompletedStepsSet.has(step.id));
       
       if (isPhaseComplete && currentPhase) {
-        console.log("Phase completed:", currentPhase.name);
+        console.log("🎯 Phase completed:", currentPhase.name);
         setCurrentCompletedPhaseName(currentPhase.name);
         // End time tracking for phase
         endTimeTracking('phase', currentPhase.id);
@@ -333,15 +375,15 @@ export default function UserView({
       
       // Move to next step
       if (currentStepIndex < allSteps.length - 1) {
-        console.log("Moving to next step");
+        console.log("🎯 Moving to next step");
         handleNext();
       } else {
-        console.log("All steps completed! Project finished.");
+        console.log("🎯 All steps completed! Project finished.");
         // Trigger completion certificate and survey
         setCompletionCertificateOpen(true);
       }
     } else {
-      console.log("Cannot complete step - not all outputs are completed");
+      console.log("❌ Cannot complete step - not all outputs are completed");
     }
   };
 
@@ -1030,7 +1072,7 @@ export default function UserView({
                 <div className="flex items-center gap-3">
                   {currentStep && !completedSteps.has(currentStep.id) && (
                     areAllOutputsCompleted(currentStep) ? (
-                      <Button onClick={handleComplete} className="gradient-primary text-white shadow-elegant hover:shadow-lg transition-smooth">
+                      <Button onClick={handleStepComplete} className="gradient-primary text-white shadow-elegant hover:shadow-lg transition-smooth">
                         <CheckCircle className="w-4 h-4 mr-2" />
                         Mark Complete
                       </Button>

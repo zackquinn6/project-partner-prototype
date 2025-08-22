@@ -48,7 +48,10 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
   };
 
   const handleOpenProjectRun = (projectRun: ProjectRun) => {
+    console.log("🎯 ProjectListing: Opening project run:", projectRun.id);
     setCurrentProjectRun(projectRun);
+    // Clear any navigation state to ensure clean transition
+    window.history.replaceState({}, document.title, window.location.pathname);
     // Signal to parent that we want to switch to workflow mode for this project run
     onProjectSelect?.('workflow' as any);
   };
