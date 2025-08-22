@@ -727,15 +727,6 @@ export default function UserView({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                      {currentStep?.phaseName}
-                    </Badge>
-                    <span className="text-muted-foreground">→</span>
-                    <Badge variant="outline">
-                      {currentStep?.operationName}
-                    </Badge>
-                  </div>
                   <CardTitle className="text-2xl">{currentStep?.step}</CardTitle>
                   {currentStep?.description && <CardDescription className="text-base">
                       {currentStep.description}
