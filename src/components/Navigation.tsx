@@ -74,8 +74,7 @@ export default function Navigation({
                       onClick={() => {
                         setCurrentProjectRun(projectRun);
                         onViewChange('user');
-                        // This will trigger the workflow view
-                        onProjectsView?.();
+                        // Don't call onProjectsView - we want to go directly to workflow
                       }}
                       className={`cursor-pointer ${currentProjectRun?.id === projectRun.id ? 'bg-primary/10 text-primary' : ''}`}
                     >
