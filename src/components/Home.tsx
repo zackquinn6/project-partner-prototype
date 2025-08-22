@@ -126,10 +126,6 @@ const Home = ({ onViewChange }: HomeProps) => {
         <div className="relative container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent-foreground px-4 py-2 rounded-full mb-6">
-                <Trophy className="h-5 w-5" />
-                <span className="text-sm font-medium">Project Partner</span>
-              </div>
               
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-primary mb-6">
                 🏆 Win the Game of DIY
