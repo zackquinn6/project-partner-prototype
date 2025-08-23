@@ -73,4 +73,62 @@ export interface ProjectRun {
     improvementSuggestions: string;
     submittedAt: string;
   };
+
+  // Advanced Features Data
+  skill_profile?: {
+    skillLevel: 'novice' | 'intermediate' | 'expert';
+    learningStyle: 'visual' | 'hands-on' | 'detailed' | 'quick-reference';
+    completionTimes: Record<string, number>;
+    confidenceRatings: Record<string, number>;
+    preferredGuidanceLevel: 'minimal' | 'standard' | 'detailed' | 'comprehensive';
+  };
+
+  delay_detection?: {
+    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    predictedDelay: number; // days
+    delayFactors: string[];
+    lastAnalyzed: string;
+  };
+
+  feedback_data?: Array<{
+    stepId: string;
+    type: 'quick' | 'detailed';
+    rating: number;
+    issues: string[];
+    suggestions: string;
+    timestamp: string;
+  }>;
+
+  weather_alerts?: Array<{
+    type: 'rain' | 'snow' | 'extreme-cold' | 'extreme-heat';
+    severity: 'watch' | 'warning' | 'advisory';
+    affectedPhases: string[];
+    recommendations: string[];
+    alertDate: string;
+  }>;
+
+  workflow_optimizations?: Array<{
+    type: 'step-reorder' | 'tool-consolidation' | 'time-reduction';
+    description: string;
+    timeSavings: number; // minutes
+    applied: boolean;
+    appliedDate?: string;
+  }>;
+
+  calendar_integration?: {
+    scheduledDays: Record<string, {
+      date: string;
+      timeSlots: Array<{
+        startTime: string;
+        endTime: string;
+        phaseId?: string;
+        operationId?: string;
+      }>;
+    }>;
+    preferences: {
+      preferredStartTime: string;
+      maxHoursPerDay: number;
+      preferredDays: number[];
+    };
+  };
 }
