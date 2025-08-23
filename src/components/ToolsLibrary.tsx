@@ -7,6 +7,7 @@ import { Search, Plus, Edit, Trash2, Image } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { LibraryItemForm } from "./LibraryItemForm";
+import { BulkUpload } from "./BulkUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -27,6 +28,7 @@ export function ToolsLibrary() {
   const [editingTool, setEditingTool] = useState<Tool | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
 
   const fetchTools = async () => {
     try {
@@ -98,6 +100,13 @@ export function ToolsLibrary() {
             className="pl-10"
           />
         </div>
+        <Button
+          variant="outline"
+          onClick={() => setShowBulkUpload(true)}
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Bulk Upload
+        </Button>
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogTrigger asChild>
             <Button>
@@ -213,6 +222,13 @@ export function ToolsLibrary() {
           )}
         </DialogContent>
       </Dialog>
+
+      <BulkUpload
+        type="tools"
+        open={showBulkUpload}
+        onOpenChange={setShowBulkUpload}
+        onSuccess={handleSave}
+      />
     </div>
   );
 }

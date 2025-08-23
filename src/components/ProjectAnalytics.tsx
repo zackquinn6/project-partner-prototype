@@ -1,55 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
 import { CheckCircle, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
 import { useProject } from '@/contexts/ProjectContext';
+import { AnalyticsFilters } from './AnalyticsFilters';
+import { generateDemoData, calculateRealAnalytics, exportAnalyticsData, AnalyticsData } from '@/utils/analyticsData';
+import { DateRange } from 'react-day-picker';
 
 const ProjectAnalytics: React.FC = () => {
-  const { projects } = useProject();
+  const { projects, projectRuns } = useProject();
+  
+  // Filter states
+  const [selectedProject, setSelectedProject] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [demoMode, setDemoMode] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
 
-  // Mock analytics data for prototyping
-  const analyticsData = {
-    totalCompletions: 847,
-    averageDuration: 12.5, // days
-    completionRate: 89.2, // percentage
-    issueReportRate: 23.4 // percentage
+  // Calculate analytics data
+  useEffect(() => {
+    if (demoMode) {
+      setAnalyticsData(generateDemoData());
+    } else {
+      const realData = calculateRealAnalytics(
+        projectRuns,
+        selectedProject,
+        selectedCategory,
+        dateRange
+      );
+      setAnalyticsData(realData);
+    }
+  }, [projectRuns, selectedProject, selectedCategory, dateRange, demoMode]);
+
+  const handleExport = () => {
+    if (analyticsData) {
+      exportAnalyticsData(analyticsData, {
+        project: selectedProject,
+        category: selectedCategory,
+        dateRange
+      });
+    }
   };
 
-  // Mock project duration distribution (bell curve data)
-  const durationData = [
-    { days: 5, projects: 12 },
-    { days: 7, projects: 34 },
-    { days: 9, projects: 67 },
-    { days: 11, projects: 89 },
-    { days: 13, projects: 125 }, // peak around average
-    { days: 15, projects: 98 },
-    { days: 17, projects: 72 },
-    { days: 19, projects: 45 },
-    { days: 21, projects: 23 },
-    { days: 23, projects: 11 },
-    { days: 25, projects: 6 }
-  ];
-
-  // Mock time spent at each step data
-  const stepTimeData = [
-    { step: 'Planning & Prep', avgHours: 3.2, completions: 847 },
-    { step: 'Material Gathering', avgHours: 1.8, completions: 820 },
-    { step: 'Surface Preparation', avgHours: 4.5, completions: 798 },
-    { step: 'Primary Work', avgHours: 8.3, completions: 785 },
-    { step: 'Quality Check', avgHours: 1.1, completions: 761 },
-    { step: 'Final Cleanup', avgHours: 2.2, completions: 751 },
-    { step: 'Documentation', avgHours: 0.8, completions: 742 }
-  ];
-
-  // Mock issue distribution data
-  const issueData = [
-    { name: 'No Issues', value: 76.6, count: 649 },
-    { name: 'Material Issues', value: 12.3, count: 104 },
-    { name: 'Unclear Instructions', value: 7.2, count: 61 },
-    { name: 'Tool Problems', value: 2.8, count: 24 },
-    { name: 'Safety Concerns', value: 1.1, count: 9 }
-  ];
+  if (!analyticsData) {
+    return <div className="flex justify-center p-8">Loading analytics...</div>;
+  }
 
   const COLORS = ['hsl(var(--primary))', 'hsl(var(--destructive))', 'hsl(var(--warning))', 'hsl(var(--secondary))', 'hsl(var(--muted))'];
 
@@ -62,6 +58,19 @@ const ProjectAnalytics: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Analytics Filters */}
+      <AnalyticsFilters
+        selectedProject={selectedProject}
+        onProjectChange={setSelectedProject}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+        demoMode={demoMode}
+        onDemoModeToggle={() => setDemoMode(!demoMode)}
+        onExport={handleExport}
+        projects={projects}
+      />
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="gradient-card border-0 shadow-card">
@@ -81,7 +90,7 @@ const ProjectAnalytics: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Avg Duration</p>
-                <p className="text-2xl font-bold">{analyticsData.averageDuration} days</p>
+                <p className="text-2xl font-bold">{analyticsData.averageDuration.toFixed(1)} days</p>
               </div>
               <Clock className="h-8 w-8 text-blue-600" />
             </div>
@@ -93,7 +102,7 @@ const ProjectAnalytics: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Completion Rate</p>
-                <p className="text-2xl font-bold">{analyticsData.completionRate}%</p>
+                <p className="text-2xl font-bold">{analyticsData.completionRate.toFixed(1)}%</p>
               </div>
               <TrendingUp className="h-8 w-8 text-primary" />
             </div>
@@ -105,7 +114,7 @@ const ProjectAnalytics: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Issue Reports</p>
-                <p className="text-2xl font-bold">{analyticsData.issueReportRate}%</p>
+                <p className="text-2xl font-bold">{analyticsData.issueReportRate.toFixed(1)}%</p>
               </div>
               <AlertTriangle className="h-8 w-8 text-orange-600" />
             </div>
@@ -119,12 +128,12 @@ const ProjectAnalytics: React.FC = () => {
           <CardHeader>
             <CardTitle>Project Duration Distribution</CardTitle>
             <CardDescription>
-              Bell curve showing project completion times (avg: {analyticsData.averageDuration} days)
+              Bell curve showing project completion times (avg: {analyticsData.averageDuration.toFixed(1)} days)
             </CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={durationData}>
+              <AreaChart data={analyticsData.durationData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
                   dataKey="days" 
@@ -168,7 +177,7 @@ const ProjectAnalytics: React.FC = () => {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={issueData}
+                  data={analyticsData.issueData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -177,12 +186,12 @@ const ProjectAnalytics: React.FC = () => {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {issueData.map((entry, index) => (
+                  {analyticsData.issueData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip 
-                  formatter={(value, name) => [`${value}% (${issueData.find(d => d.name === name)?.count} projects)`, name]}
+                  formatter={(value, name) => [`${value}% (${analyticsData.issueData.find(d => d.name === name)?.count} projects)`, name]}
                   contentStyle={{
                     backgroundColor: 'hsl(var(--background))',
                     border: '1px solid hsl(var(--border))',
@@ -205,7 +214,7 @@ const ProjectAnalytics: React.FC = () => {
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={stepTimeData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <BarChart data={analyticsData.stepTimeData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis 
                 dataKey="step" 
@@ -240,8 +249,10 @@ const ProjectAnalytics: React.FC = () => {
           <div className="mt-6 space-y-2">
             <h4 className="font-semibold text-sm text-muted-foreground">Step Completion Rates</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-              {stepTimeData.map((step, index) => {
-                const completionRate = ((step.completions / analyticsData.totalCompletions) * 100).toFixed(1);
+              {analyticsData.stepTimeData.map((step, index) => {
+                const completionRate = analyticsData.totalCompletions > 0 
+                  ? ((step.completions / analyticsData.totalCompletions) * 100).toFixed(1)
+                  : '0';
                 return (
                   <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded">
                     <span className="text-sm truncate">{step.step}</span>

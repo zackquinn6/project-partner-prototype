@@ -162,9 +162,9 @@ const Home = ({ onViewChange }: HomeProps) => {
             
             <div className="relative flex justify-center items-center">
               <img 
-                src={projectPartnerLogo} 
-                alt="Project Partner Logo" 
-                className="w-full max-w-md h-auto"
+                src="/lovable-uploads/ced88968-ca61-4fed-bee4-d2ea417c247c.png" 
+                alt="DIY Project Partner" 
+                className="w-full max-w-md h-auto rounded-lg shadow-lg"
                 style={{ transform: 'scale(1.15)' }}
               />
             </div>
