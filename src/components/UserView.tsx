@@ -961,6 +961,19 @@ export default function UserView({
           <Card className="lg:col-span-1 gradient-card border-0 shadow-card">
           <CardHeader>
             <div className="space-y-4">
+              {/* Hide Workflow Button */}
+              <div className="flex justify-start">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setWorkflowProgressVisible(!workflowProgressVisible)}
+                  className="flex items-center gap-2"
+                >
+                  <EyeOff className="w-4 h-4" />
+                  Hide Workflow
+                </Button>
+              </div>
+              
               <div>
                 <CardTitle className="text-lg">Workflow Progress</CardTitle>
                 <CardDescription>
@@ -1053,18 +1066,20 @@ export default function UserView({
 
         {/* Main Content */}
         <div className={`space-y-6 ${workflowProgressVisible ? 'lg:col-span-3' : 'lg:col-span-1'}`}>
-          {/* Show/Hide Progress Button */}
-          <div className="flex justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setWorkflowProgressVisible(!workflowProgressVisible)}
-              className="flex items-center gap-2"
-            >
-              {workflowProgressVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              {workflowProgressVisible ? 'Hide Progress' : 'Show Progress'}
-            </Button>
-          </div>
+          {/* Show Workflow Button - Only show when workflow is hidden */}
+          {!workflowProgressVisible && (
+            <div className="flex justify-start mb-6">
+              <Button
+                variant="outline" 
+                size="sm"
+                onClick={() => setWorkflowProgressVisible(true)}
+                className="flex items-center gap-2"
+              >
+                <Eye className="w-4 h-4" />
+                Show Workflow
+              </Button>
+            </div>
+          )}
           {/* Header */}
           <Card className="gradient-card border-0 shadow-card">
             <CardHeader>
