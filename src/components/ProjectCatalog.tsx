@@ -400,12 +400,11 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
 
         <div className="text-center mb-8">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4">
-            Choose Your{" "}
             <span className="bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
-              Project
+              Project Catalog
             </span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Select an expertly crafted workflow to get started with confidence</p>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Select a base project to get started with confidence</p>
         </div>
 
         {/* Filters Header Bar */}

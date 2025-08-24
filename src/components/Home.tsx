@@ -298,8 +298,8 @@ export const Home = () => {
             <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
               Every Champion Starts with a Gameplan
             </h2>
-            <p className="text-xl text-muted-foreground italic">
-              "A good plan turns a weekend warrior into a project MVP."
+            <p className="text-xl text-muted-foreground">
+              Project Partner is the one-stop shop for running a DIY project. Tools, knowledge, project management, and project enablers built into one place. Our core value is: keep the player on the field. One single app to better DIY - thats our mission.
             </p>
           </div>
           
