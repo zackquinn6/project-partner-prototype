@@ -215,7 +215,7 @@ export const Home = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button size="lg" className="px-6 md:px-8 text-base md:text-lg" asChild>
                   <Link to="/projects">
-                    {user ? "Go to My Projects" : "Browse Projects"}
+                    {user ? "View Projects" : "View Projects"}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
