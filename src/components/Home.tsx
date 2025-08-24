@@ -152,23 +152,42 @@ export const Home = () => {
   return (
     <div className="min-h-screen">
       <section className="relative overflow-hidden bg-primary py-20 md:py-32">
-        <nav className="flex items-center justify-between p-6">
+        <nav className="flex items-center justify-between p-6 relative z-10">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 text-primary-foreground">
               <HomeIcon className="h-6 w-6" />
               <span className="text-xl font-bold">ProjectPartner</span>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost">About</Button>
-            <Button variant="ghost">Features</Button>
-            <Button variant="ghost">Pricing</Button>
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+              onClick={() => handleScrollToSection('features')}
+            >
+              Features
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+              onClick={() => handleScrollToSection('about')}
+            >
+              About
+            </Button>
             {user ? (
-              <Button asChild>
+              <Button 
+                variant="secondary"
+                className="ml-2"
+                asChild
+              >
                 <Link to="/projects">My Projects</Link>
               </Button>
             ) : (
-              <Button asChild>
+              <Button 
+                variant="secondary"
+                className="ml-2"
+                asChild
+              >
                 <Link to="/auth">
                   <LogIn className="mr-2 h-4 w-4" />
                   Sign In
