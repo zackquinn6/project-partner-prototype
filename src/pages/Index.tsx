@@ -48,12 +48,6 @@ const Index = () => {
     };
   }, [navigate]);
 
-  // CONDITIONAL LOGIC AFTER ALL HOOKS
-  // Show public home page if not logged in
-  if (!user) {
-    return <Home />;
-  }
-
   const handleAdminAccess = () => {
     if (isAdmin) {
       setCurrentView('admin');
@@ -88,6 +82,12 @@ const Index = () => {
     setResetUserView(false); // Also clear reset flag when project is selected
   };
 
+  // CONDITIONAL LOGIC AFTER ALL HOOKS
+  // Show public home page if not logged in
+  if (!user) {
+    return <Home onProjectsView={handleProjectsView} />;
+  }
+
   // This useEffect is now at the top with other hooks
 
   const renderView = () => {
@@ -116,7 +116,7 @@ const Index = () => {
       case 'editWorkflow':
         return <EditWorkflowView onBackToAdmin={() => setCurrentView('admin')} />;
       default:
-        return <Home />;
+        return <Home onProjectsView={handleProjectsView} />;
     }
   };
 
