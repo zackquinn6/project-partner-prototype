@@ -151,7 +151,7 @@ export const Home = () => {
 
   return (
     <div className="min-h-screen">
-      <section className="relative overflow-hidden bg-primary pt-32 pb-20 md:pt-40 md:pb-32">
+      <section className="relative overflow-hidden bg-primary pt-20 pb-20 md:pt-24 md:pb-32">
         {/* Fixed header navigation bar */}
         <nav className="fixed top-0 left-0 right-0 bg-primary/95 backdrop-blur-sm z-50 border-b border-primary-foreground/20">
           <div className="container mx-auto px-4 flex items-center justify-between h-16">
@@ -159,7 +159,7 @@ export const Home = () => {
               <img 
                 src="/lovable-uploads/1a837ddc-50ca-40f7-b975-0ad92fdf9882.png" 
                 alt="Project Partner Logo" 
-                className="h-8 w-auto"
+                className="h-12 w-auto"
               />
             </div>
             
@@ -176,39 +176,26 @@ export const Home = () => {
                 variant="ghost" 
                 size="sm"
                 className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground text-sm"
-                onClick={() => handleScrollToSection('about')}
+                onClick={() => handleScrollToSection('about-project-partner')}
               >
                 About
               </Button>
-              {user ? (
-                <Button 
-                  variant="secondary"
-                  size="sm"
-                  className="ml-1"
-                  asChild
-                >
-                  <Link to="/projects">My Projects</Link>
-                </Button>
-              ) : (
-                <>
-                  <Button 
-                    variant="ghost"
-                    size="sm"
-                    className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground text-sm"
-                    asChild
-                  >
-                    <Link to="/auth">Sign In</Link>
-                  </Button>
-                  <Button 
-                    variant="secondary"
-                    size="sm"
-                    className="ml-1"
-                    asChild
-                  >
-                    <Link to="/auth?mode=signup">Sign Up</Link>
-                  </Button>
-                </>
-              )}
+              <Button 
+                variant="ghost"
+                size="sm"
+                className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground text-sm"
+                asChild
+              >
+                <Link to="/auth">Sign In</Link>
+              </Button>
+              <Button 
+                variant="secondary"
+                size="sm"
+                className="ml-1"
+                asChild
+              >
+                <Link to="/auth?mode=signup">Sign Up</Link>
+              </Button>
             </div>
           </div>
         </nav>
@@ -231,7 +218,10 @@ export const Home = () => {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button variant="outline" size="lg" className="px-6 md:px-8 text-base md:text-lg border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                <Button 
+                  size="lg" 
+                  className="px-6 md:px-8 text-base md:text-lg bg-accent hover:bg-accent/90 text-accent-foreground border-accent"
+                >
                   <Play className="mr-2 h-4 w-4" />
                   Watch Demo
                 </Button>
@@ -631,7 +621,7 @@ export const Home = () => {
       </section>
 
       {/* About Us */}
-      <section className="py-20 bg-primary/5">
+      <section id="about-project-partner" className="py-20 bg-primary/5">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
