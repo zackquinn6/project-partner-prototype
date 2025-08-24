@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
 import { useProject } from '@/contexts/ProjectContext';
@@ -20,7 +20,7 @@ const Index = () => {
   const { setCurrentProject, setCurrentProjectRun } = useProject();
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user' | 'editWorkflow'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user' | 'editWorkflow'>('user'); // Default to 'user' for authenticated users
   const [resetUserView, setResetUserView] = useState(false);
   const [forceListingMode, setForceListingMode] = useState(false);
 
@@ -51,13 +51,22 @@ const Index = () => {
   }, [navigate]);
 
   // CONDITIONAL LOGIC AFTER ALL HOOKS
-  // Show project catalog as pre-sign-in landing page
+  // Show project catalog as pre-sign-in landing page with loading state
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
         <PreSignInNavigation />
         <div className="pt-16">
-          <ProjectCatalog />
+          <React.Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="text-center space-y-4">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+                <p className="text-muted-foreground">Loading projects...</p>
+              </div>
+            </div>
+          }>
+            <ProjectCatalog />
+          </React.Suspense>
         </div>
       </div>
     );
