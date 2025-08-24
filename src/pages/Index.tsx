@@ -6,8 +6,10 @@ import { useUserRole } from '@/hooks/useUserRole';
 import Navigation from "@/components/Navigation";
 import Home from "@/components/Home";
 import { AdminView } from "@/components/AdminView";
+import { PreSignInNavigation } from '@/components/PreSignInNavigation';
 import EditWorkflowView from "@/components/EditWorkflowView";
 import UserView from "@/components/UserView";
+import ProjectCatalogPage from "./ProjectCatalog";
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -49,9 +51,16 @@ const Index = () => {
   }, [navigate]);
 
   // CONDITIONAL LOGIC AFTER ALL HOOKS
-  // Show public home page if not logged in
+  // Show project catalog as pre-sign-in landing page
   if (!user) {
-    return <Home />;
+    return (
+      <div className="min-h-screen bg-background">
+        <PreSignInNavigation />
+        <div className="pt-16">
+          <ProjectCatalogPage />
+        </div>
+      </div>
+    );
   }
 
   const handleAdminAccess = () => {

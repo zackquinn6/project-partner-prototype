@@ -32,9 +32,15 @@ export default function Auth() {
   // Redirect if already authenticated
   useEffect(() => {
     if (user && !loading) {
-      navigate('/');
+      // Check if there's a return parameter
+      const returnPath = searchParams.get('return');
+      if (returnPath === 'projects') {
+        navigate('/projects');
+      } else {
+        navigate('/');
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, searchParams]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,14 +127,21 @@ export default function Auth() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Welcome</CardTitle>
           <CardDescription>
-            Sign in to your account or create a new one
+            {searchParams.get('return') === 'projects' 
+              ? "Sign in to start your selected project"
+              : "Sign in to your account or create a new one"
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={isSignUp ? "signup" : "signin"} onValueChange={(value) => {
             const newMode = value === 'signup' ? 'signup' : 'signin';
             setIsSignUp(value === 'signup');
-            navigate(`/auth?mode=${newMode}`, { replace: true });
+            
+            // Preserve return parameter when switching tabs
+            const returnParam = searchParams.get('return');
+            const returnQuery = returnParam ? `&return=${returnParam}` : '';
+            navigate(`/auth?mode=${newMode}${returnQuery}`, { replace: true });
           }} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>

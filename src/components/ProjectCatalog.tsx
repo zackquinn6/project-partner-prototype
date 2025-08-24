@@ -223,8 +223,10 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       console.log('User mode - showing project setup');
       
       if (!user) {
-        console.log('No user found - redirecting to auth');
-        navigate('/auth');
+        console.log('No user found - showing sign in dialog');
+        // Instead of redirecting immediately, we could show a sign-in dialog
+        // For now, redirect to auth with a return parameter
+        navigate('/auth?return=projects');
         return;
       }
       
