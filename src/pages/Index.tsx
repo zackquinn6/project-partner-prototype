@@ -54,7 +54,7 @@ const Index = () => {
   // CONDITIONAL LOGIC AFTER ALL HOOKS
   // Show Home component as landing page for non-authenticated users
   if (!user) {
-    return <Home />;
+    return <Home onViewChange={() => {}} />;
   }
 
   const handleAdminAccess = () => {

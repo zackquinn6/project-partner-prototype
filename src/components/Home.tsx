@@ -703,6 +703,4 @@ export default function Home({ onViewChange }: HomeProps) {
       <PricingWindow open={isPricingOpen} onOpenChange={setIsPricingOpen} />
     </div>
   );
-};
-
-export default Home;
+}
