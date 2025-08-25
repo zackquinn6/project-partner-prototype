@@ -12,6 +12,9 @@ import {
   Target,
   Zap
 } from 'lucide-react';
+import { FeatureRoadmap } from './FeatureRoadmap';
+import { ProjectPhotos } from './ProjectPhotos';
+import { useProject } from '@/contexts/ProjectContext';
 
 export const PostAuthLanding = () => {
   const navigate = useNavigate();
@@ -133,6 +136,8 @@ export const PostAuthLanding = () => {
           ))}
         </div>
 
+        <FeatureRoadmap />
+        
         {/* Motivational Footer */}
         <div className="text-center bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-8">
           <h3 className="text-2xl font-bold text-foreground mb-4">

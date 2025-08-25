@@ -370,17 +370,6 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
             onChange={(sections) => updateEditingStep('contentSections', sections)}
           />
           
-          {/* Legacy content field for backward compatibility */}
-          <div className="border-t pt-4">
-            <Label htmlFor="legacy-content">Legacy Content (for backward compatibility)</Label>
-            <Textarea
-              id="legacy-content"
-              value={editingStep.content}
-              onChange={(e) => updateEditingStep('content', e.target.value)}
-              className="min-h-[100px]"
-              placeholder="Legacy text content..."
-            />
-          </div>
         </div>
       );
     }
@@ -390,56 +379,12 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
       return <MultiContentRenderer sections={step.contentSections} />;
     }
 
-    // Legacy content rendering for backward compatibility
-    switch (step.contentType) {
-      case 'document':
-        return (
-          <div className="space-y-4">
-            <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <ExternalLink className="w-5 h-5 text-orange-600" />
-                <span className="font-medium text-orange-800">External Resource</span>
-              </div>
-              <a href={step.content} target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-800 underline break-all">
-                {step.content}
-              </a>
-            </div>
-          </div>
-        );
-      case 'image':
-        return (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Image className="w-5 h-5 text-primary" />
-              <span className="font-medium">Visual Reference</span>
-            </div>
-            {step.image && <img src={step.image} alt={step.step} className="w-full rounded-lg shadow-card max-w-2xl" />}
-            <div className="prose prose-sm max-w-none">
-              <div className="whitespace-pre-wrap">{step.content}</div>
-            </div>
-          </div>
-        );
-      case 'video':
-        return (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Video className="w-5 h-5 text-primary" />
-              <span className="font-medium">Tutorial Video</span>
-            </div>
-            <div className="aspect-video rounded-lg overflow-hidden shadow-card">
-              <iframe src={step.content} className="w-full h-full" allowFullScreen title={step.step} />
-            </div>
-          </div>
-        );
-      default:
-        return (
-          <div className="prose max-w-none">
-            <div className="whitespace-pre-wrap text-foreground leading-relaxed">
-              {step.content}
-            </div>
-          </div>
-        );
-    }
+    // Fallback for steps without contentSections - show empty state
+    return (
+      <div className="flex items-center justify-center h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+        <p className="text-muted-foreground">No content available. Edit this step to add content.</p>
+      </div>
+    );
   };
 
   // Group steps by phase and operation for sidebar navigation

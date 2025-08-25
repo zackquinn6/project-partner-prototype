@@ -131,4 +131,25 @@ export interface ProjectRun {
       preferredDays: number[];
     };
   };
+
+  project_photos?: {
+    before: Array<{
+      id: string;
+      url: string;
+      caption?: string;
+      uploadedAt: string;
+    }>;
+    during: Array<{
+      id: string;
+      url: string;
+      caption?: string;
+      uploadedAt: string;
+    }>;
+    after: Array<{
+      id: string;
+      url: string;
+      caption?: string;
+      uploadedAt: string;
+    }>;
+  };
 }

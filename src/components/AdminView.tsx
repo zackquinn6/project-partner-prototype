@@ -10,7 +10,8 @@ import { WorkflowOptimizationEngine } from '@/components/WorkflowOptimizationEng
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Settings, BarChart3, Shield, Wrench, Lock, Scroll, Brain, TrendingUp } from 'lucide-react';
+import { Settings, BarChart3, Shield, Wrench, Lock, Scroll, Brain, TrendingUp, List } from 'lucide-react';
+import { StructureManager } from './StructureManager';
 
 export const AdminView: React.FC = () => {
   const [projectManagementOpen, setProjectManagementOpen] = useState(false);
@@ -21,6 +22,7 @@ export const AdminView: React.FC = () => {
   const [projectAgreementsOpen, setProjectAgreementsOpen] = useState(false);
   const [knowledgeSystemOpen, setKnowledgeSystemOpen] = useState(false);
   const [workflowOptimizationOpen, setWorkflowOptimizationOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<'admin' | 'structure-manager'>('admin');
 
   return (
     <div className="min-h-screen bg-background p-6">
