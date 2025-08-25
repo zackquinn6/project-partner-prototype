@@ -38,6 +38,107 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_requests: {
+        Row: {
+          admin_notes: string | null
+          category: string
+          created_at: string
+          description: string
+          id: string
+          priority_request: string
+          roadmap_item_id: string | null
+          status: string
+          submitted_by: string | null
+          title: string
+          updated_at: string
+          votes: number
+        }
+        Insert: {
+          admin_notes?: string | null
+          category?: string
+          created_at?: string
+          description: string
+          id?: string
+          priority_request?: string
+          roadmap_item_id?: string | null
+          status?: string
+          submitted_by?: string | null
+          title: string
+          updated_at?: string
+          votes?: number
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          priority_request?: string
+          roadmap_item_id?: string | null
+          status?: string
+          submitted_by?: string | null
+          title?: string
+          updated_at?: string
+          votes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_requests_roadmap_item_id_fkey"
+            columns: ["roadmap_item_id"]
+            isOneToOne: false
+            referencedRelation: "feature_roadmap"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feature_roadmap: {
+        Row: {
+          category: string
+          completion_date: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_order: number
+          id: string
+          priority: string
+          status: string
+          target_date: string | null
+          title: string
+          updated_at: string
+          votes: number
+        }
+        Insert: {
+          category?: string
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          priority?: string
+          status?: string
+          target_date?: string | null
+          title: string
+          updated_at?: string
+          votes?: number
+        }
+        Update: {
+          category?: string
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          priority?: string
+          status?: string
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+          votes?: number
+        }
+        Relationships: []
+      }
       knowledge_revisions: {
         Row: {
           affected_users: number | null
@@ -344,6 +445,7 @@ export type Database = {
           plan_end_date: string
           progress: number
           project_leader: string | null
+          project_photos: Json | null
           start_date: string
           status: string
           template_id: string
@@ -371,6 +473,7 @@ export type Database = {
           plan_end_date?: string
           progress?: number
           project_leader?: string | null
+          project_photos?: Json | null
           start_date?: string
           status?: string
           template_id: string
@@ -398,6 +501,7 @@ export type Database = {
           plan_end_date?: string
           progress?: number
           project_leader?: string | null
+          project_photos?: Json | null
           start_date?: string
           status?: string
           template_id?: string
