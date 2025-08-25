@@ -419,6 +419,7 @@ export type Database = {
           category: string | null
           created_at: string
           created_by: string | null
+          created_from_revision: number | null
           description: string | null
           difficulty: string | null
           effort_level: string | null
@@ -428,9 +429,12 @@ export type Database = {
           id: string
           image: string | null
           name: string
+          parent_project_id: string | null
           phases: Json
           plan_end_date: string
           publish_status: string
+          revision_notes: string | null
+          revision_number: number | null
           scaling_unit: string | null
           start_date: string
           status: string
@@ -440,6 +444,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           created_by?: string | null
+          created_from_revision?: number | null
           description?: string | null
           difficulty?: string | null
           effort_level?: string | null
@@ -449,9 +454,12 @@ export type Database = {
           id?: string
           image?: string | null
           name: string
+          parent_project_id?: string | null
           phases?: Json
           plan_end_date?: string
           publish_status?: string
+          revision_notes?: string | null
+          revision_number?: number | null
           scaling_unit?: string | null
           start_date?: string
           status?: string
@@ -461,6 +469,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           created_by?: string | null
+          created_from_revision?: number | null
           description?: string | null
           difficulty?: string | null
           effort_level?: string | null
@@ -470,15 +479,26 @@ export type Database = {
           id?: string
           image?: string | null
           name?: string
+          parent_project_id?: string | null
           phases?: Json
           plan_end_date?: string
           publish_status?: string
+          revision_notes?: string | null
+          revision_number?: number | null
           scaling_unit?: string | null
           start_date?: string
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_parent_project_id_fkey"
+            columns: ["parent_project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role_audit_log: {
         Row: {
