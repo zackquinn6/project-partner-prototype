@@ -24,6 +24,7 @@ import { CompletionCertificate } from './CompletionCertificate';
 import { ProjectSurvey } from './ProjectSurvey';
 import { ToolsMaterialsSection } from './ToolsMaterialsSection';
 import ProfileManager from './ProfileManager';
+import { ProjectPhotos } from './ProjectPhotos';
 import { isKickoffPhaseComplete, addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 interface UserViewProps {
   resetToListing?: boolean;
@@ -1209,6 +1210,21 @@ export default function UserView({
               onToggleMaterial={(materialId) => toggleMaterialCheck(currentStep.id, materialId)}
               onToggleTool={(toolId) => toggleToolCheck(currentStep.id, toolId)}
             />
+          )}
+
+          {/* Project Photos Section */}
+          {currentProjectRun && (
+            <Accordion type="single" collapsible className="mb-6">
+              <AccordionItem value="project-photos">
+                <AccordionTrigger className="flex items-center gap-2">
+                  <Image className="w-5 h-5" />
+                  Project Progress Photos
+                </AccordionTrigger>
+                <AccordionContent>
+                  <ProjectPhotos projectRunId={currentProjectRun.id} />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           )}
 
           {/* Content */}
