@@ -184,10 +184,10 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
     };
     
     console.log('OrderingWindow: Final rollup result:', {
-      materialCount: result.materials.length,
-      toolCount: result.tools.length,
-      materials: result.materials,
-      tools: result.tools
+      materialsCount: result.materials.length,
+      toolsCount: result.tools.length,
+      sampleMaterials: result.materials.slice(0, 3).map(m => ({ name: m.name, id: m.id })),
+      sampleTools: result.tools.slice(0, 3).map(t => ({ name: t.name, id: t.id }))
     });
     
     return result;

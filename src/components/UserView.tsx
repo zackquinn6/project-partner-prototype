@@ -23,18 +23,21 @@ import { UnplannedWorkWindow } from './UnplannedWorkWindow';
 import { CompletionCertificate } from './CompletionCertificate';
 import { ProjectSurvey } from './ProjectSurvey';
 import { ToolsMaterialsSection } from './ToolsMaterialsSection';
+import ProfileManager from './ProfileManager';
 import { isKickoffPhaseComplete, addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 interface UserViewProps {
   resetToListing?: boolean;
   forceListingMode?: boolean;
   onProjectSelected?: () => void;
   projectRunId?: string;
+  showProfile?: boolean;
 }
 export default function UserView({
   resetToListing,
   forceListingMode,
   onProjectSelected,
-  projectRunId
+  projectRunId,
+  showProfile
 }: UserViewProps) {
   const {
     currentProject,
@@ -68,6 +71,14 @@ export default function UserView({
   const [selectedOutput, setSelectedOutput] = useState<Output | null>(null);
   const [outputPopupOpen, setOutputPopupOpen] = useState(false);
   const [helpPopupOpen, setHelpPopupOpen] = useState(false);
+  const [showProfileManager, setShowProfileManager] = useState(false);
+
+  // Handle showProfile prop
+  useEffect(() => {
+    if (showProfile) {
+      setShowProfileManager(true);
+    }
+  }, [showProfile]);
   const [phaseCompletionPopupOpen, setPhaseCompletionPopupOpen] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState<any>(null);
   const [orderingWindowOpen, setOrderingWindowOpen] = useState(false);

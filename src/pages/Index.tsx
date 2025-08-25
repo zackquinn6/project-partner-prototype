@@ -114,7 +114,8 @@ const Index = () => {
             setResetUserView(false);
             setCurrentView('user');
           }} 
-          projectRunId={location.state?.projectRunId} 
+          projectRunId={location.state?.projectRunId}
+          showProfile={location.state?.showProfile}
         />;
       case 'editWorkflow':
         return <EditWorkflowView onBackToAdmin={() => setCurrentView('admin')} />;

@@ -31,9 +31,30 @@ export const createKickoffPhase = (): Phase => {
         description: 'Project partner agreement signed and documented',
         type: 'none' as const
       }]
-    },
+    }
+  ];
+
+  const kickoffOperation: Operation = {
+    id: 'kickoff-operation',
+    name: 'Kickoff',
+    description: 'Essential project setup and agreement',
+    steps: kickoffSteps
+  };
+
+  const kickoffPhase: Phase = {
+    id: 'kickoff-phase',
+    name: 'Kickoff',
+    description: 'Essential project setup and agreement',
+    operations: [kickoffOperation]
+  };
+
+  return kickoffPhase;
+};
+
+export const createPlanningPhase = (): Phase => {
+  const planningSteps: WorkflowStep[] = [
     {
-      id: 'kickoff-step-3',
+      id: 'planning-step-1',
       step: 'Project Planning',
       description: 'Customize your project workflow by adding phases from our library',
       contentType: 'text' as const,
@@ -49,21 +70,63 @@ export const createKickoffPhase = (): Phase => {
     }
   ];
 
-  const kickoffOperation: Operation = {
-    id: 'kickoff-operation',
-    name: 'Kickoff',
-    description: 'Essential project setup and customization',
-    steps: kickoffSteps
+  const initialPlanningOperation: Operation = {
+    id: 'initial-planning-operation',
+    name: 'Initial Planning',
+    description: 'Define project scope and select phases',
+    steps: planningSteps
   };
 
-  const kickoffPhase: Phase = {
-    id: 'kickoff-phase',
-    name: 'Kickoff',
-    description: 'Essential project setup, agreement, and customization',
-    operations: [kickoffOperation]
+  const measurementOperation: Operation = {
+    id: 'measurement-operation',
+    name: 'Measurement & Assessment',
+    description: 'Measure spaces and assess project requirements',
+    steps: [{
+      id: 'measurement-step-1',
+      step: 'Site Measurement',
+      description: 'Take accurate measurements of your work area',
+      contentType: 'text' as const,
+      content: 'Measure your work area carefully and document all dimensions needed for your project.',
+      materials: [],
+      tools: [],
+      outputs: [{
+        id: 'measurement-output',
+        name: 'Measurements Complete',
+        description: 'All necessary measurements documented',
+        type: 'none' as const
+      }]
+    }]
   };
 
-  return kickoffPhase;
+  const finalPlanningOperation: Operation = {
+    id: 'final-planning-operation',
+    name: 'Final Planning',
+    description: 'Finalize project details and create execution plan',
+    steps: [{
+      id: 'final-planning-step-1',  
+      step: 'Finalize Project Plan',
+      description: 'Review and finalize all project details and timeline',
+      contentType: 'text' as const,
+      content: 'Review your project plan, confirm all details, and create your final execution timeline.',
+      materials: [],
+      tools: [],
+      outputs: [{
+        id: 'final-planning-output',
+        name: 'Project Plan Finalized',
+        description: 'Project ready for execution',
+        type: 'none' as const
+      }]
+    }]
+  };
+
+  const planningPhase: Phase = {
+    id: 'planning-phase',
+    name: 'Planning',
+    description: 'Comprehensive project planning and preparation',
+    operations: [initialPlanningOperation, measurementOperation, finalPlanningOperation]
+  };
+
+  return planningPhase;
 };
 
 export const createOrderingPhase = (): Phase => {
@@ -111,15 +174,33 @@ export const addStandardPhasesToProjectRun = (phases: Phase[]): Phase[] => {
     processedPhases = [createKickoffPhase(), ...processedPhases];
   }
   
+  // Check if planning phase already exists
+  const hasPlanning = processedPhases.some(phase => phase.name === 'Planning');
+  if (!hasPlanning) {
+    // Insert planning phase after kickoff
+    const kickoffIndex = processedPhases.findIndex(phase => phase.name === 'Kickoff');
+    if (kickoffIndex >= 0) {
+      processedPhases.splice(kickoffIndex + 1, 0, createPlanningPhase());
+    } else {
+      processedPhases.unshift(createPlanningPhase());
+    }
+  }
+  
   // Check if ordering phase already exists
   const hasOrdering = processedPhases.some(phase => phase.name === 'Ordering');
   if (!hasOrdering) {
-    // Insert ordering phase as second phase (after kickoff)
-    const kickoffIndex = processedPhases.findIndex(phase => phase.name === 'Kickoff');
-    if (kickoffIndex >= 0) {
-      processedPhases.splice(kickoffIndex + 1, 0, createOrderingPhase());
+    // Insert ordering phase after planning
+    const planningIndex = processedPhases.findIndex(phase => phase.name === 'Planning');
+    if (planningIndex >= 0) {
+      processedPhases.splice(planningIndex + 1, 0, createOrderingPhase());
     } else {
-      processedPhases.unshift(createOrderingPhase());
+      // If no planning phase, add after kickoff
+      const kickoffIndex = processedPhases.findIndex(phase => phase.name === 'Kickoff');
+      if (kickoffIndex >= 0) {
+        processedPhases.splice(kickoffIndex + 1, 0, createOrderingPhase());
+      } else {
+        processedPhases.unshift(createOrderingPhase());
+      }
     }
   }
 
@@ -132,8 +213,7 @@ export const addKickoffPhaseToProjectRun = addStandardPhasesToProjectRun;
 export const isKickoffPhaseComplete = (completedSteps: string[]): boolean => {
   const kickoffStepIds = [
     'kickoff-step-1',
-    'kickoff-step-2', 
-    'kickoff-step-3'
+    'kickoff-step-2'
   ];
   
   return kickoffStepIds.every(stepId => completedSteps.includes(stepId));
@@ -142,8 +222,7 @@ export const isKickoffPhaseComplete = (completedSteps: string[]): boolean => {
 export const getKickoffStepIndex = (stepId: string): number => {
   const kickoffStepIds = [
     'kickoff-step-1',
-    'kickoff-step-2',
-    'kickoff-step-3'
+    'kickoff-step-2'
   ];
   
   return kickoffStepIds.indexOf(stepId);

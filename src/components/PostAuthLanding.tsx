@@ -64,7 +64,7 @@ export const PostAuthLanding = () => {
       icon: User,
       title: "My Profile",
       description: "Manage your account settings and DIY preferences",
-      action: () => console.log('Profile clicked'), // TODO: Implement profile navigation
+      action: () => navigate('/', { state: { view: 'user', showProfile: true } }),
       color: "bg-secondary",
       textColor: "text-secondary-foreground"
     }
@@ -92,19 +92,19 @@ export const PostAuthLanding = () => {
           </p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {stats.map((stat, index) => (
-            <Card key={index} className="text-center border-0 shadow-card hover:shadow-elegant transition-all duration-300">
-              <CardContent className="pt-6">
-                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
-                  <stat.icon className="h-6 w-6 text-primary-foreground" />
+        {/* Quick Stats - Compact Bar */}
+        <div className="bg-card rounded-lg border shadow-sm p-4 mb-8">
+          <div className="flex justify-center items-center space-x-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                  <stat.icon className="h-3 w-3 text-primary-foreground" />
                 </div>
-                <div className="text-3xl font-bold text-foreground mb-1">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </CardContent>
-            </Card>
-          ))}
+                <div className="text-lg font-semibold text-foreground">{stat.value}</div>
+                <div className="text-xs text-muted-foreground">{stat.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Quick Actions */}
