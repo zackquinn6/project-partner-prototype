@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 
 export default function Auth() {
   const location = useLocation();
@@ -125,6 +125,14 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <div className="flex items-center justify-center mb-4">
+            <img 
+              src="/lovable-uploads/1a837ddc-50ca-40f7-b975-0ad92fdf9882.png" 
+              alt="Project Partner Logo" 
+              className="h-12 w-auto"
+              loading="lazy"
+            />
+          </div>
           <CardTitle className="text-2xl font-bold">Welcome</CardTitle>
           <CardDescription>
             {searchParams.get('return') === 'projects' 
@@ -278,6 +286,17 @@ export default function Auth() {
           )}
         </CardContent>
       </Card>
+      
+      {/* Back to Home Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate('/')}
+        className="absolute top-4 left-4 text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Home
+      </Button>
     </div>
   );
 }

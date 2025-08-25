@@ -151,7 +151,7 @@ export default function Home({ onViewChange }: HomeProps) {
 
   const handleStartGameplan = () => {
     // Navigate to projects page for both logged in and non-logged in users
-    window.location.href = '/projects';
+    navigate('/projects');
   };
 
   return (
@@ -269,7 +269,7 @@ export default function Home({ onViewChange }: HomeProps) {
             {projectImages.map((image, index) => (
               <div key={index} className="flex-shrink-0 w-72 md:w-80">
                 <Card className="overflow-hidden hover:shadow-card transition-all duration-300 hover:scale-105 cursor-pointer"
-                      onClick={() => window.location.href = '/projects'}>
+                      onClick={() => navigate('/projects')}>
                   <div className="aspect-video overflow-hidden">
                     <img
                       src={image.src}
@@ -291,7 +291,7 @@ export default function Home({ onViewChange }: HomeProps) {
             <Button 
               size="lg" 
               className="px-8 py-4 text-lg font-semibold"
-              onClick={() => window.location.href = '/projects'}
+              onClick={() => navigate('/projects')}
             >
               Start Your Gameplan
               <ArrowRight className="ml-2 h-5 w-5" />

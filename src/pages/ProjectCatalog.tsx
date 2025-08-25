@@ -1,12 +1,7 @@
 import ProjectCatalog from '@/components/ProjectCatalog';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 const ProjectCatalogPage = () => {
-  return (
-    <ProtectedRoute>
-      <ProjectCatalog />
-    </ProtectedRoute>
-  );
+  return <ProjectCatalog />;
 };
 
 export default ProjectCatalogPage;
