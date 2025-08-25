@@ -27,11 +27,6 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
       id: 'kickoff-step-2', 
       title: 'Project Partner Agreement',
       description: 'Review and sign the project agreement'
-    },
-    {
-      id: 'kickoff-step-3',
-      title: 'Project Planning',
-      description: 'Customize your project workflow'
     }
   ];
 
@@ -172,8 +167,6 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
         return <ProjectOverviewStep {...stepProps} />;
       case 1:
         return <ProjectAgreementStep {...stepProps} />;
-      case 2:
-        return <ProjectCustomizationStep {...stepProps} />;
       default:
         return null;
     }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserDataManagement } from './UserDataManagement';
-import { DataExportManager } from './DataExportManager';
+import { PasswordSecurityManager } from './PasswordSecurityManager';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -17,14 +17,14 @@ export const DataPrivacyManager: React.FC<DataPrivacyManagerProps> = ({ open, on
           <DialogTitle>Privacy & Data Management</DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue="export" className="w-full">
+        <Tabs defaultValue="security" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="export">Data Export & Deletion</TabsTrigger>
+            <TabsTrigger value="security">Password & Security</TabsTrigger>
             <TabsTrigger value="privacy">Privacy Settings</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="export" className="mt-6">
-            <DataExportManager />
+          <TabsContent value="security" className="mt-6">
+            <PasswordSecurityManager />
           </TabsContent>
           
           <TabsContent value="privacy" className="mt-6">

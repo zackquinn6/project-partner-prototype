@@ -1,27 +1,26 @@
 import React, { useState } from 'react';
 import { ProjectManagementWindow } from '@/components/ProjectManagementWindow';
 import { ProjectAnalyticsWindow } from '@/components/ProjectAnalyticsWindow';
-import { UserRolesWindow } from '@/components/UserRolesWindow';
+import { UserManagementWindow } from '@/components/UserManagementWindow';
 import { ToolsMaterialsWindow } from '@/components/ToolsMaterialsWindow';
 import { SecurityDashboard } from '@/components/SecurityDashboard';
-import { ProjectAgreementsWindow } from '@/components/ProjectAgreementsWindow';
 import { KnowledgeIngestionSystem } from '@/components/KnowledgeIngestionSystem';
 import { WorkflowOptimizationEngine } from '@/components/WorkflowOptimizationEngine';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Settings, BarChart3, Shield, Wrench, Lock, Scroll, Brain, TrendingUp, List } from 'lucide-react';
+import { Settings, BarChart3, Shield, Wrench, Lock, Brain, TrendingUp, Users, Cog, Scroll } from 'lucide-react';
 import { StructureManager } from './StructureManager';
 
 export const AdminView: React.FC = () => {
   const [projectManagementOpen, setProjectManagementOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
-  const [userRolesOpen, setUserRolesOpen] = useState(false);
+  const [userManagementOpen, setUserManagementOpen] = useState(false);
   const [toolsMaterialsOpen, setToolsMaterialsOpen] = useState(false);
   const [securityDashboardOpen, setSecurityDashboardOpen] = useState(false);
-  const [projectAgreementsOpen, setProjectAgreementsOpen] = useState(false);
   const [knowledgeSystemOpen, setKnowledgeSystemOpen] = useState(false);
   const [workflowOptimizationOpen, setWorkflowOptimizationOpen] = useState(false);
+  const [processDesignOpen, setProcessDesignOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'admin' | 'structure-manager'>('admin');
 
   if (currentView === 'structure-manager') {
@@ -71,19 +70,19 @@ export const AdminView: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setUserRolesOpen(true)}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setUserManagementOpen(true)}>
             <CardHeader className="text-center flex-1">
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                <Shield className="w-6 h-6 text-primary" />
+                <Users className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle>User Roles</CardTitle>
+              <CardTitle>User Management</CardTitle>
               <CardDescription className="min-h-[3rem] flex items-center justify-center">
-                Manage user permissions and access control
+                Manage user roles, permissions and project agreements
               </CardDescription>
             </CardHeader>
             <CardContent className="mt-auto">
-              <Button className="w-full" onClick={() => setUserRolesOpen(true)}>
-                Manage User Roles
+              <Button className="w-full" onClick={() => setUserManagementOpen(true)}>
+                User Management
               </Button>
             </CardContent>
           </Card>
@@ -122,23 +121,6 @@ export const AdminView: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setProjectAgreementsOpen(true)}>
-            <CardHeader className="text-center flex-1">
-              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                <Scroll className="w-6 h-6 text-primary" />
-              </div>
-              <CardTitle>Project Agreements</CardTitle>
-              <CardDescription className="min-h-[3rem] flex items-center justify-center">
-                View and download signed project agreements
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="mt-auto">
-              <Button className="w-full" onClick={() => setProjectAgreementsOpen(true)}>
-                View Agreements
-              </Button>
-            </CardContent>
-          </Card>
-
           <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setKnowledgeSystemOpen(true)}>
             <CardHeader className="text-center flex-1">
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
@@ -156,36 +138,36 @@ export const AdminView: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setCurrentView('structure-manager')}>
-            <CardHeader className="text-center flex-1">
-              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                <List className="w-6 h-6 text-primary" />
-              </div>
-              <CardTitle>Structure Manager</CardTitle>
-              <CardDescription className="min-h-[3rem] flex items-center justify-center">
-                Advanced workflow editor with drag-drop and copy-paste
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="mt-auto">
-              <Button className="w-full" onClick={() => setCurrentView('structure-manager')}>
-                Structure Manager
-              </Button>
-            </CardContent>
-          </Card>
-
           <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setWorkflowOptimizationOpen(true)}>
             <CardHeader className="text-center flex-1">
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                 <TrendingUp className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle>Workflow Optimization</CardTitle>
+              <CardTitle>Process Optimization</CardTitle>
               <CardDescription className="min-h-[3rem] flex items-center justify-center">
-                AI-powered workflow improvements and time optimization
+                AI-powered workflow improvements and process optimization
               </CardDescription>
             </CardHeader>
             <CardContent className="mt-auto">
               <Button className="w-full" onClick={() => setWorkflowOptimizationOpen(true)}>
-                Workflow Engine
+                Process Optimization
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setProcessDesignOpen(true)}>
+            <CardHeader className="text-center flex-1">
+              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                <Cog className="w-6 h-6 text-primary" />
+              </div>
+              <CardTitle>Process Design & PFMEA</CardTitle>
+              <CardDescription className="min-h-[3rem] flex items-center justify-center">
+                Process design and failure modes & effects analysis management
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="mt-auto">
+              <Button className="w-full" onClick={() => setProcessDesignOpen(true)}>
+                Process Design & PFMEA
               </Button>
             </CardContent>
           </Card>
@@ -201,9 +183,9 @@ export const AdminView: React.FC = () => {
           onOpenChange={setAnalyticsOpen} 
         />
         
-        <UserRolesWindow 
-          open={userRolesOpen} 
-          onOpenChange={setUserRolesOpen} 
+        <UserManagementWindow 
+          open={userManagementOpen} 
+          onOpenChange={setUserManagementOpen} 
         />
         
         <ToolsMaterialsWindow 
@@ -220,11 +202,6 @@ export const AdminView: React.FC = () => {
           </DialogContent>
         </Dialog>
 
-        <ProjectAgreementsWindow 
-          open={projectAgreementsOpen} 
-          onOpenChange={setProjectAgreementsOpen} 
-        />
-
         <Dialog open={knowledgeSystemOpen} onOpenChange={setKnowledgeSystemOpen}>
           <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
@@ -237,9 +214,31 @@ export const AdminView: React.FC = () => {
         <Dialog open={workflowOptimizationOpen} onOpenChange={setWorkflowOptimizationOpen}>
           <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Workflow Optimization Engine</DialogTitle>
+              <DialogTitle>Process Optimization Engine</DialogTitle>
             </DialogHeader>
             <WorkflowOptimizationEngine />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={processDesignOpen} onOpenChange={setProcessDesignOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Process Design & PFMEA</DialogTitle>
+            </DialogHeader>
+            <div className="p-6 text-center space-y-4">
+              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Cog className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold">Coming Soon</h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Process Design and Process Failure Modes & Effects Analysis (PFMEA) management feature in development
+              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-lg mx-auto">
+                <p className="text-sm text-blue-800">
+                  This feature will help you design robust processes and identify potential failure modes before they occur, ensuring higher quality project outcomes.
+                </p>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

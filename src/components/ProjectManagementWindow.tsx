@@ -43,6 +43,7 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
   const {
     currentProject,
     updateProject,
+    deleteProject,
     projects
   } = useProject();
   
@@ -755,6 +756,23 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
                 <Button onClick={() => createNewRevision()} variant="secondary">
                   <Plus className="w-4 h-4 mr-2" />
                   Create New Revision
+                </Button>
+                <Button 
+                  onClick={async () => {
+                    if (window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+                      try {
+                        await deleteProject(currentProject.id);
+                        setEditingProject(false);
+                        onOpenChange(false); // Close the window after deletion
+                      } catch (error) {
+                        console.error('Error deleting project:', error);
+                      }
+                    }
+                  }} 
+                  variant="destructive"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Project
                 </Button>
               </div>
             )}
