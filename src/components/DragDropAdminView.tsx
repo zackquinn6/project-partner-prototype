@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Copy, Trash2, Edit, Check, X, GripVertical, FileOutput, Wrench, Package } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { OutputEditForm } from './OutputEditForm';
@@ -525,13 +527,35 @@ export const DragDropAdminView: React.FC<DragDropAdminViewProps> = ({ onBack }) 
                                                               </div>
                                                             </div>
                                                           ) : (
-                                                            <div className="flex-1">
-                                                              <div className="font-medium flex items-center gap-2">
-                                                                <Badge variant="outline">Step {stepIndex + 1}</Badge>
-                                                                {step.step}
-                                                              </div>
-                                                              {step.description && <div className="text-sm text-muted-foreground">{step.description}</div>}
-                                                            </div>
+                                                             <div className="flex-1">
+                                                               <div className="font-medium flex items-center gap-2">
+                                                                 <Badge variant="outline">Step {stepIndex + 1}</Badge>
+                                                                 {step.step}
+                                                               </div>
+                                                               {step.description && <div className="text-sm text-muted-foreground">{step.description}</div>}
+                                                               
+                                                               {/* Display tools and materials count */}
+                                                               <div className="flex gap-3 mt-2">
+                                                                 {step.tools.length > 0 && (
+                                                                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                                     <Wrench className="w-3 h-3" />
+                                                                     {step.tools.length} tool{step.tools.length !== 1 ? 's' : ''}
+                                                                   </div>
+                                                                 )}
+                                                                 {step.materials.length > 0 && (
+                                                                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                                     <Package className="w-3 h-3" />
+                                                                     {step.materials.length} material{step.materials.length !== 1 ? 's' : ''}
+                                                                   </div>
+                                                                 )}
+                                                                 {step.outputs.length > 0 && (
+                                                                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                                     <FileOutput className="w-3 h-3" />
+                                                                     {step.outputs.length} output{step.outputs.length !== 1 ? 's' : ''}
+                                                                   </div>
+                                                                 )}
+                                                               </div>
+                                                             </div>
                                                           )}
                                                         </div>
                                                         <div className="flex gap-1">
@@ -631,15 +655,194 @@ export const DragDropAdminView: React.FC<DragDropAdminViewProps> = ({ onBack }) 
       {/* Tools/Materials Edit Dialog */}
       {showToolsMaterialsEdit && (
         <Dialog open={true} onOpenChange={() => setShowToolsMaterialsEdit(null)}>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Edit {showToolsMaterialsEdit.type === 'tools' ? 'Tools' : 'Materials'}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                {showToolsMaterialsEdit.type === 'tools' ? 'Tools' : 'Materials'} editing functionality will be implemented here.
-              </p>
-              <Button onClick={() => setShowToolsMaterialsEdit(null)}>Close</Button>
+              {(() => {
+                // Find the current step
+                let currentStep: WorkflowStep | undefined;
+                for (const phase of displayPhases) {
+                  for (const operation of phase.operations) {
+                    currentStep = operation.steps.find(step => step.id === showToolsMaterialsEdit?.stepId);
+                    if (currentStep) break;
+                  }
+                  if (currentStep) break;
+                }
+
+                if (!currentStep) return <p>Step not found</p>;
+
+                const items = showToolsMaterialsEdit.type === 'tools' ? currentStep.tools : currentStep.materials;
+                
+                const addItem = () => {
+                  const newItem = showToolsMaterialsEdit.type === 'tools' 
+                    ? { id: `tool-${Date.now()}`, name: 'New Tool', description: '', category: 'Other' as Tool['category'], required: false }
+                    : { id: `material-${Date.now()}`, name: 'New Material', description: '', category: 'Other' as Material['category'], required: false };
+                  
+                  const updatedProject = { ...currentProject };
+                  for (const phase of updatedProject.phases) {
+                    for (const operation of phase.operations) {
+                      for (const step of operation.steps) {
+                        if (step.id === showToolsMaterialsEdit?.stepId) {
+                          if (showToolsMaterialsEdit.type === 'tools') {
+                            step.tools = [...step.tools, newItem as Tool];
+                          } else {
+                            step.materials = [...step.materials, newItem as Material];
+                          }
+                        }
+                      }
+                    }
+                  }
+                  updatedProject.updatedAt = new Date();
+                  updateProject(updatedProject);
+                };
+
+                const updateItem = (itemId: string, updates: Partial<Tool | Material>) => {
+                  const updatedProject = { ...currentProject };
+                  for (const phase of updatedProject.phases) {
+                    for (const operation of phase.operations) {
+                      for (const step of operation.steps) {
+                        if (step.id === showToolsMaterialsEdit?.stepId) {
+                          if (showToolsMaterialsEdit.type === 'tools') {
+                            step.tools = step.tools.map(tool => 
+                              tool.id === itemId ? { ...tool, ...updates } : tool
+                            );
+                          } else {
+                            step.materials = step.materials.map(material => 
+                              material.id === itemId ? { ...material, ...updates } : material
+                            );
+                          }
+                        }
+                      }
+                    }
+                  }
+                  updatedProject.updatedAt = new Date();
+                  updateProject(updatedProject);
+                };
+
+                const deleteItem = (itemId: string) => {
+                  const updatedProject = { ...currentProject };
+                  for (const phase of updatedProject.phases) {
+                    for (const operation of phase.operations) {
+                      for (const step of operation.steps) {
+                        if (step.id === showToolsMaterialsEdit?.stepId) {
+                          if (showToolsMaterialsEdit.type === 'tools') {
+                            step.tools = step.tools.filter(tool => tool.id !== itemId);
+                          } else {
+                            step.materials = step.materials.filter(material => material.id !== itemId);
+                          }
+                        }
+                      }
+                    }
+                  }
+                  updatedProject.updatedAt = new Date();
+                  updateProject(updatedProject);
+                };
+
+                return (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm text-muted-foreground">
+                        Manage {showToolsMaterialsEdit.type} for this step
+                      </p>
+                      <Button onClick={addItem} size="sm">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add {showToolsMaterialsEdit.type === 'tools' ? 'Tool' : 'Material'}
+                      </Button>
+                    </div>
+                    
+                    <div className="max-h-96 overflow-y-auto space-y-3">
+                      {items.map((item) => (
+                        <div key={item.id} className="border rounded-lg p-4 space-y-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label htmlFor={`name-${item.id}`}>Name</Label>
+                              <Input
+                                id={`name-${item.id}`}
+                                value={item.name}
+                                onChange={(e) => updateItem(item.id, { name: e.target.value })}
+                                placeholder="Item name"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`category-${item.id}`}>Category</Label>
+                              <Select 
+                                value={item.category} 
+                                onValueChange={(value) => updateItem(item.id, { category: value as any })}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {showToolsMaterialsEdit.type === 'tools' ? (
+                                    <>
+                                      <SelectItem value="Hardware">Hardware</SelectItem>
+                                      <SelectItem value="Software">Software</SelectItem>
+                                      <SelectItem value="Hand Tool">Hand Tool</SelectItem>
+                                      <SelectItem value="Power Tool">Power Tool</SelectItem>
+                                      <SelectItem value="Other">Other</SelectItem>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <SelectItem value="Hardware">Hardware</SelectItem>
+                                      <SelectItem value="Software">Software</SelectItem>
+                                      <SelectItem value="Consumable">Consumable</SelectItem>
+                                      <SelectItem value="Other">Other</SelectItem>
+                                    </>
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor={`description-${item.id}`}>Description</Label>
+                            <Textarea
+                              id={`description-${item.id}`}
+                              value={item.description}
+                              onChange={(e) => updateItem(item.id, { description: e.target.value })}
+                              placeholder="Item description"
+                              rows={2}
+                            />
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                id={`required-${item.id}`}
+                                checked={item.required}
+                                onChange={(e) => updateItem(item.id, { required: e.target.checked })}
+                                className="rounded"
+                              />
+                              <Label htmlFor={`required-${item.id}`} className="text-sm">Required</Label>
+                            </div>
+                            <Button 
+                              onClick={() => deleteItem(item.id)} 
+                              size="sm" 
+                              variant="ghost"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {items.length === 0 && (
+                        <div className="text-center py-8 text-muted-foreground">
+                          No {showToolsMaterialsEdit.type} added yet
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex justify-end">
+                      <Button onClick={() => setShowToolsMaterialsEdit(null)}>Done</Button>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </DialogContent>
         </Dialog>
