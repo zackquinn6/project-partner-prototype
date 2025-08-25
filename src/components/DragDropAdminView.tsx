@@ -677,8 +677,8 @@ export const DragDropAdminView: React.FC<DragDropAdminViewProps> = ({ onBack }) 
                 
                 const addItem = () => {
                   const newItem = showToolsMaterialsEdit.type === 'tools' 
-                    ? { id: `tool-${Date.now()}`, name: 'New Tool', description: '', category: 'Other' as Tool['category'], required: false }
-                    : { id: `material-${Date.now()}`, name: 'New Material', description: '', category: 'Other' as Material['category'], required: false };
+                    ? { id: `tool-${Date.now()}`, name: 'New Tool', description: '', category: 'Other' as const, required: false }
+                    : { id: `material-${Date.now()}`, name: 'New Material', description: '', category: 'Other' as const, required: false };
                   
                   const updatedProject = { ...currentProject };
                   for (const phase of updatedProject.phases) {
@@ -706,11 +706,11 @@ export const DragDropAdminView: React.FC<DragDropAdminViewProps> = ({ onBack }) 
                         if (step.id === showToolsMaterialsEdit?.stepId) {
                           if (showToolsMaterialsEdit.type === 'tools') {
                             step.tools = step.tools.map(tool => 
-                              tool.id === itemId ? { ...tool, ...updates } : tool
+                              tool.id === itemId ? { ...tool, ...updates } as Tool : tool
                             );
                           } else {
                             step.materials = step.materials.map(material => 
-                              material.id === itemId ? { ...material, ...updates } : material
+                              material.id === itemId ? { ...material, ...updates } as Material : material
                             );
                           }
                         }
@@ -767,9 +767,15 @@ export const DragDropAdminView: React.FC<DragDropAdminViewProps> = ({ onBack }) 
                             </div>
                             <div>
                               <Label htmlFor={`category-${item.id}`}>Category</Label>
-                              <Select 
+                               <Select 
                                 value={item.category} 
-                                onValueChange={(value) => updateItem(item.id, { category: value as any })}
+                                onValueChange={(value) => {
+                                  if (showToolsMaterialsEdit.type === 'tools') {
+                                    updateItem(item.id, { category: value as Tool['category'] });
+                                  } else {
+                                    updateItem(item.id, { category: value as Material['category'] });
+                                  }
+                                }}
                               >
                                 <SelectTrigger>
                                   <SelectValue />
