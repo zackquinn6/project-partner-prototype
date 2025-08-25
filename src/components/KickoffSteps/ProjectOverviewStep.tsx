@@ -146,7 +146,7 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
           {!isCompleted && !isEditing && (
             <Button onClick={onComplete} className="w-full mt-6 bg-green-600 hover:bg-green-700">
               <CheckCircle className="w-4 h-4 mr-2" />
-              Mark Project Overview Complete
+              I'm Ready, Let's Go
             </Button>
           )}
           
