@@ -923,6 +923,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
         open={orderingWindowOpen}
         onOpenChange={setOrderingWindowOpen}
         project={currentProject}
+        projectRun={currentProjectRun}
         userOwnedTools={[]}
         onOrderingComplete={() => {
           // Mark the ordering step as complete

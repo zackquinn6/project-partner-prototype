@@ -16,6 +16,7 @@ interface OrderingWindowProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   project: Project | null;
+  projectRun?: any; // ProjectRun object as fallback
   userOwnedTools: string[];
   onOrderingComplete?: () => void;
 }
@@ -34,7 +35,7 @@ const SHOPPING_SITES: ShoppingSite[] = [
   { name: "Toolio.us", url: "https://toolio.us", color: "bg-green-600 hover:bg-green-700" },
 ];
 
-export function OrderingWindow({ open, onOpenChange, project, userOwnedTools, onOrderingComplete }: OrderingWindowProps) {
+export function OrderingWindow({ open, onOpenChange, project, projectRun, userOwnedTools, onOrderingComplete }: OrderingWindowProps) {
   const [currentUrl, setCurrentUrl] = useState<string>(SHOPPING_SITES[0].url);
   const [urlInput, setUrlInput] = useState<string>("");
   const [checklistVisible, setChecklistVisible] = useState(true);
@@ -89,27 +90,30 @@ export function OrderingWindow({ open, onOpenChange, project, userOwnedTools, on
 
   // Extract all tools and materials from project using rollup logic
   const projectRollup = React.useMemo(() => {
-    if (!project) {
-      console.log('OrderingWindow: No project provided');
+    const activeProject = project || projectRun;
+    if (!activeProject) {
+      console.log('OrderingWindow: No project or projectRun provided');
       return { materials: [], tools: [] };
     }
     
     console.log('OrderingWindow: Project structure:', {
-      hasPhases: !!project.phases,
-      phasesLength: project.phases?.length,
-      phases: project.phases
+      hasPhases: !!activeProject.phases,
+      phasesLength: activeProject.phases?.length,
+      phases: activeProject.phases,
+      isProjectRun: !!projectRun,
+      isProject: !!project
     });
     
     const materialsMap = new Map<string, any>();
     const toolsMap = new Map<string, any>();
     
     // Ensure phases is an array before iterating
-    if (!project.phases || !Array.isArray(project.phases)) {
+    if (!activeProject.phases || !Array.isArray(activeProject.phases)) {
       console.log('OrderingWindow: No valid phases array');
       return { materials: [], tools: [] };
     }
     
-    project.phases.forEach((phase, phaseIndex) => {
+    activeProject.phases.forEach((phase, phaseIndex) => {
       console.log(`OrderingWindow: Processing phase ${phaseIndex}:`, {
         hasOperations: !!phase.operations,
         operationsLength: phase.operations?.length
@@ -187,7 +191,7 @@ export function OrderingWindow({ open, onOpenChange, project, userOwnedTools, on
     });
     
     return result;
-  }, [project]);
+  }, [project, projectRun]);
 
   const uniqueTools = projectRollup.tools;
   const uniqueMaterials = projectRollup.materials;

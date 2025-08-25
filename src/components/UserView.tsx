@@ -1523,6 +1523,7 @@ export default function UserView({
         open={orderingWindowOpen}
         onOpenChange={setOrderingWindowOpen}
         project={currentProject}
+        projectRun={currentProjectRun}
         userOwnedTools={[]}
         onOrderingComplete={() => {
           console.log("Ordering window completed for step:", currentStep?.step);
