@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Copy, Trash2, Edit, Check, X, GripVertical, FileOutput, Wrench, Package, Clipboard, ClipboardCheck } from 'lucide-react';
+import { Plus, Copy, Trash2, Edit, Check, X, GripVertical, FileOutput, Wrench, Package, Clipboard, ClipboardCheck, Save } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
@@ -318,28 +318,36 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Structure Manager</h2>
-          <p className="text-muted-foreground">Drag and drop to reorder, copy/paste to duplicate</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {clipboard && (
-            <Badge variant="outline" className="flex items-center gap-1">
-              <ClipboardCheck className="w-3 h-3" />
-              {clipboard.type} copied
-            </Badge>
-          )}
-          <Button onClick={addPhase} className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Add Phase
-          </Button>
-          <Button onClick={onBack} variant="outline">
-            Back to Admin
-          </Button>
+    <div className="fixed inset-0 bg-background overflow-auto">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-background border-b">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold">Structure Manager</h2>
+              <p className="text-muted-foreground">Drag and drop to reorder, copy/paste to duplicate</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {clipboard && (
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <ClipboardCheck className="w-3 h-3" />
+                  {clipboard.type} copied
+                </Badge>
+              )}
+              <Button onClick={addPhase} className="flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Add Phase
+              </Button>
+              <Button onClick={onBack} className="flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                Done Editing
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
+
+      <div className="container mx-auto px-6 py-8">{/* ... rest of content ... */}
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="phases" type="phases">
@@ -744,6 +752,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
           </DialogContent>
         </Dialog>
       )}
+    </div>
     </div>
   );
 };

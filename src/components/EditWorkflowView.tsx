@@ -8,13 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, CheckCircle, ExternalLink, Image, Video, Edit, Save, X, ArrowLeft, Settings, Plus, Trash2, FolderPlus, FileText, List, Wrench, Package } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle, ExternalLink, Image, Video, Edit, Save, X, ArrowLeft, Settings, Plus, Trash2, FolderPlus, FileText, List, Wrench, Package, Upload } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
 import { WorkflowStep, Material, Tool, Output, Phase, Operation, ContentSection } from '@/interfaces/Project';
 import { OutputEditForm } from './OutputEditForm';
 import { MultiContentEditor } from './MultiContentEditor';
 import { MultiContentRenderer } from './MultiContentRenderer';
+import { ProjectContentImport } from './ProjectContentImport';
+import { StructureManager } from './StructureManager';
 import { toast } from 'sonner';
 import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 
@@ -30,6 +32,7 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
   const [editMode, setEditMode] = useState(false);
   const [editingOutput, setEditingOutput] = useState<{ output: Output; stepId: string } | null>(null);
   const [outputEditOpen, setOutputEditOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   
   // Structure editing state
   const [editingPhase, setEditingPhase] = useState<Phase | null>(null);
@@ -61,6 +64,11 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
       setEditingStep({ ...currentStep });
     }
   }, [currentStep?.id]);
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleNext = () => {
     if (currentStepIndex < allSteps.length - 1) {
@@ -156,6 +164,20 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
     }
     console.log('updateEditingStep:', { field, valueType: typeof value, hasValue: !!value });
     setEditingStep({ ...editingStep, [field]: value });
+  };
+
+  // Handle import functionality
+  const handleImport = (phases: Phase[]) => {
+    if (!currentProject) return;
+    
+    const updatedProject = {
+      ...currentProject,
+      phases: [...currentProject.phases, ...phases],
+      updatedAt: new Date()
+    };
+    
+    updateProject(updatedProject);
+    toast.success(`Imported ${phases.length} phases successfully`);
   };
 
   // Structure management functions
@@ -625,7 +647,7 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
               </Button>
               <Button 
                 onClick={() => setViewMode('structure')} 
-                variant={'default'}
+                variant="default"
                 size="sm"
                 className="flex items-center gap-2"
               >
@@ -691,39 +713,52 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
   }
 
   return (
-    <div className="container mx-auto px-6 py-8">
-      {/* Header with Back Button and View Toggle */}
-      <div className="flex items-center justify-between mb-6">
-        <Button variant="ghost" onClick={onBackToAdmin} className="flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" />
-          Back to Project Manager
-        </Button>
-        <div className="flex items-center gap-4">
-          <div className="flex gap-2">
-            <Button 
-              onClick={() => setViewMode('steps')} 
-              variant={'default'}
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <FileText className="w-4 h-4" />
-              Step Editor
-            </Button>
-            <Button 
-              onClick={() => setViewMode('structure')} 
-              variant={'outline'}
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <List className="w-4 h-4" />
-              Structure Manager
-            </Button>
+    <div className="fixed inset-0 bg-background overflow-auto">
+      {/* Header with Project Name and Controls */}
+      <div className="sticky top-0 z-10 bg-background border-b">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold">Workflow Editor: {currentProject?.name || 'Untitled Project'}</h1>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setViewMode('steps')} 
+                  variant={viewMode === 'steps' ? 'default' : 'outline'}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  Step Editor
+                </Button>
+                <Button 
+                  onClick={() => setViewMode('structure')} 
+                  variant={viewMode === 'structure' ? 'default' : 'outline'}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <List className="w-4 h-4" />
+                  Structure Manager
+                </Button>
+                <Button 
+                  onClick={() => setImportOpen(true)} 
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="w-4 h-4" />
+                  Import
+                </Button>
+              </div>
+              <Button onClick={onBackToAdmin} className="flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                Done Editing
+              </Button>
+            </div>
           </div>
-          <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
-            Step Edit Mode
-          </Badge>
         </div>
       </div>
+
+      <div className="container mx-auto px-6 py-8">{/* ... rest of content ... */}
 
       <div className="grid lg:grid-cols-4 gap-8">
         {/* Sidebar */}
@@ -1203,6 +1238,14 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
           onSave={handleSaveOutput}
         />
       )}
+
+      {/* Import Dialog */}
+      <ProjectContentImport
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImport={handleImport}
+      />
+    </div>
     </div>
   );
 }
