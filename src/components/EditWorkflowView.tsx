@@ -182,203 +182,6 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
     toast.success(`Imported ${phases.length} phases successfully`);
   };
 
-  // Structure management functions
-  const addPhase = () => {
-    if (!currentProject) return;
-    
-    const newPhase: Phase = {
-      id: `phase-${Date.now()}`,
-      name: 'New Phase',
-      description: '',
-      operations: []
-    };
-    
-    const updatedProject = {
-      ...currentProject,
-      phases: [...currentProject.phases, newPhase],
-      updatedAt: new Date()
-    };
-    
-    updateProject(updatedProject);
-  };
-
-  const addOperation = (phaseId: string) => {
-    if (!currentProject) return;
-    
-    const newOperation: Operation = {
-      id: `operation-${Date.now()}`,
-      name: 'New Operation',
-      description: '',
-      steps: []
-    };
-    
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.map(phase => 
-        phase.id === phaseId 
-          ? { ...phase, operations: [...phase.operations, newOperation] }
-          : phase
-      ),
-      updatedAt: new Date()
-    };
-    
-    updateProject(updatedProject);
-  };
-
-  const addStep = (phaseId: string, operationId: string) => {
-    if (!currentProject) return;
-    
-    const newStep: WorkflowStep = {
-      id: `step-${Date.now()}`,
-      step: 'New Step',
-      description: '',
-      contentType: 'text',
-      content: '',
-      materials: [],
-      tools: [],
-      outputs: []
-    };
-    
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.map(phase => 
-        phase.id === phaseId 
-          ? {
-              ...phase,
-              operations: phase.operations.map(operation =>
-                operation.id === operationId
-                  ? { ...operation, steps: [...operation.steps, newStep] }
-                  : operation
-              )
-            }
-          : phase
-      ),
-      updatedAt: new Date()
-    };
-    
-    updateProject(updatedProject);
-  };
-
-  const updatePhase = (updatedPhase: Phase) => {
-    if (!currentProject) return;
-    
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.map(phase => 
-        phase.id === updatedPhase.id ? updatedPhase : phase
-      ),
-      updatedAt: new Date()
-    };
-    
-    updateProject(updatedProject);
-    setEditingPhase(null);
-  };
-
-  const updateOperation = (phaseId: string, updatedOperation: Operation) => {
-    if (!currentProject) return;
-    
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.map(phase => 
-        phase.id === phaseId 
-          ? {
-              ...phase,
-              operations: phase.operations.map(operation =>
-                operation.id === updatedOperation.id ? updatedOperation : operation
-              )
-            }
-          : phase
-      ),
-      updatedAt: new Date()
-    };
-    
-    updateProject(updatedProject);
-    setEditingOperation(null);
-  };
-
-  const updateStructureStep = (phaseId: string, operationId: string, updatedStep: WorkflowStep) => {
-    if (!currentProject) return;
-    
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.map(phase => 
-        phase.id === phaseId 
-          ? {
-              ...phase,
-              operations: phase.operations.map(operation =>
-                operation.id === operationId
-                  ? {
-                      ...operation,
-                      steps: operation.steps.map(step =>
-                        step.id === updatedStep.id ? updatedStep : step
-                      )
-                    }
-                  : operation
-              )
-            }
-          : phase
-      ),
-      updatedAt: new Date()
-    };
-    
-    updateProject(updatedProject);
-    setEditingStructureStep(null);
-  };
-
-  const deletePhase = (phaseId: string) => {
-    if (!currentProject) return;
-    
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.filter(phase => phase.id !== phaseId),
-      updatedAt: new Date()
-    };
-    
-    updateProject(updatedProject);
-  };
-
-  const deleteOperation = (phaseId: string, operationId: string) => {
-    if (!currentProject) return;
-    
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.map(phase => 
-        phase.id === phaseId 
-          ? {
-              ...phase,
-              operations: phase.operations.filter(operation => operation.id !== operationId)
-            }
-          : phase
-      ),
-      updatedAt: new Date()
-    };
-    
-    updateProject(updatedProject);
-  };
-
-  const deleteStep = (phaseId: string, operationId: string, stepId: string) => {
-    if (!currentProject) return;
-    
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.map(phase => 
-        phase.id === phaseId 
-          ? {
-              ...phase,
-              operations: phase.operations.map(operation =>
-                operation.id === operationId
-                  ? { ...operation, steps: operation.steps.filter(step => step.id !== stepId) }
-                  : operation
-              )
-            }
-          : phase
-      ),
-      updatedAt: new Date()
-    };
-    
-    updateProject(updatedProject);
-  };
-
   const renderContent = (step: typeof currentStep) => {
     if (!step) return null;
 
@@ -409,7 +212,6 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
             sections={contentSections}
             onChange={(sections) => updateEditingStep('contentSections', sections)}
           />
-          
         </div>
       );
     }
@@ -435,185 +237,6 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
     }, {} as Record<string, any[]>);
     return acc;
   }, {} as Record<string, Record<string, any[]>>);
-
-  // Structure view rendering
-  const renderStructureView = () => {
-    if (!currentProject) return null;
-
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Project Structure</h2>
-          <Button onClick={addPhase} className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Add Phase
-          </Button>
-        </div>
-
-        <div className="space-y-4">
-          {displayPhases.map((phase, phaseIndex) => {
-            const isStandardPhase = phaseIndex < 3; // First 3 are standard phases
-            return (
-            <Card key={phase.id} className="border-2">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    {editingPhase?.id === phase.id ? (
-                      <div className="space-y-2">
-                        <Input
-                          value={editingPhase.name}
-                          onChange={(e) => setEditingPhase({ ...editingPhase, name: e.target.value })}
-                          className="text-xl font-bold"
-                        />
-                        <Textarea
-                          value={editingPhase.description}
-                          onChange={(e) => setEditingPhase({ ...editingPhase, description: e.target.value })}
-                          placeholder="Phase description..."
-                        />
-                        <div className="flex gap-2">
-                          <Button onClick={() => updatePhase(editingPhase)} size="sm">Save</Button>
-                          <Button onClick={() => setEditingPhase(null)} variant="outline" size="sm">Cancel</Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <CardTitle className="flex items-center gap-2">
-                          <Badge variant="outline" className="bg-primary/10 text-primary">Phase {phaseIndex + 1}</Badge>
-                          {phase.name}
-                        </CardTitle>
-                        {phase.description && <CardDescription>{phase.description}</CardDescription>}
-                      </>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={() => addOperation(phase.id)} size="sm" variant="outline">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Operation
-                    </Button>
-                    <Button onClick={() => setEditingPhase(phase)} size="sm" variant="ghost" disabled={isStandardPhase}>
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button onClick={() => deletePhase(phase.id)} size="sm" variant="ghost" className="text-destructive" disabled={isStandardPhase}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {phase.operations.map((operation, operationIndex) => (
-                    <Card key={operation.id} className="ml-4">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            {editingOperation?.id === operation.id ? (
-                              <div className="space-y-2">
-                                <Input
-                                  value={editingOperation.name}
-                                  onChange={(e) => setEditingOperation({ ...editingOperation, name: e.target.value })}
-                                  className="font-medium"
-                                />
-                                <Textarea
-                                  value={editingOperation.description}
-                                  onChange={(e) => setEditingOperation({ ...editingOperation, description: e.target.value })}
-                                  placeholder="Operation description..."
-                                />
-                                <div className="flex gap-2">
-                                  <Button onClick={() => updateOperation(phase.id, editingOperation)} size="sm">Save</Button>
-                                  <Button onClick={() => setEditingOperation(null)} variant="outline" size="sm">Cancel</Button>
-                                </div>
-                              </div>
-                            ) : (
-                              <>
-                                <CardTitle className="text-lg flex items-center gap-2">
-                                  <Badge variant="secondary">Op {operationIndex + 1}</Badge>
-                                  {operation.name}
-                                </CardTitle>
-                                {operation.description && <CardDescription>{operation.description}</CardDescription>}
-                              </>
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <Button onClick={() => addStep(phase.id, operation.id)} size="sm" variant="outline">
-                              <Plus className="w-4 h-4 mr-2" />
-                              Add Step
-                            </Button>
-                            <Button onClick={() => setEditingOperation(operation)} size="sm" variant="ghost">
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button onClick={() => deleteOperation(phase.id, operation.id)} size="sm" variant="ghost" className="text-destructive">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          {operation.steps.map((step, stepIndex) => (
-                            <div key={step.id} className="ml-4 p-3 border rounded-lg bg-muted/20">
-                              <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                  {editingStructureStep?.id === step.id ? (
-                                    <div className="space-y-2">
-                                      <Input
-                                        value={editingStructureStep.step}
-                                        onChange={(e) => setEditingStructureStep({ ...editingStructureStep, step: e.target.value })}
-                                        className="font-medium"
-                                      />
-                                      <Textarea
-                                        value={editingStructureStep.description}
-                                        onChange={(e) => setEditingStructureStep({ ...editingStructureStep, description: e.target.value })}
-                                        placeholder="Step description..."
-                                      />
-                                      <div className="flex gap-2">
-                                        <Button onClick={() => updateStructureStep(phase.id, operation.id, editingStructureStep)} size="sm">Save</Button>
-                                        <Button onClick={() => setEditingStructureStep(null)} variant="outline" size="sm">Cancel</Button>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <>
-                                      <div className="font-medium flex items-center gap-2">
-                                        <Badge variant="outline">Step {stepIndex + 1}</Badge>
-                                        {step.step}
-                                      </div>
-                                      {step.description && <div className="text-sm text-muted-foreground">{step.description}</div>}
-                                    </>
-                                  )}
-                                </div>
-                                <div className="flex gap-2">
-                                  <Button onClick={() => setEditingStructureStep(step)} size="sm" variant="ghost">
-                                    <Edit className="w-4 h-4" />
-                                  </Button>
-                                  <Button onClick={() => deleteStep(phase.id, operation.id, step.id)} size="sm" variant="ghost" className="text-destructive">
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                          {operation.steps.length === 0 && (
-                            <div className="text-center py-4 text-muted-foreground">
-                              No steps added yet
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  {phase.operations.length === 0 && (
-                    <div className="text-center py-4 text-muted-foreground">
-                      No operations added yet
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-          })}
-        </div>
-      </div>
-    );
-  };
 
   if (!currentProject) {
     return (
@@ -663,7 +286,7 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
           </div>
         </div>
 
-        {renderStructureView()}
+        <StructureManager />
       </div>
     );
   }
@@ -722,34 +345,54 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold">Workflow Editor: {currentProject?.name || 'Untitled Project'}</h1>
             <div className="flex items-center gap-4">
+              {editMode && (
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                  Editing: {currentStep?.step}
+                </Badge>
+              )}
               <div className="flex gap-2">
-                <Button 
-                  onClick={() => setViewMode('steps')} 
-                  variant="default"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <FileText className="w-4 h-4" />
-                  Step Editor
-                </Button>
-                <Button 
-                  onClick={() => setViewMode('structure')} 
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <List className="w-4 h-4" />
-                  Structure Manager
-                </Button>
-                <Button 
-                  onClick={() => setImportOpen(true)} 
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Upload className="w-4 h-4" />
-                  Import
-                </Button>
+                {editMode ? (
+                  <>
+                    <Button onClick={handleSaveEdit} size="sm">
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </Button>
+                    <Button onClick={handleCancelEdit} variant="outline" size="sm">
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      onClick={() => setViewMode('steps')} 
+                      variant="default"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <FileText className="w-4 h-4" />
+                      Step Editor
+                    </Button>
+                    <Button 
+                      onClick={() => setViewMode('structure')} 
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <List className="w-4 h-4" />
+                      Structure Manager
+                    </Button>
+                    <Button 
+                      onClick={() => setImportOpen(true)} 
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Import
+                    </Button>
+                  </>
+                )}
               </div>
               <Button onClick={onBackToAdmin} className="flex items-center gap-2">
                 <Save className="w-4 h-4" />
@@ -760,487 +403,562 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">{/* ... rest of content ... */}
+      <div className="container mx-auto px-6 py-8">
+        {editMode ? (
+          // Full-screen edit mode
+          <div className="space-y-6 max-w-6xl mx-auto">
+            {/* Progress */}
+            <Card className="gradient-card border-0 shadow-card">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Progress</span>
+                  <span className="text-sm text-muted-foreground">
+                    Step {currentStepIndex + 1} of {allSteps.length}
+                  </span>
+                </div>
+                <Progress value={progress} className="h-2" />
+              </CardContent>
+            </Card>
 
-      <div className="grid lg:grid-cols-4 gap-8">
-        {/* Sidebar */}
-        <Card className="lg:col-span-1 gradient-card border-0 shadow-card">
-          <CardHeader>
-            <CardTitle className="text-lg">Workflow Steps</CardTitle>
-            <CardDescription>
-              Step {currentStepIndex + 1} of {allSteps.length}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Progress</span>
-                <span>{Math.round(progress)}%</span>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </div>
+            {/* Step Details */}
+            {editingStep && (
+              <div className="space-y-6">
+                {/* Basic Info */}
+                <Card className="gradient-card border-0 shadow-card">
+                  <CardHeader>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                        {currentStep?.phaseName}
+                      </Badge>
+                      <span className="text-muted-foreground">→</span>
+                      <Badge variant="outline">
+                        {currentStep?.operationName}
+                      </Badge>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="step-title" className="text-base font-medium">Step Title</Label>
+                        <Input
+                          id="step-title"
+                          value={editingStep.step}
+                          onChange={(e) => updateEditingStep('step', e.target.value)}
+                          className="text-2xl font-bold mt-2"
+                          placeholder="Step title..."
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="step-description" className="text-base font-medium">Description</Label>
+                        <Textarea
+                          id="step-description"
+                          value={editingStep.description || ''}
+                          onChange={(e) => updateEditingStep('description', e.target.value)}
+                          placeholder="Step description..."
+                          className="mt-2"
+                          rows={3}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-base font-medium">Flow Type</Label>
+                        <div className="mt-2">
+                          <FlowTypeSelector
+                            value={editingStep.flowType}
+                            onValueChange={(value) => updateEditingStep('flowType', value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
 
-            <div className="space-y-4">
-              {Object.entries(groupedSteps).map(([phase, operations]) => (
-                <div key={phase} className="space-y-2">
-                  <h4 className="font-semibold text-primary">{phase}</h4>
-                  {Object.entries(operations).map(([operation, opSteps]) => (
-                    <div key={operation} className="ml-2 space-y-1">
-                      <h5 className="text-sm font-medium text-muted-foreground">{operation}</h5>
-                      {opSteps.map(step => {
-                        const stepIndex = allSteps.findIndex(s => s.id === step.id);
-                        return (
-                          <div 
-                            key={step.id} 
-                            className={`ml-2 p-2 rounded text-sm cursor-pointer transition-fast ${
-                              step.id === currentStep?.id 
-                                ? 'bg-primary/10 text-primary border border-primary/20' 
-                                : 'hover:bg-muted/50'
-                            }`} 
+                {/* Content Editor */}
+                <Card className="gradient-card border-0 shadow-card">
+                  <CardHeader>
+                    <CardTitle>Step Content</CardTitle>
+                    <CardDescription>Add instructions, images, videos, and other content for this step</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-8">
+                    {renderContent(currentStep)}
+                  </CardContent>
+                </Card>
+
+                {/* Tools, Materials, and Time Estimation */}
+                <div className="grid lg:grid-cols-2 gap-6">
+                  <Card className="gradient-card border-0 shadow-card">
+                    <CardHeader>
+                      <CardTitle>Tools & Materials</CardTitle>
+                      <CardDescription>Manage required tools and materials</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
                             onClick={() => {
-                              setCurrentStepIndex(stepIndex);
-                              setEditMode(false);
+                              const newTool: Tool = {
+                                id: `tool-${Date.now()}`,
+                                name: 'New Tool',
+                                description: '',
+                                category: 'Other',
+                                required: false
+                              };
+                              updateEditingStep('tools', [...editingStep.tools, newTool]);
                             }}
                           >
-                            <div className="flex items-center gap-2">
-                              <span className="truncate">{step.step}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
+                            <Wrench className="w-4 h-4 mr-2" />
+                            Add Tool
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              const newMaterial: Material = {
+                                id: `material-${Date.now()}`,
+                                name: 'New Material',
+                                description: '',
+                                category: 'Other',
+                                required: false
+                              };
+                              updateEditingStep('materials', [...editingStep.materials, newMaterial]);
+                            }}
+                          >
+                            <Package className="w-4 h-4 mr-2" />
+                            Add Material
+                          </Button>
+                        </div>
+                        
+                        <Accordion type="multiple" defaultValue={["materials", "tools"]} className="w-full">
+                          {/* Materials section */}
+                          {(editingStep.materials.length > 0) && (
+                            <AccordionItem value="materials">
+                              <AccordionTrigger className="text-base font-semibold">
+                                Materials ({editingStep.materials.length})
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-3 pt-2">
+                                  {editingStep.materials.map((material, index) => (
+                                    <div key={material.id} className="p-3 bg-background/50 rounded-lg border">
+                                      <div className="space-y-3">
+                                        <div className="grid grid-cols-2 gap-3">
+                                          <div>
+                                            <Label>Name</Label>
+                                            <Input
+                                              value={material.name}
+                                              onChange={(e) => {
+                                                const updatedMaterials = [...editingStep.materials];
+                                                updatedMaterials[index] = { ...material, name: e.target.value };
+                                                updateEditingStep('materials', updatedMaterials);
+                                              }}
+                                              placeholder="Material name"
+                                            />
+                                          </div>
+                                          <div>
+                                            <Label>Category</Label>
+                                            <Select 
+                                              value={material.category} 
+                                              onValueChange={(value) => {
+                                                const updatedMaterials = [...editingStep.materials];
+                                                updatedMaterials[index] = { ...material, category: value as Material['category'] };
+                                                updateEditingStep('materials', updatedMaterials);
+                                              }}
+                                            >
+                                              <SelectTrigger>
+                                                <SelectValue />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                <SelectItem value="Hardware">Hardware</SelectItem>
+                                                <SelectItem value="Software">Software</SelectItem>
+                                                <SelectItem value="Consumable">Consumable</SelectItem>
+                                                <SelectItem value="Other">Other</SelectItem>
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <Label>Description</Label>
+                                          <Textarea
+                                            value={material.description}
+                                            onChange={(e) => {
+                                              const updatedMaterials = [...editingStep.materials];
+                                              updatedMaterials[index] = { ...material, description: e.target.value };
+                                              updateEditingStep('materials', updatedMaterials);
+                                            }}
+                                            placeholder="Material description"
+                                            rows={2}
+                                          />
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                          <div className="flex items-center space-x-2">
+                                            <input
+                                              type="checkbox"
+                                              checked={material.required}
+                                              onChange={(e) => {
+                                                const updatedMaterials = [...editingStep.materials];
+                                                updatedMaterials[index] = { ...material, required: e.target.checked };
+                                                updateEditingStep('materials', updatedMaterials);
+                                              }}
+                                              className="rounded"
+                                            />
+                                            <Label className="text-sm">Required</Label>
+                                          </div>
+                                          <Button 
+                                            onClick={() => {
+                                              const updatedMaterials = editingStep.materials.filter((_, i) => i !== index);
+                                              updateEditingStep('materials', updatedMaterials);
+                                            }}
+                                            size="sm" 
+                                            variant="ghost"
+                                            className="text-destructive hover:text-destructive"
+                                          >
+                                            <Trash2 className="w-4 h-4" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          )}
+
+                          {/* Tools section */}
+                          {(editingStep.tools.length > 0) && (
+                            <AccordionItem value="tools">
+                              <AccordionTrigger className="text-base font-semibold">
+                                Tools ({editingStep.tools.length})
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-3 pt-2">
+                                  {editingStep.tools.map((tool, index) => (
+                                    <div key={tool.id} className="p-3 bg-background/50 rounded-lg border">
+                                      <div className="space-y-3">
+                                        <div className="grid grid-cols-2 gap-3">
+                                          <div>
+                                            <Label>Name</Label>
+                                            <Input
+                                              value={tool.name}
+                                              onChange={(e) => {
+                                                const updatedTools = [...editingStep.tools];
+                                                updatedTools[index] = { ...tool, name: e.target.value };
+                                                updateEditingStep('tools', updatedTools);
+                                              }}
+                                              placeholder="Tool name"
+                                            />
+                                          </div>
+                                          <div>
+                                            <Label>Category</Label>
+                                            <Select 
+                                              value={tool.category} 
+                                              onValueChange={(value) => {
+                                                const updatedTools = [...editingStep.tools];
+                                                updatedTools[index] = { ...tool, category: value as Tool['category'] };
+                                                updateEditingStep('tools', updatedTools);
+                                              }}
+                                            >
+                                              <SelectTrigger>
+                                                <SelectValue />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                <SelectItem value="Hardware">Hardware</SelectItem>
+                                                <SelectItem value="Software">Software</SelectItem>
+                                                <SelectItem value="Hand Tool">Hand Tool</SelectItem>
+                                                <SelectItem value="Power Tool">Power Tool</SelectItem>
+                                                <SelectItem value="Other">Other</SelectItem>
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <Label>Description</Label>
+                                          <Textarea
+                                            value={tool.description}
+                                            onChange={(e) => {
+                                              const updatedTools = [...editingStep.tools];
+                                              updatedTools[index] = { ...tool, description: e.target.value };
+                                              updateEditingStep('tools', updatedTools);
+                                            }}
+                                            placeholder="Tool description"
+                                            rows={2}
+                                          />
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                          <div className="flex items-center space-x-2">
+                                            <input
+                                              type="checkbox"
+                                              checked={tool.required}
+                                              onChange={(e) => {
+                                                const updatedTools = [...editingStep.tools];
+                                                updatedTools[index] = { ...tool, required: e.target.checked };
+                                                updateEditingStep('tools', updatedTools);
+                                              }}
+                                              className="rounded"
+                                            />
+                                            <Label className="text-sm">Required</Label>
+                                          </div>
+                                          <Button 
+                                            onClick={() => {
+                                              const updatedTools = editingStep.tools.filter((_, i) => i !== index);
+                                              updateEditingStep('tools', updatedTools);
+                                            }}
+                                            size="sm" 
+                                            variant="ghost"
+                                            className="text-destructive hover:text-destructive"
+                                          >
+                                            <Trash2 className="w-4 h-4" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          )}
+                        </Accordion>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Time Estimation */}
+                  <StepTimeEstimation
+                    step={editingStep}
+                    scalingUnit={currentProject?.scalingUnit}
+                    onChange={(timeEstimation) => updateEditingStep('timeEstimation', timeEstimation)}
+                  />
+                </div>
+
+                {/* Navigation */}
+                <div className="flex justify-between">
+                  <Button 
+                    onClick={handlePrevious} 
+                    disabled={currentStepIndex === 0}
+                    variant="outline"
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-2" />
+                    Previous Step
+                  </Button>
+                  <Button 
+                    onClick={handleNext} 
+                    disabled={currentStepIndex >= allSteps.length - 1}
+                  >
+                    Next Step
+                    <ChevronRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          // Normal grid layout with sidebar
+          <div className="grid lg:grid-cols-4 gap-8">
+            {/* Sidebar */}
+            <Card className="lg:col-span-1 gradient-card border-0 shadow-card">
+              <CardHeader>
+                <CardTitle className="text-lg">Workflow Steps</CardTitle>
+                <CardDescription>
+                  Step {currentStepIndex + 1} of {allSteps.length}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Progress</span>
+                    <span>{Math.round(progress)}%</span>
+                  </div>
+                  <Progress value={progress} className="h-2" />
+                </div>
+
+                <div className="space-y-4">
+                  {Object.entries(groupedSteps).map(([phase, operations]) => (
+                    <div key={phase} className="space-y-2">
+                      <h4 className="font-semibold text-primary">{phase}</h4>
+                      {Object.entries(operations).map(([operation, opSteps]) => (
+                        <div key={operation} className="ml-2 space-y-1">
+                          <h5 className="text-sm font-medium text-muted-foreground">{operation}</h5>
+                          {opSteps.map(step => {
+                            const stepIndex = allSteps.findIndex(s => s.id === step.id);
+                            return (
+                              <div 
+                                key={step.id} 
+                                className={`ml-2 p-2 rounded text-sm cursor-pointer transition-fast ${
+                                  step.id === currentStep?.id 
+                                    ? 'bg-primary/10 text-primary border border-primary/20' 
+                                    : 'hover:bg-muted/50'
+                                }`} 
+                                onClick={() => {
+                                  setCurrentStepIndex(stepIndex);
+                                  setEditMode(false);
+                                }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="truncate">{step.step}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        {/* Main Content */}
-        <div className="lg:col-span-3 space-y-6">
-          {/* Header */}
-          <Card className="gradient-card border-0 shadow-card">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                      {currentStep?.phaseName}
-                    </Badge>
-                    <span className="text-muted-foreground">→</span>
-                    <Badge variant="outline">
-                      {currentStep?.operationName}
-                    </Badge>
-                  </div>
-                  {editMode && editingStep ? (
-                    <div className="space-y-2">
-                      <Input
-                        value={editingStep.step}
-                        onChange={(e) => updateEditingStep('step', e.target.value)}
-                        className="text-2xl font-bold border-none p-0 h-auto shadow-none"
-                        placeholder="Step title..."
-                      />
-                      <Textarea
-                        value={editingStep.description || ''}
-                        onChange={(e) => updateEditingStep('description', e.target.value)}
-                        placeholder="Step description..."
-                        className="resize-none"
-                      />
-                      <div className="pt-2">
-                        <FlowTypeSelector
-                          value={editingStep.flowType}
-                          onValueChange={(value) => updateEditingStep('flowType', value)}
-                        />
+            {/* Main Content */}
+            <div className="lg:col-span-3 space-y-6">
+              {/* Header */}
+              <Card className="gradient-card border-0 shadow-card">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                          {currentStep?.phaseName}
+                        </Badge>
+                        <span className="text-muted-foreground">→</span>
+                        <Badge variant="outline">
+                          {currentStep?.operationName}
+                        </Badge>
                       </div>
+                      <>
+                        <CardTitle className="text-2xl">{currentStep?.step}</CardTitle>
+                        {currentStep?.description && (
+                          <CardDescription className="text-base">
+                            {currentStep.description}
+                          </CardDescription>
+                        )}
+                      </>
                     </div>
-                  ) : (
-                    <>
-                      <CardTitle className="text-2xl">{currentStep?.step}</CardTitle>
-                      {currentStep?.description && (
-                        <CardDescription className="text-base">
-                          {currentStep.description}
-                        </CardDescription>
-                      )}
-                    </>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  {editMode ? (
-                    <>
-                      <Button onClick={handleSaveEdit} size="sm">
-                        <Save className="w-4 h-4 mr-2" />
-                        Save
+                    <div className="flex gap-2">
+                      <Button onClick={handleStartEdit} variant="outline" size="sm">
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit Step
                       </Button>
-                      <Button onClick={handleCancelEdit} variant="outline" size="sm">
-                        <X className="w-4 h-4 mr-2" />
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <Button onClick={handleStartEdit} variant="outline" size="sm">
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Step
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
-
-          {/* Content */}
-          <Card className="gradient-card border-0 shadow-card">
-            <CardContent className="p-8">
-              {renderContent(currentStep)}
-            </CardContent>
-          </Card>
-
-          {/* Tools, Materials, and Outputs */}
-          <Card className="gradient-card border-0 shadow-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Tools, Materials & Outputs</h3>
-                {editMode && (
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => {
-                        const newTool: Tool = {
-                          id: `tool-${Date.now()}`,
-                          name: 'New Tool',
-                          description: '',
-                          category: 'Other',
-                          required: false
-                        };
-                        if (editingStep) {
-                          updateEditingStep('tools', [...editingStep.tools, newTool]);
-                        }
-                      }}
-                    >
-                      <Wrench className="w-4 h-4 mr-2" />
-                      Add Tool
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => {
-                        const newMaterial: Material = {
-                          id: `material-${Date.now()}`,
-                          name: 'New Material',
-                          description: '',
-                          category: 'Other',
-                          required: false
-                        };
-                        if (editingStep) {
-                          updateEditingStep('materials', [...editingStep.materials, newMaterial]);
-                        }
-                      }}
-                    >
-                      <Package className="w-4 h-4 mr-2" />
-                      Add Material
-                    </Button>
+                    </div>
                   </div>
-                )}
-              </div>
-              <Accordion type="multiple" defaultValue={["materials", "tools", "outputs"]} className="w-full">
-                {/* Materials */}
-                {(currentStep?.materials?.length > 0 || editMode) && (
-                  <AccordionItem value="materials">
-                    <AccordionTrigger className="text-lg font-semibold">
-                      Materials Needed ({currentStep?.materials?.length || 0})
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-3 pt-2">
-                        {editMode && editingStep ? (
-                          // Edit mode - show editable materials
-                          <>
-                            {editingStep.materials.map((material, index) => (
-                              <div key={material.id} className="p-3 bg-background/50 rounded-lg border">
-                                <div className="space-y-3">
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                      <Label>Name</Label>
-                                      <Input
-                                        value={material.name}
-                                        onChange={(e) => {
-                                          const updatedMaterials = [...editingStep.materials];
-                                          updatedMaterials[index] = { ...material, name: e.target.value };
-                                          updateEditingStep('materials', updatedMaterials);
-                                        }}
-                                        placeholder="Material name"
-                                      />
-                                    </div>
-                                    <div>
-                                      <Label>Category</Label>
-                                      <Select 
-                                        value={material.category} 
-                                        onValueChange={(value) => {
-                                          const updatedMaterials = [...editingStep.materials];
-                                          updatedMaterials[index] = { ...material, category: value as Material['category'] };
-                                          updateEditingStep('materials', updatedMaterials);
-                                        }}
-                                      >
-                                        <SelectTrigger>
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="Hardware">Hardware</SelectItem>
-                                          <SelectItem value="Software">Software</SelectItem>
-                                          <SelectItem value="Consumable">Consumable</SelectItem>
-                                          <SelectItem value="Other">Other</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <Label>Description</Label>
-                                    <Textarea
-                                      value={material.description}
-                                      onChange={(e) => {
-                                        const updatedMaterials = [...editingStep.materials];
-                                        updatedMaterials[index] = { ...material, description: e.target.value };
-                                        updateEditingStep('materials', updatedMaterials);
-                                      }}
-                                      placeholder="Material description"
-                                      rows={2}
-                                    />
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <div className="flex items-center space-x-2">
-                                      <input
-                                        type="checkbox"
-                                        checked={material.required}
-                                        onChange={(e) => {
-                                          const updatedMaterials = [...editingStep.materials];
-                                          updatedMaterials[index] = { ...material, required: e.target.checked };
-                                          updateEditingStep('materials', updatedMaterials);
-                                        }}
-                                        className="rounded"
-                                      />
-                                      <Label className="text-sm">Required</Label>
-                                    </div>
-                                    <Button 
-                                      onClick={() => {
-                                        const updatedMaterials = editingStep.materials.filter((_, i) => i !== index);
-                                        updateEditingStep('materials', updatedMaterials);
-                                      }}
-                                      size="sm" 
-                                      variant="ghost"
-                                      className="text-destructive hover:text-destructive"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
+                </CardHeader>
+              </Card>
+
+              {/* Content */}
+              <Card className="gradient-card border-0 shadow-card">
+                <CardContent className="p-8">
+                  {renderContent(currentStep)}
+                </CardContent>
+              </Card>
+
+              {/* Tools, Materials, and Outputs */}
+              <Card className="gradient-card border-0 shadow-card">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">Tools, Materials & Outputs</h3>
+                  </div>
+                  <Accordion type="multiple" defaultValue={["materials", "tools", "outputs"]} className="w-full">
+                    {/* Materials */}
+                    {currentStep?.materials?.length > 0 && (
+                      <AccordionItem value="materials">
+                        <AccordionTrigger className="text-lg font-semibold">
+                          Materials Needed ({currentStep?.materials?.length || 0})
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-3 pt-2">
+                            {currentStep.materials.map(material => (
+                              <div key={material.id} className="p-3 bg-background/50 rounded-lg">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-1">
+                                    <div className="font-medium">{material.name}</div>
+                                    {material.category && <Badge variant="outline" className="text-xs mt-1">{material.category}</Badge>}
+                                    {material.description && <div className="text-sm text-muted-foreground mt-1">{material.description}</div>}
                                   </div>
                                 </div>
                               </div>
                             ))}
-                            {editingStep.materials.length === 0 && (
-                              <div className="text-center py-8 text-muted-foreground">
-                                No materials added yet
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          // View mode - show materials list
-                          currentStep?.materials?.map(material => (
-                            <div key={material.id} className="p-3 bg-background/50 rounded-lg">
-                              <div className="flex items-start gap-3">
-                                <div className="flex-1">
-                                  <div className="font-medium">{material.name}</div>
-                                  {material.category && <Badge variant="outline" className="text-xs mt-1">{material.category}</Badge>}
-                                  {material.description && <div className="text-sm text-muted-foreground mt-1">{material.description}</div>}
-                                </div>
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                )}
-
-                {/* Tools */}
-                {(currentStep?.tools?.length > 0 || editMode) && (
-                  <AccordionItem value="tools">
-                    <AccordionTrigger className="text-lg font-semibold">
-                      Tools Required ({currentStep?.tools?.length || 0})
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-3 pt-2">
-                        {editMode && editingStep ? (
-                          // Edit mode - show editable tools
-                          <>
-                            {editingStep.tools.map((tool, index) => (
-                              <div key={tool.id} className="p-3 bg-background/50 rounded-lg border">
-                                <div className="space-y-3">
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                      <Label>Name</Label>
-                                      <Input
-                                        value={tool.name}
-                                        onChange={(e) => {
-                                          const updatedTools = [...editingStep.tools];
-                                          updatedTools[index] = { ...tool, name: e.target.value };
-                                          updateEditingStep('tools', updatedTools);
-                                        }}
-                                        placeholder="Tool name"
-                                      />
-                                    </div>
-                                    <div>
-                                      <Label>Category</Label>
-                                      <Select 
-                                        value={tool.category} 
-                                        onValueChange={(value) => {
-                                          const updatedTools = [...editingStep.tools];
-                                          updatedTools[index] = { ...tool, category: value as Tool['category'] };
-                                          updateEditingStep('tools', updatedTools);
-                                        }}
-                                      >
-                                        <SelectTrigger>
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="Hardware">Hardware</SelectItem>
-                                          <SelectItem value="Software">Software</SelectItem>
-                                          <SelectItem value="Hand Tool">Hand Tool</SelectItem>
-                                          <SelectItem value="Power Tool">Power Tool</SelectItem>
-                                          <SelectItem value="Other">Other</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <Label>Description</Label>
-                                    <Textarea
-                                      value={tool.description}
-                                      onChange={(e) => {
-                                        const updatedTools = [...editingStep.tools];
-                                        updatedTools[index] = { ...tool, description: e.target.value };
-                                        updateEditingStep('tools', updatedTools);
-                                      }}
-                                      placeholder="Tool description"
-                                      rows={2}
-                                    />
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <div className="flex items-center space-x-2">
-                                      <input
-                                        type="checkbox"
-                                        checked={tool.required}
-                                        onChange={(e) => {
-                                          const updatedTools = [...editingStep.tools];
-                                          updatedTools[index] = { ...tool, required: e.target.checked };
-                                          updateEditingStep('tools', updatedTools);
-                                        }}
-                                        className="rounded"
-                                      />
-                                      <Label className="text-sm">Required</Label>
-                                    </div>
-                                    <Button 
-                                      onClick={() => {
-                                        const updatedTools = editingStep.tools.filter((_, i) => i !== index);
-                                        updateEditingStep('tools', updatedTools);
-                                      }}
-                                      size="sm" 
-                                      variant="ghost"
-                                      className="text-destructive hover:text-destructive"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                            {editingStep.tools.length === 0 && (
-                              <div className="text-center py-8 text-muted-foreground">
-                                No tools added yet
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          // View mode - show tools list
-                          currentStep?.tools?.map(tool => (
-                            <div key={tool.id} className="p-3 bg-background/50 rounded-lg">
-                              <div className="flex items-start gap-3">
-                                <div className="flex-1">
-                                  <div className="font-medium">{tool.name}</div>
-                                  {tool.category && <Badge variant="outline" className="text-xs mt-1">{tool.category}</Badge>}
-                                  {tool.description && <div className="text-sm text-muted-foreground mt-1">{tool.description}</div>}
-                                </div>
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                )}
-
-                {/* Outputs */}
-                {currentStep?.outputs?.length > 0 && (
-                  <AccordionItem value="outputs">
-                    <AccordionTrigger className="text-lg font-semibold">
-                      Outputs ({currentStep.outputs.length})
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-3 pt-2">
-                        {currentStep.outputs.map(output => (
-                          <div key={output.id} className="p-3 bg-background/50 rounded-lg">
-                            <div className="flex items-start gap-3">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <div className="font-medium">{output.name}</div>
-                                  <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
-                                </div>
-                                <div className="text-sm text-muted-foreground mt-1">{output.description}</div>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditOutput(output, currentStep.id)}
-                              >
-                                <Settings className="w-3 h-3 mr-1" />
-                                Edit Details
-                              </Button>
-                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                )}
-              </Accordion>
-            </CardContent>
-          </Card>
+                        </AccordionContent>
+                      </AccordionItem>
+                    )}
 
-          {/* Time Estimation */}
-          {editMode && editingStep && (
-            <StepTimeEstimation
-              step={editingStep}
-              scalingUnit={currentProject?.scalingUnit}
-              onChange={(timeEstimation) => updateEditingStep('timeEstimation', timeEstimation)}
-            />
-          )}
+                    {/* Tools */}
+                    {currentStep?.tools?.length > 0 && (
+                      <AccordionItem value="tools">
+                        <AccordionTrigger className="text-lg font-semibold">
+                          Tools Required ({currentStep?.tools?.length || 0})
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-3 pt-2">
+                            {currentStep.tools.map(tool => (
+                              <div key={tool.id} className="p-3 bg-background/50 rounded-lg">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-1">
+                                    <div className="font-medium">{tool.name}</div>
+                                    {tool.category && <Badge variant="outline" className="text-xs mt-1">{tool.category}</Badge>}
+                                    {tool.description && <div className="text-sm text-muted-foreground mt-1">{tool.description}</div>}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    )}
 
-          {/* Navigation */}
-          <div className="flex justify-between">
-            <Button 
-              onClick={handlePrevious} 
-              disabled={currentStepIndex === 0}
-              variant="outline"
-            >
-              <ChevronLeft className="w-4 h-4 mr-2" />
-              Previous
-            </Button>
-            <Button 
-              onClick={handleNext} 
-              disabled={currentStepIndex >= allSteps.length - 1}
-            >
-              Next
-              <ChevronRight className="w-4 h-4 ml-2" />
-            </Button>
+                    {/* Outputs */}
+                    {currentStep?.outputs?.length > 0 && (
+                      <AccordionItem value="outputs">
+                        <AccordionTrigger className="text-lg font-semibold">
+                          Outputs ({currentStep.outputs.length})
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-3 pt-2">
+                            {currentStep.outputs.map(output => (
+                              <div key={output.id} className="p-3 bg-background/50 rounded-lg">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <div className="font-medium">{output.name}</div>
+                                      <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
+                                    </div>
+                                    <div className="text-sm text-muted-foreground mt-1">{output.description}</div>
+                                  </div>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleEditOutput(output, currentStep.id)}
+                                  >
+                                    <Settings className="w-3 h-3 mr-1" />
+                                    Edit Details
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    )}
+                  </Accordion>
+                </CardContent>
+              </Card>
+
+              {/* Navigation */}
+              <div className="flex justify-between">
+                <Button 
+                  onClick={handlePrevious} 
+                  disabled={currentStepIndex === 0}
+                  variant="outline"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Previous
+                </Button>
+                <Button 
+                  onClick={handleNext} 
+                  disabled={currentStepIndex >= allSteps.length - 1}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Output Edit Form */}
@@ -1262,7 +980,6 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
         onOpenChange={setImportOpen}
         onImport={handleImport}
       />
-    </div>
     </div>
   );
 }
