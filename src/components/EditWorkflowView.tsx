@@ -286,7 +286,7 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
           </div>
         </div>
 
-        <StructureManager />
+        <StructureManager onBack={() => setViewMode('steps')} />
       </div>
     );
   }
