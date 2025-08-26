@@ -240,7 +240,7 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
 
   if (!currentProject) {
     return (
-      <div className="container mx-auto px-6 py-8">
+      <div className="fixed inset-0 bg-background overflow-auto z-50 flex items-center justify-center">
         <Card>
           <CardContent className="text-center py-8">
             <p className="text-muted-foreground">No project selected</p>
@@ -252,87 +252,93 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
 
   if (viewMode === 'structure') {
     return (
-      <div className="container mx-auto px-6 py-8">
+      <div className="fixed inset-0 bg-background overflow-auto z-50">
         {/* Header with Back Button and View Toggle */}
-        <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" onClick={onBackToAdmin} className="flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Project Manager
-          </Button>
-          <div className="flex items-center gap-4">
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => setViewMode('steps')} 
-                variant={'outline'}
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <FileText className="w-4 h-4" />
-                Step Editor
-              </Button>
-              <Button 
-                onClick={() => setViewMode('structure')} 
-                variant="default"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <List className="w-4 h-4" />
-                Structure Manager
-              </Button>
+        <div className="w-full px-6 py-6">
+          <div className="flex items-center justify-between mb-6">
+            <Button variant="ghost" onClick={onBackToAdmin} className="flex items-center gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Project Manager
+            </Button>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setViewMode('steps')} 
+                  variant={'outline'}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  Step Editor
+                </Button>
+                <Button 
+                  onClick={() => setViewMode('structure')} 
+                  variant="default"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <List className="w-4 h-4" />
+                  Structure Manager
+                </Button>
+              </div>
+              <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                Structure Mode
+              </Badge>
             </div>
-            <Badge variant="outline" className="bg-blue-100 text-blue-800">
-              Structure Mode
-            </Badge>
           </div>
         </div>
 
-        <StructureManager onBack={() => setViewMode('steps')} />
+        <div className="w-full px-6">
+          <StructureManager onBack={() => setViewMode('steps')} />
+        </div>
       </div>
     );
   }
 
   if (allSteps.length === 0) {
     return (
-      <div className="container mx-auto px-6 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" onClick={onBackToAdmin} className="flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Project Manager
-          </Button>
-          <div className="flex items-center gap-4">
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => setViewMode('steps')} 
-                variant={'outline'}
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <FileText className="w-4 h-4" />
-                Step Editor
-              </Button>
-              <Button 
-                onClick={() => setViewMode('structure')} 
-                variant={'default'}
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <List className="w-4 h-4" />
-                Structure Manager
-              </Button>
+      <div className="fixed inset-0 bg-background overflow-auto z-50">
+        <div className="w-full px-6 py-6">
+          <div className="flex items-center justify-between mb-6">
+            <Button variant="ghost" onClick={onBackToAdmin} className="flex items-center gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Project Manager
+            </Button>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setViewMode('steps')} 
+                  variant={'outline'}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  Step Editor
+                </Button>
+                <Button 
+                  onClick={() => setViewMode('structure')} 
+                  variant={'default'}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <List className="w-4 h-4" />
+                  Structure Manager
+                </Button>
+              </div>
             </div>
           </div>
+          <Card>
+            <CardContent className="text-center py-8">
+              <p className="text-muted-foreground mb-4">
+                This project has no workflow steps. Use Structure Manager to add phases, operations, and steps.
+              </p>
+              <Button onClick={() => setViewMode('structure')} className="flex items-center gap-2">
+                <List className="w-4 h-4" />
+                Go to Structure Manager
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-        <Card>
-          <CardContent className="text-center py-8">
-            <p className="text-muted-foreground mb-4">
-              This project has no workflow steps. Use Structure Manager to add phases, operations, and steps.
-            </p>
-            <Button onClick={() => setViewMode('structure')} className="flex items-center gap-2">
-              <List className="w-4 h-4" />
-              Go to Structure Manager
-            </Button>
-          </CardContent>
-        </Card>
       </div>
     );
   }
@@ -341,7 +347,7 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
     <div className="fixed inset-0 bg-background overflow-auto z-50">
       {/* Header with Project Name and Controls */}
       <div className="sticky top-0 z-10 bg-background border-b">
-        <div className="container mx-auto px-6 py-4">
+        <div className="w-full px-6 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold">Workflow Editor: {currentProject?.name || 'Untitled Project'}</h1>
             <div className="flex items-center gap-4">
@@ -403,10 +409,10 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="w-full px-6 py-8">
         {editMode ? (
           // Full-screen edit mode
-          <div className="space-y-6 max-w-6xl mx-auto">
+          <div className="space-y-6">
             {/* Progress */}
             <Card className="gradient-card border-0 shadow-card">
               <CardContent className="p-4">
