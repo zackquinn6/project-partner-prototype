@@ -8,13 +8,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Output } from '@/interfaces/Project';
+
+// Extend Output interface to include allowances field
+interface ExtendedOutput extends Output {
+  allowances?: string;
+}
 import { Plus, X } from 'lucide-react';
 
 interface OutputEditFormProps {
-  output: Output;
+  output: ExtendedOutput;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (updatedOutput: Output) => void;
+  onSave: (updatedOutput: ExtendedOutput) => void;
 }
 
 export const OutputEditForm: React.FC<OutputEditFormProps> = ({
@@ -23,7 +28,7 @@ export const OutputEditForm: React.FC<OutputEditFormProps> = ({
   onClose,
   onSave
 }) => {
-  const [formData, setFormData] = useState<Output>({ ...output });
+  const [formData, setFormData] = useState<ExtendedOutput>({ ...output });
   const [newKeyInput, setNewKeyInput] = useState('');
 
   const handleSave = () => {
@@ -107,7 +112,7 @@ export const OutputEditForm: React.FC<OutputEditFormProps> = ({
               <h3 className="font-semibold">Requirements</h3>
               
               <div>
-                <Label htmlFor="requirement">Requirement</Label>
+                <Label htmlFor="requirement">Requirements</Label>
                 <Textarea
                   id="requirement"
                   value={formData.requirement || ''}
@@ -116,16 +121,27 @@ export const OutputEditForm: React.FC<OutputEditFormProps> = ({
                   rows={3}
                 />
               </div>
+
+              <div>
+                <Label htmlFor="allowances">Allowances</Label>
+                <Textarea
+                  id="allowances"
+                  value={formData.allowances || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, allowances: e.target.value }))}
+                  placeholder="Acceptable variations or tolerances..."
+                  rows={2}
+                />
+              </div>
             </CardContent>
           </Card>
 
-          {/* Quality and Issues */}
+          {/* Potential Effects */}
           <Card>
             <CardContent className="p-4 space-y-4">
-              <h3 className="font-semibold">Quality Control & Issues</h3>
+              <h3 className="font-semibold">Potential Effects</h3>
               
               <div>
-                <Label htmlFor="potentialEffects">Potential Effects if Error</Label>
+                <Label htmlFor="potentialEffects">Potential Effects of Error</Label>
                 <Textarea
                   id="potentialEffects"
                   value={formData.potentialEffects || ''}
@@ -144,7 +160,14 @@ export const OutputEditForm: React.FC<OutputEditFormProps> = ({
                   placeholder="URL or description of reference photos"
                 />
               </div>
+            </CardContent>
+          </Card>
 
+          {/* Quality Control Checks */}
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <h3 className="font-semibold">Quality Control Checks</h3>
+              
               <div>
                 <Label htmlFor="qualityChecks">Quality Check Methods</Label>
                 <Textarea
