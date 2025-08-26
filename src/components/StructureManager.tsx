@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Copy, Trash2, Edit, Check, X, GripVertical, FileOutput, Wrench, Package, Clipboard, ClipboardCheck, Save } from 'lucide-react';
+import { FlowTypeSelector, getFlowTypeBadge } from './FlowTypeSelector';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
@@ -195,7 +196,8 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
       materials: [],
       tools: [],
       outputs: [],
-      contentSections: []
+      contentSections: [],
+      flowType: 'prime'
     };
     
     const updatedProject = {
@@ -606,51 +608,60 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                                                                     </div>
                                                                   )}
                                                                   
-                                                                  {isStepEditing ? (
-                                                                    <div className="flex-1 space-y-2">
-                                                                      <Input
-                                                                        value={editingItem.data.step}
-                                                                        onChange={(e) => setEditingItem({ ...editingItem, data: { ...editingItem.data, step: e.target.value } })}
-                                                                        placeholder="Step name"
-                                                                        className="text-xs"
-                                                                      />
-                                                                      <Textarea
-                                                                        value={editingItem.data.description}
-                                                                        onChange={(e) => setEditingItem({ ...editingItem, data: { ...editingItem.data, description: e.target.value } })}
-                                                                        placeholder="Step description"
-                                                                        rows={1}
-                                                                        className="text-xs"
-                                                                      />
-                                                                    </div>
-                                                                  ) : (
-                                                                    <div className="flex-1">
-                                                                      <p className="font-medium text-xs">{step.step}</p>
-                                                                      <p className="text-muted-foreground text-xs">{step.description}</p>
-                                                                    </div>
+                                                                   {isStepEditing ? (
+                                                                     <div className="flex-1 space-y-2">
+                                                                       <Input
+                                                                         value={editingItem.data.step}
+                                                                         onChange={(e) => setEditingItem({ ...editingItem, data: { ...editingItem.data, step: e.target.value } })}
+                                                                         placeholder="Step name"
+                                                                         className="text-xs"
+                                                                       />
+                                                                       <Textarea
+                                                                         value={editingItem.data.description}
+                                                                         onChange={(e) => setEditingItem({ ...editingItem, data: { ...editingItem.data, description: e.target.value } })}
+                                                                         placeholder="Step description"
+                                                                         rows={1}
+                                                                         className="text-xs"
+                                                                       />
+                                                                       <div className="text-xs">
+                                                                         <FlowTypeSelector
+                                                                           value={editingItem.data.flowType}
+                                                                           onValueChange={(value) => setEditingItem({ ...editingItem, data: { ...editingItem.data, flowType: value } })}
+                                                                         />
+                                                                       </div>
+                                                                     </div>
+                                                                   ) : (
+                                                                     <div className="flex-1">
+                                                                       <div className="flex items-center gap-2">
+                                                                         <p className="font-medium text-xs">{step.step}</p>
+                                                                         {getFlowTypeBadge(step.flowType)}
+                                                                       </div>
+                                                                       <p className="text-muted-foreground text-xs">{step.description}</p>
+                                                                     </div>
                                                                   )}
                                                                 </div>
                                                                 
-                                                                <div className="flex items-center gap-1">
-                                                                  <div className="flex items-center gap-1">
-                                                                    {step.tools?.length > 0 && (
-                                                                      <Badge variant="outline" className="text-xs flex items-center gap-1">
-                                                                        <Wrench className="w-2 h-2" />
-                                                                        {step.tools.length}
-                                                                      </Badge>
-                                                                    )}
-                                                                    {step.materials?.length > 0 && (
-                                                                      <Badge variant="outline" className="text-xs flex items-center gap-1">
-                                                                        <Package className="w-2 h-2" />
-                                                                        {step.materials.length}
-                                                                      </Badge>
-                                                                    )}
-                                                                    {step.outputs?.length > 0 && (
-                                                                      <Badge variant="outline" className="text-xs flex items-center gap-1">
-                                                                        <FileOutput className="w-2 h-2" />
-                                                                        {step.outputs.length}
-                                                                      </Badge>
-                                                                    )}
-                                                                  </div>
+                                                                 <div className="flex items-center gap-1">
+                                                                   <div className="flex items-center gap-1">
+                                                                     {step.tools?.length > 0 && (
+                                                                       <Badge variant="outline" className="text-xs flex items-center gap-1">
+                                                                         <Wrench className="w-2 h-2" />
+                                                                         {step.tools.length}
+                                                                       </Badge>
+                                                                     )}
+                                                                     {step.materials?.length > 0 && (
+                                                                       <Badge variant="outline" className="text-xs flex items-center gap-1">
+                                                                         <Package className="w-2 h-2" />
+                                                                         {step.materials.length}
+                                                                       </Badge>
+                                                                     )}
+                                                                     {step.outputs?.length > 0 && (
+                                                                       <Badge variant="outline" className="text-xs flex items-center gap-1">
+                                                                         <FileOutput className="w-2 h-2" />
+                                                                         {step.outputs.length}
+                                                                       </Badge>
+                                                                     )}
+                                                                   </div>
                                                                   
                                                                   {!isStandardPhase && (
                                                                     <>

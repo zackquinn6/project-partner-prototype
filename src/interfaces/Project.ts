@@ -82,6 +82,7 @@ export interface WorkflowStep {
   tools: Tool[];
   outputs: Output[];
   contentSections?: ContentSection[];
+  flowType?: 'prime' | 'repeat' | 'inspection' | 'alternate' | 'if-necessary';
 }
 
 export interface Operation {

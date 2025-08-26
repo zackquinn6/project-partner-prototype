@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Info, ShoppingCart, Plus, Award, Eye, EyeOff } from "lucide-react";
+import { FlowTypeLegend, getStepIndicator } from './FlowTypeLegend';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
 import { Output } from '@/interfaces/Project';
@@ -1141,6 +1142,7 @@ export default function UserView({
                         }
                       }}>
                             <div className="flex items-center gap-2">
+                              {getStepIndicator(step.flowType)}
                               {completedSteps.has(step.id) && <CheckCircle className="w-4 h-4" />}
                               <span className="truncate">{step.step}</span>
                             </div>
@@ -1151,7 +1153,9 @@ export default function UserView({
             </div>
           </CardContent>
         </Card>
-        )}
+
+        {/* Flow Type Legend */}
+        <FlowTypeLegend compact={true} showDescriptions={false} />
 
         {/* Main Content */}
         <div className={`space-y-6 ${workflowProgressVisible ? 'lg:col-span-3' : 'lg:col-span-1'}`}>
@@ -1174,10 +1178,13 @@ export default function UserView({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-2xl">{currentStep?.step}</CardTitle>
+                  <div className="flex items-center gap-3">
+                    <CardTitle className="text-2xl">{currentStep?.step}</CardTitle>
+                    {getStepIndicator(currentStep?.flowType)}
+                  </div>
                   {currentStep?.description && <CardDescription className="text-base">
-                      {currentStep.description}
-                     </CardDescription>}
+                    {currentStep.description}
+                  </CardDescription>}
                 </div>
                 
                 {/* Show ordering button for ordering steps */}

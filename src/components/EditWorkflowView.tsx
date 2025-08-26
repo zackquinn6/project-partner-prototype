@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, CheckCircle, ExternalLink, Image, Video, Edit, Save, X, ArrowLeft, Settings, Plus, Trash2, FolderPlus, FileText, List, Wrench, Package, Upload } from "lucide-react";
+import { FlowTypeSelector } from './FlowTypeSelector';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
 import { WorkflowStep, Material, Tool, Output, Phase, Operation, ContentSection } from '@/interfaces/Project';
@@ -844,6 +845,12 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
                         placeholder="Step description..."
                         className="resize-none"
                       />
+                      <div className="pt-2">
+                        <FlowTypeSelector
+                          value={editingStep.flowType}
+                          onValueChange={(value) => updateEditingStep('flowType', value)}
+                        />
+                      </div>
                     </div>
                   ) : (
                     <>
