@@ -19,6 +19,7 @@ import { MultiContentEditor } from './MultiContentEditor';
 import { MultiContentRenderer } from './MultiContentRenderer';
 import { ProjectContentImport } from './ProjectContentImport';
 import { StructureManager } from './StructureManager';
+import { ToolsMaterialsWindow } from './ToolsMaterialsWindow';
 import { toast } from 'sonner';
 import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 
@@ -35,6 +36,7 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
   const [editingOutput, setEditingOutput] = useState<{ output: Output; stepId: string } | null>(null);
   const [outputEditOpen, setOutputEditOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [toolsMaterialsOpen, setToolsMaterialsOpen] = useState(false);
   
   // Structure editing state
   const [editingPhase, setEditingPhase] = useState<Phase | null>(null);
@@ -221,7 +223,16 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
       return <MultiContentRenderer sections={step.contentSections} />;
     }
 
-    // Fallback for steps without contentSections - show empty state
+    // Fallback for steps with legacy content
+    if (step.content && step.content.trim()) {
+      return (
+        <div className="text-muted-foreground whitespace-pre-wrap">
+          {step.content}
+        </div>
+      );
+    }
+
+    // Show empty state only if truly no content
     return (
       <div className="flex items-center justify-center h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg">
         <p className="text-muted-foreground">No content available. Edit this step to add content.</p>
@@ -489,7 +500,7 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
 
                 {/* Tools, Materials, and Time Estimation */}
                 <div className="grid lg:grid-cols-2 gap-6">
-                  <Card className="gradient-card border-0 shadow-card">
+                  <Card className="bg-muted/30 border shadow-sm">
                     <CardHeader>
                       <CardTitle>Tools & Materials</CardTitle>
                       <CardDescription>Manage required tools and materials</CardDescription>
@@ -500,6 +511,14 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
                           <Button 
                             size="sm" 
                             variant="outline"
+                            onClick={() => setToolsMaterialsOpen(true)}
+                          >
+                            <Wrench className="w-4 h-4 mr-2" />
+                            Select from Library
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
                             onClick={() => {
                               const newTool: Tool = {
                                 id: `tool-${Date.now()}`,
@@ -511,25 +530,8 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
                               updateEditingStep('tools', [...editingStep.tools, newTool]);
                             }}
                           >
-                            <Wrench className="w-4 h-4 mr-2" />
-                            Add Tool
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => {
-                              const newMaterial: Material = {
-                                id: `material-${Date.now()}`,
-                                name: 'New Material',
-                                description: '',
-                                category: 'Other',
-                                required: false
-                              };
-                              updateEditingStep('materials', [...editingStep.materials, newMaterial]);
-                            }}
-                          >
                             <Package className="w-4 h-4 mr-2" />
-                            Add Material
+                            Add New Item
                           </Button>
                         </div>
                         
@@ -758,7 +760,7 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
           // Normal grid layout with sidebar
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Sidebar */}
-            <Card className="lg:col-span-1 gradient-card border-0 shadow-card">
+            <Card className="lg:col-span-1 bg-muted/20 border shadow-sm">
               <CardHeader>
                 <CardTitle className="text-lg">Workflow Steps</CardTitle>
                 <CardDescription>
@@ -813,7 +815,7 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
             {/* Main Content */}
             <div className="lg:col-span-3 space-y-6">
               {/* Header */}
-              <Card className="gradient-card border-0 shadow-card">
+              <Card className="bg-muted/30 border shadow-sm">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
@@ -846,14 +848,14 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
               </Card>
 
               {/* Content */}
-              <Card className="gradient-card border-0 shadow-card">
+              <Card className="bg-muted/30 border shadow-sm">
                 <CardContent className="p-8">
                   {renderContent(currentStep)}
                 </CardContent>
               </Card>
 
               {/* Tools, Materials, and Outputs */}
-              <Card className="gradient-card border-0 shadow-card">
+              <Card className="bg-muted/30 border shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">Tools, Materials & Outputs</h3>
@@ -985,6 +987,11 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
         open={importOpen}
         onOpenChange={setImportOpen}
         onImport={handleImport}
+      />
+      {/* Tools & Materials Library */}
+      <ToolsMaterialsWindow 
+        open={toolsMaterialsOpen}
+        onOpenChange={setToolsMaterialsOpen}
       />
     </div>
   );
