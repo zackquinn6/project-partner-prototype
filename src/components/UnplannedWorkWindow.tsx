@@ -80,16 +80,16 @@ export const UnplannedWorkWindow: React.FC<UnplannedWorkWindowProps> = ({
     e.preventDefault();
     
     if (draggedPhaseIndex !== null) {
-      // Reordering existing phase
+      // Reordering existing new phase within the selectedPhases
       const newPhases = [...selectedPhases];
       const [draggedPhase] = newPhases.splice(draggedPhaseIndex, 1);
       
-      const insertIndex = targetIndex !== undefined ? targetIndex : newPhases.length;
+      const insertIndex = targetIndex !== undefined ? Math.min(targetIndex, newPhases.length) : newPhases.length;
       newPhases.splice(insertIndex, 0, draggedPhase);
       
       setSelectedPhases(newPhases);
     } else if (draggedItem) {
-      // Adding new phase from library
+      // Adding new phase from library - this will be inserted in the project at the target position
       const newPhase: Phase = {
         id: `${draggedItem.id}-${Date.now()}`,
         name: draggedItem.name,
@@ -97,13 +97,8 @@ export const UnplannedWorkWindow: React.FC<UnplannedWorkWindowProps> = ({
         operations: draggedItem.operations
       };
       
-      if (targetIndex !== undefined) {
-        const newPhases = [...selectedPhases];
-        newPhases.splice(targetIndex, 0, newPhase);
-        setSelectedPhases(newPhases);
-      } else {
-        setSelectedPhases(prev => [...prev, newPhase]);
-      }
+      // Add to selectedPhases list (these will be inserted at the end when confirmed)
+      setSelectedPhases(prev => [...prev, newPhase]);
     }
     
     setDraggedItem(null);
@@ -159,17 +154,12 @@ export const UnplannedWorkWindow: React.FC<UnplannedWorkWindowProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="text-2xl font-bold">Add Unplanned Work</DialogTitle>
               <DialogDescription>
                 Add additional phases to handle unexpected work discovered during your project
               </DialogDescription>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -283,12 +273,12 @@ export const UnplannedWorkWindow: React.FC<UnplannedWorkWindowProps> = ({
             </CardContent>
           </Card>
 
-          {/* Selected Phases */}
+          {/* Project Plan */}
           <Card>
             <CardHeader>
-              <CardTitle>Unplanned Work Phases</CardTitle>
+              <CardTitle>Project Plan</CardTitle>
               <CardDescription>
-                Phases to add to your project workflow
+                Current project phases - drop new phases to add them to your workflow
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -298,69 +288,96 @@ export const UnplannedWorkWindow: React.FC<UnplannedWorkWindowProps> = ({
                 onDrop={handleDrop} 
                 onDragEnd={handleDragEnd}
               >
-                {/* Drop Zone before first phase */}
-                <div 
-                  className={`h-2 ${dropZoneIndex === 0 ? 'bg-blue-200 border-2 border-dashed border-blue-400' : ''} rounded transition-all duration-200`}
-                  onDragOver={e => handleDragOver(e, 0)}
-                  onDrop={e => handleDrop(e, 0)}
-                />
-
-                {/* Selected Phases */}
-                {selectedPhases.map((phase, index) => (
+                {/* Show current project phases with drop zones */}
+                {currentProjectRun && currentProjectRun.phases.map((phase: any, index: number) => (
                   <div key={phase.id}>
-                    <Card 
-                      className={`group cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow ${
-                        draggedPhaseIndex === index ? 'opacity-50' : ''
-                      }`} 
-                      draggable 
-                      onDragStart={e => handleSelectedPhaseDragStart(e, index)}
+                    {/* Drop Zone before each existing phase */}
+                    <div 
+                      className={`h-2 ${dropZoneIndex === index ? 'bg-blue-200 border-2 border-dashed border-blue-400' : ''} rounded transition-all duration-200`}
+                      onDragOver={e => handleDragOver(e, index)}
+                      onDrop={e => handleDrop(e, index)}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start gap-3 flex-1">
-                            <GripVertical className="w-4 h-4 text-muted-foreground mt-1" />
-                            <div className="flex-1">
-                              <h4 className="font-medium">
-                                {index + 1}. {phase.name}
-                                {phase.id.startsWith('manual-') && (
-                                  <Badge variant="outline" className="ml-2 text-xs border-yellow-300 text-yellow-700">
-                                    Custom
-                                  </Badge>
-                                )}
-                              </h4>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {phase.description}
-                              </p>
-                              <div className="text-xs text-muted-foreground mt-2">
-                                {phase.operations.length} operation(s)
-                              </div>
-                            </div>
+                      {dropZoneIndex === index && (
+                        <div className="text-xs text-blue-600 text-center py-1">Drop new phase here</div>
+                      )}
+                    </div>
+
+                    {/* Existing Phase */}
+                    <Card className="border border-muted bg-muted/50">
+                      <CardContent className="p-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">{index + 1}</Badge>
+                          <span className="font-medium text-sm">{phase.name}</span>
+                          <div className="text-xs text-muted-foreground ml-auto">
+                            {phase.operations?.length || 0} operation(s)
                           </div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleRemovePhase(phase.id)} 
-                            className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
                         </div>
+                        {phase.description && (
+                          <p className="text-xs text-muted-foreground mt-1 truncate">
+                            {phase.description}
+                          </p>
+                        )}
                       </CardContent>
                     </Card>
-                    
-                    {/* Drop Zone after each phase */}
-                    <div 
-                      className={`h-2 ${dropZoneIndex === index + 1 ? 'bg-blue-200 border-2 border-dashed border-blue-400' : ''} rounded transition-all duration-200`}
-                      onDragOver={e => handleDragOver(e, index + 1)}
-                      onDrop={e => handleDrop(e, index + 1)}
-                    />
                   </div>
                 ))}
 
-                {selectedPhases.length === 0 && (
-                  <div className="text-center py-12 text-muted-foreground">
+                {/* Drop Zone at the end */}
+                <div 
+                  className={`h-4 ${dropZoneIndex === (currentProjectRun?.phases?.length || 0) ? 'bg-blue-200 border-2 border-dashed border-blue-400' : 'border border-dashed border-muted-foreground/30'} rounded transition-all duration-200`}
+                  onDragOver={e => handleDragOver(e, currentProjectRun?.phases?.length || 0)}
+                  onDrop={e => handleDrop(e, currentProjectRun?.phases?.length || 0)}
+                >
+                  {dropZoneIndex === (currentProjectRun?.phases?.length || 0) ? (
+                    <div className="text-xs text-blue-600 text-center py-2">Drop new phase here</div>
+                  ) : (
+                    <div className="text-xs text-muted-foreground text-center py-2">Add phases to the end</div>
+                  )}
+                </div>
+
+                {/* Show selected/new phases that will be added */}
+                {selectedPhases.length > 0 && (
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="font-medium text-sm mb-2 text-green-700">New Phases to Add:</h4>
+                    {selectedPhases.map((phase, index) => (
+                      <Card key={phase.id} className="mb-2 border-green-200 bg-green-50">
+                        <CardContent className="p-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-3 flex-1">
+                              <GripVertical className="w-4 h-4 text-muted-foreground mt-1" />
+                              <div className="flex-1">
+                                <h4 className="font-medium text-sm">
+                                  {phase.name}
+                                  {phase.id.startsWith('manual-') && (
+                                    <Badge variant="outline" className="ml-2 text-xs border-yellow-300 text-yellow-700">
+                                      Custom
+                                    </Badge>
+                                  )}
+                                </h4>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {phase.description}
+                                </p>
+                              </div>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleRemovePhase(phase.id)} 
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+
+                {!currentProjectRun?.phases?.length && selectedPhases.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
                     <Layers className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p>Drop phases here to add unplanned work</p>
+                    <p>Drop phases here to add to your project</p>
                   </div>
                 )}
               </div>

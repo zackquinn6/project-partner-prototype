@@ -165,6 +165,116 @@ export const createOrderingPhase = (): Phase => {
   return orderingPhase;
 };
 
+export const createCloseProjectPhase = (): Phase => {
+  const manageMaterialsOperation: Operation = {
+    id: 'manage-materials-operation',
+    name: 'Manage Materials',
+    description: 'Properly handle remaining materials and waste',
+    steps: [
+      {
+        id: 'store-spare-materials-step',
+        step: 'Store Spare Materials',
+        description: 'Organize and store leftover materials for future use',
+        contentType: 'text' as const,
+        content: 'Properly organize and store any remaining materials in a dry, safe location. Label containers and keep receipts for warranty purposes.',
+        materials: [],
+        tools: [],
+        outputs: [{
+          id: 'spare-materials-output',
+          name: 'Materials Stored',
+          description: 'Leftover materials properly organized and stored',
+          type: 'none' as const
+        }]
+      },
+      {
+        id: 'dispose-waste-materials-step',
+        step: 'Dispose Waste Materials',
+        description: 'Responsibly dispose of construction waste and debris',
+        contentType: 'text' as const,
+        content: 'Dispose of construction waste according to local regulations. Separate recyclable materials and hazardous waste for proper disposal.',
+        materials: [],
+        tools: [],
+        outputs: [{
+          id: 'waste-disposal-output',
+          name: 'Waste Disposed',
+          description: 'Construction waste responsibly disposed of',
+          type: 'none' as const
+        }]
+      }
+    ]
+  };
+
+  const returnToolsOperation: Operation = {
+    id: 'return-tools-operation',
+    name: 'Return Tools',
+    description: 'Return rented tools and organize purchased tools',
+    steps: [
+      {
+        id: 'return-rented-tools-step',
+        step: 'Return Rented Tools',
+        description: 'Clean and return any rented tools to avoid late fees',
+        contentType: 'text' as const,
+        content: 'Clean all rented tools thoroughly and return them to the rental facility. Check rental agreements for return deadlines to avoid additional charges.',
+        materials: [],
+        tools: [],
+        outputs: [{
+          id: 'rented-tools-output',
+          name: 'Rented Tools Returned',
+          description: 'All rented tools cleaned and returned on time',
+          type: 'none' as const
+        }]
+      },
+      {
+        id: 'store-purchased-tools-step',
+        step: 'Store Purchased Tools',
+        description: 'Organize and store newly purchased tools',
+        contentType: 'text' as const,
+        content: 'Clean and properly store all purchased tools in your tool storage area. Keep receipts and warranty information in a safe place.',
+        materials: [],
+        tools: [],
+        outputs: [{
+          id: 'purchased-tools-output',
+          name: 'Tools Organized',
+          description: 'Purchased tools cleaned and properly stored',
+          type: 'none' as const
+        }]
+      }
+    ]
+  };
+
+  const celebrateOperation: Operation = {
+    id: 'celebrate-operation',
+    name: 'Celebrate',
+    description: 'Celebrate your successful project completion',
+    steps: [
+      {
+        id: 'celebrate-step',
+        step: 'Celebrate Your Success',
+        description: 'Take time to appreciate your accomplishment and share your success',
+        contentType: 'text' as const,
+        content: 'Congratulations on completing your project! Take photos of your finished work, share with family and friends, and enjoy the satisfaction of a job well done.',
+        materials: [],
+        tools: [],
+        outputs: [{
+          id: 'celebration-output',
+          name: 'Project Celebrated',
+          description: 'Achievement recognized and celebrated',
+          type: 'none' as const
+        }]
+      }
+    ]
+  };
+
+  const closeProjectPhase: Phase = {
+    id: 'close-project-phase',
+    name: 'Close Project',
+    description: 'Final cleanup, organization, and celebration of project completion',
+    operations: [manageMaterialsOperation, returnToolsOperation, celebrateOperation]
+  };
+
+  return closeProjectPhase;
+};
+
 export const addStandardPhasesToProjectRun = (phases: Phase[]): Phase[] => {
   let processedPhases = [...phases];
   
@@ -202,6 +312,13 @@ export const addStandardPhasesToProjectRun = (phases: Phase[]): Phase[] => {
         processedPhases.unshift(createOrderingPhase());
       }
     }
+  }
+
+  // Check if close project phase already exists
+  const hasCloseProject = processedPhases.some(phase => phase.name === 'Close Project');
+  if (!hasCloseProject) {
+    // Always add close project phase at the end
+    processedPhases.push(createCloseProjectPhase());
   }
 
   return processedPhases;

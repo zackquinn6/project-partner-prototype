@@ -143,13 +143,17 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
             hasMaterials: !!step.materials,
             materialsLength: step.materials?.length,
             hasTools: !!step.tools,
-            toolsLength: step.tools?.length
+            toolsLength: step.tools?.length,
+            stepData: {
+              materials: step.materials,
+              tools: step.tools
+            }
           });
           
           // Process materials - add quantities (materials are consumed per step)
-          if (step.materials && Array.isArray(step.materials)) {
+          if (step.materials && Array.isArray(step.materials) && step.materials.length > 0) {
             step.materials.forEach(material => {
-              const key = material.id;
+              const key = material.id || material.name || `material-${Date.now()}`;
               if (materialsMap.has(key)) {
                 // Material already exists, increment quantity
                 const existing = materialsMap.get(key);
@@ -158,11 +162,11 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
               } else {
                 // New material
                 materialsMap.set(key, {
-                  id: material.id,
+                  id: material.id || key,
                   name: material.name,
-                  description: material.description,
-                  category: material.category,
-                  required: material.required,
+                  description: material.description || '',
+                  category: material.category || 'Other',
+                  required: material.required !== false,
                   totalQuantity: 1,
                   usedInSteps: [step.step]
                 });
@@ -171,9 +175,9 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
           }
 
           // Process tools - track max quantity needed in any single step (tools are reused)
-          if (step.tools && Array.isArray(step.tools)) {
+          if (step.tools && Array.isArray(step.tools) && step.tools.length > 0) {
             step.tools.forEach(tool => {
-              const key = tool.id;
+              const key = tool.id || tool.name || `tool-${Date.now()}`;
               const toolQuantity = 1; // Default quantity per step
               
               if (toolsMap.has(key)) {
@@ -184,11 +188,11 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
               } else {
                 // New tool
                 toolsMap.set(key, {
-                  id: tool.id,
+                  id: tool.id || key,
                   name: tool.name,
-                  description: tool.description,
-                  category: tool.category,
-                  required: tool.required,
+                  description: tool.description || '',
+                  category: tool.category || 'Other',
+                  required: tool.required !== false,
                   maxQuantity: toolQuantity,
                   usedInSteps: [step.step]
                 });
