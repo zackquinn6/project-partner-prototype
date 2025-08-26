@@ -118,11 +118,11 @@ export function MaterialsLibrary() {
             <DialogHeader>
               <DialogTitle>Add New Material</DialogTitle>
             </DialogHeader>
-            <LibraryItemForm
-              type="material"
-              onSave={handleSave}
-              onCancel={() => setShowAddDialog(false)}
-            />
+        <LibraryItemForm
+          type="materials"
+          onSave={handleSave}
+          onCancel={() => setShowAddDialog(false)}
+        />
           </DialogContent>
         </Dialog>
       </div>
@@ -211,7 +211,7 @@ export function MaterialsLibrary() {
           </DialogHeader>
           {editingMaterial && (
             <LibraryItemForm
-              type="material"
+              type="materials"
               item={editingMaterial}
               onSave={handleSave}
               onCancel={() => {

@@ -113,7 +113,7 @@ Sandpaper,Fine grit sandpaper,Pack of 10 sheets`;
       const validItems = parsedItems.filter(item => !item.errors?.length);
       
       const { error } = await supabase
-        .from(type as any)
+        .from(type)
         .insert(validItems.map(item => ({
           item: item.item,
           description: item.description || null,

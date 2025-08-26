@@ -724,6 +724,107 @@ export type Database = {
         }
         Relationships: []
       }
+      variation_attribute_values: {
+        Row: {
+          attribute_id: string
+          created_at: string
+          display_value: string
+          id: string
+          sort_order: number | null
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          attribute_id: string
+          created_at?: string
+          display_value: string
+          id?: string
+          sort_order?: number | null
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          attribute_id?: string
+          created_at?: string
+          display_value?: string
+          id?: string
+          sort_order?: number | null
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "variation_attribute_values_attribute_id_fkey"
+            columns: ["attribute_id"]
+            isOneToOne: false
+            referencedRelation: "variation_attributes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      variation_attributes: {
+        Row: {
+          attribute_type: string
+          created_at: string
+          display_name: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          attribute_type?: string
+          created_at?: string
+          display_name: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          attribute_type?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      variation_instances: {
+        Row: {
+          attributes: Json
+          core_item_id: string
+          created_at: string
+          description: string | null
+          id: string
+          item_type: string
+          name: string
+          sku: string | null
+          updated_at: string
+        }
+        Insert: {
+          attributes?: Json
+          core_item_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_type: string
+          name: string
+          sku?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attributes?: Json
+          core_item_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_type?: string
+          name?: string
+          sku?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       workflow_optimizations: {
         Row: {
           affected_steps: string[]

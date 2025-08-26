@@ -118,11 +118,11 @@ export function ToolsLibrary() {
             <DialogHeader>
               <DialogTitle>Add New Tool</DialogTitle>
             </DialogHeader>
-            <LibraryItemForm
-              type="tool"
-              onSave={handleSave}
-              onCancel={() => setShowAddDialog(false)}
-            />
+        <LibraryItemForm
+          type="tools"
+          onSave={handleSave}
+          onCancel={() => setShowAddDialog(false)}
+        />
           </DialogContent>
         </Dialog>
       </div>
@@ -211,7 +211,7 @@ export function ToolsLibrary() {
           </DialogHeader>
           {editingTool && (
             <LibraryItemForm
-              type="tool"
+              type="tools"
               item={editingTool}
               onSave={handleSave}
               onCancel={() => {
