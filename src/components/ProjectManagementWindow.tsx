@@ -773,9 +773,13 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
     );
   }
 
-  // Render EditWorkflowView full-screen outside the Dialog when in workflow editing mode
+  // If in workflow edit mode, render full-screen
   if (currentView === 'editWorkflow' || currentView === 'dragdrop') {
-    return <EditWorkflowView onBackToAdmin={() => setCurrentView('table')} />;
+    return (
+      <div className="fixed inset-0 z-50 bg-background">
+        <EditWorkflowView onBackToAdmin={() => setCurrentView('table')} />
+      </div>
+    );
   }
 
   const renderView = () => {

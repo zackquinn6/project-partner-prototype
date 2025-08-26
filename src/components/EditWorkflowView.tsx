@@ -1,25 +1,26 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, CheckCircle, ExternalLink, Image, Video, Edit, Save, X, ArrowLeft, Settings, Plus, Trash2, FolderPlus, FileText, List, Wrench, Package, Upload } from "lucide-react";
-import { FlowTypeSelector } from './FlowTypeSelector';
-import { StepTimeEstimation } from './StepTimeEstimation';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useState, useEffect } from 'react';
 import { useProject } from '@/contexts/ProjectContext';
-import { WorkflowStep, Material, Tool, Output, Phase, Operation, ContentSection } from '@/interfaces/Project';
-import { OutputEditForm } from './OutputEditForm';
-import { MultiContentEditor } from './MultiContentEditor';
-import { MultiContentRenderer } from './MultiContentRenderer';
-import { ProjectContentImport } from './ProjectContentImport';
-import { StructureManager } from './StructureManager';
-import { ToolsMaterialsWindow } from './ToolsMaterialsWindow';
+import { WorkflowStep, Tool, Material, Output, ContentSection, Phase, Operation, Project } from '@/interfaces/Project';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { MultiContentEditor } from '@/components/MultiContentEditor';
+import { MultiContentRenderer } from '@/components/MultiContentRenderer';
+import { FlowTypeSelector } from '@/components/FlowTypeSelector';
+import { StepTimeEstimation } from '@/components/StepTimeEstimation';
+import { ToolsMaterialsWindow } from '@/components/ToolsMaterialsWindow';
+import { MultiSelectLibraryDialog } from '@/components/MultiSelectLibraryDialog';
+import { StructureManager } from '@/components/StructureManager';
+import { OutputEditForm } from '@/components/OutputEditForm';
+import { ProjectContentImport } from '@/components/ProjectContentImport';
+import { ArrowLeft, Eye, Edit, Package, Wrench, FileOutput, Plus, X, Settings, Save, ChevronLeft, ChevronRight, FileText, List, Upload, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 
@@ -37,6 +38,9 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
   const [outputEditOpen, setOutputEditOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [toolsMaterialsOpen, setToolsMaterialsOpen] = useState(false);
+  const [toolsLibraryOpen, setToolsLibraryOpen] = useState(false);
+  const [materialsLibraryOpen, setMaterialsLibraryOpen] = useState(false);
+  const [showStructureManager, setShowStructureManager] = useState(false);
   
   // Structure editing state
   const [editingPhase, setEditingPhase] = useState<Phase | null>(null);
@@ -511,27 +515,10 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
                           <Button 
                             size="sm" 
                             variant="outline"
-                            onClick={() => setToolsMaterialsOpen(true)}
+                            onClick={() => setToolsLibraryOpen(true)}
                           >
                             <Wrench className="w-4 h-4 mr-2" />
                             Select from Library
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            onClick={() => {
-                              const newTool: Tool = {
-                                id: `tool-${Date.now()}`,
-                                name: 'New Tool',
-                                description: '',
-                                category: 'Other',
-                                required: false
-                              };
-                              updateEditingStep('tools', [...editingStep.tools, newTool]);
-                            }}
-                          >
-                            <Package className="w-4 h-4 mr-2" />
-                            Add New Item
                           </Button>
                         </div>
                         
@@ -989,9 +976,43 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
         onImport={handleImport}
       />
       {/* Tools & Materials Library */}
-      <ToolsMaterialsWindow 
+      <ToolsMaterialsWindow
         open={toolsMaterialsOpen}
         onOpenChange={setToolsMaterialsOpen}
+      />
+      
+      <MultiSelectLibraryDialog
+        open={toolsLibraryOpen}
+        onOpenChange={setToolsLibraryOpen}
+        type="tools"
+        onSelect={(selectedItems) => {
+          const newTools: Tool[] = selectedItems.map(item => ({
+            id: `tool-${Date.now()}-${Math.random()}`,
+            name: item.item,
+            description: item.description || '',
+            category: 'Hand Tool',
+            required: false
+          }));
+          
+          updateEditingStep('tools', [...(editingStep?.tools || []), ...newTools]);
+        }}
+      />
+      
+      <MultiSelectLibraryDialog
+        open={materialsLibraryOpen}
+        onOpenChange={setMaterialsLibraryOpen}
+        type="materials"
+        onSelect={(selectedItems) => {
+          const newMaterials: Material[] = selectedItems.map(item => ({
+            id: `material-${Date.now()}-${Math.random()}`,
+            name: item.item,
+            description: item.description || '',
+            category: 'Consumable',
+            required: false
+          }));
+          
+          updateEditingStep('materials', [...(editingStep?.materials || []), ...newMaterials]);
+        }}
       />
     </div>
   );
