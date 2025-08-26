@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle, EyeOff } from "lucide-react";
-import { getStepIndicator } from './FlowTypeLegend';
+import { getStepIndicator, FlowTypeLegend } from './FlowTypeLegend';
 import {
   Sidebar,
   SidebarContent,
@@ -41,6 +42,7 @@ export function WorkflowSidebar({
 }: WorkflowSidebarProps) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const [showStepTypesInfo, setShowStepTypesInfo] = useState(false);
 
   return (
     <Sidebar collapsible="icon">
@@ -84,6 +86,15 @@ export function WorkflowSidebar({
                       ❗ Call an audible
                     </Button>
                   )}
+
+                  {/* Step Types Info Button */}
+                  <Button 
+                    variant="outline"
+                    onClick={() => setShowStepTypesInfo(true)}
+                    className="w-full py-2 px-4 text-sm"
+                  >
+                    ℹ️ Step Types Info
+                  </Button>
                 </div>
 
                 {/* Step Navigation */}
@@ -128,6 +139,18 @@ export function WorkflowSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      {/* Step Types Info Dialog */}
+      <Dialog open={showStepTypesInfo} onOpenChange={setShowStepTypesInfo}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Workflow Step Types</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <FlowTypeLegend compact={false} showDescriptions={true} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </Sidebar>
   );
 }

@@ -13,7 +13,6 @@ import {
   Zap
 } from 'lucide-react';
 import { FeatureRoadmap } from './FeatureRoadmap';
-import { ProjectPhotos } from './ProjectPhotos';
 import { useProject } from '@/contexts/ProjectContext';
 
 export const PostAuthLanding = () => {

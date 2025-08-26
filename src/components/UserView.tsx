@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Info, ShoppingCart, Plus, Award, Eye, EyeOff } from "lucide-react";
-import { FlowTypeLegend, getStepIndicator } from './FlowTypeLegend';
+import { getStepIndicator } from './FlowTypeLegend';
 import { WorkflowSidebar } from './WorkflowSidebar';
 import {
   SidebarProvider,
@@ -30,7 +30,6 @@ import { CompletionCertificate } from './CompletionCertificate';
 import { ProjectSurvey } from './ProjectSurvey';
 import { ToolsMaterialsSection } from './ToolsMaterialsSection';
 import ProfileManager from './ProfileManager';
-import { ProjectPhotos } from './ProjectPhotos';
 import { isKickoffPhaseComplete, addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 interface UserViewProps {
   resetToListing?: boolean;
@@ -1125,31 +1124,16 @@ export default function UserView({
             </CardHeader>
           </Card>
 
-          {/* Tools & Materials Section - At Top */}
-          {currentStep && (currentStep.materials?.length > 0 || currentStep.tools?.length > 0) && (
-            <ToolsMaterialsSection
-              currentStep={currentStep}
-              checkedMaterials={checkedMaterials[currentStep.id] || new Set()}
-              checkedTools={checkedTools[currentStep.id] || new Set()}
-              onToggleMaterial={(materialId) => toggleMaterialCheck(currentStep.id, materialId)}
-              onToggleTool={(toolId) => toggleToolCheck(currentStep.id, toolId)}
-            />
-          )}
-
-          {/* Project Photos Section */}
-          {currentProjectRun && (
-            <Accordion type="single" collapsible className="mb-6">
-              <AccordionItem value="project-photos">
-                <AccordionTrigger className="flex items-center gap-2">
-                  <Image className="w-5 h-5" />
-                  Project Progress Photos
-                </AccordionTrigger>
-                <AccordionContent>
-                  <ProjectPhotos projectRunId={currentProjectRun.id} />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          )}
+              {/* Tools & Materials Section - At Top */}
+              {currentStep && (currentStep.materials?.length > 0 || currentStep.tools?.length > 0) && (
+                <ToolsMaterialsSection
+                  currentStep={currentStep}
+                  checkedMaterials={checkedMaterials[currentStep.id] || new Set()}
+                  checkedTools={checkedTools[currentStep.id] || new Set()}
+                  onToggleMaterial={(materialId) => toggleMaterialCheck(currentStep.id, materialId)}
+                  onToggleTool={(toolId) => toggleToolCheck(currentStep.id, toolId)}
+                />
+              )}
 
           {/* Content */}
           <Card className="gradient-card border-0 shadow-card">
@@ -1415,10 +1399,6 @@ export default function UserView({
             </CardContent>
           </Card>
 
-                {/* Flow Type Legend - At bottom of workflow */}
-                <div className="mt-8 pt-6 border-t border-muted">
-                  <FlowTypeLegend compact={false} showDescriptions={true} />
-                </div>
               </div>
             </div>
           </main>
