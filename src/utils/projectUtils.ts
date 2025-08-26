@@ -55,6 +55,21 @@ export const createPlanningPhase = (): Phase => {
   const planningSteps: WorkflowStep[] = [
     {
       id: 'planning-step-1',
+      step: 'Project Sizing & Time Estimation',
+      description: 'Determine project scope, measurements, and time requirements',
+      contentType: 'text' as const,
+      content: 'Complete the project sizing questionnaire to determine the scope, measurements, and estimated time for your project.',
+      materials: [],
+      tools: [],
+      outputs: [{
+        id: 'sizing-output',
+        name: 'Project Sized',
+        description: 'Project scope and timing determined',
+        type: 'none' as const
+      }]
+    },
+    {
+      id: 'planning-step-2',
       step: 'Project Planning',
       description: 'Customize your project workflow by adding phases from our library',
       contentType: 'text' as const,
