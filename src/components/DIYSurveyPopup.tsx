@@ -78,7 +78,7 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
 
   const totalSteps = mode === 'verify' ? 7 : (mode === 'personality' ? 12 : 6);
   const progress = mode === 'personality' && currentStep >= 0 ? 
-    ((currentStep + 1) / (totalSteps - 1)) * 100 : 
+    ((currentStep + 1) / 11) * 100 : 
     (currentStep / totalSteps) * 100;
 
   const usStates = [
@@ -367,10 +367,6 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
             return;
           }
 
-          toast({
-            title: "Profile Saved!",
-            description: "Your DIY Builder Profile has been saved to your account.",
-          });
         } else if (personalityProfile) {
           // User is not signed in - save temporarily
           saveTempPersonalityProfile(personalityProfile);
@@ -437,10 +433,6 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
             return;
           }
 
-          toast({
-            title: "Thanks for sharing!",
-            description: "Your preferences have been saved.",
-          });
         } else {
           // User is not signed in - save temporarily
           saveTempProfileAnswers(answers);
@@ -513,7 +505,7 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
     if (mode === 'personality') {
       if (currentStep === -1) return true; // Opener screen
       if (currentStep >= 0 && currentStep <= 9) {
-        return personalityAnswers[currentStep] !== 0 || currentStep === 0;
+        return personalityAnswers[currentStep] !== undefined;
       }
       if (currentStep === 10) return true; // Results screen
       return false;
@@ -1060,7 +1052,7 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
                 <Progress value={progress} className="w-full" />
                 <p className="text-sm text-muted-foreground">
                   {mode === 'personality' && currentStep >= 0 ? 
-                    `Question ${currentStep + 1} of 10` : 
+                    (currentStep <= 9 ? `Question ${currentStep + 1} of 10` : 'Your Results') : 
                     `Step ${currentStep} of ${mode === 'verify' ? totalSteps - 1 : totalSteps}`
                   }
                 </p>
