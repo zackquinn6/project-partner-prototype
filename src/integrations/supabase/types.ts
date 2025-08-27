@@ -41,6 +41,7 @@ export type Database = {
       feature_requests: {
         Row: {
           admin_notes: string | null
+          admin_response: string | null
           category: string
           created_at: string
           description: string
@@ -55,6 +56,7 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          admin_response?: string | null
           category?: string
           created_at?: string
           description: string
@@ -69,6 +71,7 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          admin_response?: string | null
           category?: string
           created_at?: string
           description?: string
@@ -136,6 +139,30 @@ export type Database = {
           title?: string
           updated_at?: string
           votes?: number
+        }
+        Relationships: []
+      }
+      feature_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          item_id: string
+          item_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          item_id: string
+          item_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          item_type?: string
+          user_id?: string
         }
         Relationships: []
       }
