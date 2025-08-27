@@ -8,9 +8,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash2, Calendar, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar, CheckCircle, Clock, AlertCircle, Star, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
+import { AdminFeatureRequestManager } from './AdminFeatureRequestManager';
 
 interface RoadmapItem {
   id: string;
@@ -187,114 +189,134 @@ export const AdminRoadmapManager: React.FC<AdminRoadmapManagerProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            Roadmap Management
-            <Button 
-              className="flex items-center gap-2"
-              onClick={() => {
-                setEditingItem(null);
-                setRoadmapForm({
-                  title: '',
-                  description: '',
-                  status: 'planned',
-                  priority: 'medium',
-                  category: 'feature',
-                  target_date: ''
-                });
-                setShowAddForm(true);
-              }}
-            >
-              <Plus className="w-4 h-4" />
-              Add Roadmap Item
-            </Button>
+          <DialogTitle>
+            Roadmap & Feature Request Management
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Feature Roadmap Items</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Feature</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>ETA</TableHead>
-                    <TableHead>Votes</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {roadmapItems.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            {getStatusIcon(item.status)}
-                            {item.title}
-                          </div>
-                          {item.description && (
-                            <p className="text-sm text-muted-foreground mt-1 max-w-md truncate">
-                              {item.description}
-                            </p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="capitalize">
-                          {item.category}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={getPriorityColor(item.priority) as any} className="capitalize">
-                          {item.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={item.status === 'completed' ? 'default' : 
-                                   item.status === 'in-progress' ? 'secondary' : 'outline'}
-                          className="capitalize"
-                        >
-                          {item.status.replace('-', ' ')}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {item.target_date ? (
-                          new Date(item.target_date).toLocaleDateString()
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>{item.votes}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditItem(item)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteItem(item.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <Tabs defaultValue="roadmap" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="roadmap">Roadmap Items</TabsTrigger>
+              <TabsTrigger value="requests">Feature Requests</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="roadmap" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    Feature Roadmap Items
+                    <Button 
+                      className="flex items-center gap-2"
+                      onClick={() => {
+                        setEditingItem(null);
+                        setRoadmapForm({
+                          title: '',
+                          description: '',
+                          status: 'planned',
+                          priority: 'medium',
+                          category: 'feature',
+                          target_date: ''
+                        });
+                        setShowAddForm(true);
+                      }}
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Roadmap Item
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Feature</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Priority</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>ETA</TableHead>
+                        <TableHead>Votes</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {roadmapItems.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="font-medium">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                {getStatusIcon(item.status)}
+                                {item.title}
+                              </div>
+                              {item.description && (
+                                <p className="text-sm text-muted-foreground mt-1 max-w-md truncate">
+                                  {item.description}
+                                </p>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="capitalize">
+                              {item.category}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={getPriorityColor(item.priority) as any} className="capitalize">
+                              {item.priority}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={item.status === 'completed' ? 'default' : 
+                                       item.status === 'in-progress' ? 'secondary' : 'outline'}
+                              className="capitalize"
+                            >
+                              {item.status.replace('-', ' ')}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {item.target_date ? (
+                              new Date(item.target_date).toLocaleDateString()
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>{item.votes}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditItem(item)}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteItem(item.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="requests" className="space-y-4">
+              <div className="h-96 overflow-y-auto">
+                <AdminFeatureRequestManager
+                  open={true}
+                  onOpenChange={() => {}}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Add/Edit Form */}

@@ -37,6 +37,7 @@ interface FeatureRequest {
   votes: number;
   created_at: string;
   admin_notes: string | null;
+  admin_response: string | null;
   submitted_by: string | null;
 }
 
@@ -54,7 +55,10 @@ export const FeatureRoadmapWindow: React.FC<FeatureRoadmapWindowProps> = ({
   const [featureRequests, setFeatureRequests] = useState<FeatureRequest[]>([]);
   const [showFeatureRequestForm, setShowFeatureRequestForm] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [userVotes, setUserVotes] = useState<Set<string>>(new Set());
+  const [userVotes, setUserVotes] = useState<Record<string, Set<string>>>({
+    roadmap: new Set(),
+    request: new Set()
+  });
 
   // Form state for feature requests
   const [requestForm, setRequestForm] = useState({
@@ -72,7 +76,7 @@ export const FeatureRoadmapWindow: React.FC<FeatureRoadmapWindowProps> = ({
 
   const fetchData = async () => {
     try {
-      const [roadmapResponse, requestsResponse] = await Promise.all([
+      const [roadmapResponse, requestsResponse, userVotesResponse] = await Promise.all([
         supabase
           .from('feature_roadmap')
           .select('*')
@@ -80,14 +84,26 @@ export const FeatureRoadmapWindow: React.FC<FeatureRoadmapWindowProps> = ({
         supabase
           .from('feature_requests')
           .select('*')
-          .order('created_at', { ascending: false })
+          .order('created_at', { ascending: false }),
+        user ? supabase
+          .from('feature_votes')
+          .select('item_id, item_type')
+          .eq('user_id', user.id) : Promise.resolve({ data: [], error: null })
       ]);
 
       if (roadmapResponse.error) throw roadmapResponse.error;
       if (requestsResponse.error) throw requestsResponse.error;
+      if (userVotesResponse.error) throw userVotesResponse.error;
 
       setRoadmapItems((roadmapResponse.data || []) as RoadmapItem[]);
       setFeatureRequests((requestsResponse.data || []) as FeatureRequest[]);
+      
+      // Set user votes
+      const votes = { roadmap: new Set<string>(), request: new Set<string>() };
+      (userVotesResponse.data || []).forEach(vote => {
+        votes[vote.item_type as 'roadmap' | 'request'].add(vote.item_id);
+      });
+      setUserVotes(votes);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load roadmap data');
@@ -138,9 +154,59 @@ export const FeatureRoadmapWindow: React.FC<FeatureRoadmapWindowProps> = ({
       return;
     }
 
-    // For demo purposes, just show the vote action
-    // In a real implementation, you'd track votes per user
-    toast.success('Vote recorded! (Feature in development)');
+    // Check if user owns this request (can't vote on own request)
+    if (itemType === 'request') {
+      const request = featureRequests.find(r => r.id === itemId);
+      if (request?.submitted_by === user.id) {
+        toast.error("You can't vote on your own feature request");
+        return;
+      }
+    }
+
+    const hasVoted = userVotes[itemType].has(itemId);
+
+    try {
+      if (hasVoted) {
+        // Remove vote
+        const { error } = await supabase
+          .from('feature_votes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('item_id', itemId)
+          .eq('item_type', itemType);
+
+        if (error) throw error;
+        
+        setUserVotes(prev => ({
+          ...prev,
+          [itemType]: new Set([...prev[itemType]].filter(id => id !== itemId))
+        }));
+        toast.success('Vote removed');
+      } else {
+        // Add vote
+        const { error } = await supabase
+          .from('feature_votes')
+          .insert({
+            user_id: user.id,
+            item_id: itemId,
+            item_type: itemType
+          });
+
+        if (error) throw error;
+        
+        setUserVotes(prev => ({
+          ...prev,
+          [itemType]: new Set([...prev[itemType], itemId])
+        }));
+        toast.success('Vote recorded');
+      }
+      
+      // Refresh data to get updated vote counts
+      fetchData();
+    } catch (error) {
+      console.error('Error voting:', error);
+      toast.error('Failed to record vote');
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -252,9 +318,13 @@ export const FeatureRoadmapWindow: React.FC<FeatureRoadmapWindowProps> = ({
                           variant="ghost"
                           size="sm"
                           onClick={() => handleVote(item.id, 'roadmap')}
-                          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                          className={`flex items-center gap-1 text-sm ${
+                            userVotes.roadmap.has(item.id) 
+                              ? 'text-primary' 
+                              : 'text-muted-foreground hover:text-foreground'
+                          }`}
                         >
-                          <ThumbsUp className="w-4 h-4" />
+                          <ThumbsUp className={`w-4 h-4 ${userVotes.roadmap.has(item.id) ? 'fill-current' : ''}`} />
                           {item.votes} votes
                         </Button>
                       </div>
@@ -286,25 +356,33 @@ export const FeatureRoadmapWindow: React.FC<FeatureRoadmapWindowProps> = ({
                             <Star className="w-4 h-4 text-yellow-500" />
                             {request.title}
                           </CardTitle>
-                          <p className="text-muted-foreground mt-2">{request.description}</p>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="capitalize">
-                              {request.category}
-                            </Badge>
-                            <Badge 
-                              variant={request.priority_request === 'critical' ? 'destructive' : 
-                                     request.priority_request === 'high' ? 'secondary' : 'outline'}
-                              className="capitalize"
-                            >
-                              {request.priority_request}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(request.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
+                           <p className="text-muted-foreground mt-2">{request.description}</p>
+                           {request.admin_response && (
+                             <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                               <div className="flex items-center gap-2 mb-1">
+                                 <Badge variant="outline" className="text-xs">Admin Response</Badge>
+                               </div>
+                               <p className="text-sm text-blue-800 dark:text-blue-200">{request.admin_response}</p>
+                             </div>
+                           )}
+                         </div>
+                         <div className="flex flex-col items-end gap-2">
+                           <div className="flex items-center gap-2">
+                             <Badge variant="outline" className="capitalize">
+                               {request.category}
+                             </Badge>
+                             <Badge 
+                               variant={request.priority_request === 'critical' ? 'destructive' : 
+                                      request.priority_request === 'high' ? 'secondary' : 'outline'}
+                               className="capitalize"
+                             >
+                               {request.priority_request}
+                             </Badge>
+                           </div>
+                           <p className="text-sm text-muted-foreground">
+                             {new Date(request.created_at).toLocaleDateString()}
+                           </p>
+                         </div>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -320,9 +398,16 @@ export const FeatureRoadmapWindow: React.FC<FeatureRoadmapWindowProps> = ({
                           variant="ghost"
                           size="sm"
                           onClick={() => handleVote(request.id, 'request')}
-                          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                          disabled={request.submitted_by === user?.id}
+                          className={`flex items-center gap-1 text-sm ${
+                            request.submitted_by === user?.id 
+                              ? 'text-muted-foreground/50 cursor-not-allowed' 
+                              : userVotes.request.has(request.id) 
+                                ? 'text-primary' 
+                                : 'text-muted-foreground hover:text-foreground'
+                          }`}
                         >
-                          <ThumbsUp className="w-4 h-4" />
+                          <ThumbsUp className={`w-4 h-4 ${userVotes.request.has(request.id) ? 'fill-current' : ''}`} />
                           {request.votes} votes
                         </Button>
                       </div>

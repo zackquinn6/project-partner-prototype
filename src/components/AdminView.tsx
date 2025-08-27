@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Settings, BarChart3, Shield, Wrench, Lock, Brain, TrendingUp, Users, Cog, Scroll, MapPin } from 'lucide-react';
 import { StructureManager } from './StructureManager';
 import { AdminRoadmapManager } from './AdminRoadmapManager';
+import { AdminFeatureRequestManager } from './AdminFeatureRequestManager';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const AdminView: React.FC = () => {
   const [projectManagementOpen, setProjectManagementOpen] = useState(false);
@@ -23,6 +25,7 @@ export const AdminView: React.FC = () => {
   const [workflowOptimizationOpen, setWorkflowOptimizationOpen] = useState(false);
   const [processDesignOpen, setProcessDesignOpen] = useState(false);
   const [roadmapManagerOpen, setRoadmapManagerOpen] = useState(false);
+  const [featureRequestManagerOpen, setFeatureRequestManagerOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'admin' | 'structure-manager'>('admin');
 
   if (currentView === 'structure-manager') {
@@ -239,9 +242,14 @@ export const AdminView: React.FC = () => {
           </DialogContent>
         </Dialog>
 
-        <AdminRoadmapManager 
-          open={roadmapManagerOpen} 
-          onOpenChange={setRoadmapManagerOpen} 
+        <AdminRoadmapManager
+          open={roadmapManagerOpen}
+          onOpenChange={setRoadmapManagerOpen}
+        />
+
+        <AdminFeatureRequestManager
+          open={featureRequestManagerOpen}
+          onOpenChange={setFeatureRequestManagerOpen}
         />
 
         <Dialog open={processDesignOpen} onOpenChange={setProcessDesignOpen}>
