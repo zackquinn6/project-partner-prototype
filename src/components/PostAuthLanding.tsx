@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +12,18 @@ import {
   Target,
   Zap
 } from 'lucide-react';
-import { FeatureRoadmap } from './FeatureRoadmap';
 import { useProject } from '@/contexts/ProjectContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export const PostAuthLanding = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [stats, setStats] = useState([
+    { label: "Active Projects", value: "0", icon: Target },
+    { label: "Completed", value: "0", icon: Trophy }, 
+    { label: "Hours Saved", value: "0", icon: Zap }
+  ]);
 
   useEffect(() => {
     const handleProjectsNavigation = () => {
@@ -45,6 +52,43 @@ export const PostAuthLanding = () => {
     };
   }, [navigate]);
 
+  // Fetch user stats
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      if (!user) return;
+      
+      try {
+        const { data: projectRuns, error } = await supabase
+          .from('project_runs')
+          .select('status, progress')
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        const activeProjects = projectRuns?.filter(run => 
+          run.status !== 'complete' && run.progress < 100
+        ).length || 0;
+
+        const completedProjects = projectRuns?.filter(run => 
+          run.status === 'complete' || run.progress >= 100
+        ).length || 0;
+
+        const totalProjectsStarted = projectRuns?.length || 0;
+        const hoursSaved = totalProjectsStarted * 2; // 2 hours research time saved per project
+
+        setStats([
+          { label: "Active Projects", value: activeProjects.toString(), icon: Target },
+          { label: "Completed", value: completedProjects.toString(), icon: Trophy }, 
+          { label: "Hours Saved", value: hoursSaved.toString(), icon: Zap }
+        ]);
+      } catch (error) {
+        console.error('Error fetching user stats:', error);
+      }
+    };
+
+    fetchUserStats();
+  }, [user]);
+
   const quickActions = [
     {
       icon: FolderOpen,
@@ -72,11 +116,6 @@ export const PostAuthLanding = () => {
     }
   ];
 
-  const stats = [
-    { label: "Active Projects", value: "2", icon: Target },
-    { label: "Completed", value: "5", icon: Trophy }, 
-    { label: "Hours Saved", value: "24", icon: Zap }
-  ];
 
   return (
     <div className="min-h-screen bg-background pt-20 pb-12">
@@ -135,8 +174,6 @@ export const PostAuthLanding = () => {
           ))}
         </div>
 
-        <FeatureRoadmap />
-        
         {/* Motivational Footer */}
         <div className="text-center bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-8">
           <h3 className="text-2xl font-bold text-foreground mb-4">

@@ -231,6 +231,12 @@ export default function Home({ onViewChange }: HomeProps) {
                 🏆 Win the Game of DIY
               </h1>
               
+              <div className="bg-primary-foreground/10 rounded-lg border border-primary-foreground/20 p-4 md:p-6 mb-8">
+                <p className="text-lg sm:text-xl text-primary-foreground font-medium text-center italic">
+                  "Project Partner turns repeat‑DIY chaos into a clear, winning playbook — combining planning, shopping, execution, on-demand guidance, and community spirit into one simple, sports‑themed system that gets projects done smarter every time."
+                </p>
+              </div>
+              
               <p className="text-lg sm:text-xl md:text-2xl text-primary-foreground/90 mb-8 leading-relaxed">
                 Your home projects aren't just tasks — they're challenges to conquer.
               </p>

@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Home, FolderOpen, ChevronDown, Settings, LogOut, User } from "lucide-react";
+import { Home, FolderOpen, ChevronDown, Settings, LogOut, User, TrendingUp } from "lucide-react";
 import { useProject } from '@/contexts/ProjectContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from "react";
 import { DataPrivacyManager } from './DataPrivacyManager';
 import ProfileManager from './ProfileManager';
+import { FeatureRoadmapWindow } from './FeatureRoadmapWindow';
 
 interface NavigationProps {
   currentView: 'home' | 'admin' | 'user' | 'editWorkflow';
@@ -24,6 +25,7 @@ export default function Navigation({
 }: NavigationProps) {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isRoadmapOpen, setIsRoadmapOpen] = useState(false);
   
   // Add error boundary for useProject hook
   let projectData;
@@ -126,6 +128,10 @@ export default function Navigation({
                       <User className="w-4 h-4 mr-2" />
                       Profile Settings
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsRoadmapOpen(true)}>
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      Feature Roadmap
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setIsPrivacyOpen(true)}>
                       Privacy & Data
                     </DropdownMenuItem>
@@ -141,6 +147,7 @@ export default function Navigation({
       
       <DataPrivacyManager open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen} />
       <ProfileManager open={isProfileOpen} onOpenChange={setIsProfileOpen} />
+      <FeatureRoadmapWindow open={isRoadmapOpen} onOpenChange={setIsRoadmapOpen} />
     </>
   );
 }
