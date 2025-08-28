@@ -91,14 +91,14 @@ Execution,Installation,Cut Materials,Cut materials to size,Cut Materials,Materia
       
       try {
         values = parseCsvLine(line);
+        
+        headers.forEach((header, index) => {
+          rowData[header] = (values[index] || '').trim();
+        });
       } catch (parseError) {
         errors.push(`Row ${i + 1}: Malformed CSV data`);
         continue;
       }
-        
-      headers.forEach((header, index) => {
-        rowData[header] = (values[index] || '').trim();
-      });
 
       if (!rowData.phase || !rowData.operation || !rowData.step) {
         errors.push(`Row ${i + 1}: Missing required fields (phase, operation, step)`);
