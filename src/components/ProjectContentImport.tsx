@@ -35,11 +35,41 @@ Preparation,Site Prep,Mark Utilities,Identify underground utilities,Utility Mark
 Execution,Installation,Measure Space,Take accurate measurements,Measurements,Precise dimensions recorded,performance-durability,Tape Measure,25ft measuring tape,,,
 Execution,Installation,Cut Materials,Cut materials to size,Cut Materials,Materials ready for installation,major-aesthetics,Saw,Hand saw for cutting,Wood,Construction lumber`;
 
+  const parseCsvLine = (line: string): string[] => {
+    const values: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      const nextChar = line[i + 1];
+      
+      if (char === '"' && !inQuotes) {
+        inQuotes = true;
+      } else if (char === '"' && inQuotes) {
+        if (nextChar === '"') {
+          current += '"';
+          i++; // Skip the next quote
+        } else {
+          inQuotes = false;
+        }
+      } else if (char === ',' && !inQuotes) {
+        values.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    values.push(current.trim());
+    return values;
+  };
+
   const parseCSV = (csvText: string): ParsedProjectContent => {
-    const lines = csvText.trim().split('\n');
+    const lines = csvText.trim().split('\n').filter(line => line.trim()); // Filter out empty lines
     if (lines.length < 2) return { phases: [], errors: ['CSV must have at least a header and one data row'] };
 
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const headers = parseCsvLine(lines[0]).map(h => h.trim().toLowerCase());
     const requiredHeaders = ['phase', 'operation', 'step'];
     const errors: string[] = [];
 
@@ -53,11 +83,21 @@ Execution,Installation,Cut Materials,Cut materials to size,Cut Materials,Materia
     const phasesMap = new Map<string, Phase>();
     
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim());
-      const rowData: any = {};
+      const line = lines[i].trim();
+      if (!line) continue; // Skip empty lines
       
+      let values: string[];
+      let rowData: any = {};
+      
+      try {
+        values = parseCsvLine(line);
+      } catch (parseError) {
+        errors.push(`Row ${i + 1}: Malformed CSV data`);
+        continue;
+      }
+        
       headers.forEach((header, index) => {
-        rowData[header] = values[index] || '';
+        rowData[header] = (values[index] || '').trim();
       });
 
       if (!rowData.phase || !rowData.operation || !rowData.step) {
