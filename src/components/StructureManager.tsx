@@ -382,7 +382,8 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
   }
 
   return (
-    <div className="fixed inset-0 bg-background overflow-auto">
+    <div className="fixed inset-0 bg-background overflow-hidden">
+      <div className="h-full overflow-y-auto">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background border-b">
         <div className="container mx-auto px-6 py-4">
@@ -432,10 +433,10 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                   return (
                     <Draggable key={phase.id} draggableId={phase.id} index={phaseIndex} isDragDisabled={isStandardPhase || isCloseProjectPhase}>
                       {(provided, snapshot) => (
-                        <Card 
+                         <Card 
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className={`border-2 ${snapshot.isDragging ? 'shadow-lg' : ''} ${isStandardPhase ? 'bg-muted/30' : ''} ${isCloseProjectPhase ? 'bg-green-50 border-green-200' : ''}`}
+                          className={`border-2 ${snapshot.isDragging ? 'shadow-lg' : ''} ${isStandardPhase ? 'bg-muted/30' : ''}`}
                         >
                           <CardHeader>
                             <div className="flex items-center justify-between">
@@ -463,11 +464,10 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                                   </div>
                                 ) : (
                                   <div className="flex-1">
-                                    <CardTitle className="flex items-center gap-2">
-                                      {phase.name}
-                                      {isStandardPhase && <Badge variant="secondary" className="text-xs">Standard</Badge>}
-                                      {isCloseProjectPhase && <Badge variant="default" className="text-xs bg-green-600">Locked Final</Badge>}
-                                    </CardTitle>
+                                     <CardTitle className="flex items-center gap-2">
+                                       {phase.name}
+                                       {isStandardPhase && <Badge variant="secondary" className="text-xs">Standard</Badge>}
+                                     </CardTitle>
                                     <p className="text-muted-foreground text-sm">{phase.description}</p>
                                   </div>
                                 )}
@@ -519,25 +519,16 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                                   </>
                                 )}
                                 
-                                {/* Close Project phase - read only display */}
-                                {isCloseProjectPhase && (
-                                  <Badge variant="outline" className="text-green-700">Final Phase</Badge>
-                                )}
                               </div>
                             </div>
                           </CardHeader>
                           
                             <CardContent>
                               <div className="flex items-center gap-2 mb-4">
-                                <Button onClick={() => addOperation(phase.id)} className="flex items-center gap-2">
-                                  <Plus className="w-3 h-3" />
-                                  Add Operation
-                                </Button>
-                                {isCloseProjectPhase && (
-                                  <Badge variant="outline" className="text-xs text-muted-foreground">
-                                    Final phase - position locked
-                                  </Badge>
-                                )}
+                                 <Button onClick={() => addOperation(phase.id)} className="flex items-center gap-2">
+                                   <Plus className="w-3 h-3" />
+                                   Add Operation
+                                 </Button>
                               </div>
                             
                             <Droppable droppableId={`operations-${phase.id}`} type="operations">
@@ -637,20 +628,18 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                                               </div>
                                             </CardHeader>
                                             
-                                            <CardContent className="pt-0">
-                                              {!isStandardPhase && (
-                                                <div className="flex items-center gap-2 mb-3">
-                                                  <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => addStep(phase.id, operation.id)}
-                                                    className="flex items-center gap-1 text-xs"
-                                                  >
-                                                    <Plus className="w-3 h-3" />
-                                                    Add Step
-                                                  </Button>
-                                                </div>
-                                              )}
+                                             <CardContent className="pt-0">
+                                               <div className="flex items-center gap-2 mb-3">
+                                                 <Button
+                                                   size="sm"
+                                                   variant="outline"
+                                                   onClick={() => addStep(phase.id, operation.id)}
+                                                   className="flex items-center gap-1 text-xs"
+                                                 >
+                                                   <Plus className="w-3 h-3" />
+                                                   Add Step
+                                                 </Button>
+                                               </div>
                                               
                                               <Droppable droppableId={`steps-${phase.id}-${operation.id}`} type="steps">
                                                 {(provided) => (
@@ -734,50 +723,50 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                                                                          </Badge>
                                                                        )}
                                                                      </div>
-                                                                    
-                                                    {!isStandardPhase && (
-                                                      <>
-                                                        <Button
-                                                          size="sm"
-                                                          variant="ghost"
-                                                          onClick={() => setShowDecisionEditor({ step })}
-                                                          title="Configure decision point"
-                                                        >
-                                                          🔀
-                                                        </Button>
-                                                        <Button
-                                                          size="sm"
-                                                          variant="ghost"
-                                                          onClick={() => setShowStepContentEdit({ stepId: step.id, step })}
-                                                        >
-                                                          <Edit className="w-3 h-3" />
-                                                        </Button>
-                                                        
-                                                        <Button
-                                                          size="sm"
-                                                          variant="ghost"
-                                                          onClick={() => copyItem('step', step)}
-                                                        >
-                                                          <Copy className="w-3 h-3" />
-                                                        </Button>
-                                                        
-                                                        {clipboard?.type === 'step' && (
-                                                          <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={() => pasteItem('step', { phaseId: phase.id, operationId: operation.id })}
-                                                          >
-                                                            <Clipboard className="w-3 h-3" />
-                                                          </Button>
-                                                        )}
-                                                        
-                                                        {!isCloseProjectPhase && (
-                                                          <Button size="sm" variant="ghost" onClick={() => deleteStep(phase.id, operation.id, step.id)}>
-                                                            <Trash2 className="w-3 h-3" />
-                                                          </Button>
-                                                        )}
-                                                      </>
-                                                    )}
+                                                     
+                                                       {(
+                                                         <>
+                                                           <Button
+                                                             size="sm"
+                                                             variant="ghost"
+                                                             onClick={() => setShowDecisionEditor({ step })}
+                                                             title="Configure decision point"
+                                                           >
+                                                             🔀
+                                                           </Button>
+                                                           <Button
+                                                             size="sm"
+                                                             variant="ghost"
+                                                             onClick={() => setShowStepContentEdit({ stepId: step.id, step })}
+                                                           >
+                                                             <Edit className="w-3 h-3" />
+                                                           </Button>
+                                                           
+                                                           <Button
+                                                             size="sm"
+                                                             variant="ghost"
+                                                             onClick={() => copyItem('step', step)}
+                                                           >
+                                                             <Copy className="w-3 h-3" />
+                                                           </Button>
+                                                           
+                                                           {clipboard?.type === 'step' && (
+                                                             <Button
+                                                               size="sm"
+                                                               variant="ghost"
+                                                               onClick={() => pasteItem('step', { phaseId: phase.id, operationId: operation.id })}
+                                                             >
+                                                               <Clipboard className="w-3 h-3" />
+                                                             </Button>
+                                                           )}
+                                                           
+                                                           {!isStandardPhase && !isCloseProjectPhase && (
+                                                             <Button size="sm" variant="ghost" onClick={() => deleteStep(phase.id, operation.id, step.id)}>
+                                                               <Trash2 className="w-3 h-3" />
+                                                             </Button>
+                                                           )}
+                                                         </>
+                                                       )}
                                                                   </div>
                                                                 </div>
                                                               </CardContent>
@@ -857,6 +846,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
           onSave={handleDecisionEditorSave}
         />
       )}
+    </div>
     </div>
   );
 };
