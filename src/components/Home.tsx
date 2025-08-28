@@ -234,7 +234,7 @@ export default function Home({ onViewChange }: HomeProps) {
               </h1>
               
               <div className="card-premium bg-primary-foreground/10 backdrop-blur-sm border-primary-foreground/20 mb-8">
-                <p className="text-lg sm:text-xl text-primary-foreground font-medium text-center italic">
+                <p className="text-lg sm:text-xl text-foreground font-medium text-center italic">
                   "Project Partner turns repeat‑DIY chaos into a clear, winning playbook — combining planning, shopping, execution, on-demand guidance, and community spirit into one simple, sports‑themed system that gets projects done smarter every time."
                 </p>
               </div>
