@@ -230,7 +230,7 @@ export default function Home({ onViewChange }: HomeProps) {
             <div className="text-center lg:text-left">
               
               <h1 className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-6">
-                🏆 Win the Game of DIY
+                🛠️ Win the Game of DIY
               </h1>
               
               <div className="card-premium bg-primary-foreground/10 backdrop-blur-sm border-primary-foreground/20 mb-8">
