@@ -101,8 +101,10 @@ export const PostAuthLanding = () => {
       title: "My Projects",
       description: "Continue working on your active projects and track progress",
       action: () => {
-        console.log('🔄 PostAuthLanding: My Projects button clicked');
-        window.dispatchEvent(new CustomEvent('navigate-to-projects'));
+        console.log('🔄 PostAuthLanding: My Projects button clicked - dispatching event');
+        const event = new CustomEvent('navigate-to-projects');
+        window.dispatchEvent(event);
+        console.log('🔄 PostAuthLanding: Event dispatched');
       },
       color: "bg-primary",
       textColor: "text-primary-foreground"
@@ -120,8 +122,10 @@ export const PostAuthLanding = () => {
       title: "My Profile",
       description: "Manage your account settings and DIY preferences",
       action: () => {
-        console.log('🔄 PostAuthLanding: My Profile button clicked');
-        window.dispatchEvent(new CustomEvent('show-profile'));
+        console.log('🔄 PostAuthLanding: My Profile button clicked - dispatching event');
+        const event = new CustomEvent('show-profile');
+        window.dispatchEvent(event);
+        console.log('🔄 PostAuthLanding: Event dispatched');
       },
       color: "bg-secondary",
       textColor: "text-secondary-foreground"

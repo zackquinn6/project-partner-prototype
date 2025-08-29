@@ -554,6 +554,18 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       return;
     }
 
+    // Check if this is a template project (non-UUID ID)
+    const isTemplateProject = !projectId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    
+    if (isTemplateProject) {
+      toast({
+        title: "Cannot Delete",
+        description: "Template projects cannot be deleted. Only delete your personal project runs.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('projects')
@@ -567,6 +579,11 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       }
 
       await fetchProjects();
+      
+      toast({
+        title: "Success",
+        description: "Project deleted successfully",
+      });
     } catch (error) {
       console.error('Error deleting project:', error);
       toast({

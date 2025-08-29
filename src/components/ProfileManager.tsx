@@ -188,6 +188,16 @@ export default function ProfileManager({
             <Edit3 className="w-4 h-4" />
             Edit profile
           </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              console.log('🏠 ProfileManager: Opening Home Manager');
+              window.dispatchEvent(new CustomEvent('show-home-manager'));
+            }}
+            className="flex items-center gap-2"
+          >
+            🏠 Manage Homes
+          </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Save Profile
           </Button>

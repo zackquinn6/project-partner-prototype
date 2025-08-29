@@ -3,7 +3,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Home, FolderOpen, ChevronDown, Settings, LogOut, User, TrendingUp } from "lucide-react";
 import { useProject } from '@/contexts/ProjectContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DataPrivacyManager } from './DataPrivacyManager';
 import ProfileManager from './ProfileManager';
 import { FeatureRoadmapWindow } from './FeatureRoadmapWindow';
@@ -45,6 +45,19 @@ export default function Navigation({
   
   const { projectRuns, currentProjectRun, setCurrentProjectRun } = projectData;
   const { signOut } = useAuth();
+
+  useEffect(() => {
+    const handleHomeManagerEvent = () => {
+      console.log('🏠 Navigation: Home manager event received');
+      setIsHomeManagerOpen(true);
+    };
+
+    window.addEventListener('show-home-manager', handleHomeManagerEvent);
+    
+    return () => {
+      window.removeEventListener('show-home-manager', handleHomeManagerEvent);
+    };
+  }, []);
   
   // Filter to show only project runs that are not completed (progress < 100%)
   const activeProjectRuns = projectRuns.filter(run => 
