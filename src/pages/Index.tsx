@@ -48,14 +48,32 @@ const Index = () => {
       setShowHelpPopup(true);
     };
 
+    const handleProjectsNavigation = () => {
+      console.log('🔄 Index: "My Projects" clicked from PostAuthLanding');
+      handleProjectsView();
+    };
+
+    const handleProfileNavigation = () => {
+      console.log('🔄 Index: "My Profile" clicked from PostAuthLanding');
+      setCurrentView('user');
+      // Navigate with show profile state
+      navigate('/', { 
+        state: { view: 'user', showProfile: true } 
+      });
+    };
+
     window.addEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
     window.addEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
+    window.addEventListener('navigate-to-projects', handleProjectsNavigation);
+    window.addEventListener('show-profile', handleProfileNavigation);
     window.addEventListener('show-help-popup', handleShowHelpPopup);
     
     return () => {
       window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
       window.removeEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
       window.removeEventListener('show-help-popup', handleShowHelpPopup);
+      window.removeEventListener('navigate-to-projects', handleProjectsNavigation);
+      window.removeEventListener('show-profile', handleProfileNavigation);
     };
   }, [navigate]);
 

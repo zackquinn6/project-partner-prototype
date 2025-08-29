@@ -302,11 +302,46 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       // Add kickoff phase to the project run phases
       const phasesWithKickoff = addStandardPhasesToProjectRun(projectRunData.phases);
 
+      // Get user's profile to find home_id or create a default home
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('home_id')
+        .eq('user_id', user.id)
+        .single();
+
+      let homeId = profileData?.home_id;
+      
+      if (!homeId) {
+        // Create a default home for the user
+        const { data: defaultHome, error: homeError } = await supabase
+          .from('homes')
+          .insert({
+            user_id: user.id,
+            name: 'Main Home',
+            is_primary: true
+          })
+          .select()
+          .single();
+
+        if (homeError) throw homeError;
+        
+        homeId = defaultHome.id;
+
+        // Update profile with the new home
+        await supabase
+          .from('profiles')
+          .upsert({
+            user_id: user.id,
+            home_id: homeId
+          });
+      }
+
       const { data, error } = await supabase
         .from('project_runs')
         .insert({
           template_id: projectRunData.templateId,
           user_id: user.id,
+          home_id: homeId,
           name: projectRunData.name,
           description: projectRunData.description,
           start_date: projectRunData.startDate.toISOString(),
