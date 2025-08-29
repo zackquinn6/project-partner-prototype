@@ -13,6 +13,7 @@ import UserView from "@/components/UserView";
 import ProjectCatalog from "@/components/ProjectCatalog";
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { HelpPopup } from '@/components/HelpPopup';
 
 const Index = () => {
   // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL RETURNS
@@ -24,6 +25,7 @@ const Index = () => {
   const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user' | 'editWorkflow'>('user'); // Default to 'user' for authenticated users
   const [resetUserView, setResetUserView] = useState(false);
   const [forceListingMode, setForceListingMode] = useState(false);
+  const [showHelpPopup, setShowHelpPopup] = useState(false);
 
   // Listen for edit workflow navigation event
   useEffect(() => {
@@ -42,12 +44,18 @@ const Index = () => {
       });
     };
 
+    const handleShowHelpPopup = () => {
+      setShowHelpPopup(true);
+    };
+
     window.addEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
     window.addEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
+    window.addEventListener('show-help-popup', handleShowHelpPopup);
     
     return () => {
       window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
       window.removeEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
+      window.removeEventListener('show-help-popup', handleShowHelpPopup);
     };
   }, [navigate]);
 
@@ -130,6 +138,10 @@ const Index = () => {
       <div className="w-full h-full">
         {renderView()}
       </div>
+      <HelpPopup
+        isOpen={showHelpPopup}
+        onClose={() => setShowHelpPopup(false)}
+      />
     </div>
   );
 };

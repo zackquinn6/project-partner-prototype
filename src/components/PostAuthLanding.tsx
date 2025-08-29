@@ -28,6 +28,7 @@ export const PostAuthLanding = () => {
 
   useEffect(() => {
     const handleProjectsNavigation = () => {
+      console.log('🔄 PostAuthLanding: handleProjectsNavigation called');
       // Navigate to user view in listing mode, same as "My Projects" button in Navigation
       navigate('/', { 
         state: { view: 'user', forceListingMode: true } 
@@ -44,12 +45,21 @@ export const PostAuthLanding = () => {
       });
     };
 
+    const handleShowProfile = () => {
+      console.log('🔄 PostAuthLanding: handleShowProfile called');
+      navigate('/', { 
+        state: { view: 'user', showProfile: true } 
+      });
+    };
+
     window.addEventListener('navigate-to-projects', handleProjectsNavigation);
     window.addEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
+    window.addEventListener('show-profile', handleShowProfile);
     
     return () => {
       window.removeEventListener('navigate-to-projects', handleProjectsNavigation);
       window.removeEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
+      window.removeEventListener('show-profile', handleShowProfile);
     };
   }, [navigate]);
 
@@ -110,10 +120,8 @@ export const PostAuthLanding = () => {
       title: "My Projects",
       description: "Continue working on your active projects and track progress",
       action: () => {
-        console.log('Navigating to My Projects');
-        navigate('/', { 
-          state: { view: 'user', forceListingMode: true } 
-        });
+        console.log('🔄 PostAuthLanding: My Projects button clicked');
+        window.dispatchEvent(new CustomEvent('navigate-to-projects'));
       },
       color: "bg-primary",
       textColor: "text-primary-foreground"
@@ -131,14 +139,8 @@ export const PostAuthLanding = () => {
       title: "My Profile",
       description: "Manage your account settings and DIY preferences",
       action: () => {
-        console.log('Navigating to My Profile');
-        navigate('/', { 
-          state: { view: 'user' } 
-        });
-        // Dispatch event to show profile after navigation
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('show-profile'));
-        }, 100);
+        console.log('🔄 PostAuthLanding: My Profile button clicked');
+        window.dispatchEvent(new CustomEvent('show-profile'));
       },
       color: "bg-secondary",
       textColor: "text-secondary-foreground"
