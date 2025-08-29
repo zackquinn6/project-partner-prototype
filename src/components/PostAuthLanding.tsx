@@ -27,14 +27,6 @@ export const PostAuthLanding = () => {
   ]);
 
   useEffect(() => {
-    const handleProjectsNavigation = () => {
-      console.log('🔄 PostAuthLanding: handleProjectsNavigation called');
-      // Navigate to user view in listing mode, same as "My Projects" button in Navigation
-      navigate('/', { 
-        state: { view: 'user', forceListingMode: true } 
-      });
-    };
-
     const handleKickoffNavigation = (event: CustomEvent) => {
       const { projectRunId } = event.detail;
       navigate('/', {
@@ -45,21 +37,10 @@ export const PostAuthLanding = () => {
       });
     };
 
-    const handleShowProfile = () => {
-      console.log('🔄 PostAuthLanding: handleShowProfile called');
-      navigate('/', { 
-        state: { view: 'user', showProfile: true } 
-      });
-    };
-
-    window.addEventListener('navigate-to-projects', handleProjectsNavigation);
     window.addEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
-    window.addEventListener('show-profile', handleShowProfile);
     
     return () => {
-      window.removeEventListener('navigate-to-projects', handleProjectsNavigation);
       window.removeEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
-      window.removeEventListener('show-profile', handleShowProfile);
     };
   }, [navigate]);
 
