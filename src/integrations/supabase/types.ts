@@ -166,6 +166,48 @@ export type Database = {
         }
         Relationships: []
       }
+      homes: {
+        Row: {
+          address: string | null
+          build_year: string | null
+          city: string | null
+          created_at: string
+          home_type: string | null
+          id: string
+          is_primary: boolean | null
+          name: string
+          state: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          build_year?: string | null
+          city?: string | null
+          created_at?: string
+          home_type?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name: string
+          state?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          build_year?: string | null
+          city?: string | null
+          created_at?: string
+          home_type?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name?: string
+          state?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       knowledge_revisions: {
         Row: {
           affected_users: number | null
@@ -393,6 +435,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           home_build_year: string | null
+          home_id: string | null
           home_ownership: string | null
           home_state: string | null
           id: string
@@ -414,6 +457,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           home_build_year?: string | null
+          home_id?: string | null
           home_ownership?: string | null
           home_state?: string | null
           id?: string
@@ -435,6 +479,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           home_build_year?: string | null
+          home_id?: string | null
           home_ownership?: string | null
           home_state?: string | null
           id?: string
@@ -448,7 +493,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_profiles_home_id"
+            columns: ["home_id"]
+            isOneToOne: false
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_runs: {
         Row: {
@@ -464,6 +517,7 @@ export type Database = {
           difficulty: string | null
           end_date: string | null
           estimated_time: string | null
+          home_id: string | null
           id: string
           issue_reports: Json | null
           name: string
@@ -492,6 +546,7 @@ export type Database = {
           difficulty?: string | null
           end_date?: string | null
           estimated_time?: string | null
+          home_id?: string | null
           id?: string
           issue_reports?: Json | null
           name: string
@@ -520,6 +575,7 @@ export type Database = {
           difficulty?: string | null
           end_date?: string | null
           estimated_time?: string | null
+          home_id?: string | null
           id?: string
           issue_reports?: Json | null
           name?: string
@@ -536,6 +592,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_project_runs_home_id"
+            columns: ["home_id"]
+            isOneToOne: false
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "project_runs_template_id_fkey"
             columns: ["template_id"]

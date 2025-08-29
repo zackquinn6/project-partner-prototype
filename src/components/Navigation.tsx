@@ -7,6 +7,7 @@ import { useState } from "react";
 import { DataPrivacyManager } from './DataPrivacyManager';
 import ProfileManager from './ProfileManager';
 import { FeatureRoadmapWindow } from './FeatureRoadmapWindow';
+import { HomeManager } from './HomeManager';
 
 interface NavigationProps {
   currentView: 'home' | 'admin' | 'user' | 'editWorkflow';
@@ -26,6 +27,7 @@ export default function Navigation({
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isRoadmapOpen, setIsRoadmapOpen] = useState(false);
+  const [isHomeManagerOpen, setIsHomeManagerOpen] = useState(false);
   
   // Add error boundary for useProject hook
   let projectData;
@@ -140,6 +142,10 @@ export default function Navigation({
                       <TrendingUp className="w-4 h-4 mr-2" />
                       Feature Roadmap
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsHomeManagerOpen(true)}>
+                      <Home className="w-4 h-4 mr-2" />
+                      Manage Homes
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setIsPrivacyOpen(true)}>
                       Privacy & Data
                     </DropdownMenuItem>
@@ -156,6 +162,7 @@ export default function Navigation({
       <DataPrivacyManager open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen} />
       <ProfileManager open={isProfileOpen} onOpenChange={setIsProfileOpen} />
       <FeatureRoadmapWindow open={isRoadmapOpen} onOpenChange={setIsRoadmapOpen} />
+      <HomeManager open={isHomeManagerOpen} onOpenChange={setIsHomeManagerOpen} />
     </>
   );
 }

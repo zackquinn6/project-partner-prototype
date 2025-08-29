@@ -17,6 +17,7 @@ interface ProjectContextType {
   setCurrentProject: (project: Project | null) => void;
   setCurrentProjectRun: (projectRun: ProjectRun | null) => void;
   addProject: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  createProjectRun: (project: Project, customName?: string, homeId?: string) => Promise<string | null>;
   addProjectRun: (projectRun: Omit<ProjectRun, 'id' | 'createdAt' | 'updatedAt'>, onSuccess?: (projectRunId: string) => void) => Promise<void>;
   updateProject: (project: Project) => Promise<void>;
   updateProjectRun: (projectRun: ProjectRun) => Promise<void>;
@@ -568,6 +569,66 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     }
   };
 
+  const createProjectRun = async (project: Project, customName?: string, homeId?: string): Promise<string | null> => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create a project run.",
+        variant: "destructive"
+      });
+      return null;
+    }
+
+    try {
+      // Create project run with home_id
+      const projectRunData = {
+        template_id: project.id,
+        user_id: user.id,
+        home_id: homeId || null,
+        name: project.name,
+        custom_project_name: customName || null,
+        description: project.description,
+        category: project.category,
+        difficulty: project.difficulty,
+        estimated_time: project.estimatedTime,
+        phases: JSON.stringify(addStandardPhasesToProjectRun(project.phases)),
+        status: 'not-started' as const,
+        progress: 0,
+        start_date: new Date().toISOString(),
+        plan_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        completed_steps: JSON.stringify([])
+      };
+
+      const { data, error } = await supabase
+        .from('project_runs')
+        .insert(projectRunData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Database error creating project run:', error);
+        throw error;
+      }
+
+      await fetchProjectRuns();
+      
+      toast({
+        title: "Success",
+        description: "Project started successfully!",
+      });
+
+      return data.id;
+    } catch (error) {
+      console.error('Error creating project run:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to start project. Please try again.",
+        variant: "destructive"
+      });
+      return null;
+    }
+  };
+
   const handleSetCurrentProjectRun = (projectRun: ProjectRun | null) => {
     setCurrentProjectRun(projectRun);
     if (projectRun) {
@@ -585,6 +646,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     setCurrentProject,
     setCurrentProjectRun: handleSetCurrentProjectRun,
     addProject,
+    createProjectRun,
     addProjectRun,
     updateProject,
     updateProjectRun,

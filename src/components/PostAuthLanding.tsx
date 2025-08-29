@@ -149,56 +149,56 @@ export const PostAuthLanding = () => {
 
 
   return (
-    <div className="min-h-screen bg-background pt-20 pb-12">
-      <div className="container mx-auto px-4 max-w-6xl">
+    <div className="min-h-screen bg-background pt-16 md:pt-20 pb-8 md:pb-12">
+      <div className="container mx-auto px-2 md:px-4 max-w-6xl">
         {/* Welcome Header */}
-        <div className="text-center mb-12">
-          <Badge variant="outline" className="mb-4 text-primary border-primary">
+        <div className="text-center mb-8 md:mb-12 px-4">
+          <Badge variant="outline" className="mb-3 md:mb-4 text-primary border-primary text-xs md:text-sm">
             🏆 Welcome Back{userNickname ? `, ${userNickname}` : ', Champion'}!
           </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
+          <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6">
             Ready to Build Something Great?
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
             Your DIY journey continues here. Pick up where you left off or start your next winning project.
           </p>
         </div>
 
         {/* Quick Stats - Compact Bar */}
-        <div className="bg-card rounded-lg border shadow-sm p-4 mb-8">
-          <div className="flex justify-center items-center space-x-8">
+        <div className="bg-card rounded-lg border shadow-sm p-3 md:p-4 mb-6 md:mb-8 mx-4 md:mx-0">
+          <div className="flex justify-center items-center space-x-4 md:space-x-8 overflow-x-auto">
             {stats.map((stat, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                  <stat.icon className="h-3 w-3 text-primary-foreground" />
+              <div key={index} className="flex items-center space-x-1 md:space-x-2 min-w-0">
+                <div className="w-5 h-5 md:w-6 md:h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                  <stat.icon className="h-2 w-2 md:h-3 md:w-3 text-primary-foreground" />
                 </div>
-                <div className="text-lg font-semibold text-foreground">{stat.value}</div>
-                <div className="text-xs text-muted-foreground">{stat.label}</div>
+                <div className="text-base md:text-lg font-semibold text-foreground whitespace-nowrap">{stat.value}</div>
+                <div className="text-xs text-muted-foreground whitespace-nowrap">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-12 px-4 md:px-0">
           {quickActions.map((action, index) => (
             <Card 
               key={index} 
               className="gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 cursor-pointer group"
               onClick={action.action}
             >
-              <CardHeader className="text-center pb-4">
-                <div className={`w-16 h-16 ${action.color} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
-                  <action.icon className={`h-8 w-8 ${action.textColor}`} />
+              <CardHeader className="text-center pb-3 md:pb-4">
+                <div className={`w-12 h-12 md:w-16 md:h-16 ${action.color} rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 group-hover:scale-110 transition-transform`}>
+                  <action.icon className={`h-6 w-6 md:h-8 md:w-8 ${action.textColor}`} />
                 </div>
-                <CardTitle className="text-xl group-hover:text-primary transition-colors">{action.title}</CardTitle>
+                <CardTitle className="text-lg md:text-xl group-hover:text-primary transition-colors">{action.title}</CardTitle>
               </CardHeader>
-              <CardContent className="text-center">
-                <CardDescription className="text-base leading-relaxed mb-4">
+              <CardContent className="text-center px-4 md:px-6">
+                <CardDescription className="text-sm md:text-base leading-relaxed mb-3 md:mb-4">
                   {action.description}
                 </CardDescription>
-                <Button variant="ghost" size="sm" className="group-hover:bg-accent group-hover:text-accent-foreground">
-                  Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                <Button variant="ghost" size="sm" className="group-hover:bg-accent group-hover:text-accent-foreground text-xs md:text-sm">
+                  Get Started <ArrowRight className="ml-2 h-3 w-3 md:h-4 md:w-4" />
                 </Button>
               </CardContent>
             </Card>
@@ -206,11 +206,11 @@ export const PostAuthLanding = () => {
         </div>
 
         {/* Motivational Footer */}
-        <div className="text-center bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-8">
-          <h3 className="text-2xl font-bold text-foreground mb-4">
+        <div className="text-center bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-6 md:p-8 mx-4 md:mx-0">
+          <h3 className="text-xl md:text-2xl font-bold text-foreground mb-3 md:mb-4">
             🔨 Time to Get Back on the Field
           </h3>
-          <p className="text-lg text-muted-foreground italic">
+          <p className="text-base md:text-lg text-muted-foreground italic">
             "Every expert was once a beginner. Every pro was once an amateur. Every legend was once a learner."
           </p>
         </div>
