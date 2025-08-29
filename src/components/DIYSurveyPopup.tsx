@@ -76,7 +76,7 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
     nickname: initialData?.nickname || ""
   });
 
-  const totalSteps = mode === 'verify' ? 7 : (mode === 'personality' ? 12 : 6);
+  const totalSteps = mode === 'verify' ? 6 : (mode === 'personality' ? 12 : 5);
   const progress = mode === 'personality' && currentStep >= 0 ? 
     ((currentStep + 1) / 11) * 100 : 
     (currentStep / totalSteps) * 100;
@@ -516,9 +516,8 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
       case 1: return answers.fullName.trim() !== ""; // Name step - require full name
       case 2: return answers.skillLevel !== "" && answers.physicalCapability !== "";
       case 3: return true; // Can proceed even with no selections
-      case 4: return answers.homeOwnership !== "";
-      case 5: return answers.preferredLearningMethods.length > 0;
-      case 6: return true; // Owned tools is optional
+      case 4: return answers.preferredLearningMethods.length > 0;
+      case 5: return true; // Owned tools is optional
       default: return false;
     }
   };
