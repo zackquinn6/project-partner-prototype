@@ -1149,22 +1149,13 @@ export default function UserView({
               
               {/* Decision Buttons for Planning Steps */}
               {currentStep && (
-                (currentStep.phaseName === 'Planning' ||
-                 currentStep.step?.includes('Plan') ||
-                 currentStep.id?.includes('plan') ||
-                 currentStep.phaseName?.includes('Review') ||
-                 currentStep.step?.includes('Final') ||
-                 currentStep.step?.includes('Assessment')) && 
-                currentStep.content?.toLowerCase().includes('review your project plan')
+                currentStep.step?.toLowerCase().includes('initial planning') ||
+                currentStep.step?.toLowerCase().includes('final planning')
               ) && (
                 <div className="mt-6 pt-6 border-t border-border">
                   <div className="flex gap-3 justify-center">
-                    {/* Show decision rollup button for planning phases */}
-                    {currentStep && (
-                      currentStep.phaseName === 'Planning' ||
-                      currentStep.step?.includes('Plan') ||
-                      currentStep.id?.includes('plan')
-                    ) && (
+                    {/* Show Review Decisions button for Initial Planning */}
+                    {currentStep.step?.toLowerCase().includes('initial planning') && (
                       <Button 
                         onClick={() => {
                           setDecisionRollupMode('initial-plan');
@@ -1178,12 +1169,8 @@ export default function UserView({
                       </Button>
                     )}
 
-                    {/* Show final plan decision rollup for assessment/review phases */}
-                    {currentStep && (
-                      currentStep.phaseName?.includes('Review') ||
-                      currentStep.step?.includes('Final') ||
-                      currentStep.step?.includes('Assessment')
-                    ) && (
+                    {/* Show Finalize Decisions button for Final Planning */}
+                    {currentStep.step?.toLowerCase().includes('final planning') && (
                       <Button 
                         onClick={() => {
                           setDecisionRollupMode('final-plan');

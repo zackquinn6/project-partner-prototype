@@ -69,11 +69,12 @@ export function WorkflowSidebar({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="space-y-2">
+                <div className="flex flex-col items-center space-y-2">
                   <Button 
                     onClick={onHelpClick}
                     variant="outline"
-                    className="w-full py-1 px-3 text-xs bg-muted/50 hover:bg-muted/80 text-muted-foreground hover:text-foreground border-muted"
+                    size="sm"
+                    className="px-3 py-1 text-xs bg-blue-900/20 hover:bg-blue-900/30 text-blue-800 hover:text-blue-900 border-blue-900/30 w-fit"
                   >
                     <div className="text-center">
                       <div>Call the Coach</div>
@@ -85,7 +86,8 @@ export function WorkflowSidebar({
                     <Button 
                       onClick={onUnplannedWorkClick}
                       variant="outline"
-                      className="w-full py-1 px-3 text-xs bg-muted/50 hover:bg-muted/80 text-muted-foreground hover:text-foreground border-muted"
+                      size="sm"
+                      className="px-3 py-1 text-xs bg-red-900/20 hover:bg-red-900/30 text-red-800 hover:text-red-900 border-red-900/30 w-fit"
                     >
                       <div className="text-center">
                         <div>❗ Call an audible</div>
