@@ -122,17 +122,13 @@ export default function ProfileManager({
     if (!existingProfile) return null;
 
     return (
-      <div className="space-y-6">
-        <div className="text-center space-y-2">
-          <h3 className="text-2xl font-bold flex items-center justify-center gap-2">
-            <User className="w-6 h-6" />
-            Your DIY Profile
-          </h3>
-          <p className="text-muted-foreground">
-            Your DIY Profile helps us match you with the right tools, guidance, and partners—
-            so every project starts with an advantage.
-          </p>
-        </div>
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <p className="text-muted-foreground">
+              Your profile helps us match you with the right tools, guidance, and partners—
+              so every project starts with an advantage.
+            </p>
+          </div>
 
         <div className="space-y-4">
           <Card>

@@ -1127,43 +1127,6 @@ export default function UserView({
                   </Button>
                 )}
 
-                {/* Show decision rollup button for planning phases */}
-                {currentStep && (
-                  currentStep.phaseName === 'Planning' ||
-                  currentStep.step?.includes('Plan') ||
-                  currentStep.id?.includes('plan')
-                ) && (
-                  <Button 
-                    onClick={() => {
-                      setDecisionRollupMode('initial-plan');
-                      setDecisionRollupOpen(true);
-                    }}
-                    variant="outline"
-                    className="mr-2"
-                  >
-                    <HelpCircle className="w-4 h-4 mr-2" />
-                    Review Decisions
-                  </Button>
-                )}
-
-                {/* Show final plan decision rollup for assessment/review phases */}
-                {currentStep && (
-                  currentStep.phaseName?.includes('Review') ||
-                  currentStep.step?.includes('Final') ||
-                  currentStep.step?.includes('Assessment')
-                ) && (
-                  <Button 
-                    onClick={() => {
-                      setDecisionRollupMode('final-plan');
-                      setDecisionRollupOpen(true);
-                    }}
-                    variant="outline"
-                    className="mr-2"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Finalize Decisions
-                  </Button>
-                )}
               </div>
             </CardHeader>
           </Card>
@@ -1183,6 +1146,59 @@ export default function UserView({
           <Card className="gradient-card border-0 shadow-card">
             <CardContent className="p-8">
               {renderContent(currentStep)}
+              
+              {/* Decision Buttons for Planning Steps */}
+              {currentStep && (
+                (currentStep.phaseName === 'Planning' ||
+                 currentStep.step?.includes('Plan') ||
+                 currentStep.id?.includes('plan') ||
+                 currentStep.phaseName?.includes('Review') ||
+                 currentStep.step?.includes('Final') ||
+                 currentStep.step?.includes('Assessment')) && 
+                currentStep.content?.toLowerCase().includes('review your project plan')
+              ) && (
+                <div className="mt-6 pt-6 border-t border-border">
+                  <div className="flex gap-3 justify-center">
+                    {/* Show decision rollup button for planning phases */}
+                    {currentStep && (
+                      currentStep.phaseName === 'Planning' ||
+                      currentStep.step?.includes('Plan') ||
+                      currentStep.id?.includes('plan')
+                    ) && (
+                      <Button 
+                        onClick={() => {
+                          setDecisionRollupMode('initial-plan');
+                          setDecisionRollupOpen(true);
+                        }}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <HelpCircle className="w-4 h-4" />
+                        Review Decisions
+                      </Button>
+                    )}
+
+                    {/* Show final plan decision rollup for assessment/review phases */}
+                    {currentStep && (
+                      currentStep.phaseName?.includes('Review') ||
+                      currentStep.step?.includes('Final') ||
+                      currentStep.step?.includes('Assessment')
+                    ) && (
+                      <Button 
+                        onClick={() => {
+                          setDecisionRollupMode('final-plan');
+                          setDecisionRollupOpen(true);
+                        }}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        Finalize Decisions
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

@@ -72,22 +72,24 @@ export function WorkflowSidebar({
                 <div className="space-y-2">
                   <Button 
                     onClick={onHelpClick}
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-2 px-4 text-sm"
+                    variant="outline"
+                    className="w-full py-1 px-3 text-xs bg-muted/50 hover:bg-muted/80 text-muted-foreground hover:text-foreground border-muted"
                   >
                     <div className="text-center">
                       <div>Call the Coach</div>
-                      <div className="text-xs opacity-90">Stuck, Get Expert Help</div>
+                      <div className="text-[10px] opacity-75">Stuck, Get Expert Help</div>
                     </div>
                   </Button>
                   
                   {isKickoffComplete && (
                     <Button 
                       onClick={onUnplannedWorkClick}
-                      className="w-full py-2 px-4 text-sm bg-red-800 hover:bg-red-900 text-white"
+                      variant="outline"
+                      className="w-full py-1 px-3 text-xs bg-muted/50 hover:bg-muted/80 text-muted-foreground hover:text-foreground border-muted"
                     >
                       <div className="text-center">
                         <div>❗ Call an audible</div>
-                        <div className="text-xs opacity-90">Update project plan</div>
+                        <div className="text-[10px] opacity-75">Update project plan</div>
                       </div>
                     </Button>
                   )}
