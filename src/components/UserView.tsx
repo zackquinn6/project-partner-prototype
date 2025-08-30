@@ -1149,13 +1149,13 @@ export default function UserView({
               
               {/* Decision Buttons for Planning Steps */}
               {currentStep && (
-                (currentStep.step?.toLowerCase().includes('initial') && currentStep.step?.toLowerCase().includes('plan')) ||
+                (currentStep.step?.toLowerCase().includes('project') && currentStep.step?.toLowerCase().includes('plan')) ||
                 (currentStep.step?.toLowerCase().includes('finalize') && currentStep.step?.toLowerCase().includes('plan'))
               ) && (
                 <div className="mt-6 pt-6 border-t border-border">
                   <div className="flex gap-3 justify-center">
-                    {/* Show Review Decisions button for Initial Planning */}
-                    {(currentStep.step?.toLowerCase().includes('initial') && currentStep.step?.toLowerCase().includes('plan')) && (
+                    {/* Show Review Decisions button for Project Planning */}
+                    {(currentStep.step?.toLowerCase().includes('project') && currentStep.step?.toLowerCase().includes('plan')) && (
                       <Button 
                         onClick={() => {
                           setDecisionRollupMode('initial-plan');
