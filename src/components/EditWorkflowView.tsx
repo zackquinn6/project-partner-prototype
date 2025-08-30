@@ -1096,6 +1096,15 @@ export default function EditWorkflowView({ onBackToAdmin }: EditWorkflowViewProp
         onOpenChange={setImportOpen}
         onImport={handleImport}
       />
+      
+      {/* Process Improvement Engine Dialog */}
+      {processImprovementOpen && currentProject && (
+        <ProcessImprovementEngine
+          project={currentProject}
+          onProjectUpdate={updateProject}
+          onClose={() => setProcessImprovementOpen(false)}
+        />
+      )}
       {/* Tools & Materials Library */}
       <ToolsMaterialsWindow
         open={toolsMaterialsOpen}

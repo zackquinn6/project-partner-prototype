@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Project } from '@/interfaces/Project';
@@ -169,7 +170,7 @@ export const ProcessImprovementEngine: React.FC<ProcessImprovementEngineProps> =
             materials: [],
             tools: [],
             outputs: [],
-            flowType: 'linear' as const
+            flowType: 'prime' as const
           };
           updatedProject.phases[0].operations[0].steps.push(newStep);
         }
@@ -245,7 +246,12 @@ export const ProcessImprovementEngine: React.FC<ProcessImprovementEngineProps> =
   };
 
   return (
-    <div className="space-y-6">
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Process Improvement Analysis</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -429,6 +435,8 @@ export const ProcessImprovementEngine: React.FC<ProcessImprovementEngineProps> =
           </div>
         </>
       )}
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
