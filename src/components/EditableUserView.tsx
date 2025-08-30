@@ -19,6 +19,8 @@ import { HelpPopup } from './HelpPopup';
 import { PhaseCompletionPopup } from './PhaseCompletionPopup';
 import { OrderingWindow } from './OrderingWindow';
 import { SignatureCapture } from './SignatureCapture';
+import { StepCompletionTracker } from './StepCompletionTracker';
+import { EnhancedProjectPlanning } from './EnhancedProjectPlanning';
 import { toast } from 'sonner';
 import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 
@@ -28,7 +30,7 @@ interface EditableUserViewProps {
 }
 
 export default function EditableUserView({ onBackToAdmin, isAdminEditing = false }: EditableUserViewProps) {
-  const { currentProject, currentProjectRun, updateProject } = useProject();
+  const { currentProject, currentProjectRun, updateProject, updateProjectRun } = useProject();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
   
@@ -68,6 +70,10 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
   const [collapsedPhases, setCollapsedPhases] = useState<Set<string>>(new Set());
   const [signatures, setSignatures] = useState<Record<string, string>>({});
   const [orderingWindowOpen, setOrderingWindowOpen] = useState(false);
+  const [completionTrackerOpen, setCompletionTrackerOpen] = useState(false);
+  const [stepCompletionPercentages, setStepCompletionPercentages] = useState<Record<string, number>>(
+    currentProjectRun?.stepCompletionPercentages || {}
+  );
   
   // Editing state
   const [editingStep, setEditingStep] = useState<string | null>(null);
@@ -256,16 +262,48 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
 
   const handleComplete = () => {
     if (currentStep) {
-      // Create a Set to prevent duplicates, then convert back to array
-      const newCompletedSteps = new Set([...completedSteps, currentStep.id]);
+      setCompletionTrackerOpen(true);
+    }
+  };
+
+  const handleStepCompletion = async (percentage: number) => {
+    if (!currentStep || !currentProjectRun) return;
+
+    // Update step completion percentage
+    const newPercentages = {
+      ...stepCompletionPercentages,
+      [currentStep.id]: percentage
+    };
+    setStepCompletionPercentages(newPercentages);
+
+    // Only mark as completed if 100%
+    let newCompletedSteps = new Set(completedSteps);
+    if (percentage === 100) {
+      newCompletedSteps.add(currentStep.id);
       setCompletedSteps(newCompletedSteps);
-      
-      // Update phase ratings and check for phase completion
+    } else {
+      // Remove from completed if less than 100%
+      newCompletedSteps.delete(currentStep.id);
+      setCompletedSteps(newCompletedSteps);
+    }
+
+    // Update project run with new percentages
+    await updateProjectRun({
+      ...currentProjectRun,
+      stepCompletionPercentages: newPercentages,
+      completedSteps: Array.from(newCompletedSteps),
+      updatedAt: new Date()
+    });
+
+    setCompletionTrackerOpen(false);
+
+    // Check for phase completion only if step is 100%
+    if (percentage === 100) {
       const currentPhase = getCurrentPhase();
       if (currentPhase) {
         const allPhaseSteps = getAllStepsInPhase(currentPhase);
         const completedPhaseSteps = allPhaseSteps.filter(step => 
-          newCompletedSteps.has(step.id) || step.id === currentStep.id
+          newCompletedSteps.has(step.id)
         );
 
         if (completedPhaseSteps.length === allPhaseSteps.length) {
@@ -275,7 +313,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
         }
       }
       
-      // Auto-advance to next step
+      // Auto-advance to next step if completed
       if (currentStepIndex < allSteps.length - 1) {
         setTimeout(() => {
           setCurrentStepIndex(currentStepIndex + 1);
@@ -538,12 +576,17 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                             <h5 className="text-sm font-medium text-muted-foreground">{operation.name}</h5>
                             {operation.steps.map(step => {
                               const stepIndex = allSteps.findIndex(s => s.id === step.id);
+                              const completionPercentage = stepCompletionPercentages[step.id] || 0;
+                              const isInProgress = completionPercentage > 0 && completionPercentage < 100;
+                              const isCompleted = completedSteps.has(step.id);
+                              
                               return (
                                  <div 
                                    key={step.id} 
                                    className={`ml-2 p-2 rounded text-sm cursor-pointer transition-fast ${
                                      step.id === currentStep?.id ? 'bg-primary/10 text-primary border border-primary/20' : 
-                                     completedSteps.has(step.id) ? 'bg-green-50 text-green-700 border border-green-200' : 
+                                     isCompleted ? 'bg-green-50 text-green-700 border border-green-200' : 
+                                     isInProgress ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
                                      'hover:bg-muted/50 border border-transparent hover:border-muted-foreground/20'
                                    }`} 
                                    onClick={() => {
@@ -554,9 +597,17 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                                      }
                                    }}
                                  >
-                                  <div className="flex items-center gap-2">
-                                    {completedSteps.has(step.id) && <CheckCircle className="w-4 h-4" />}
-                                    <span className="truncate">{step.step}</span>
+                                  <div className="flex items-center gap-2 justify-between">
+                                    <div className="flex items-center gap-2">
+                                      {isCompleted && <CheckCircle className="w-4 h-4" />}
+                                      {isInProgress && <div className="w-4 h-4 rounded-full bg-yellow-400 border-2 border-yellow-600" />}
+                                      <span className="truncate">{step.step}</span>
+                                    </div>
+                                    {isInProgress && (
+                                      <span className="text-xs font-medium text-yellow-600">
+                                        {completionPercentage}%
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                               );
@@ -671,7 +722,22 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
           {/* Content */}
           <Card className="gradient-card border-0 shadow-card">
             <CardContent className="p-8">
-              {renderEditableContent(currentStep)}
+              {/* Show Enhanced Project Planning for Planning phase steps */}
+              {currentStep?.phaseName === 'Planning' && (
+                currentStep.step.includes('Project Sizing') || 
+                currentStep.step.includes('Time Estimation') ||
+                currentStep.step.includes('Final Planning')
+              ) ? (
+                <EnhancedProjectPlanning
+                  onComplete={() => {
+                    // Mark this planning step as complete when sizing is done
+                    handleStepCompletion(100);
+                  }}
+                  isCompleted={completedSteps.has(currentStep.id)}
+                />
+              ) : (
+                renderEditableContent(currentStep)
+              )}
             </CardContent>
           </Card>
 
@@ -917,6 +983,19 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
         onOutputToggle={toggleOutputCheck}
         onPhaseComplete={handlePhaseCompleted}
       />
+
+      {/* Step Completion Tracker */}
+      {completionTrackerOpen && currentStep && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <StepCompletionTracker
+            stepId={currentStep.id}
+            stepName={currentStep.step}
+            currentPercentage={stepCompletionPercentages[currentStep.id] || 100}
+            onComplete={handleStepCompletion}
+            onCancel={() => setCompletionTrackerOpen(false)}
+          />
+        </div>
+      )}
 
       {/* Ordering Window */}
       <OrderingWindow

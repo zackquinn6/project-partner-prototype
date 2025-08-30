@@ -22,6 +22,7 @@ export interface ProjectRun {
   currentOperationId?: string;
   currentStepId?: string;
   completedSteps: string[];
+  stepCompletionPercentages?: Record<string, number>; // stepId -> percentage (0-100)
   progress: number; // 0-100
   
   // Copy of template data at time of creation (for consistency)
