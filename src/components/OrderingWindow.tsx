@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronLeft, ChevronRight, ShoppingCart, Eye, EyeOff, ExternalLink, Globe, Check, Maximize } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -332,12 +333,12 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
   if (fullScreenMode) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
           <div className="h-[90vh] flex flex-col">
             <div className="p-4 border-b flex items-center justify-between bg-muted/30">
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-semibold">Shopping Checklist</h2>
-                <Badge variant="secondary">{uniqueMaterials.length} items total</Badge>
+                <Badge variant="secondary">{uniqueTools.length + uniqueMaterials.length} items total</Badge>
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -353,7 +354,68 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
             </div>
             
             <div className="flex-1 p-4 overflow-auto">
-              {renderShoppingChecklist()}
+              <div className="h-full">
+                <Tabs defaultValue="materials" className="w-full h-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="materials">Materials ({uniqueMaterials.length})</TabsTrigger>
+                    <TabsTrigger value="tools">Tools ({uniqueTools.length})</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="materials" className="h-full mt-4">
+                    {renderShoppingChecklist()}
+                  </TabsContent>
+                  
+                  <TabsContent value="tools" className="h-full mt-4">
+                    <ScrollArea className="h-full">
+                      <div className="space-y-4">
+                        {uniqueTools.length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                            <p>No tools to order for this project</p>
+                          </div>
+                        ) : (
+                          uniqueTools.map((tool, index) => (
+                            <div key={`${tool.id}-${index}`} className="border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      checked={orderedTools.has(tool.id)}
+                                      onChange={() => handleToolToggle(tool.id)}
+                                      className="rounded"
+                                    />
+                                    <h4 className="font-medium text-sm truncate">{tool.name}</h4>
+                                    {userProfile?.owned_tools?.some((ownedTool: any) => ownedTool.tool === tool.name || ownedTool.name === tool.name) && (
+                                      <Badge variant="secondary" className="text-xs">Already Owned</Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                    {tool.description}
+                                  </p>
+                                  {tool.maxQuantity && (
+                                    <Badge variant="secondary" className="text-xs mt-2">
+                                      Qty: {tool.maxQuantity}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(currentUrl, '_blank')}
+                                  className="ml-2 flex-shrink-0"
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </TabsContent>
+                </Tabs>
+              </div>
             </div>
           </div>
         </DialogContent>
