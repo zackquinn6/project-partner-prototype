@@ -132,6 +132,36 @@ export const PostAuthLanding = () => {
     }
   ];
 
+  // Additional quick actions for tools and homes
+  const additionalActions = [
+    {
+      icon: Target,
+      title: "My Tool Library",
+      description: "View and manage your tool collection",
+      action: () => {
+        console.log('🔧 PostAuthLanding: My Tool Library clicked - dispatching event');
+        const event = new CustomEvent('show-tool-library');
+        window.dispatchEvent(event);
+      },
+      color: "bg-muted",
+      textColor: "text-muted-foreground"
+    },
+    {
+      icon: Trophy,
+      title: "My Homes",
+      description: "Manage your properties and home details",
+      action: () => {
+        console.log('🏠 PostAuthLanding: My Homes clicked - dispatching event');
+        const event = new CustomEvent('show-home-manager');
+        window.dispatchEvent(event);
+      },
+      color: "bg-muted",
+      textColor: "text-muted-foreground"
+    }
+  ];
+
+  const allQuickActions = [...quickActions, ...additionalActions];
+
 
   return (
     <div className="min-h-screen bg-background pt-16 md:pt-20 pb-8 md:pb-12">
@@ -165,8 +195,8 @@ export const PostAuthLanding = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-12 px-4 md:px-0">
-          {quickActions.map((action, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 mb-8 md:mb-12 px-4 md:px-0">
+          {allQuickActions.map((action, index) => (
             <Card 
               key={index} 
               className="gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 cursor-pointer group"

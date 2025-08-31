@@ -60,10 +60,25 @@ const Index = () => {
       console.log('🔄 Index: "My Profile" clicked from PostAuthLanding');
       console.log('🔄 Index: Setting view to user and showProfile true');
       setCurrentView('user');
+      // Clear any project selection to ensure profile shows
+      setCurrentProject(null);
+      setCurrentProjectRun(null);
       // Navigate with show profile state
       navigate('/', { 
         state: { view: 'user', showProfile: true } 
       });
+    };
+
+    const handleToolLibraryNavigation = () => {
+      console.log('🔧 Index: Tool Library clicked - dispatching show tools event');
+      const event = new CustomEvent('show-tools-materials');
+      window.dispatchEvent(event);
+    };
+
+    const handleHomeManagerNavigation = () => {
+      console.log('🏠 Index: Home Manager clicked - dispatching show home manager event');
+      const event = new CustomEvent('show-home-manager');
+      window.dispatchEvent(event);
     };
 
     window.addEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
@@ -71,6 +86,8 @@ const Index = () => {
     window.addEventListener('navigate-to-projects', handleProjectsNavigation);
     window.addEventListener('show-profile', handleProfileNavigation);
     window.addEventListener('show-help-popup', handleShowHelpPopup);
+    window.addEventListener('show-tool-library', handleToolLibraryNavigation);
+    window.addEventListener('show-home-manager', handleHomeManagerNavigation);
     
     return () => {
       window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
@@ -78,6 +95,8 @@ const Index = () => {
       window.removeEventListener('show-help-popup', handleShowHelpPopup);
       window.removeEventListener('navigate-to-projects', handleProjectsNavigation);
       window.removeEventListener('show-profile', handleProfileNavigation);
+      window.removeEventListener('show-tool-library', handleToolLibraryNavigation);
+      window.removeEventListener('show-home-manager', handleHomeManagerNavigation);
     };
   }, [navigate]);
 

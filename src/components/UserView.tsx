@@ -266,15 +266,18 @@ export default function UserView({
   useEffect(() => {
     console.log('🔄 UserView: resetToListing useEffect triggered:', { 
       resetToListing, 
-      currentProjectRun: !!currentProjectRun 
+      currentProjectRun: !!currentProjectRun,
+      showProfile 
     });
     
-    if (resetToListing) {
+    if (resetToListing && !showProfile) {
       console.log("🔄 UserView: Resetting to listing mode due to resetToListing prop");
       setViewMode('listing');
       // DON'T clear project run - this was causing the Continue button issue
+    } else if (showProfile) {
+      console.log("🔄 UserView: Profile mode requested - keeping current view");
     }
-  }, [resetToListing]);
+  }, [resetToListing, showProfile]);
 
   // Auto-switch to workflow view when a project or project run is selected (but respect resetToListing and forceListingMode)
   useEffect(() => {
@@ -1169,20 +1172,6 @@ export default function UserView({
                       </Button>
                     )}
 
-                    {/* Show Finalize Decisions button for Final Planning */}
-                    {(currentStep.step?.toLowerCase().includes('finalize') && currentStep.step?.toLowerCase().includes('plan')) && (
-                      <Button 
-                        onClick={() => {
-                          setDecisionRollupMode('final-plan');
-                          setDecisionRollupOpen(true);
-                        }}
-                        variant="outline"
-                        className="flex items-center gap-2"
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        Finalize Decisions
-                      </Button>
-                    )}
                   </div>
                 </div>
               )}
