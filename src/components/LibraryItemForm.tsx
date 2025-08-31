@@ -139,7 +139,7 @@ export function LibraryItemForm({ type, item, onSave, onCancel }: LibraryItemFor
   return (
     <Tabs defaultValue="basic" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="basic">Basic Information</TabsTrigger>
+        <TabsTrigger value="basic">Core Tool</TabsTrigger>
         <TabsTrigger value="variations" disabled={!item?.id}>
           Variations {!item?.id && '(Save item first)'}
         </TabsTrigger>

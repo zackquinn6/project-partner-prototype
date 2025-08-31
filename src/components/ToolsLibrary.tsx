@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Edit, Trash2, Image } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Image, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { LibraryItemForm } from "./LibraryItemForm";
 import { BulkUpload } from "./BulkUpload";
+import { VariationViewer } from "./VariationViewer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -29,6 +30,7 @@ export function ToolsLibrary() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
+  const [viewingVariations, setViewingVariations] = useState<Tool | null>(null);
 
   const fetchTools = async () => {
     try {
@@ -129,11 +131,19 @@ export function ToolsLibrary() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
         {filteredTools.map((tool) => (
-          <Card key={tool.id} className="relative">
+          <Card key={tool.id} className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => setViewingVariations(tool)}>
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
                 <CardTitle className="text-lg">{tool.item}</CardTitle>
-                <div className="flex gap-1">
+                <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setViewingVariations(tool)}
+                    title="View Variations"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -229,6 +239,16 @@ export function ToolsLibrary() {
         onOpenChange={setShowBulkUpload}
         onSuccess={handleSave}
       />
+
+      {viewingVariations && (
+        <VariationViewer
+          open={!!viewingVariations}
+          onOpenChange={(open) => !open && setViewingVariations(null)}
+          coreItemId={viewingVariations.id}
+          itemType="tools"
+          coreItemName={viewingVariations.item}
+        />
+      )}
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, X, Edit2, Trash2 } from 'lucide-react';
+import { Plus, X, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { clearAllToolVariations, clearAllMaterialVariations } from '@/utils/variationUtils';
 
 interface VariationAttribute {
   id: string;
@@ -66,6 +67,29 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
   const [showAttributeDialog, setShowAttributeDialog] = useState(false);
   const [showValueDialog, setShowValueDialog] = useState(false);
   const [showVariationDialog, setShowVariationDialog] = useState(false);
+  
+  // Common attributes that can be selected
+  const [commonAttributes] = useState([
+    { name: 'size', display_name: 'Size' },
+    { name: 'color', display_name: 'Color' },
+    { name: 'material', display_name: 'Material' },
+    { name: 'brand', display_name: 'Brand' },
+    { name: 'power_source', display_name: 'Power Source' },
+    { name: 'voltage', display_name: 'Voltage' },
+    { name: 'weight', display_name: 'Weight' },
+    { name: 'blade_size', display_name: 'Blade Size' },
+    { name: 'capacity', display_name: 'Capacity' },
+    { name: 'speed', display_name: 'Speed' },
+    { name: 'torque', display_name: 'Torque' },
+    { name: 'length', display_name: 'Length' },
+    { name: 'width', display_name: 'Width' },
+    { name: 'height', display_name: 'Height' },
+    { name: 'finish', display_name: 'Finish' },
+    { name: 'thread_count', display_name: 'Thread Count' },
+    { name: 'grade', display_name: 'Grade' },
+    { name: 'type', display_name: 'Type' }
+  ]);
+  const [selectedCommonAttributes, setSelectedCommonAttributes] = useState<string[]>([]);
 
   useEffect(() => {
     fetchAttributes();
@@ -121,25 +145,48 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
   };
 
   const handleCreateAttribute = async () => {
-    if (!newAttributeName.trim()) {
-      toast.error('Attribute name is required');
+    if (selectedCommonAttributes.length === 0 && !newAttributeName.trim()) {
+      toast.error('Please select common attributes or enter a custom attribute name');
       return;
     }
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('variation_attributes')
-        .insert({
-          name: newAttributeName.toLowerCase().replace(/\s+/g, '_'),
-          display_name: newAttributeName,
-          attribute_type: 'text'
-        });
+      // Create selected common attributes
+      for (const attrName of selectedCommonAttributes) {
+        const commonAttr = commonAttributes.find(a => a.name === attrName);
+        if (commonAttr) {
+          const { error } = await supabase
+            .from('variation_attributes')
+            .insert({
+              name: commonAttr.name,
+              display_name: commonAttr.display_name,
+              attribute_type: 'text'
+            });
 
-      if (error) throw error;
+          if (error && error.code !== '23505') { // Ignore if already exists
+            throw error;
+          }
+        }
+      }
 
-      toast.success('Attribute created successfully');
+      // Create custom attribute if provided
+      if (newAttributeName.trim()) {
+        const { error } = await supabase
+          .from('variation_attributes')
+          .insert({
+            name: newAttributeName.toLowerCase().replace(/\s+/g, '_'),
+            display_name: newAttributeName,
+            attribute_type: 'text'
+          });
+
+        if (error && error.code !== '23505') { // Ignore if already exists
+          throw error;
+        }
+      }
+
       setNewAttributeName('');
+      setSelectedCommonAttributes([]);
       setShowAttributeDialog(false);
       fetchAttributes();
     } catch (error) {
@@ -168,9 +215,15 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
           core_item_id: coreItemId
         });
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505') {
+          toast.error('This attribute value already exists for this item');
+          return;
+        }
+        throw error;
+      }
 
-      toast.success('Attribute value created successfully');
+      
       setNewValueText('');
       setSelectedAttributeId('');
       setShowValueDialog(false);
@@ -203,9 +256,15 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
           attributes: selectedAttributes
         });
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505') {
+          toast.error('A variation with this name already exists');
+          return;
+        }
+        throw error;
+      }
 
-      toast.success('Variation created successfully');
+      
       setVariationName('');
       setVariationDescription('');
       setVariationSku('');
@@ -233,7 +292,7 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
 
       if (error) throw error;
 
-      toast.success('Variation deleted successfully');
+      
       fetchVariations();
       onVariationUpdate?.();
     } catch (error) {
@@ -267,7 +326,7 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
           .eq('id', attributeId);
       }
 
-      toast.success('Attribute deleted successfully');
+      
       fetchAttributes();
     } catch (error) {
       console.error('Error deleting attribute:', error);
@@ -286,7 +345,7 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
 
       if (error) throw error;
 
-      toast.success('Attribute value deleted successfully');
+      
       fetchAttributes();
     } catch (error) {
       console.error('Error deleting attribute value:', error);
@@ -374,30 +433,59 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
                     Add Attribute
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create New Attribute</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="attr-name">Attribute Name</Label>
-                      <Input
-                        id="attr-name"
-                        value={newAttributeName}
-                        onChange={(e) => setNewAttributeName(e.target.value)}
-                        placeholder="e.g., Blade Size"
-                      />
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New Attribute</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Common Attributes</Label>
+                        <div className="grid grid-cols-2 gap-2 mt-2 max-h-40 overflow-y-auto">
+                          {commonAttributes.map(attr => (
+                            <div key={attr.name} className="flex items-center space-x-2">
+                              <Button
+                                type="button"
+                                variant={selectedCommonAttributes.includes(attr.name) ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedCommonAttributes(prev => 
+                                    prev.includes(attr.name) 
+                                      ? prev.filter(a => a !== attr.name)
+                                      : [...prev, attr.name]
+                                  );
+                                }}
+                                className="flex-1 justify-start"
+                              >
+                                <Plus className={`h-3 w-3 mr-2 ${selectedCommonAttributes.includes(attr.name) ? 'rotate-45' : ''}`} />
+                                {attr.display_name}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="attr-name">Or Create Custom Attribute</Label>
+                        <Input
+                          id="attr-name"
+                          value={newAttributeName}
+                          onChange={(e) => setNewAttributeName(e.target.value)}
+                          placeholder="e.g., Custom Property"
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button variant="outline" onClick={() => {
+                          setShowAttributeDialog(false);
+                          setSelectedCommonAttributes([]);
+                          setNewAttributeName('');
+                        }}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handleCreateAttribute} disabled={loading}>
+                          Create Attributes
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex justify-end space-x-2">
-                      <Button variant="outline" onClick={() => setShowAttributeDialog(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={handleCreateAttribute} disabled={loading}>
-                        Create Attribute
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
+                  </DialogContent>
               </Dialog>
 
               <Dialog open={showValueDialog} onOpenChange={setShowValueDialog}>
@@ -496,7 +584,26 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             Variations for {coreItemName}
-            <Dialog open={showVariationDialog} onOpenChange={setShowVariationDialog}>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={async () => {
+                  if (confirm(`Are you sure you want to clear ALL ${itemType} variations? This action cannot be undone.`)) {
+                    const success = itemType === 'tools' 
+                      ? await clearAllToolVariations() 
+                      : await clearAllMaterialVariations();
+                    if (success) {
+                      fetchVariations();
+                      onVariationUpdate?.();
+                    }
+                  }
+                }}
+              >
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Clear All
+              </Button>
+              <Dialog open={showVariationDialog} onOpenChange={setShowVariationDialog}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
@@ -569,7 +676,7 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
                   </div>
 
                   <div>
-                    <Label htmlFor="var-sku">SKU/Model (Optional)</Label>
+                    <Label htmlFor="var-sku">Recommended Model Names (Optional)</Label>
                     <Input
                       id="var-sku"
                       value={variationSku}
@@ -617,7 +724,8 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
                   </div>
                 </div>
               </DialogContent>
-            </Dialog>
+              </Dialog>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
