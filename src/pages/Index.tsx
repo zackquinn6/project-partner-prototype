@@ -58,7 +58,9 @@ const Index = () => {
 
     const handleProfileNavigation = () => {
       console.log('🔄 Index: "My Profile" clicked from PostAuthLanding');
-      console.log('🔄 Index: Setting view to user and showProfile true');
+      // Clear any force listing flags that might interfere
+      setForceListingMode(false);
+      setResetUserView(false);
       setCurrentView('user');
       // Clear any project selection to ensure profile shows
       setCurrentProject(null);
@@ -70,14 +72,8 @@ const Index = () => {
     };
 
     const handleToolLibraryNavigation = () => {
-      console.log('🔧 Index: Tool Library clicked - dispatching show tools event');
+      console.log('🔧 Index: Tool Library clicked - opening tools window');
       const event = new CustomEvent('show-tools-materials');
-      window.dispatchEvent(event);
-    };
-
-    const handleHomeManagerNavigation = () => {
-      console.log('🏠 Index: Home Manager clicked - dispatching show home manager event');
-      const event = new CustomEvent('show-home-manager');
       window.dispatchEvent(event);
     };
 
@@ -86,8 +82,7 @@ const Index = () => {
     window.addEventListener('navigate-to-projects', handleProjectsNavigation);
     window.addEventListener('show-profile', handleProfileNavigation);
     window.addEventListener('show-help-popup', handleShowHelpPopup);
-    window.addEventListener('show-tool-library', handleToolLibraryNavigation);
-    window.addEventListener('show-home-manager', handleHomeManagerNavigation);
+    window.addEventListener('show-tools-materials', handleToolLibraryNavigation);
     
     return () => {
       window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
@@ -95,8 +90,7 @@ const Index = () => {
       window.removeEventListener('show-help-popup', handleShowHelpPopup);
       window.removeEventListener('navigate-to-projects', handleProjectsNavigation);
       window.removeEventListener('show-profile', handleProfileNavigation);
-      window.removeEventListener('show-tool-library', handleToolLibraryNavigation);
-      window.removeEventListener('show-home-manager', handleHomeManagerNavigation);
+      window.removeEventListener('show-tools-materials', handleToolLibraryNavigation);
     };
   }, [navigate]);
 
@@ -115,27 +109,19 @@ const Index = () => {
   };
 
   const handleProjectsView = () => {
-    console.log('🔄 Index: "My Projects" clicked - forcing listing mode');
-    console.log('🔄 Index: Current state - currentProject:', currentProject?.name, 'currentProjectRun:', currentProjectRun?.name);
+    console.log('🔄 Index: "My Projects" clicked - showing project listing');
     
-    // Clear the location state first to ensure clean navigation
+    // Clear the location state to ensure clean navigation
     window.history.replaceState({}, document.title, window.location.pathname);
     
-    // Immediately clear any project selections to prevent auto-switch to workflow
+    // Clear any project selections
     setCurrentProject(null);
     setCurrentProjectRun(null);
     
-    // Force listing mode - this won't auto-clear like resetUserView
-    setForceListingMode(true);
-    setResetUserView(true);
-    
-    console.log('🔄 Index: Set forceListingMode=true, resetUserView=true');
-    
-    // Clear the resetUserView quickly but keep forceListingMode active
-    setTimeout(() => {
-      setResetUserView(false);
-      console.log('🔄 Index: Reset resetUserView to false after timeout');
-    }, 100);
+    // Set view to user and clear any conflicting flags
+    setCurrentView('user');
+    setForceListingMode(false);
+    setResetUserView(false);
   };
 
   const handleProjectSelected = () => {
@@ -159,7 +145,7 @@ const Index = () => {
           currentView: currentView
         });
         return <UserView 
-          resetToListing={resetUserView || forceListingMode} 
+          resetToListing={resetUserView} 
           forceListingMode={forceListingMode}
           onProjectSelected={() => {
             console.log('🎯 Index: onProjectSelected called - clearing all reset flags');
