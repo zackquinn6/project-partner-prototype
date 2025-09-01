@@ -13,6 +13,7 @@ import UserView from "@/components/UserView";
 import ProjectCatalog from "@/components/ProjectCatalog";
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { HomeManager } from '@/components/HomeManager';
 import { HelpPopup } from '@/components/HelpPopup';
 
 const Index = () => {
@@ -26,6 +27,7 @@ const Index = () => {
   const [resetUserView, setResetUserView] = useState(false);
   const [forceListingMode, setForceListingMode] = useState(false);
   const [showHelpPopup, setShowHelpPopup] = useState(false);
+  const [showHomeManager, setShowHomeManager] = useState(false);
 
   // Listen for edit workflow navigation event
   useEffect(() => {
@@ -46,6 +48,11 @@ const Index = () => {
 
     const handleShowHelpPopup = () => {
       setShowHelpPopup(true);
+    };
+
+    const handleShowHomeManager = () => {
+      console.log('🏠 Index: Home Manager clicked - showing home manager');
+      setShowHomeManager(true);
     };
 
     const handleProjectsNavigation = () => {
@@ -81,6 +88,7 @@ const Index = () => {
     window.addEventListener('navigate-to-projects', handleProjectsNavigation);
     window.addEventListener('show-profile', handleProfileNavigation);
     window.addEventListener('show-help-popup', handleShowHelpPopup);
+    window.addEventListener('show-home-manager', handleShowHomeManager);
     
     return () => {
       window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
@@ -88,6 +96,7 @@ const Index = () => {
       window.removeEventListener('show-help-popup', handleShowHelpPopup);
       window.removeEventListener('navigate-to-projects', handleProjectsNavigation);
       window.removeEventListener('show-profile', handleProfileNavigation);
+      window.removeEventListener('show-home-manager', handleShowHomeManager);
     };
   }, [navigate]);
 
@@ -169,6 +178,10 @@ const Index = () => {
       <HelpPopup
         isOpen={showHelpPopup}
         onClose={() => setShowHelpPopup(false)}
+      />
+      <HomeManager 
+        open={showHomeManager}
+        onOpenChange={setShowHomeManager}
       />
     </div>
   );

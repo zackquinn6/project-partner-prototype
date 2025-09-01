@@ -170,7 +170,7 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
           const existingPhotos = editingHome?.photos || [];
           const allPhotos = [...existingPhotos, ...photoUrls];
           
-          await supabase
+          const { error: updateError } = await supabase
             .from('homes')
             .update({ photos: allPhotos })
             .eq('id', homeId);
@@ -553,28 +553,50 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
                 />
               </div>
 
-              <div className="space-y-2 flex items-center">
-                <label className="flex items-center space-x-2">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="photos">Home Photos</Label>
+                <div className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-4">
                   <input
-                    type="checkbox"
-                    checked={formData.is_primary}
-                    onChange={(e) => setFormData(prev => ({ ...prev, is_primary: e.target.checked }))}
-                    className="rounded border-input"
+                    id="photos"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
                   />
-                  <span className="text-sm">Set as primary home</span>
-                </label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('photos')?.click()}
+                    className="w-full"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Choose Photos ({selectedFiles.length} selected)
+                  </Button>
+                  {selectedFiles.length > 0 && (
+                    <div className="mt-2 text-sm text-muted-foreground">
+                      {selectedFiles.map((file, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <Image className="w-4 h-4" />
+                          {file.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex gap-2 justify-end mt-6">
               <Button type="button" variant="outline" onClick={() => {
                 setShowForm(false);
                 setEditingHome(null);
+                setSelectedFiles([]);
               }}>
                 Cancel
               </Button>
-              <Button type="submit">
-                {editingHome ? 'Update Home' : 'Add Home'}
+              <Button type="submit" disabled={uploading}>
+                {uploading ? 'Uploading...' : editingHome ? 'Update Home' : 'Add Home'}
               </Button>
             </div>
           </form>
