@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Home, Plus, MapPin, Calendar, Trash2, Star } from 'lucide-react';
+import { Home, Plus, MapPin, Calendar, Trash2, Star, Upload, Image } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -21,6 +21,7 @@ interface Home {
   home_type?: string;
   build_year?: string;
   is_primary: boolean;
+  photos?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -55,6 +56,8 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
     home_ownership: '',
     is_primary: false
   });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (open && user) {
@@ -84,11 +87,52 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setSelectedFiles(Array.from(e.target.files));
+    }
+  };
+
+  const uploadPhotos = async (homeId: string): Promise<string[]> => {
+    if (selectedFiles.length === 0) return [];
+    
+    setUploading(true);
+    const uploadedUrls: string[] = [];
+    
+    try {
+      for (const file of selectedFiles) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${homeId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('project-photos')
+          .upload(fileName, file);
+          
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('project-photos')
+          .getPublicUrl(fileName);
+          
+        uploadedUrls.push(publicUrl);
+      }
+    } catch (error) {
+      console.error('Error uploading photos:', error);
+      toast.error('Failed to upload some photos');
+    } finally {
+      setUploading(false);
+    }
+    
+    return uploadedUrls;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     try {
+      let homeId = editingHome?.id;
+      
       if (editingHome) {
         // Update existing home
         const { error } = await supabase
@@ -101,18 +145,36 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
           .eq('user_id', user.id);
 
         if (error) throw error;
-        toast.success('Home updated successfully');
       } else {
         // Create new home
-        const { error } = await supabase
+        const { data: newHome, error } = await supabase
           .from('homes')
           .insert({
             ...formData,
             user_id: user.id
-          });
+          })
+          .select()
+          .single();
 
         if (error) throw error;
-        toast.success('Home added successfully');
+        homeId = newHome.id;
+      }
+
+      // Upload photos if any
+      let photoUrls: string[] = [];
+      if (selectedFiles.length > 0 && homeId) {
+        photoUrls = await uploadPhotos(homeId);
+        
+        // Update home with photo URLs
+        if (photoUrls.length > 0) {
+          const existingPhotos = editingHome?.photos || [];
+          const allPhotos = [...existingPhotos, ...photoUrls];
+          
+          await supabase
+            .from('homes')
+            .update({ photos: allPhotos })
+            .eq('id', homeId);
+        }
       }
 
       // If this is being set as primary, update other homes
@@ -121,11 +183,13 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
           .from('homes')
           .update({ is_primary: false })
           .eq('user_id', user.id)
-          .neq('id', editingHome?.id || '');
+          .neq('id', homeId || '');
       }
 
+      toast.success(editingHome ? 'Home updated successfully' : 'Home added successfully');
       setShowForm(false);
       setEditingHome(null);
+      setSelectedFiles([]);
       setFormData({
         name: '',
         address: '',

@@ -344,15 +344,15 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
                   onChange={(e) => setProjectSetupForm(prev => ({ ...prev, teamMate: e.target.value }))}
                 />
               </div>
-              <div>
-                <Label htmlFor="home-select">Select Home</Label>
+               <div>
+                <Label htmlFor="home-select">Select Home *</Label>
                 <div className="flex gap-2">
                   <Select 
                     value={projectSetupForm.selectedHomeId} 
                     onValueChange={(value) => setProjectSetupForm(prev => ({ ...prev, selectedHomeId: value }))}
                   >
                     <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Choose a home for this project" />
+                      <SelectValue placeholder="Choose a home for this project (required)" />
                     </SelectTrigger>
                     <SelectContent>
                       {homes.map((home) => (
@@ -385,7 +385,10 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
                 <Button variant="outline" onClick={handleSkipSetup}>
                   Skip for now
                 </Button>
-                <Button onClick={handleProjectSetupComplete}>
+                <Button 
+                  onClick={handleProjectSetupComplete}
+                  disabled={!projectSetupForm.selectedHomeId}
+                >
                   Let's do this!
                 </Button>
               </div>
