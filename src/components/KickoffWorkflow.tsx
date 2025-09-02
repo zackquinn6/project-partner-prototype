@@ -189,11 +189,6 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
               </CardDescription>
             </div>
             <div className="flex items-center gap-4">
-              {onExit && (
-                <Button variant="outline" onClick={onExit}>
-                  Exit Kickoff
-                </Button>
-              )}
               <div className="text-right">
                 <div className="text-sm text-muted-foreground mb-1">
                   Step {currentKickoffStep + 1} of {kickoffSteps.length}

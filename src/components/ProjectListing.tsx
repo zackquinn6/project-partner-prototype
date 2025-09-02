@@ -4,13 +4,15 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Play, Trash2, Plus, User } from "lucide-react";
+import { Play, Trash2, Plus, User, Wrench, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProject } from '@/contexts/ProjectContext';
 import { Project } from '@/interfaces/Project';
 import { ProjectRun } from '@/interfaces/ProjectRun';
 import { ProjectSelector } from '@/components/ProjectSelector';
 import ProfileManager from '@/components/ProfileManager';
+import { ToolsMaterialsWindow } from '@/components/ToolsMaterialsWindow';
+import { HomeManager } from '@/components/HomeManager';
 import { useState } from "react";
 
 interface ProjectListingProps {
@@ -21,6 +23,8 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
   const { projectRuns, currentProjectRun, setCurrentProjectRun, deleteProjectRun } = useProject();
   const navigate = useNavigate();
   const [showProfileManager, setShowProfileManager] = useState(false);
+  const [showToolsLibrary, setShowToolsLibrary] = useState(false);
+  const [showHomeManager, setShowHomeManager] = useState(false);
 
   const calculateProgress = (projectRun: ProjectRun) => {
     return projectRun.progress || 0;
@@ -88,6 +92,22 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
               >
                 <User className="w-4 h-4" />
                 My Profile
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setShowToolsLibrary(true)}
+                className="flex items-center gap-2"
+              >
+                <Wrench className="w-4 h-4" />
+                My Tool Library
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setShowHomeManager(true)}
+                className="flex items-center gap-2"
+              >
+                <Home className="w-4 h-4" />
+                My Homes
               </Button>
               <Button 
                 onClick={() => navigate('/projects')}
@@ -207,6 +227,14 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
       <ProfileManager 
         open={showProfileManager} 
         onOpenChange={setShowProfileManager} 
+      />
+      <ToolsMaterialsWindow 
+        open={showToolsLibrary} 
+        onOpenChange={setShowToolsLibrary} 
+      />
+      <HomeManager 
+        open={showHomeManager} 
+        onOpenChange={setShowHomeManager} 
       />
     </div>
   );

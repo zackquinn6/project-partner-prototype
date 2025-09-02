@@ -131,14 +131,6 @@ export default function Navigation({
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button 
-                  variant="ghost" 
-                  className="transition-fast text-xs sm:text-sm px-2 sm:px-3"
-                  onClick={() => setIsToolsLibraryOpen(true)}
-                >
-                  <span className="hidden sm:inline">My Tool Library</span>
-                  <span className="sm:hidden">Tools</span>
-                </Button>
                 
                 <Button 
                   variant="ghost" 
@@ -165,13 +157,6 @@ export default function Navigation({
                     <DropdownMenuItem onClick={() => setIsRoadmapOpen(true)}>
                       <TrendingUp className="w-4 h-4 mr-2" />
                       Feature Roadmap
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      console.log('🏠 Navigation: Manage Homes clicked from dropdown');
-                      setIsHomeManagerOpen(true);
-                    }}>
-                      <Home className="w-4 h-4 mr-2" />
-                      Manage Homes
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setIsPrivacyOpen(true)}>
                       Privacy & Data
