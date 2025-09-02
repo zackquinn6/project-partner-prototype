@@ -104,11 +104,15 @@ const Index = () => {
     };
   }, [navigate]);
 
-  // CONDITIONAL LOGIC AFTER ALL HOOKS
-  // Show Home component as landing page for non-authenticated users
-  if (!user) {
-    return <Home onViewChange={() => {}} />;
-  }
+  // Define functions BEFORE they are used in useEffect
+  const handleProjectsView = () => {
+    console.log('🔄 Index: handleProjectsView called');
+    setResetUserView(true);
+    setForceListingMode(true);
+    setCurrentView('user');
+    // Clear projectRunId by replacing location state
+    navigate('/', { replace: true, state: {} });
+  };
 
   const handleAdminAccess = () => {
     if (isAdmin) {
@@ -118,14 +122,11 @@ const Index = () => {
     }
   };
 
-  const handleProjectsView = () => {
-    console.log('🔄 Index: handleProjectsView called');
-    setResetUserView(true);
-    setForceListingMode(true);
-    setCurrentView('user');
-    // Clear projectRunId by replacing location state
-    navigate('/', { replace: true, state: {} });
-  };
+  // CONDITIONAL LOGIC AFTER ALL HOOKS
+  // Show Home component as landing page for non-authenticated users
+  if (!user) {
+    return <Home onViewChange={() => {}} />;
+  }
 
   const handleProjectSelected = () => {
     console.log('🎯 Index: Project selected from dropdown - clearing force listing mode');

@@ -167,6 +167,15 @@ export default function Navigation({
                       <TrendingUp className="w-4 h-4 mr-2" />
                       Feature Roadmap
                     </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsHomeManagerOpen(true);
+                      }}
+                    >
+                      <Home className="w-4 h-4 mr-2" />
+                      My Homes
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setIsPrivacyOpen(true)}>
                       Privacy & Data
                     </DropdownMenuItem>
