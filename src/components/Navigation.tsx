@@ -10,6 +10,7 @@ import { FeatureRoadmapWindow } from './FeatureRoadmapWindow';
 import { HomeManager } from './HomeManager';
 import { ToolsMaterialsWindow } from './ToolsMaterialsWindow';
 import { UserToolsMaterialsWindow } from './UserToolsMaterialsWindow';
+import { HomeMaintenanceWindow } from './HomeMaintenanceWindow';
 
 interface NavigationProps {
   currentView: 'home' | 'admin' | 'user' | 'editWorkflow';
@@ -32,6 +33,7 @@ export default function Navigation({
   const [isHomeManagerOpen, setIsHomeManagerOpen] = useState(false);
   const [isToolsLibraryOpen, setIsToolsLibraryOpen] = useState(false);
   const [isUserToolsLibraryOpen, setIsUserToolsLibraryOpen] = useState(false);
+  const [isHomeMaintenanceOpen, setIsHomeMaintenanceOpen] = useState(false);
   
   // Add error boundary for useProject hook
   let projectData;
@@ -69,14 +71,22 @@ export default function Navigation({
       setIsUserToolsLibraryOpen(true);
     };
 
+    const handleHomeMaintenanceEvent = (event: Event) => {
+      console.log('🏠 Navigation: Home maintenance event received');
+      event.stopPropagation();
+      setIsHomeMaintenanceOpen(true);
+    };
+
     window.addEventListener('show-home-manager', handleHomeManagerEvent);
     window.addEventListener('show-tools-materials', handleToolsLibraryEvent);
     window.addEventListener('show-user-tools-materials', handleUserToolsLibraryEvent);
+    window.addEventListener('show-home-maintenance', handleHomeMaintenanceEvent);
     
     return () => {
       window.removeEventListener('show-home-manager', handleHomeManagerEvent);
       window.removeEventListener('show-tools-materials', handleToolsLibraryEvent);
       window.removeEventListener('show-user-tools-materials', handleUserToolsLibraryEvent);
+      window.removeEventListener('show-home-maintenance', handleHomeMaintenanceEvent);
     };
   }, []);
   
@@ -211,6 +221,7 @@ export default function Navigation({
       />
       <ToolsMaterialsWindow open={isToolsLibraryOpen} onOpenChange={setIsToolsLibraryOpen} />
       <UserToolsMaterialsWindow open={isUserToolsLibraryOpen} onOpenChange={setIsUserToolsLibraryOpen} />
+      <HomeMaintenanceWindow open={isHomeMaintenanceOpen} onOpenChange={setIsHomeMaintenanceOpen} />
     </>
   );
 }

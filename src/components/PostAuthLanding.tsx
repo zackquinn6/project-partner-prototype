@@ -112,8 +112,18 @@ export const PostAuthLanding = () => {
       textColor: "text-primary-foreground"
     },
     {
+      icon: Home,
+      title: "My Home Maintenance",
+      action: () => {
+        console.log('🏠 PostAuthLanding: My Home Maintenance clicked - dispatching event');
+        const event = new CustomEvent('show-home-maintenance');
+        window.dispatchEvent(event);
+      },
+      color: "bg-green-600",
+      textColor: "text-white"
+    },
+    {
       icon: Wrench,
-      title: "My Tool Library",
       action: () => {
         console.log('🔧 PostAuthLanding: My Tool Library clicked - dispatching event');
         const event = new CustomEvent('show-user-tools-materials');

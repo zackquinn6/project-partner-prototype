@@ -360,6 +360,83 @@ export type Database = {
         }
         Relationships: []
       }
+      maintenance_completions: {
+        Row: {
+          completed_at: string
+          created_at: string
+          id: string
+          notes: string | null
+          photo_url: string | null
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photo_url?: string | null
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photo_url?: string | null
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "user_maintenance_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_templates: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          frequency_days: number
+          id: string
+          instructions: string | null
+          photo_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          frequency_days: number
+          id?: string
+          instructions?: string | null
+          photo_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          frequency_days?: number
+          id?: string
+          instructions?: string | null
+          photo_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       materials: {
         Row: {
           created_at: string
@@ -771,6 +848,65 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      user_maintenance_tasks: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          frequency_days: number
+          home_id: string
+          id: string
+          is_active: boolean
+          is_custom: boolean
+          last_completed_at: string | null
+          next_due_date: string
+          template_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          frequency_days: number
+          home_id: string
+          id?: string
+          is_active?: boolean
+          is_custom?: boolean
+          last_completed_at?: string | null
+          next_due_date: string
+          template_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          frequency_days?: number
+          home_id?: string
+          id?: string
+          is_active?: boolean
+          is_custom?: boolean
+          last_completed_at?: string | null
+          next_due_date?: string
+          template_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_maintenance_tasks_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
