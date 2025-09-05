@@ -116,7 +116,7 @@ export const PostAuthLanding = () => {
       title: "My Tool Library",
       action: () => {
         console.log('🔧 PostAuthLanding: My Tool Library clicked - dispatching event');
-        const event = new CustomEvent('show-tools-materials');
+        const event = new CustomEvent('show-user-tools-materials');
         window.dispatchEvent(event);
       },
       color: "bg-primary",

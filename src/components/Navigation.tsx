@@ -9,6 +9,7 @@ import ProfileManager from './ProfileManager';
 import { FeatureRoadmapWindow } from './FeatureRoadmapWindow';
 import { HomeManager } from './HomeManager';
 import { ToolsMaterialsWindow } from './ToolsMaterialsWindow';
+import { UserToolsMaterialsWindow } from './UserToolsMaterialsWindow';
 
 interface NavigationProps {
   currentView: 'home' | 'admin' | 'user' | 'editWorkflow';
@@ -30,6 +31,7 @@ export default function Navigation({
   const [isRoadmapOpen, setIsRoadmapOpen] = useState(false);
   const [isHomeManagerOpen, setIsHomeManagerOpen] = useState(false);
   const [isToolsLibraryOpen, setIsToolsLibraryOpen] = useState(false);
+  const [isUserToolsLibraryOpen, setIsUserToolsLibraryOpen] = useState(false);
   
   // Add error boundary for useProject hook
   let projectData;
@@ -61,12 +63,20 @@ export default function Navigation({
       setIsToolsLibraryOpen(true);
     };
 
+    const handleUserToolsLibraryEvent = (event: Event) => {
+      console.log('🔧 Navigation: User tools library event received');
+      event.stopPropagation();
+      setIsUserToolsLibraryOpen(true);
+    };
+
     window.addEventListener('show-home-manager', handleHomeManagerEvent);
     window.addEventListener('show-tools-materials', handleToolsLibraryEvent);
+    window.addEventListener('show-user-tools-materials', handleUserToolsLibraryEvent);
     
     return () => {
       window.removeEventListener('show-home-manager', handleHomeManagerEvent);
       window.removeEventListener('show-tools-materials', handleToolsLibraryEvent);
+      window.removeEventListener('show-user-tools-materials', handleUserToolsLibraryEvent);
     };
   }, []);
   
@@ -200,6 +210,7 @@ export default function Navigation({
         }} 
       />
       <ToolsMaterialsWindow open={isToolsLibraryOpen} onOpenChange={setIsToolsLibraryOpen} />
+      <UserToolsMaterialsWindow open={isUserToolsLibraryOpen} onOpenChange={setIsUserToolsLibraryOpen} />
     </>
   );
 }
