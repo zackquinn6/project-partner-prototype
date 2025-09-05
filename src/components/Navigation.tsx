@@ -170,7 +170,7 @@ export default function Navigation({
                     <DropdownMenuItem 
                       onClick={(e) => {
                         e.stopPropagation();
-                        setIsHomeManagerOpen(true);
+                        window.dispatchEvent(new CustomEvent('show-home-manager'));
                       }}
                     >
                       <Home className="w-4 h-4 mr-2" />
