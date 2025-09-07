@@ -204,22 +204,20 @@ export const PostAuthLanding = () => {
           </div>
         </div>
 
-        {/* Quick Actions - Single Row */}
+        {/* My Apps - App Icons Row */}
         <div className="mb-8 md:mb-12 px-4 md:px-0">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+          <div className="flex justify-center items-center gap-6 md:gap-8 overflow-x-auto pb-2">
             {[...myWorkActions, ...exploreActions, ...accountActions].map((action, index) => (
-              <Card 
+              <div 
                 key={index} 
-                className="gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 cursor-pointer group"
+                className="flex flex-col items-center cursor-pointer group min-w-0"
                 onClick={action.action}
               >
-                <CardHeader className="text-center pb-2 px-2 pt-4">
-                  <div className={`w-6 h-6 ${action.color} rounded-full flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
-                    <action.icon className={`h-4 w-4 ${action.textColor}`} />
-                  </div>
-                  <CardTitle className="text-sm group-hover:text-primary transition-colors leading-tight">{action.title}</CardTitle>
-                </CardHeader>
-              </Card>
+                <div className={`w-12 h-12 md:w-14 md:h-14 ${action.color} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-110 transition-all duration-300 shadow-sm group-hover:shadow-md`}>
+                  <action.icon className={`h-6 w-6 md:h-7 md:w-7 ${action.textColor}`} />
+                </div>
+                <span className="text-xs text-muted-foreground text-center leading-tight max-w-16 group-hover:text-foreground transition-colors">{action.title}</span>
+              </div>
             ))}
           </div>
         </div>
