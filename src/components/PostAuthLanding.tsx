@@ -153,7 +153,7 @@ export const PostAuthLanding = () => {
       title: "My Profile",
       action: () => {
         console.log('🔄 PostAuthLanding: My Profile button clicked - dispatching event');
-        const event = new CustomEvent('show-profile');
+        const event = new CustomEvent('open-profile-manager');
         window.dispatchEvent(event);
         console.log('🔄 PostAuthLanding: Event dispatched');
       },

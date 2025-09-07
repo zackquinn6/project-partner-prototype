@@ -77,16 +77,24 @@ export default function Navigation({
       setIsHomeMaintenanceOpen(true);
     };
 
+    const handleProfileManagerEvent = (event: Event) => {
+      console.log('👤 Navigation: Profile manager event received');
+      event.stopPropagation();
+      setIsProfileOpen(true);
+    };
+
     window.addEventListener('show-home-manager', handleHomeManagerEvent);
     window.addEventListener('show-tools-materials', handleToolsLibraryEvent);
     window.addEventListener('show-user-tools-materials', handleUserToolsLibraryEvent);
     window.addEventListener('show-home-maintenance', handleHomeMaintenanceEvent);
+    window.addEventListener('open-profile-manager', handleProfileManagerEvent);
     
     return () => {
       window.removeEventListener('show-home-manager', handleHomeManagerEvent);
       window.removeEventListener('show-tools-materials', handleToolsLibraryEvent);
       window.removeEventListener('show-user-tools-materials', handleUserToolsLibraryEvent);
       window.removeEventListener('show-home-maintenance', handleHomeMaintenanceEvent);
+      window.removeEventListener('open-profile-manager', handleProfileManagerEvent);
     };
   }, []);
   

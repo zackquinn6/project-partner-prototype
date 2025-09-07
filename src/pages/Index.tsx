@@ -64,18 +64,9 @@ const Index = () => {
     };
 
     const handleProfileNavigation = () => {
-      console.log('🔄 Index: "My Profile" clicked from PostAuthLanding');
-      // Clear any force listing flags that might interfere
-      setForceListingMode(false);
-      setResetUserView(false);
-      setCurrentView('user');
-      // Clear any project selection to ensure profile shows
-      setCurrentProject(null);
-      setCurrentProjectRun(null);
-      // Navigate with show profile state
-      navigate('/', { 
-        state: { view: 'user', showProfile: true } 
-      });
+      console.log('🔄 Index: "My Profile" clicked - opening ProfileManager');
+      // Dispatch event to open ProfileManager dialog directly
+      window.dispatchEvent(new CustomEvent('open-profile-manager'));
     };
 
     const handleToolLibraryNavigation = (event: Event) => {

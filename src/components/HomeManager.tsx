@@ -371,15 +371,31 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
                   <Card key={home.id} className={home.is_primary ? 'ring-2 ring-primary' : ''}>
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          {home.name}
-                          {home.is_primary && (
-                            <Badge variant="secondary" className="text-xs">
-                              <Star className="w-3 h-3 mr-1" />
-                              Primary
-                            </Badge>
-                          )}
-                        </CardTitle>
+                        <div className="flex items-center gap-3">
+                          {/* Home Photo Icon */}
+                          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
+                            {home.photos && home.photos.length > 0 ? (
+                              <img 
+                                src={home.photos[0]} 
+                                alt={`${home.name} photo`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <Home className="w-6 h-6 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg flex items-center gap-2">
+                              {home.name}
+                              {home.is_primary && (
+                                <Badge variant="secondary" className="text-xs">
+                                  <Star className="w-3 h-3 mr-1" />
+                                  Primary
+                                </Badge>
+                              )}
+                            </CardTitle>
+                          </div>
+                        </div>
                         <div className="flex gap-2">
                           <Button
                             variant="ghost"
