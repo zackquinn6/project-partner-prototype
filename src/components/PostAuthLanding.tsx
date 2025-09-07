@@ -124,6 +124,7 @@ export const PostAuthLanding = () => {
     },
     {
       icon: Wrench,
+      title: "My Tools & Materials",
       action: () => {
         console.log('🔧 PostAuthLanding: My Tool Library clicked - dispatching event');
         const event = new CustomEvent('show-user-tools-materials');
@@ -216,7 +217,7 @@ export const PostAuthLanding = () => {
                 <div className={`w-12 h-12 md:w-14 md:h-14 ${action.color} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-110 transition-all duration-300 shadow-sm group-hover:shadow-md`}>
                   <action.icon className={`h-6 w-6 md:h-7 md:w-7 ${action.textColor}`} />
                 </div>
-                <span className="text-xs text-muted-foreground text-center leading-tight max-w-16 group-hover:text-foreground transition-colors">{action.title}</span>
+                <span className="text-xs text-muted-foreground text-center leading-tight h-8 flex items-center justify-center max-w-16 group-hover:text-foreground transition-colors">{action.title}</span>
               </div>
             ))}
           </div>
