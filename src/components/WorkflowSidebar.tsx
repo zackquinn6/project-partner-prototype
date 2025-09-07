@@ -77,8 +77,8 @@ export function WorkflowSidebar({
                     className="px-3 py-1 text-xs bg-blue-900/20 hover:bg-blue-900/30 text-blue-800 hover:text-blue-900 border-blue-900/30 w-fit"
                   >
                     <div className="text-center">
-                      <div>Call the Coach</div>
-                      <div className="text-[10px] opacity-75">Stuck, Get Expert Help</div>
+                      <div>Expert Virtual Consults</div>
+                      <div className="text-[10px] opacity-75">Get Expert Help</div>
                     </div>
                   </Button>
                   

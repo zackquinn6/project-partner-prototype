@@ -519,7 +519,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                 onClick={() => setHelpPopupOpen(true)}
                 className="w-full bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
               >
-                Stuck? Get Help
+                Expert Virtual Consults
               </Button>
             </div>
           </CardHeader>
