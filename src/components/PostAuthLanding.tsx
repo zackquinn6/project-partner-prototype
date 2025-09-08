@@ -14,13 +14,15 @@ import {
   Wrench,
   Home,
   Shield,
-  Hammer
+  Hammer,
+  HelpCircle
 } from 'lucide-react';
 import { useProject } from '@/contexts/ProjectContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { ToolRentalsWindow } from '@/components/ToolRentalsWindow';
+import { HelpPopup } from '@/components/HelpPopup';
 
 export const PostAuthLanding = () => {
   const navigate = useNavigate();
@@ -28,6 +30,7 @@ export const PostAuthLanding = () => {
   const { isAdmin } = useUserRole();
   const [userNickname, setUserNickname] = useState<string>('');
   const [showToolRentals, setShowToolRentals] = useState(false);
+  const [showHelpPopup, setShowHelpPopup] = useState(false);
   const [stats, setStats] = useState([
     { label: "Active Projects", value: "0", icon: Target },
     { label: "Completed", value: "0", icon: Trophy }, 
@@ -130,7 +133,7 @@ export const PostAuthLanding = () => {
     },
     {
       icon: Wrench,
-      title: "My Tools & Materials",
+      title: "My Tool Library",
       action: () => {
         console.log('🔧 PostAuthLanding: My Tool Library clicked - dispatching event');
         const event = new CustomEvent('show-user-tools-materials');
@@ -145,6 +148,13 @@ export const PostAuthLanding = () => {
       action: () => setShowToolRentals(true),
       color: "bg-orange-600",
       textColor: "text-white"
+    },
+    {
+      icon: HelpCircle,
+      title: "Expert Help",
+      action: () => setShowHelpPopup(true),
+      color: "bg-green-600",
+      textColor: "text-white"
     }
   ];
 
@@ -152,7 +162,7 @@ export const PostAuthLanding = () => {
   const exploreActions = [
     {
       icon: BookOpen,
-      title: "Project Catalog", 
+      title: "New Project Catalog", 
       action: () => navigate('/projects'),
       color: "bg-accent",
       textColor: "text-accent-foreground"
@@ -192,11 +202,8 @@ export const PostAuthLanding = () => {
       <div className="container mx-auto px-2 md:px-4 max-w-6xl">
         {/* Welcome Header */}
         <div className="text-center mb-8 md:mb-12 px-4">
-          <Badge variant="outline" className="mb-3 md:mb-4 text-primary border-primary text-xs md:text-sm">
-            🏆 Welcome Back{userNickname ? `, ${userNickname}` : ', Champion'}!
-          </Badge>
           <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6">
-            Ready to Build Something Great?
+            Your DIY Homepage
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
             Your DIY journey continues here. Pick up where you left off or start your next winning project.
@@ -222,7 +229,7 @@ export const PostAuthLanding = () => {
         <div className="mb-8 md:mb-12 px-4 md:px-0">
           <div className="max-w-lg mx-auto">
             {/* First Row - My Work */}
-            <div className="grid grid-cols-4 gap-6 justify-items-center mb-8">
+            <div className="grid grid-cols-5 gap-6 justify-items-center mb-8">
               {myWorkActions.map((action, index) => (
                 <div 
                   key={index} 
@@ -260,14 +267,16 @@ export const PostAuthLanding = () => {
           <h3 className="text-xl md:text-2xl font-bold text-foreground mb-3 md:mb-4">
             🔨 Time to Get Back on the Field
           </h3>
-          <p className="text-base md:text-lg text-muted-foreground italic">
-            "Every expert was once a beginner. Every pro was once an amateur. Every legend was once a learner."
-          </p>
         </div>
         
         <ToolRentalsWindow 
           isOpen={showToolRentals} 
           onClose={() => setShowToolRentals(false)} 
+        />
+        
+        <HelpPopup 
+          isOpen={showHelpPopup} 
+          onClose={() => setShowHelpPopup(false)} 
         />
       </div>
     </div>
