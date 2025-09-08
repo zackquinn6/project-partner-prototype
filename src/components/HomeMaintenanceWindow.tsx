@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Home, Plus, Calendar, Clock, AlertTriangle, CheckCircle, Filter } from 'lucide-react';
+import { Home, Plus, Calendar, Clock, AlertTriangle, CheckCircle, Filter, Trash2 } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -321,7 +321,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ op
                                     size="sm"
                                     onClick={() => handleDeleteTask(task.id)}
                                   >
-                                    Delete
+                                    <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </div>
