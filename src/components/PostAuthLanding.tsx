@@ -13,18 +13,21 @@ import {
   Zap,
   Wrench,
   Home,
-  Shield
+  Shield,
+  Hammer
 } from 'lucide-react';
 import { useProject } from '@/contexts/ProjectContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
+import { ToolRentalsWindow } from '@/components/ToolRentalsWindow';
 
 export const PostAuthLanding = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
   const [userNickname, setUserNickname] = useState<string>('');
+  const [showToolRentals, setShowToolRentals] = useState(false);
   const [stats, setStats] = useState([
     { label: "Active Projects", value: "0", icon: Target },
     { label: "Completed", value: "0", icon: Trophy }, 
@@ -135,6 +138,13 @@ export const PostAuthLanding = () => {
       },
       color: "bg-primary",
       textColor: "text-primary-foreground"
+    },
+    {
+      icon: Hammer,
+      title: "Tool Rentals",
+      action: () => setShowToolRentals(true),
+      color: "bg-orange-600",
+      textColor: "text-white"
     }
   ];
 
@@ -212,7 +222,7 @@ export const PostAuthLanding = () => {
         <div className="mb-8 md:mb-12 px-4 md:px-0">
           <div className="max-w-lg mx-auto">
             {/* First Row - My Work */}
-            <div className="grid grid-cols-3 gap-8 justify-items-center mb-8">
+            <div className="grid grid-cols-4 gap-6 justify-items-center mb-8">
               {myWorkActions.map((action, index) => (
                 <div 
                   key={index} 
@@ -254,6 +264,11 @@ export const PostAuthLanding = () => {
             "Every expert was once a beginner. Every pro was once an amateur. Every legend was once a learner."
           </p>
         </div>
+        
+        <ToolRentalsWindow 
+          isOpen={showToolRentals} 
+          onClose={() => setShowToolRentals(false)} 
+        />
       </div>
     </div>
   );

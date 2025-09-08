@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send feedback email to support
     const emailResponse = await resend.emails.send({
       from: "Feedback <onboarding@resend.dev>",
-      to: ["zackquinn6@gmail.com"], // Replace with your actual support email
+      to: ["contact@toolio.us"],
       replyTo: userEmail,
       subject: `App Feedback: ${category}`,
       html: `
