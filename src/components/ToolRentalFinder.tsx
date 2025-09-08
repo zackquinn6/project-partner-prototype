@@ -21,6 +21,8 @@ interface RentalCenter {
   rating: number;
   hasGeneralTools: boolean;
   hasHeavyEquipment: boolean;
+  isLibrary: boolean;
+  isMakerspace: boolean;
   priceRange: 'budget' | 'mid' | 'premium';
 }
 
@@ -33,6 +35,8 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
   const [radius, setRadius] = useState('25');
   const [generalTools, setGeneralTools] = useState(true);
   const [heavyEquipment, setHeavyEquipment] = useState(true);
+  const [libraries, setLibraries] = useState(true);
+  const [makerspaces, setMakerspaces] = useState(true);
   const [rentalCenters, setRentalCenters] = useState<RentalCenter[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -54,6 +58,8 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
       rating: 4.2,
       hasGeneralTools: true,
       hasHeavyEquipment: true,
+      isLibrary: false,
+      isMakerspace: false,
       priceRange: 'mid'
     },
     {
@@ -69,6 +75,8 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
       rating: 4.5,
       hasGeneralTools: true,
       hasHeavyEquipment: true,
+      isLibrary: false,
+      isMakerspace: false,
       priceRange: 'premium'
     },
     {
@@ -83,6 +91,8 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
       rating: 4.0,
       hasGeneralTools: true,
       hasHeavyEquipment: false,
+      isLibrary: false,
+      isMakerspace: false,
       priceRange: 'budget'
     },
     {
@@ -98,6 +108,8 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
       rating: 4.7,
       hasGeneralTools: true,
       hasHeavyEquipment: true,
+      isLibrary: false,
+      isMakerspace: false,
       priceRange: 'premium'
     },
     {
@@ -112,10 +124,80 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
       rating: 3.8,
       hasGeneralTools: true,
       hasHeavyEquipment: false,
+      isLibrary: false,
+      isMakerspace: false,
       priceRange: 'budget'
     },
     {
       id: '6',
+      name: 'Boston Public Library - Maker Lab',
+      address: '700 Boylston St',
+      city: 'Boston',
+      state: 'MA',
+      zipCode: '02116',
+      phone: '(617) 536-5400',
+      website: 'https://bpl.org/makerlab',
+      distance: 1.5,
+      rating: 4.6,
+      hasGeneralTools: true,
+      hasHeavyEquipment: false,
+      isLibrary: true,
+      isMakerspace: false,
+      priceRange: 'budget'
+    },
+    {
+      id: '7',
+      name: 'Cambridge Public Library Tool Library',
+      address: '449 Broadway',
+      city: 'Cambridge',
+      state: 'MA',
+      zipCode: '02138',
+      phone: '(617) 349-4040',
+      website: 'https://cambridgema.gov/cpl/toollibrary',
+      distance: 3.2,
+      rating: 4.8,
+      hasGeneralTools: true,
+      hasHeavyEquipment: false,
+      isLibrary: true,
+      isMakerspace: false,
+      priceRange: 'budget'
+    },
+    {
+      id: '8',
+      name: 'Artisan\'s Asylum Makerspace',
+      address: '10 Tyler St',
+      city: 'Somerville',
+      state: 'MA',
+      zipCode: '02143',
+      phone: '(617) 284-6800',
+      website: 'https://artisansasylum.com',
+      distance: 4.8,
+      rating: 4.4,
+      hasGeneralTools: true,
+      hasHeavyEquipment: true,
+      isLibrary: false,
+      isMakerspace: true,
+      priceRange: 'mid'
+    },
+    {
+      id: '9',
+      name: 'MakeIt Labs',
+      address: '256 Marginal St',
+      city: 'Chelsea',
+      state: 'MA',
+      zipCode: '02150',
+      phone: '(617) 555-9876',
+      website: 'https://makeitlabs.com',
+      distance: 6.1,
+      rating: 4.5,
+      hasGeneralTools: true,
+      hasHeavyEquipment: false,
+      isLibrary: false,
+      isMakerspace: true,
+      priceRange: 'mid'
+    },
+    {
+      id: '10',
       name: 'NYC Tool Rental Hub',
       address: '100 Broadway',
       city: 'New York',
@@ -127,36 +209,9 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
       rating: 4.3,
       hasGeneralTools: true,
       hasHeavyEquipment: true,
+      isLibrary: false,
+      isMakerspace: false,
       priceRange: 'mid'
-    },
-    {
-      id: '7',
-      name: 'Chicago Equipment Co',
-      address: '500 Michigan Ave',
-      city: 'Chicago',
-      state: 'IL',
-      zipCode: '60611',
-      phone: '(312) 555-0500',
-      website: 'https://chicagoequip.com',
-      distance: 25.8,
-      rating: 4.6,
-      hasGeneralTools: true,
-      hasHeavyEquipment: true,
-      priceRange: 'premium'
-    },
-    {
-      id: '8',
-      name: 'Austin Tool Co',
-      address: '200 Congress Ave',
-      city: 'Austin',
-      state: 'TX',
-      zipCode: '78701',
-      phone: '(512) 555-0200',
-      distance: 45.1,
-      rating: 4.1,
-      hasGeneralTools: true,
-      hasHeavyEquipment: false,
-      priceRange: 'budget'
     }
   ];
 
@@ -167,7 +222,7 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
       setRentalCenters([]);
       setHasSearched(false);
     }
-  }, [debouncedSearchQuery, radius, generalTools, heavyEquipment]);
+  }, [debouncedSearchQuery, radius, generalTools, heavyEquipment, libraries, makerspaces]);
 
   const performSearch = async () => {
     setLoading(true);
@@ -186,12 +241,17 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
       
       const withinRadius = center.distance <= parseInt(radius);
       
-      // Fix tool type filter logic: if no filters selected, show all; otherwise show centers that match at least one selected filter
-      const matchesToolType = (!generalTools && !heavyEquipment) || 
-                             (generalTools && center.hasGeneralTools) || 
+      // Tool type filter logic
+      const matchesToolType = (generalTools && center.hasGeneralTools) || 
                              (heavyEquipment && center.hasHeavyEquipment);
       
-      return matchesLocation && withinRadius && matchesToolType;
+      // Location type filter logic
+      const matchesLocationType = (libraries && center.isLibrary) ||
+                                 (makerspaces && center.isMakerspace) ||
+                                 (!libraries && !makerspaces && !center.isLibrary && !center.isMakerspace) ||
+                                 (!center.isLibrary && !center.isMakerspace);
+      
+      return matchesLocation && withinRadius && matchesToolType && matchesLocationType;
     });
 
     // Sort by distance
@@ -226,7 +286,7 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Find Tool Rental Centers
+            Tool Access & Rental Finder
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -289,6 +349,33 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
                   />
                   <label htmlFor="heavy-equipment" className="text-sm">
                     Heavy Equipment
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Location Type Filters */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Location Types</label>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="libraries"
+                    checked={libraries}
+                    onCheckedChange={(checked) => setLibraries(checked === true)}
+                  />
+                  <label htmlFor="libraries" className="text-sm">
+                    Libraries
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="makerspaces"
+                    checked={makerspaces}
+                    onCheckedChange={(checked) => setMakerspaces(checked === true)}
+                  />
+                  <label htmlFor="makerspaces" className="text-sm">
+                    Makerspaces
                   </label>
                 </div>
               </div>
@@ -366,6 +453,16 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
                         Heavy Equipment
                       </Badge>
                     )}
+                    {center.isLibrary && (
+                      <Badge variant="secondary" className="text-xs">
+                        Library
+                      </Badge>
+                    )}
+                    {center.isMakerspace && (
+                      <Badge variant="secondary" className="text-xs">
+                        Makerspace
+                      </Badge>
+                    )}
                   </div>
 
                   {/* Actions */}
@@ -396,9 +493,9 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
           <Card className="border-dashed">
             <CardContent className="py-12 text-center">
               <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">Find Tool Rental Centers</h3>
+              <h3 className="text-lg font-medium mb-2">Find Tool Access & Rental Centers</h3>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Enter your location (city, state, or ZIP code) above to find tool rental centers near you.
+                Enter your location (city, state, or ZIP code) above to find tool access & rental centers near you.
               </p>
             </CardContent>
           </Card>

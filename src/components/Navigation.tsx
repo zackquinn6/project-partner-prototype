@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Home, FolderOpen, ChevronDown, Settings, LogOut, User, TrendingUp, Shield, Lock, HelpCircle } from "lucide-react";
+import { Home, FolderOpen, ChevronDown, Settings, LogOut, User, Users, TrendingUp, Shield, Lock, HelpCircle } from "lucide-react";
 import { useProject } from '@/contexts/ProjectContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -14,6 +14,7 @@ import { ToolsMaterialsWindow } from './ToolsMaterialsWindow';
 import { UserToolsMaterialsWindow } from './UserToolsMaterialsWindow';
 import { ToolsMaterialsLibraryView } from './ToolsMaterialsLibraryView';
 import { HomeMaintenanceWindow } from './HomeMaintenanceWindow';
+import { CommunityPostsWindow } from './CommunityPostsWindow';
 
 interface NavigationProps {
   currentView: 'home' | 'admin' | 'user' | 'editWorkflow';
@@ -39,6 +40,7 @@ export default function Navigation({
   const [isNewToolsLibraryOpen, setIsNewToolsLibraryOpen] = useState(false);
   const [isHomeMaintenanceOpen, setIsHomeMaintenanceOpen] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [isCommunityPostsOpen, setIsCommunityPostsOpen] = useState(false);
   
   // Add error boundary for useProject hook
   let projectData;
@@ -89,11 +91,18 @@ export default function Navigation({
       setIsProfileOpen(true);
     };
 
+    const handleCommunityPostsEvent = (event: Event) => {
+      console.log('🌐 Navigation: Community posts event received');
+      event.stopPropagation();
+      setIsCommunityPostsOpen(true);
+    };
+
     window.addEventListener('show-home-manager', handleHomeManagerEvent);
     window.addEventListener('show-tools-materials', handleToolsLibraryEvent);
     window.addEventListener('show-user-tools-materials', handleUserToolsLibraryEvent);
     window.addEventListener('show-home-maintenance', handleHomeMaintenanceEvent);
     window.addEventListener('open-profile-manager', handleProfileManagerEvent);
+    window.addEventListener('show-community-posts', handleCommunityPostsEvent);
     
     return () => {
       window.removeEventListener('show-home-manager', handleHomeManagerEvent);
@@ -101,6 +110,7 @@ export default function Navigation({
       window.removeEventListener('show-user-tools-materials', handleUserToolsLibraryEvent);
       window.removeEventListener('show-home-maintenance', handleHomeMaintenanceEvent);
       window.removeEventListener('open-profile-manager', handleProfileManagerEvent);
+      window.removeEventListener('show-community-posts', handleCommunityPostsEvent);
     };
   }, []);
   
@@ -191,12 +201,24 @@ export default function Navigation({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48 bg-background border border-border shadow-lg z-[60] backdrop-blur-sm">
                     <DropdownMenuItem onClick={() => setIsProfileOpen(true)}>
-                      <User className="w-4 h-4 mr-2" />
-                      Profile Settings
+                      <User className="w-4 h-4 mr-2 text-blue-500" />
+                      My Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => window.dispatchEvent(new CustomEvent('show-home-manager'))}
+                    >
+                      <Home className="w-4 h-4 mr-2 text-green-500" />
+                      My Homes
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setIsRoadmapOpen(true)}>
                       <TrendingUp className="w-4 h-4 mr-2" />
                       App Improvements & Feedback
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => window.dispatchEvent(new CustomEvent('show-community-posts'))}
+                    >
+                      <Users className="w-4 h-4 mr-2 text-purple-500" />
+                      Community Posts
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setIsPrivacyOpen(true)}>
                       <Lock className="w-4 h-4 mr-2" />
@@ -212,9 +234,9 @@ export default function Navigation({
                       <LogOut className="w-4 h-4 mr-2" />
                       Sign Out
                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
 
+                </DropdownMenuContent>
+                </DropdownMenu>
                 {/* Feedback Button */}
                 <Button 
                   variant="ghost" 
@@ -228,22 +250,6 @@ export default function Navigation({
             </div>
           </div>
         </nav>
-      
-      <DataPrivacyManager open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen} />
-      <ProfileManager open={isProfileOpen} onOpenChange={setIsProfileOpen} />
-      <FeatureRoadmapWindow open={isRoadmapOpen} onOpenChange={setIsRoadmapOpen} />
-      <HomeManager 
-        open={isHomeManagerOpen} 
-        onOpenChange={(open) => {
-          console.log('🏠 Navigation: HomeManager state change:', open);
-          setIsHomeManagerOpen(open);
-        }} 
-      />
-      <ToolsMaterialsWindow open={isToolsLibraryOpen} onOpenChange={setIsToolsLibraryOpen} />
-      <UserToolsMaterialsWindow open={isUserToolsLibraryOpen} onOpenChange={setIsUserToolsLibraryOpen} />
-      <ToolsMaterialsLibraryView open={isNewToolsLibraryOpen} onOpenChange={setIsNewToolsLibraryOpen} />
-      <HomeMaintenanceWindow open={isHomeMaintenanceOpen} onOpenChange={setIsHomeMaintenanceOpen} />
-      <FeedbackDialog open={showFeedback} onOpenChange={setShowFeedback} />
     </>
   );
 }

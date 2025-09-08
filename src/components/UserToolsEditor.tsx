@@ -144,7 +144,7 @@ export function UserToolsEditor() {
         .getPublicUrl(fileName);
 
       updateTool(toolId, 'user_photo_url', publicUrl);
-      toast({ title: "Success", description: "Photo uploaded successfully" });
+      // Photo uploaded successfully - no toast needed
     } catch (error) {
       console.error('Error uploading photo:', error);
       toast({ title: "Error", description: "Failed to upload photo", variant: "destructive" });
@@ -165,9 +165,9 @@ export function UserToolsEditor() {
       if (error) throw error;
     } catch (error) {
       console.error('Error auto-saving tools:', error);
-      toast({ title: "Auto-save failed", description: "Changes may not be saved", variant: "destructive" });
+      // Removed toast notification for auto-save failures
     }
-  }, [user, userTools, toast]);
+  }, [user, userTools]);
 
   const saveTools = async () => {
     if (!user) return;
@@ -180,7 +180,7 @@ export function UserToolsEditor() {
         .eq('user_id', user.id);
       
       if (error) throw error;
-      toast({ title: "Success", description: "Your tools have been saved" });
+      // Tools saved successfully - no toast needed
     } catch (error) {
       console.error('Error saving tools:', error);
       toast({ title: "Error", description: "Failed to save tools", variant: "destructive" });
@@ -275,9 +275,6 @@ export function UserToolsEditor() {
           <Button variant="outline" onClick={() => setShowAddTools(true)}>
             <ShoppingCart className="w-4 h-4 mr-2" />
             Add Tools
-          </Button>
-          <Button onClick={saveTools} disabled={isLoading}>
-            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </div>

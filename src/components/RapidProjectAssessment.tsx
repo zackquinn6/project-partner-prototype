@@ -383,7 +383,7 @@ export function RapidProjectAssessment() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calculator className="w-5 h-5" />
-              Rapid Project Assessment
+              Rapid Plan
             </CardTitle>
             <div className="flex justify-between items-center">
               <p className="text-muted-foreground">Manage your project cost assessments</p>
@@ -465,7 +465,7 @@ export function RapidProjectAssessment() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Calculator className="w-5 h-5" />
-              Rapid Project Assessment
+              Rapid Plan
             </CardTitle>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setCurrentView('list')}>
