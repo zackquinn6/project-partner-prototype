@@ -1,6 +1,32 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+
+// Server-side input sanitization
+const sanitizeInput = (input: string): string => {
+  if (!input || typeof input !== 'string') {
+    return '';
+  }
+
+  // Remove HTML tags
+  let sanitized = input.replace(/<[^>]*>/g, '');
+  
+  // Remove control characters
+  sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+  
+  // Remove javascript: protocol
+  sanitized = sanitized.replace(/javascript:/gi, '');
+  
+  // Remove event handlers
+  sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+  
+  // Remove potential script injections
+  sanitized = sanitized.replace(/<script[^>]*>.*?<\/script>/gi, '');
+  
+  // Trim excessive whitespace
+  sanitized = sanitized.replace(/\s+/g, ' ').trim();
+  
+  return sanitized;
+};
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -16,6 +42,7 @@ interface FeedbackRequest {
   category: string;
   message: string;
   currentUrl?: string;
+  csrfToken?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -27,28 +54,42 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log("Processing feedback submission...");
     
-    const { userEmail, userName, category, message, currentUrl }: FeedbackRequest = await req.json();
+    const { userEmail, userName, category, message, currentUrl, csrfToken }: FeedbackRequest = await req.json();
 
-    console.log(`Sending feedback from ${userEmail} (${userName}) - Category: ${category}`);
+    // Sanitize all inputs server-side
+    const sanitizedEmail = sanitizeInput(userEmail?.trim() || '');
+    const sanitizedUserName = sanitizeInput(userName || '');
+    const sanitizedCategory = sanitizeInput(category || '');
+    const sanitizedMessage = sanitizeInput(message || '');
+    const sanitizedUrl = sanitizeInput(currentUrl || '');
+
+    if (!sanitizedEmail || !sanitizedUserName || !sanitizedCategory || !sanitizedMessage) {
+      return new Response(
+        JSON.stringify({ error: "All fields are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`Sending feedback from ${sanitizedEmail} (${sanitizedUserName}) - Category: ${sanitizedCategory}`);
 
     // Send feedback email to support
     const emailResponse = await resend.emails.send({
       from: "Feedback <onboarding@resend.dev>",
       to: ["contact@toolio.us"],
-      replyTo: userEmail,
-      subject: `App Feedback: ${category}`,
+      replyTo: sanitizedEmail,
+      subject: `App Feedback: ${sanitizedCategory}`,
       html: `
         <h2>New App Feedback Received</h2>
         <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <p><strong>From:</strong> ${userName} (${userEmail})</p>
-          <p><strong>Category:</strong> ${category}</p>
-          ${currentUrl ? `<p><strong>Page:</strong> ${currentUrl}</p>` : ''}
+          <p><strong>From:</strong> ${sanitizedUserName} (${sanitizedEmail})</p>
+          <p><strong>Category:</strong> ${sanitizedCategory}</p>
+          ${sanitizedUrl ? `<p><strong>Page:</strong> ${sanitizedUrl}</p>` : ''}
           <p><strong>Submitted:</strong> ${new Date().toLocaleString()}</p>
         </div>
         
         <h3>Feedback Message:</h3>
         <div style="background: white; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;">
-          ${message.replace(/\n/g, '<br>')}
+          ${sanitizedMessage.replace(/\n/g, '<br>')}
         </div>
         
         <hr style="margin: 30px 0;">
@@ -63,19 +104,19 @@ const handler = async (req: Request): Promise<Response> => {
     // Send confirmation email to user
     const confirmationResponse = await resend.emails.send({
       from: "DIY Project Assistant <onboarding@resend.dev>",
-      to: [userEmail],
+      to: [sanitizedEmail],
       subject: "Thank you for your feedback!",
       html: `
-        <h2>Thank you for your feedback, ${userName}!</h2>
+        <h2>Thank you for your feedback, ${sanitizedUserName}!</h2>
         
         <p>We've received your feedback about our DIY Project Assistant app and truly appreciate you taking the time to share your thoughts with us.</p>
         
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3>Your Feedback Summary:</h3>
-          <p><strong>Category:</strong> ${category}</p>
+          <p><strong>Category:</strong> ${sanitizedCategory}</p>
           <p><strong>Message:</strong></p>
           <blockquote style="border-left: 4px solid #007bff; padding-left: 15px; margin: 10px 0; color: #555;">
-            ${message.replace(/\n/g, '<br>')}
+            ${sanitizedMessage.replace(/\n/g, '<br>')}
           </blockquote>
         </div>
         

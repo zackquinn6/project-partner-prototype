@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { checkAuthRateLimit, recordAuthAttempt } from '@/utils/securityUtils';
+import { sanitizeInput } from '@/utils/inputSanitization';
 
 interface AuthContextType {
   user: User | null;
@@ -51,10 +52,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signUp = async (email: string, password: string) => {
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeInput(email.trim().toLowerCase());
+    
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
-      email,
+      email: sanitizedEmail,
       password,
       options: {
         emailRedirectTo: redirectUrl
@@ -64,29 +68,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, password: string) => {
-    // Check rate limiting
-    if (!checkAuthRateLimit(email)) {
-      return { error: { message: 'Too many login attempts. Please try again later.' } };
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeInput(email.trim().toLowerCase());
+    
+    // Check server-side rate limiting
+    try {
+      const { data: rateLimitResult } = await supabase.functions.invoke('auth-rate-limit', {
+        body: {
+          email: sanitizedEmail,
+          action: 'check'
+        }
+      });
+      
+      if (!rateLimitResult?.allowed) {
+        return { error: { message: 'Too many login attempts. Please try again later.' } };
+      }
+    } catch (rateLimitError) {
+      console.warn('Rate limit check failed, falling back to client-side:', rateLimitError);
+      // Fallback to client-side rate limiting
+      if (!checkAuthRateLimit(sanitizedEmail)) {
+        return { error: { message: 'Too many login attempts. Please try again later.' } };
+      }
+      recordAuthAttempt(sanitizedEmail);
     }
 
-    // Record the attempt
-    recordAuthAttempt(email);
-
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: sanitizedEmail,
       password,
     });
     
-    // Log failed login attempts
+    // Log failed login attempts on server
     if (error) {
       try {
-        await supabase.rpc('log_failed_login', {
-          user_email: email,
-          ip_addr: null, // Browser can't access IP
-          user_agent_string: navigator.userAgent
+        await supabase.functions.invoke('auth-rate-limit', {
+          body: {
+            email: sanitizedEmail,
+            action: 'record_failure',
+            user_agent: navigator.userAgent
+          }
         });
       } catch (logError) {
-        console.warn('Failed to log login attempt:', logError);
+        console.warn('Failed to log login attempt on server:', logError);
+        // Fallback to client-side logging
+        try {
+          await supabase.rpc('log_failed_login', {
+            user_email: sanitizedEmail,
+            ip_addr: null,
+            user_agent_string: navigator.userAgent
+          });
+        } catch (fallbackError) {
+          console.warn('Failed to log login attempt:', fallbackError);
+        }
       }
     }
     

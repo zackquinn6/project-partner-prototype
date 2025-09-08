@@ -1141,7 +1141,19 @@ export type Database = {
         Args: { user_email: string }
         Returns: string
       }
+      check_rate_limit: {
+        Args: {
+          identifier: string
+          max_attempts?: number
+          window_minutes?: number
+        }
+        Returns: boolean
+      }
       cleanup_old_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      cleanup_security_logs: {
         Args: Record<PropertyKey, never>
         Returns: number
       }
@@ -1181,6 +1193,10 @@ export type Database = {
           user_email?: string
         }
         Returns: undefined
+      }
+      sanitize_input: {
+        Args: { input_text: string }
+        Returns: string
       }
       validate_admin_action: {
         Args: { action_type: string }

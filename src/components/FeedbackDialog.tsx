@@ -9,6 +9,7 @@ import { MessageCircle, Send, Star } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { sanitizeInput, generateCSRFToken, setCSRFToken, getCSRFToken } from '@/utils/inputSanitization';
 
 interface FeedbackDialogProps {
   open: boolean;
@@ -20,6 +21,16 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
   const [category, setCategory] = useState<string>('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [csrfToken, setCsrfToken] = useState<string>('');
+
+  // Generate CSRF token when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      const token = generateCSRFToken();
+      setCsrfToken(token);
+      setCSRFToken(token);
+    }
+  }, [open]);
 
   const categories = [
     { value: 'bug', label: 'Bug Report' },
@@ -33,13 +44,24 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!category || !message.trim()) {
+    // Sanitize inputs
+    const sanitizedMessage = sanitizeInput(message.trim());
+    const sanitizedCategory = sanitizeInput(category);
+    
+    if (!sanitizedCategory || !sanitizedMessage) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     if (!user?.email) {
       toast.error('Please sign in to submit feedback');
+      return;
+    }
+
+    // Validate CSRF token
+    const storedToken = getCSRFToken();
+    if (!storedToken || storedToken !== csrfToken) {
+      toast.error('Security validation failed. Please try again.');
       return;
     }
 
@@ -58,10 +80,11 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
       const { data, error } = await supabase.functions.invoke('send-feedback', {
         body: {
           userEmail: user.email,
-          userName,
-          category: categories.find(c => c.value === category)?.label || category,
-          message,
-          currentUrl: window.location.href
+          userName: sanitizeInput(userName),
+          category: categories.find(c => c.value === sanitizedCategory)?.label || sanitizedCategory,
+          message: sanitizedMessage,
+          currentUrl: window.location.href,
+          csrfToken
         }
       });
 
