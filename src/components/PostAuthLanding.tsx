@@ -210,27 +210,19 @@ Pick up where you left off or start your next winning project.</p>
           </div>
         </div>
 
-        {/* My Apps - App Icons Grid (3x2) */}
+        {/* My Apps - App Icons Grid (4x2) */}
         <div className="mb-8 md:mb-12 px-4 md:px-0">
-          <div className="max-w-lg mx-auto">
-            {/* First Row - My Work */}
-            <div className="grid grid-cols-5 gap-6 justify-items-center mb-8">
-              {myWorkActions.map((action, index) => <div key={index} className="flex flex-col items-center cursor-pointer group" onClick={action.action}>
+          <div className="max-w-2xl mx-auto">
+            {/* Responsive 4x2 Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 justify-items-center">
+              {[...myWorkActions, ...exploreActions, ...accountActions].map((action, index) => (
+                <div key={index} className="flex flex-col items-center cursor-pointer group" onClick={action.action}>
                   <div className={`w-14 h-14 md:w-16 md:h-16 ${action.color} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-110 transition-all duration-300 shadow-sm group-hover:shadow-md`}>
-                    <action.icon className={`h-7 w-7 md:h-8 md:w-8 ${action.textColor}`} />
+                    <action.icon className={`h-6 w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 ${action.textColor}`} />
                   </div>
-                  <span className="text-xs text-muted-foreground text-center leading-tight w-20 group-hover:text-foreground transition-colors whitespace-normal">{action.title}</span>
-                </div>)}
-            </div>
-            
-            {/* Second Row - Explore & Account */}
-            <div className="grid grid-cols-3 gap-8 justify-items-center">
-              {[...exploreActions, ...accountActions].map((action, index) => <div key={index} className="flex flex-col items-center cursor-pointer group" onClick={action.action}>
-                  <div className={`w-14 h-14 md:w-16 md:h-16 ${action.color} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-110 transition-all duration-300 shadow-sm group-hover:shadow-md`}>
-                    <action.icon className={`h-7 w-7 md:h-8 md:w-8 ${action.textColor}`} />
-                  </div>
-                  <span className="text-xs text-muted-foreground text-center leading-tight w-20 group-hover:text-foreground transition-colors whitespace-normal">{action.title}</span>
-                </div>)}
+                  <span className="text-xs text-muted-foreground text-center leading-tight w-16 sm:w-20 group-hover:text-foreground transition-colors whitespace-normal">{action.title}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
