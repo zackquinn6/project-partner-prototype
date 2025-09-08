@@ -14,6 +14,7 @@ import { AddMaintenanceTaskDialog } from './AddMaintenanceTaskDialog';
 import { TaskCompletionDialog } from './TaskCompletionDialog';
 import { MaintenanceHistoryTab } from './MaintenanceHistoryTab';
 import { MaintenancePdfPrinter } from './MaintenancePdfPrinter';
+import { MaintenanceNotifications } from './MaintenanceNotifications';
 interface MaintenanceTask {
   id: string;
   user_id: string;

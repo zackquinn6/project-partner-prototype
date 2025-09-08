@@ -186,7 +186,9 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
       
       const withinRadius = center.distance <= parseInt(radius);
       
-      const matchesToolType = (generalTools && center.hasGeneralTools) || 
+      // Fix tool type filter logic: if no filters selected, show all; otherwise show centers that match at least one selected filter
+      const matchesToolType = (!generalTools && !heavyEquipment) || 
+                             (generalTools && center.hasGeneralTools) || 
                              (heavyEquipment && center.hasHeavyEquipment);
       
       return matchesLocation && withinRadius && matchesToolType;
