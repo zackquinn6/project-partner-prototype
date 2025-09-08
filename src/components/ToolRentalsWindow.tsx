@@ -22,13 +22,13 @@ export const ToolRentalsWindow = ({ isOpen, onClose }: ToolRentalsWindowProps) =
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wrench className="h-6 w-6 text-primary" />
-            Tool Rentals
+            Tool Access
           </DialogTitle>
         </DialogHeader>
         
         <Tabs defaultValue="finder" className="w-full h-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="finder">Tool Rental Finder</TabsTrigger>
+            <TabsTrigger value="finder">Tool Access Finder</TabsTrigger>
             <TabsTrigger value="toolio">Toolio (Boston, MA)</TabsTrigger>
           </TabsList>
           

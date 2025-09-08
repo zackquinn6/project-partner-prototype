@@ -160,7 +160,7 @@ export default function Home({ onViewChange }: HomeProps) {
                 <div className="w-20 h-20 bg-orange-500 rounded-3xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-lg">
                   <Hammer className="w-10 h-10 text-white" />
                 </div>
-                <span className="text-sm font-medium text-orange-600">Tool Rentals</span>
+                <span className="text-sm font-medium text-orange-600">Tool Access</span>
               </div>
               
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => navigate('/projects')}>

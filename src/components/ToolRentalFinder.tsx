@@ -5,26 +5,30 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Phone, ExternalLink, Search, Filter } from 'lucide-react';
+import { MapPin, Phone, ExternalLink, Search, Filter, Star } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 
-interface RentalCenter {
+interface AccessCenter {
   id: string;
   name: string;
   address: string;
   city: string;
   state: string;
-  zipCode: string;
-  phone: string;
+  phone?: string;
   website?: string;
   distance: number;
-  rating: number;
+  cost: number; // 1-5 scale
+  quality: number; // 1-5 scale
+  options: number; // 1-5 scale (scope of tools/options available)
+  internetRating: number; // 1-5 scale
   hasGeneralTools: boolean;
   hasHeavyEquipment: boolean;
   isLibrary: boolean;
   isMakerspace: boolean;
   isRentalApp: boolean;
-  priceRange: 'budget' | 'mid' | 'premium';
+  isRentalCenter: boolean;
+  isRetailer: boolean;
+  type: 'rental_center' | 'retailer' | 'library' | 'makerspace' | 'rental_app';
 }
 
 interface ToolRentalFinderProps {
@@ -33,298 +37,199 @@ interface ToolRentalFinderProps {
 
 export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [radius, setRadius] = useState('25');
+  const [radius, setRadius] = useState('20');
   const [generalTools, setGeneralTools] = useState(true);
-  const [heavyEquipment, setHeavyEquipment] = useState(true);
+  const [heavyEquipment, setHeavyEquipment] = useState(false);
   const [libraries, setLibraries] = useState(true);
   const [makerspaces, setMakerspaces] = useState(true);
   const [rentalApps, setRentalApps] = useState(true);
-  const [rentalCenters, setRentalCenters] = useState<RentalCenter[]>([]);
+  const [rentalCenters, setRentalCenters] = useState(true);
+  const [retailers, setRetailers] = useState(true);
+  const [accessCenters, setAccessCenters] = useState<AccessCenter[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  // Mock data for demonstration - in real implementation, this would come from an API
-  const mockRentalCenters: RentalCenter[] = [
-    {
-      id: '1',
-      name: 'Home Depot Tool Rental',
-      address: '123 Main St',
-      city: 'Boston',
-      state: 'MA',
-      zipCode: '02101',
-      phone: '(617) 555-0123',
-      website: 'https://homedepot.com/toolrental',
-      distance: 2.3,
-      rating: 4.2,
-      hasGeneralTools: true,
-      hasHeavyEquipment: true,
-      isLibrary: false,
-      isMakerspace: false,
-      isRentalApp: false,
-      priceRange: 'mid'
-    },
-    {
-      id: '2',
-      name: 'United Rentals',
-      address: '456 Industrial Ave',
-      city: 'Cambridge',
-      state: 'MA',
-      zipCode: '02139',
-      phone: '(617) 555-0456',
-      website: 'https://unitedrentals.com',
-      distance: 3.7,
-      rating: 4.5,
-      hasGeneralTools: true,
-      hasHeavyEquipment: true,
-      isLibrary: false,
-      isMakerspace: false,
-      isRentalApp: false,
-      priceRange: 'premium'
-    },
-    {
-      id: '3',
-      name: 'Local Tool Supply',
-      address: '789 Workshop Rd',
-      city: 'Somerville',
-      state: 'MA',
-      zipCode: '02143',
-      phone: '(617) 555-0789',
-      distance: 4.1,
-      rating: 4.0,
-      hasGeneralTools: true,
-      hasHeavyEquipment: false,
-      isLibrary: false,
-      isMakerspace: false,
-      isRentalApp: false,
-      priceRange: 'budget'
-    },
-    {
-      id: '4',
-      name: 'Pro Equipment Rental',
-      address: '321 Commerce St',
-      city: 'Brookline',
-      state: 'MA',
-      zipCode: '02446',
-      phone: '(617) 555-0321',
-      website: 'https://proequipment.com',
-      distance: 5.2,
-      rating: 4.7,
-      hasGeneralTools: true,
-      hasHeavyEquipment: true,
-      isLibrary: false,
-      isMakerspace: false,
-      isRentalApp: false,
-      priceRange: 'premium'
-    },
-    {
-      id: '5',
-      name: 'Budget Tools & More',
-      address: '654 Thrifty Lane',
-      city: 'Newton',
-      state: 'MA',
-      zipCode: '02458',
-      phone: '(617) 555-0654',
-      distance: 8.9,
-      rating: 3.8,
-      hasGeneralTools: true,
-      hasHeavyEquipment: false,
-      isLibrary: false,
-      isMakerspace: false,
-      isRentalApp: false,
-      priceRange: 'budget'
-    },
-    {
-      id: '6',
-      name: 'Boston Public Library - Maker Lab',
-      address: '700 Boylston St',
-      city: 'Boston',
-      state: 'MA',
-      zipCode: '02116',
-      phone: '(617) 536-5400',
-      website: 'https://bpl.org/makerlab',
-      distance: 1.5,
-      rating: 4.6,
-      hasGeneralTools: true,
-      hasHeavyEquipment: false,
-      isLibrary: true,
-      isMakerspace: false,
-      isRentalApp: false,
-      priceRange: 'budget'
-    },
-    {
-      id: '7',
-      name: 'Cambridge Public Library Tool Library',
-      address: '449 Broadway',
-      city: 'Cambridge',
-      state: 'MA',
-      zipCode: '02138',
-      phone: '(617) 349-4040',
-      website: 'https://cambridgema.gov/cpl/toollibrary',
-      distance: 3.2,
-      rating: 4.8,
-      hasGeneralTools: true,
-      hasHeavyEquipment: false,
-      isLibrary: true,
-      isMakerspace: false,
-      isRentalApp: false,
-      priceRange: 'budget'
-    },
-    {
-      id: '8',
-      name: 'Artisan\'s Asylum Makerspace',
-      address: '10 Tyler St',
-      city: 'Somerville',
-      state: 'MA',
-      zipCode: '02143',
-      phone: '(617) 284-6800',
-      website: 'https://artisansasylum.com',
-      distance: 4.8,
-      rating: 4.4,
-      hasGeneralTools: true,
-      hasHeavyEquipment: true,
-      isLibrary: false,
-      isMakerspace: true,
-      isRentalApp: false,
-      priceRange: 'mid'
-    },
-    {
-      id: '9',
-      name: 'MakeIt Labs',
-      address: '256 Marginal St',
-      city: 'Chelsea',
-      state: 'MA',
-      zipCode: '02150',
-      phone: '(617) 555-9876',
-      website: 'https://makeitlabs.com',
-      distance: 6.1,
-      rating: 4.5,
-      hasGeneralTools: true,
-      hasHeavyEquipment: false,
-      isLibrary: false,
-      isMakerspace: true,
-      isRentalApp: false,
-      priceRange: 'mid'
-    },
-    {
-      id: '10',
-      name: 'NYC Tool Rental Hub',
-      address: '100 Broadway',
-      city: 'New York',
-      state: 'NY',
-      zipCode: '10038',
-      phone: '(212) 555-0100',
-      website: 'https://nyctoolrental.com',
-      distance: 15.2,
-      rating: 4.3,
-      hasGeneralTools: true,
-      hasHeavyEquipment: true,
-      isLibrary: false,
-      isMakerspace: false,
-      isRentalApp: false,
-      priceRange: 'mid'
-    },
-    {
-      id: '11',
-      name: 'ShareShed App',
-      address: 'Peer-to-peer network',
-      city: 'Boston',
-      state: 'MA',
-      zipCode: '02101',
-      phone: 'App-based',
-      website: 'https://shareshed.com',
-      distance: 0.5,
-      rating: 4.2,
-      hasGeneralTools: true,
-      hasHeavyEquipment: false,
-      isLibrary: false,
-      isMakerspace: false,
-      isRentalApp: true,
-      priceRange: 'budget'
-    },
-    {
-      id: '12',
-      name: 'ToolShare Boston',
-      address: 'Community network',
-      city: 'Boston',
-      state: 'MA',
-      zipCode: '02116',
-      phone: 'App messaging',
-      website: 'https://toolshare.boston',
-      distance: 1.0,
-      rating: 4.0,
-      hasGeneralTools: true,
-      hasHeavyEquipment: true,
-      isLibrary: false,
-      isMakerspace: false,
-      isRentalApp: true,
-      priceRange: 'budget'
-    }
-  ];
-
   useEffect(() => {
     if (debouncedSearchQuery.length >= 2) {
       performSearch();
     } else if (debouncedSearchQuery.length === 0) {
-      setRentalCenters([]);
+      setAccessCenters([]);
       setHasSearched(false);
     }
-  }, [debouncedSearchQuery, radius, generalTools, heavyEquipment, libraries, makerspaces, rentalApps]);
+  }, [debouncedSearchQuery, radius, generalTools, heavyEquipment, libraries, makerspaces, rentalApps, rentalCenters, retailers]);
 
   const performSearch = async () => {
     setLoading(true);
     setHasSearched(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Filter mock data based on criteria
-    let filteredCenters = mockRentalCenters.filter(center => {
-      const query = debouncedSearchQuery.toLowerCase();
-      const matchesLocation = center.city.toLowerCase().includes(query) ||
-                             center.state.toLowerCase().includes(query) ||
-                             center.zipCode.includes(debouncedSearchQuery) ||
-                             center.name.toLowerCase().includes(query);
-      
-      const withinRadius = center.distance <= parseInt(radius);
-      
-      // Tool type filter logic
-      const matchesToolType = (generalTools && center.hasGeneralTools) || 
-                             (heavyEquipment && center.hasHeavyEquipment);
-      
-      // Location type filter logic
-      const matchesLocationType = (libraries && center.isLibrary) ||
-                                 (makerspaces && center.isMakerspace) ||
-                                 (rentalApps && center.isRentalApp) ||
-                                 (!libraries && !makerspaces && !rentalApps && !center.isLibrary && !center.isMakerspace && !center.isRentalApp) ||
-                                 (!center.isLibrary && !center.isMakerspace && !center.isRentalApp);
-      
-      return matchesLocation && withinRadius && matchesToolType && matchesLocationType;
-    });
+    try {
+      // Create mock results with enhanced rating system for demo
+      const mockResults: AccessCenter[] = [
+        {
+          id: 'home-depot-1',
+          name: 'Home Depot Tool Rental',
+          address: '123 Main St',
+          city: debouncedSearchQuery.split(',')[0] || debouncedSearchQuery,
+          state: debouncedSearchQuery.split(',')[1]?.trim() || 'MA',
+          phone: '(617) 555-0123',
+          website: 'https://homedepot.com/toolrental',
+          distance: 2.3,
+          cost: 3,
+          quality: 4,
+          options: 4,
+          internetRating: 4,
+          hasGeneralTools: true,
+          hasHeavyEquipment: true,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: true,
+          isRetailer: true,
+          type: 'rental_center'
+        },
+        {
+          id: 'lowes-1',
+          name: 'Lowe\'s Tool Rental',
+          address: '456 Oak Ave',
+          city: debouncedSearchQuery.split(',')[0] || debouncedSearchQuery,
+          state: debouncedSearchQuery.split(',')[1]?.trim() || 'MA',
+          phone: '(617) 555-0456',
+          website: 'https://lowes.com/toolrental',
+          distance: 3.1,
+          cost: 3,
+          quality: 4,
+          options: 4,
+          internetRating: 4,
+          hasGeneralTools: true,
+          hasHeavyEquipment: true,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: true,
+          isRetailer: true,
+          type: 'retailer'
+        },
+        {
+          id: 'united-rentals-1',
+          name: 'United Rentals',
+          address: '789 Industrial Blvd',
+          city: debouncedSearchQuery.split(',')[0] || debouncedSearchQuery,
+          state: debouncedSearchQuery.split(',')[1]?.trim() || 'MA',
+          phone: '(617) 555-0789',
+          website: 'https://unitedrentals.com',
+          distance: 4.5,
+          cost: 4,
+          quality: 5,
+          options: 5,
+          internetRating: 4,
+          hasGeneralTools: true,
+          hasHeavyEquipment: true,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: true,
+          isRetailer: false,
+          type: 'rental_center'
+        },
+        {
+          id: 'library-1',
+          name: 'Public Library Tool Library',
+          address: '100 Library St',
+          city: debouncedSearchQuery.split(',')[0] || debouncedSearchQuery,
+          state: debouncedSearchQuery.split(',')[1]?.trim() || 'MA',
+          phone: '(617) 555-0100',
+          website: 'https://library.org/tools',
+          distance: 1.5,
+          cost: 1,
+          quality: 3,
+          options: 3,
+          internetRating: 4,
+          hasGeneralTools: true,
+          hasHeavyEquipment: false,
+          isLibrary: true,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: false,
+          isRetailer: false,
+          type: 'library'
+        },
+        {
+          id: 'makerspace-1',
+          name: 'Community Makerspace',
+          address: '200 Workshop Way',
+          city: debouncedSearchQuery.split(',')[0] || debouncedSearchQuery,
+          state: debouncedSearchQuery.split(',')[1]?.trim() || 'MA',
+          phone: '(617) 555-0200',
+          website: 'https://makerspace.com',
+          distance: 6.2,
+          cost: 2,
+          quality: 4,
+          options: 4,
+          internetRating: 4,
+          hasGeneralTools: true,
+          hasHeavyEquipment: false,
+          isLibrary: false,
+          isMakerspace: true,
+          isRentalApp: false,
+          isRentalCenter: false,
+          isRetailer: false,
+          type: 'makerspace'
+        }
+      ];
 
-    // Sort by distance
-    filteredCenters.sort((a, b) => a.distance - b.distance);
+      // Filter results based on selected criteria
+      const filteredResults = mockResults.filter(center => {
+        const withinRadius = center.distance <= parseInt(radius);
+        const matchesToolType = (generalTools && center.hasGeneralTools) || 
+                               (heavyEquipment && center.hasHeavyEquipment);
+        const matchesAccessType = (rentalCenters && center.isRentalCenter) ||
+                                 (retailers && center.isRetailer) ||
+                                 (libraries && center.isLibrary) ||
+                                 (makerspaces && center.isMakerspace) ||
+                                 (rentalApps && center.isRentalApp);
+        
+        return withinRadius && matchesToolType && matchesAccessType;
+      }).sort((a, b) => a.distance - b.distance);
+
+      setAccessCenters(filteredResults);
+    } catch (error) {
+      console.error('Error performing search:', error);
+      setAccessCenters([]);
+    }
     
-    setRentalCenters(filteredCenters);
     setLoading(false);
   };
 
-  const getPriceRangeColor = (priceRange: string) => {
-    switch (priceRange) {
-      case 'budget': return 'text-green-600';
-      case 'mid': return 'text-yellow-600';
-      case 'premium': return 'text-red-600';
-      default: return 'text-gray-600';
+  const getStarRating = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`h-4 w-4 ${i < rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`}
+      />
+    ));
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'rental_center': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'retailer': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'library': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'makerspace': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'rental_app': return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
-  const getPriceRangeLabel = (priceRange: string) => {
-    switch (priceRange) {
-      case 'budget': return '$';
-      case 'mid': return '$$';
-      case 'premium': return '$$$';
-      default: return '$';
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'rental_center': return 'Rental Center';
+      case 'retailer': return 'Retailer';
+      case 'library': return 'Library';
+      case 'makerspace': return 'Makerspace';
+      case 'rental_app': return 'Rental App';
+      default: return 'Tool Access';
     }
   };
 
@@ -335,7 +240,7 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Tool Access & Rental Finder
+            Tool Access Finder
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -409,6 +314,26 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <Checkbox
+                    id="rental-centers"
+                    checked={rentalCenters}
+                    onCheckedChange={(checked) => setRentalCenters(checked === true)}
+                  />
+                  <label htmlFor="rental-centers" className="text-sm">
+                    Rental Centers
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="retailers"
+                    checked={retailers}
+                    onCheckedChange={(checked) => setRetailers(checked === true)}
+                  />
+                  <label htmlFor="retailers" className="text-sm">
+                    Retailers
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
                     id="libraries"
                     checked={libraries}
                     onCheckedChange={(checked) => setLibraries(checked === true)}
@@ -448,15 +373,15 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
         {loading && (
           <div className="text-center py-8">
             <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-            <p className="text-muted-foreground">Searching for rental centers...</p>
+            <p className="text-muted-foreground">Searching for tool access locations...</p>
           </div>
         )}
 
-        {!loading && hasSearched && rentalCenters.length === 0 && (
+        {!loading && hasSearched && accessCenters.length === 0 && (
           <Card>
             <CardContent className="py-8 text-center">
               <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No rental centers found</h3>
+              <h3 className="text-lg font-medium mb-2">No tool access locations found</h3>
               <p className="text-muted-foreground">
                 Try expanding your search radius or adjusting your filters.
               </p>
@@ -464,102 +389,101 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
           </Card>
         )}
 
-        {!loading && rentalCenters.length > 0 && (
+        {!loading && accessCenters.length > 0 && (
           <>
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium">
-                Found {rentalCenters.length} rental center{rentalCenters.length !== 1 ? 's' : ''}
+                Found {accessCenters.length} tool access location{accessCenters.length !== 1 ? 's' : ''}
               </h3>
               <Badge variant="outline" className="text-xs">
                 Within {radius} miles
               </Badge>
             </div>
 
-            {rentalCenters.map((center) => (
-              <Card key={center.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h4 className="font-semibold text-lg">{center.name}</h4>
-                      <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                        <MapPin className="h-4 w-4" />
-                        <span>{center.address}, {center.city}, {center.state}</span>
-                        <Badge variant="secondary" className="ml-2">
-                          {center.distance} mi
-                        </Badge>
+            {/* Results Grid */}
+            <div className="space-y-4">
+              {accessCenters.map((center) => (
+                <Card key={center.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold text-lg">{center.name}</h4>
+                          <Badge className={`text-xs ${getTypeColor(center.type)}`}>
+                            {getTypeLabel(center.type)}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
+                          <MapPin className="h-4 w-4" />
+                          <span>{center.address}, {center.city}, {center.state}</span>
+                          <Badge variant="secondary" className="ml-2">
+                            {center.distance.toFixed(1)} mi
+                          </Badge>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="flex items-center gap-1 mb-1">
-                        <span className="text-yellow-500">★</span>
-                        <span className="text-sm font-medium">{center.rating}</span>
+
+                    {/* Rating Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                      <div className="text-center">
+                        <div className="text-xs text-muted-foreground mb-1">Cost</div>
+                        <div className="flex justify-center">
+                          {getStarRating(center.cost)}
+                        </div>
                       </div>
-                      <span className={`text-lg font-bold ${getPriceRangeColor(center.priceRange)}`}>
-                        {getPriceRangeLabel(center.priceRange)}
-                      </span>
+                      <div className="text-center">
+                        <div className="text-xs text-muted-foreground mb-1">Quality</div>
+                        <div className="flex justify-center">
+                          {getStarRating(center.quality)}
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs text-muted-foreground mb-1">Options/Scope</div>
+                        <div className="flex justify-center">
+                          {getStarRating(center.options)}
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs text-muted-foreground mb-1">Internet Rating</div>
+                        <div className="flex justify-center">
+                          {getStarRating(center.internetRating)}
+                        </div>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Available Tool Types */}
-                  <div className="flex gap-2 mb-3">
-                    {center.hasGeneralTools && (
-                      <Badge variant="outline" className="text-xs">
-                        General Tools
-                      </Badge>
-                    )}
-                    {center.hasHeavyEquipment && (
-                      <Badge variant="outline" className="text-xs">
-                        Heavy Equipment
-                      </Badge>
-                    )}
-                    {center.isLibrary && (
-                      <Badge variant="secondary" className="text-xs">
-                        Library
-                      </Badge>
-                    )}
-                    {center.isMakerspace && (
-                      <Badge variant="secondary" className="text-xs">
-                        Makerspace
-                      </Badge>
-                    )}
-                    {center.isRentalApp && (
-                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-800">
-                        Rental App
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Phone className="h-4 w-4 mr-2" />
-                      {center.phone}
-                    </Button>
-                    {center.website && (
-                      <Button 
-                        variant="default" 
-                        size="sm" 
-                        className="flex-1"
-                        onClick={() => window.open(center.website, '_blank')}
-                      >
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Visit Website
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 flex-wrap">
+                      {center.phone && (
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={`tel:${center.phone}`} className="flex items-center gap-2">
+                            <Phone className="h-4 w-4" />
+                            Call
+                          </a>
+                        </Button>
+                      )}
+                      {center.website && (
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={center.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                            <ExternalLink className="h-4 w-4" />
+                            Visit Website
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </>
         )}
 
-        {!hasSearched && (
-          <Card className="border-dashed">
-            <CardContent className="py-12 text-center">
+        {!hasSearched && !loading && (
+          <Card>
+            <CardContent className="py-8 text-center">
               <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">Find Tool Access & Rental Centers</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Enter your location (city, state, or ZIP code) above to find tool access & rental centers near you.
+              <h3 className="text-lg font-medium mb-2">Find Tool Access Locations</h3>
+              <p className="text-muted-foreground">
+                Enter a location to search for rental centers, retailers, libraries, makerspaces, and rental apps near you.
               </p>
             </CardContent>
           </Card>
