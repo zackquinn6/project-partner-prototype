@@ -10,6 +10,7 @@ import { FeatureRoadmapWindow } from './FeatureRoadmapWindow';
 import { HomeManager } from './HomeManager';
 import { ToolsMaterialsWindow } from './ToolsMaterialsWindow';
 import { UserToolsMaterialsWindow } from './UserToolsMaterialsWindow';
+import { ToolsMaterialsLibraryView } from './ToolsMaterialsLibraryView';
 import { HomeMaintenanceWindow } from './HomeMaintenanceWindow';
 
 interface NavigationProps {
@@ -33,6 +34,7 @@ export default function Navigation({
   const [isHomeManagerOpen, setIsHomeManagerOpen] = useState(false);
   const [isToolsLibraryOpen, setIsToolsLibraryOpen] = useState(false);
   const [isUserToolsLibraryOpen, setIsUserToolsLibraryOpen] = useState(false);
+  const [isNewToolsLibraryOpen, setIsNewToolsLibraryOpen] = useState(false);
   const [isHomeMaintenanceOpen, setIsHomeMaintenanceOpen] = useState(false);
   
   // Add error boundary for useProject hook
@@ -68,7 +70,7 @@ export default function Navigation({
     const handleUserToolsLibraryEvent = (event: Event) => {
       console.log('🔧 Navigation: User tools library event received');
       event.stopPropagation();
-      setIsUserToolsLibraryOpen(true);
+      setIsNewToolsLibraryOpen(true);
     };
 
     const handleHomeMaintenanceEvent = (event: Event) => {
@@ -229,6 +231,7 @@ export default function Navigation({
       />
       <ToolsMaterialsWindow open={isToolsLibraryOpen} onOpenChange={setIsToolsLibraryOpen} />
       <UserToolsMaterialsWindow open={isUserToolsLibraryOpen} onOpenChange={setIsUserToolsLibraryOpen} />
+      <ToolsMaterialsLibraryView open={isNewToolsLibraryOpen} onOpenChange={setIsNewToolsLibraryOpen} />
       <HomeMaintenanceWindow open={isHomeMaintenanceOpen} onOpenChange={setIsHomeMaintenanceOpen} />
     </>
   );

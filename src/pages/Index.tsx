@@ -23,7 +23,7 @@ const Index = () => {
   const { setCurrentProject, setCurrentProjectRun, currentProject, currentProjectRun } = useProject();
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user' | 'editWorkflow'>('user'); // Default to 'user' for authenticated users
+  const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user' | 'editWorkflow'>('home'); // Default to 'home' for authenticated users
   const [resetUserView, setResetUserView] = useState(false);
   const [forceListingMode, setForceListingMode] = useState(false);
   const [showHelpPopup, setShowHelpPopup] = useState(false);
@@ -71,12 +71,18 @@ const Index = () => {
       setCurrentView('user');
     };
 
+    const handleAdminPanelNavigation = () => {
+      console.log('🛡️ Index: Admin Panel navigation received');
+      handleAdminAccess();
+    };
+
     window.addEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
     window.addEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
     window.addEventListener('navigate-to-projects', handleProjectsNavigation);
     window.addEventListener('show-profile', handleProfileNavigation);
     window.addEventListener('show-help-popup', handleShowHelpPopup);
     window.addEventListener('show-tools-materials', handleToolLibraryNavigation);
+    window.addEventListener('show-admin-panel', handleAdminPanelNavigation);
     
     return () => {
       window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
@@ -85,6 +91,7 @@ const Index = () => {
       window.removeEventListener('navigate-to-projects', handleProjectsNavigation);
       window.removeEventListener('show-profile', handleProfileNavigation);
       window.removeEventListener('show-tools-materials', handleToolLibraryNavigation);
+      window.removeEventListener('show-admin-panel', handleAdminPanelNavigation);
     };
   }, [navigate]);
 

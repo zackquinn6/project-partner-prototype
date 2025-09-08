@@ -306,7 +306,7 @@ export function UserToolsEditor() {
 
               <div className="flex items-center gap-3">
                 <div className="flex-1">
-                  <Label>Your Photo</Label>
+                  <Label>Item Photo</Label>
                   <div className="flex items-center gap-2 mt-1">
                     <input
                       type="file"
