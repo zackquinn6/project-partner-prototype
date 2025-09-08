@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Play, Trash2, Plus, User, Wrench, Home, Users, Zap, Folder, Calculator, HelpCircle } from "lucide-react";
+import { Play, Trash2, Plus, User, Wrench, Home, Users, Zap, Folder, Calculator, HelpCircle, Hammer, BookOpen, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProject } from '@/contexts/ProjectContext';
 import { Project } from '@/interfaces/Project';
@@ -77,119 +77,109 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
   return (
     <div className="container mx-auto px-6 py-8 space-y-6">
       
-      <Card className="gradient-card border-0 shadow-card">
-        <CardHeader>
-          <div>
-            <CardTitle className="text-2xl">My Apps</CardTitle>
-            <CardDescription>
-              Access all your home management tools
-            </CardDescription>
+      {/* DIY Dashboard */}
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold text-foreground mb-4">Your DIY Homepage</h1>
+        <p className="text-lg text-muted-foreground mb-6">
+          Your DIY journey continues here. Pick up where you left off or start your next winning project.
+        </p>
+        
+        {/* Stats */}
+        <div className="flex justify-center gap-8 mb-8">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-sm">1</span>
+            </div>
+            <span className="text-muted-foreground">Active Projects</span>
           </div>
-        </CardHeader>
-        <CardContent>
-          {/* App Cards Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <Button 
-              variant="outline"
-              onClick={() => onProjectSelect?.(null)}
-              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 hover:from-slate-100 hover:to-slate-200"
-            >
-              <div className="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center">
-                <Folder className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm text-slate-800 font-medium">My Projects</span>
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={() => window.dispatchEvent(new CustomEvent('show-user-tools-materials'))}
-              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:from-blue-100 hover:to-blue-200"
-            >
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                <Calculator className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm text-blue-800 font-medium">Rapid Plan</span>
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={() => setShowHomeManager(true)}
-              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:from-green-100 hover:to-green-200"
-            >
-              <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
-                <Home className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm text-green-800 font-medium">My Home Maintenance</span>
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={() => setShowToolsLibrary(true)}
-              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 hover:from-slate-100 hover:to-slate-200"
-            >
-              <div className="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center">
-                <Wrench className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm text-slate-800 font-medium">My Tool Library</span>
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={() => window.dispatchEvent(new CustomEvent('show-tools-materials'))}
-              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:from-orange-100 hover:to-orange-200"
-            >
-              <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center">
-                <Wrench className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm text-orange-800 font-medium">Tool Rentals</span>
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={() => navigate('/projects')}
-              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:from-orange-100 hover:to-orange-200"
-            >
-              <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center">
-                <Plus className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm text-orange-800 font-medium">New Project Catalog</span>
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={() => window.dispatchEvent(new CustomEvent('show-help-popup'))}
-              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:from-green-100 hover:to-green-200"
-            >
-              <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
-                <HelpCircle className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm text-green-800 font-medium">Expert Help</span>
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={() => setShowProfileManager(true)}
-              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 hover:from-gray-100 hover:to-gray-200"
-            >
-              <div className="w-10 h-10 bg-gray-600 rounded-xl flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm text-gray-800 font-medium">My Profile</span>
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={() => setShowCommunityPosts(true)}
-              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:from-purple-100 hover:to-purple-200"
-            >
-              <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
-                <Users className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm text-purple-800 font-medium">Community</span>
-            </Button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+              <span className="text-muted-foreground font-bold text-sm">0</span>
+            </div>
+            <span className="text-muted-foreground">Completed</span>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-sm">2</span>
+            </div>
+            <span className="text-muted-foreground">Hours Saved</span>
+          </div>
+        </div>
+        
+        {/* Apps Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 max-w-4xl mx-auto mb-8">
+          <div className="flex flex-col items-center group cursor-pointer" onClick={() => onProjectSelect?.(null)}>
+            <div className="w-16 h-16 bg-slate-700 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-lg">
+              <Folder className="w-8 h-8 text-white" />
+            </div>
+            <span className="text-sm font-medium text-slate-800">My Projects</span>
+          </div>
+          
+          <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-user-tools-materials'))}>
+            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-lg">
+              <Calculator className="w-8 h-8 text-white" />
+            </div>
+            <span className="text-sm font-medium text-blue-800">Rapid Assessment</span>
+          </div>
+          
+          <div className="flex flex-col items-center group cursor-pointer" onClick={() => setShowHomeManager(true)}>
+            <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-lg">
+              <Home className="w-8 h-8 text-white" />
+            </div>
+            <span className="text-sm font-medium text-green-800">My Home Maintenance</span>
+          </div>
+          
+          <div className="flex flex-col items-center group cursor-pointer" onClick={() => setShowToolsLibrary(true)}>
+            <div className="w-16 h-16 bg-slate-700 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-lg">
+              <Wrench className="w-8 h-8 text-white" />
+            </div>
+            <span className="text-sm font-medium text-slate-800">My Tool Library</span>
+          </div>
+          
+          <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-tools-materials'))}>
+            <div className="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-lg">
+              <Hammer className="w-8 h-8 text-white" />
+            </div>
+            <span className="text-sm font-medium text-orange-800">Tool Rentals</span>
+          </div>
+          
+          <div className="flex flex-col items-center group cursor-pointer" onClick={() => navigate('/projects')}>
+            <div className="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-lg">
+              <BookOpen className="w-8 h-8 text-white" />
+            </div>
+            <span className="text-sm font-medium text-orange-800">New Project Catalog</span>
+          </div>
+          
+          <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-help-popup'))}>
+            <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-lg">
+              <HelpCircle className="w-8 h-8 text-white" />
+            </div>
+            <span className="text-sm font-medium text-green-800">Expert Help</span>
+          </div>
+          
+          <div className="flex flex-col items-center group cursor-pointer" onClick={() => setShowProfileManager(true)}>
+            <div className="w-16 h-16 bg-gray-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-lg">
+              <User className="w-8 h-8 text-white" />
+            </div>
+            <span className="text-sm font-medium text-gray-800">My Profile</span>
+          </div>
+          
+          <div className="flex flex-col items-center group cursor-pointer" onClick={() => setShowCommunityPosts(true)}>
+            <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-lg">
+              <Users className="w-8 h-8 text-white" />
+            </div>
+            <span className="text-sm font-medium text-purple-800">Community</span>
+          </div>
+          
+          <div className="flex flex-col items-center group cursor-pointer" onClick={() => setShowHomeManager(true)}>
+            <div className="w-16 h-16 bg-slate-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-lg">
+              <MapPin className="w-8 h-8 text-white" />
+            </div>
+            <span className="text-sm font-medium text-slate-800">My Homes</span>
+          </div>
+        </div>
+      </div>
+      
       <Card className="gradient-card border-0 shadow-card">
         <CardHeader>
           <div>

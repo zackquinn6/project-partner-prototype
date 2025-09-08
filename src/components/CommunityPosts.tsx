@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ExternalLink, Search, Users, Star, MessageSquare, Video, TrendingUp } from 'lucide-react';
 
 interface CommunityPost {
@@ -383,76 +384,78 @@ export function CommunityPosts() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredCommunities.map((community) => (
-          <Card key={community.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <span className="text-lg">{getPlatformIcon(community.platform)}</span>
-                    {community.name}
-                  </CardTitle>
-                  <div className="flex items-center gap-2 mt-2">
+      <Card>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Community Name</TableHead>
+                <TableHead>Platform</TableHead>
+                <TableHead>Focus Topics</TableHead>
+                <TableHead>Members</TableHead>
+                <TableHead>Popularity</TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredCommunities.map((community) => (
+                <TableRow key={community.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{getPlatformIcon(community.platform)}</span>
+                      <div>
+                        <div className="font-medium">{community.name}</div>
+                        <div className="text-sm text-muted-foreground line-clamp-2">{community.description}</div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
                     <Badge className={getPlatformColor(community.platform)}>
                       {community.platform}
                     </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {community.type}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="flex items-center gap-1">
-                    <TrendingUp className={`w-4 h-4 ${getPopularityColor(community.popularityScore)}`} />
-                    <span className={`font-medium ${getPopularityColor(community.popularityScore)}`}>
-                      {community.popularityScore}
-                    </span>
-                  </div>
-                  {community.memberCount && (
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Users className="w-3 h-3" />
-                      {community.memberCount}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {community.focusTopics.slice(0, 2).map((topic, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {topic}
+                        </Badge>
+                      ))}
+                      {community.focusTopics.length > 2 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{community.focusTopics.length - 2}
+                        </Badge>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                {community.description}
-              </p>
-
-              <div className="space-y-3">
-                <div>
-                  <h4 className="text-xs font-medium text-muted-foreground mb-1">Focus Topics</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {community.focusTopics.slice(0, 3).map((topic, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {topic}
-                      </Badge>
-                    ))}
-                    {community.focusTopics.length > 3 && (
-                      <Badge variant="secondary" className="text-xs">
-                        +{community.focusTopics.length - 3} more
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                <Button 
-                  className="w-full" 
-                  size="sm"
-                  onClick={() => window.open(community.link, '_blank')}
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Visit Community
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="font-medium">{community.memberCount || 'N/A'}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <TrendingUp className={`w-4 h-4 ${getPopularityColor(community.popularityScore)}`} />
+                      <span className={`font-medium ${getPopularityColor(community.popularityScore)}`}>
+                        {community.popularityScore}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(community.link, '_blank')}
+                      className="flex items-center gap-1"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Visit
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       {filteredCommunities.length === 0 && (
         <Card>
