@@ -153,8 +153,9 @@ const Index = () => {
         />;
       case 'editWorkflow':
         return <EditWorkflowView onBackToAdmin={() => setCurrentView('admin')} />;
+      case 'home':
       default:
-        return <PostAuthLanding />;
+        return <Home onViewChange={setCurrentView} />;
     }
   };
 
