@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Play, Trash2, Plus, User, Wrench, Home, Users, Zap } from "lucide-react";
+import { Play, Trash2, Plus, User, Wrench, Home, Users, Zap, Folder, Calculator, HelpCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProject } from '@/contexts/ProjectContext';
 import { Project } from '@/interfaces/Project';
@@ -79,65 +79,124 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
       
       <Card className="gradient-card border-0 shadow-card">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl">My Projects</CardTitle>
-              <CardDescription>
-                View and manage your project portfolio
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              {/* App Cards Grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <Button 
-                  variant="outline"
-                  onClick={() => setShowProfileManager(true)}
-                  className="flex flex-col items-center gap-2 h-20 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:from-blue-100 hover:to-blue-200"
-                >
-                  <User className="w-5 h-5 text-blue-600" />
-                  <span className="text-sm text-blue-800">My Profile</span>
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => setShowHomeManager(true)}
-                  className="flex flex-col items-center gap-2 h-20 bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:from-green-100 hover:to-green-200"
-                >
-                  <Home className="w-5 h-5 text-green-600" />
-                  <span className="text-sm text-green-800">My Homes</span>
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => setShowToolsLibrary(true)}
-                  className="flex flex-col items-center gap-2 h-20 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:from-orange-100 hover:to-orange-200"
-                >
-                  <Wrench className="w-5 h-5 text-orange-600" />
-                  <span className="text-sm text-orange-800">Tools & Materials</span>
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => window.dispatchEvent(new CustomEvent('show-user-tools-materials'))}
-                  className="flex flex-col items-center gap-2 h-20 bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 hover:from-yellow-100 hover:to-yellow-200"
-                >
-                  <Zap className="w-5 h-5 text-yellow-600" />
-                  <span className="text-sm text-yellow-800">Rapid Plan</span>
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => setShowCommunityPosts(true)}
-                  className="flex flex-col items-center gap-2 h-20 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:from-purple-100 hover:to-purple-200"
-                >
-                  <Users className="w-5 h-5 text-purple-600" />
-                  <span className="text-sm text-purple-800">Community</span>
-                </Button>
-                <Button 
-                  onClick={() => navigate('/projects')}
-                  className="flex flex-col items-center gap-2 h-20 bg-gradient-to-br from-primary/10 to-primary/20 border-primary/30 hover:from-primary/20 hover:to-primary/30"
-                >
-                  <Plus className="w-5 h-5 text-primary" />
-                  <span className="text-sm text-primary">Start New Project</span>
-                </Button>
+          <div>
+            <CardTitle className="text-2xl">My Apps</CardTitle>
+            <CardDescription>
+              Access all your home management tools
+            </CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* App Cards Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <Button 
+              variant="outline"
+              onClick={() => onProjectSelect?.(null)}
+              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 hover:from-slate-100 hover:to-slate-200"
+            >
+              <div className="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center">
+                <Folder className="w-5 h-5 text-white" />
               </div>
-            </div>
+              <span className="text-sm text-slate-800 font-medium">My Projects</span>
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={() => window.dispatchEvent(new CustomEvent('show-user-tools-materials'))}
+              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:from-blue-100 hover:to-blue-200"
+            >
+              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                <Calculator className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-blue-800 font-medium">Rapid Plan</span>
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={() => setShowHomeManager(true)}
+              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:from-green-100 hover:to-green-200"
+            >
+              <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
+                <Home className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-green-800 font-medium">My Home Maintenance</span>
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={() => setShowToolsLibrary(true)}
+              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 hover:from-slate-100 hover:to-slate-200"
+            >
+              <div className="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center">
+                <Wrench className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-slate-800 font-medium">My Tool Library</span>
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={() => window.dispatchEvent(new CustomEvent('show-tools-materials'))}
+              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:from-orange-100 hover:to-orange-200"
+            >
+              <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center">
+                <Wrench className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-orange-800 font-medium">Tool Rentals</span>
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/projects')}
+              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:from-orange-100 hover:to-orange-200"
+            >
+              <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center">
+                <Plus className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-orange-800 font-medium">New Project Catalog</span>
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={() => window.dispatchEvent(new CustomEvent('show-help-popup'))}
+              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:from-green-100 hover:to-green-200"
+            >
+              <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
+                <HelpCircle className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-green-800 font-medium">Expert Help</span>
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={() => setShowProfileManager(true)}
+              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 hover:from-gray-100 hover:to-gray-200"
+            >
+              <div className="w-10 h-10 bg-gray-600 rounded-xl flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-gray-800 font-medium">My Profile</span>
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={() => setShowCommunityPosts(true)}
+              className="flex flex-col items-center gap-3 h-24 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:from-purple-100 hover:to-purple-200"
+            >
+              <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
+                <Users className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-purple-800 font-medium">Community</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      <Card className="gradient-card border-0 shadow-card">
+        <CardHeader>
+          <div>
+            <CardTitle className="text-2xl">My Projects</CardTitle>
+            <CardDescription>
+              View and manage your project portfolio
+            </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
@@ -245,7 +304,7 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
         </CardContent>
       </Card>
       
-      <ProfileManager 
+      <ProfileManager
         open={showProfileManager} 
         onOpenChange={setShowProfileManager} 
       />
