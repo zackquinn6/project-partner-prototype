@@ -22,7 +22,7 @@ export const ToolRentalsWindow = ({ isOpen, onClose }: ToolRentalsWindowProps) =
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wrench className="h-6 w-6 text-primary" />
-            Tool Access
+            Tool Access & Rentals
           </DialogTitle>
         </DialogHeader>
         

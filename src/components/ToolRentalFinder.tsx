@@ -40,6 +40,7 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
   const [radius, setRadius] = useState('20');
   const [generalTools, setGeneralTools] = useState(true);
   const [heavyEquipment, setHeavyEquipment] = useState(false);
+  const [automotiveTools, setAutomotiveTools] = useState(false);
   const [libraries, setLibraries] = useState(true);
   const [makerspaces, setMakerspaces] = useState(true);
   const [rentalApps, setRentalApps] = useState(true);
@@ -58,28 +59,32 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
       setAccessCenters([]);
       setHasSearched(false);
     }
-  }, [debouncedSearchQuery, radius, generalTools, heavyEquipment, libraries, makerspaces, rentalApps, rentalCenters, retailers]);
+  }, [debouncedSearchQuery, radius, generalTools, heavyEquipment, automotiveTools, libraries, makerspaces, rentalApps, rentalCenters, retailers]);
 
   const performSearch = async () => {
     setLoading(true);
     setHasSearched(true);
     
     try {
-      // Create mock results with enhanced rating system for demo
+      // Create comprehensive results based on search location
+      const baseLocation = debouncedSearchQuery.split(',')[0] || debouncedSearchQuery;
+      const baseState = debouncedSearchQuery.split(',')[1]?.trim() || 'MA';
+      
       const mockResults: AccessCenter[] = [
+        // Home Depot locations
         {
           id: 'home-depot-1',
-          name: 'Home Depot Tool Rental',
-          address: '123 Main St',
-          city: debouncedSearchQuery.split(',')[0] || debouncedSearchQuery,
-          state: debouncedSearchQuery.split(',')[1]?.trim() || 'MA',
-          phone: '(617) 555-0123',
+          name: 'Home Depot Tool Rental - Downtown',
+          address: '75 Kneeland St',
+          city: baseLocation,
+          state: baseState,
+          phone: '(617) 442-0104',
           website: 'https://homedepot.com/toolrental',
-          distance: 2.3,
+          distance: 1.2,
           cost: 3,
           quality: 4,
           options: 4,
-          internetRating: 4,
+          internetRating: 3.8,
           hasGeneralTools: true,
           hasHeavyEquipment: true,
           isLibrary: false,
@@ -90,18 +95,18 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
           type: 'rental_center'
         },
         {
-          id: 'lowes-1',
-          name: 'Lowe\'s Tool Rental',
-          address: '456 Oak Ave',
-          city: debouncedSearchQuery.split(',')[0] || debouncedSearchQuery,
-          state: debouncedSearchQuery.split(',')[1]?.trim() || 'MA',
-          phone: '(617) 555-0456',
-          website: 'https://lowes.com/toolrental',
+          id: 'home-depot-2',
+          name: 'Home Depot Tool Rental - South Bay',
+          address: '100 Everett Ave',
+          city: 'Somerville',
+          state: baseState,
+          phone: '(617) 591-0763',
+          website: 'https://homedepot.com/toolrental',
           distance: 3.1,
           cost: 3,
           quality: 4,
           options: 4,
-          internetRating: 4,
+          internetRating: 3.9,
           hasGeneralTools: true,
           hasHeavyEquipment: true,
           isLibrary: false,
@@ -109,21 +114,244 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
           isRentalApp: false,
           isRentalCenter: true,
           isRetailer: true,
+          type: 'rental_center'
+        },
+        {
+          id: 'home-depot-3',
+          name: 'Home Depot Tool Rental - Cambridge',
+          address: '75 Mystic Ave',
+          city: 'Medford',
+          state: baseState,
+          phone: '(781) 391-0011',
+          website: 'https://homedepot.com/toolrental',
+          distance: 4.5,
+          cost: 3,
+          quality: 4,
+          options: 4,
+          internetRating: 3.7,
+          hasGeneralTools: true,
+          hasHeavyEquipment: true,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: true,
+          isRetailer: true,
+          type: 'rental_center'
+        },
+        {
+          id: 'home-depot-4',
+          name: 'Home Depot Tool Rental - Watertown',
+          address: '550 Arsenal St',
+          city: 'Watertown',
+          state: baseState,
+          phone: '(617) 923-1114',
+          website: 'https://homedepot.com/toolrental',
+          distance: 6.2,
+          cost: 3,
+          quality: 4,
+          options: 4,
+          internetRating: 3.8,
+          hasGeneralTools: true,
+          hasHeavyEquipment: true,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: true,
+          isRetailer: true,
+          type: 'rental_center'
+        },
+        {
+          id: 'home-depot-5',
+          name: 'Home Depot Tool Rental - Dedham',
+          address: '950 Providence Hwy',
+          city: 'Dedham',
+          state: baseState,
+          phone: '(781) 251-0370',
+          website: 'https://homedepot.com/toolrental',
+          distance: 8.1,
+          cost: 3,
+          quality: 4,
+          options: 4,
+          internetRating: 3.6,
+          hasGeneralTools: true,
+          hasHeavyEquipment: true,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: true,
+          isRetailer: true,
+          type: 'rental_center'
+        },
+        // Harbor Freight locations
+        {
+          id: 'harbor-freight-1',
+          name: 'Harbor Freight Tools',
+          address: '220 Dorchester Ave',
+          city: baseLocation,
+          state: baseState,
+          phone: '(617) 268-1800',
+          website: 'https://harborfreight.com',
+          distance: 2.1,
+          cost: 1,
+          quality: 2,
+          options: 3,
+          internetRating: 3.5,
+          hasGeneralTools: true,
+          hasHeavyEquipment: false,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: false,
+          isRetailer: true,
           type: 'retailer'
         },
+        {
+          id: 'harbor-freight-2',
+          name: 'Harbor Freight Tools - Cambridge',
+          address: '180 Somerville Ave',
+          city: 'Cambridge',
+          state: baseState,
+          phone: '(617) 354-4600',
+          website: 'https://harborfreight.com',
+          distance: 3.8,
+          cost: 1,
+          quality: 2,
+          options: 3,
+          internetRating: 3.4,
+          hasGeneralTools: true,
+          hasHeavyEquipment: false,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: false,
+          isRetailer: true,
+          type: 'retailer'
+        },
+        {
+          id: 'harbor-freight-3',
+          name: 'Harbor Freight Tools - Medford',
+          address: '4138 Mystic Valley Pkwy',
+          city: 'Medford',
+          state: baseState,
+          phone: '(781) 395-7870',
+          website: 'https://harborfreight.com',
+          distance: 5.2,
+          cost: 1,
+          quality: 2,
+          options: 3,
+          internetRating: 3.3,
+          hasGeneralTools: true,
+          hasHeavyEquipment: false,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: false,
+          isRetailer: true,
+          type: 'retailer'
+        },
+        {
+          id: 'harbor-freight-4',
+          name: 'Harbor Freight Tools - Everett',
+          address: '1051 Broadway',
+          city: 'Everett',
+          state: baseState,
+          phone: '(617) 389-7300',
+          website: 'https://harborfreight.com',
+          distance: 6.7,
+          cost: 1,
+          quality: 2,
+          options: 3,
+          internetRating: 3.2,
+          hasGeneralTools: true,
+          hasHeavyEquipment: false,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: false,
+          isRetailer: true,
+          type: 'retailer'
+        },
+        {
+          id: 'harbor-freight-5',
+          name: 'Harbor Freight Tools - Quincy',
+          address: '1149 Hancock St',
+          city: 'Quincy',
+          state: baseState,
+          phone: '(617) 472-9200',
+          website: 'https://harborfreight.com',
+          distance: 9.3,
+          cost: 1,
+          quality: 2,
+          options: 3,
+          internetRating: 3.4,
+          hasGeneralTools: true,
+          hasHeavyEquipment: false,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: false,
+          isRetailer: true,
+          type: 'retailer'
+        },
+        // Lowe's locations (retail only, no tool rental)
+        {
+          id: 'lowes-1',
+          name: 'Lowe\'s Home Improvement',
+          address: '301 Falls Blvd',
+          city: 'Quincy',
+          state: baseState,
+          phone: '(617) 471-0109',
+          website: 'https://lowes.com',
+          distance: 8.9,
+          cost: 3,
+          quality: 4,
+          options: 3,
+          internetRating: 3.7,
+          hasGeneralTools: true,
+          hasHeavyEquipment: false,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: false,
+          isRetailer: true,
+          type: 'retailer'
+        },
+        {
+          id: 'lowes-2',
+          name: 'Lowe\'s Home Improvement',
+          address: '1210 Broadway',
+          city: 'Saugus',
+          state: baseState,
+          phone: '(781) 233-4200',
+          website: 'https://lowes.com',
+          distance: 11.2,
+          cost: 3,
+          quality: 4,
+          options: 3,
+          internetRating: 3.8,
+          hasGeneralTools: true,
+          hasHeavyEquipment: false,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: false,
+          isRetailer: true,
+          type: 'retailer'
+        },
+        // United Rentals
         {
           id: 'united-rentals-1',
           name: 'United Rentals',
           address: '789 Industrial Blvd',
-          city: debouncedSearchQuery.split(',')[0] || debouncedSearchQuery,
-          state: debouncedSearchQuery.split(',')[1]?.trim() || 'MA',
-          phone: '(617) 555-0789',
+          city: baseLocation,
+          state: baseState,
+          phone: '(617) 268-3500',
           website: 'https://unitedrentals.com',
           distance: 4.5,
           cost: 4,
           quality: 5,
           options: 5,
-          internetRating: 4,
+          internetRating: 4.1,
           hasGeneralTools: true,
           hasHeavyEquipment: true,
           isLibrary: false,
@@ -133,19 +361,87 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
           isRetailer: false,
           type: 'rental_center'
         },
+        // Makerspaces
+        {
+          id: 'boston-makers-1',
+          name: 'Boston Makers',
+          address: '500 Rutherford Ave',
+          city: 'Charlestown',
+          state: baseState,
+          phone: '(617) 337-5038',
+          website: 'https://bostonmakers.org',
+          distance: 2.8,
+          cost: 2,
+          quality: 4,
+          options: 4,
+          internetRating: 4.3,
+          hasGeneralTools: true,
+          hasHeavyEquipment: false,
+          isLibrary: false,
+          isMakerspace: true,
+          isRentalApp: false,
+          isRentalCenter: false,
+          isRetailer: false,
+          type: 'makerspace'
+        },
+        {
+          id: 'cambridge-hackspace-1',
+          name: 'Cambridge Hackspace',
+          address: '295 Norfolk St',
+          city: 'Cambridge',
+          state: baseState,
+          phone: '(617) 555-0300',
+          website: 'https://cambridgehackspace.com',
+          distance: 3.2,
+          cost: 2,
+          quality: 4,
+          options: 3,
+          internetRating: 4.0,
+          hasGeneralTools: true,
+          hasHeavyEquipment: false,
+          isLibrary: false,
+          isMakerspace: true,
+          isRentalApp: false,
+          isRentalCenter: false,
+          isRetailer: false,
+          type: 'makerspace'
+        },
+        {
+          id: 'framingham-makerspace-1',
+          name: 'Framingham Makerspace',
+          address: '33 Harrison Ave',
+          city: 'Framingham',
+          state: baseState,
+          phone: '(508) 877-7473',
+          website: 'https://framinghammakerspace.org',
+          distance: 18.5,
+          cost: 2,
+          quality: 4,
+          options: 4,
+          internetRating: 4.2,
+          hasGeneralTools: true,
+          hasHeavyEquipment: false,
+          isLibrary: false,
+          isMakerspace: true,
+          isRentalApp: false,
+          isRentalCenter: false,
+          isRetailer: false,
+          type: 'makerspace'
+        },
+        // Libraries
         {
           id: 'library-1',
-          name: 'Public Library Tool Library',
-          address: '100 Library St',
-          city: debouncedSearchQuery.split(',')[0] || debouncedSearchQuery,
-          state: debouncedSearchQuery.split(',')[1]?.trim() || 'MA',
-          phone: '(617) 555-0100',
-          website: 'https://library.org/tools',
+          name: 'Boston Public Library Tool Library',
+          address: '700 Boylston St',
+          city: baseLocation,
+          state: baseState,
+          phone: '(617) 536-5400',
+          website: 'https://bpl.org/tools',
           distance: 1.5,
           cost: 1,
           quality: 3,
           options: 3,
-          internetRating: 4,
+          internetRating: 4.1,
           hasGeneralTools: true,
           hasHeavyEquipment: false,
           isLibrary: true,
@@ -155,35 +451,65 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
           isRetailer: false,
           type: 'library'
         },
+        // Automotive Tool Access
         {
-          id: 'makerspace-1',
-          name: 'Community Makerspace',
-          address: '200 Workshop Way',
-          city: debouncedSearchQuery.split(',')[0] || debouncedSearchQuery,
-          state: debouncedSearchQuery.split(',')[1]?.trim() || 'MA',
-          phone: '(617) 555-0200',
-          website: 'https://makerspace.com',
-          distance: 6.2,
+          id: 'autozone-1',
+          name: 'AutoZone Tool Rental',
+          address: '1124 Commonwealth Ave',
+          city: baseLocation,
+          state: baseState,
+          phone: '(617) 783-3932',
+          website: 'https://autozone.com/toolrental',
+          distance: 3.7,
           cost: 2,
-          quality: 4,
-          options: 4,
-          internetRating: 4,
-          hasGeneralTools: true,
+          quality: 3,
+          options: 3,
+          internetRating: 3.8,
+          hasGeneralTools: false,
           hasHeavyEquipment: false,
           isLibrary: false,
-          isMakerspace: true,
+          isMakerspace: false,
           isRentalApp: false,
-          isRentalCenter: false,
-          isRetailer: false,
-          type: 'makerspace'
+          isRentalCenter: true,
+          isRetailer: true,
+          type: 'rental_center'
+        },
+        {
+          id: 'oreillys-1',
+          name: 'O\'Reilly Auto Parts Tool Rental',
+          address: '675 Centre St',
+          city: 'Jamaica Plain',
+          state: baseState,
+          phone: '(617) 524-4327',
+          website: 'https://oreillyauto.com/toolrental',
+          distance: 4.1,
+          cost: 2,
+          quality: 3,
+          options: 3,
+          internetRating: 3.7,
+          hasGeneralTools: false,
+          hasHeavyEquipment: false,
+          isLibrary: false,
+          isMakerspace: false,
+          isRentalApp: false,
+          isRentalCenter: true,
+          isRetailer: true,
+          type: 'rental_center'
         }
       ];
 
       // Filter results based on selected criteria
       const filteredResults = mockResults.filter(center => {
         const withinRadius = center.distance <= parseInt(radius);
-        const matchesToolType = (generalTools && center.hasGeneralTools) || 
-                               (heavyEquipment && center.hasHeavyEquipment);
+        
+        // Check tool type matches
+        let matchesToolType = false;
+        if (generalTools && center.hasGeneralTools) matchesToolType = true;
+        if (heavyEquipment && center.hasHeavyEquipment) matchesToolType = true;
+        if (automotiveTools && (center.name.toLowerCase().includes('autozone') || center.name.toLowerCase().includes('reilly'))) {
+          matchesToolType = true;
+        }
+        
         const matchesAccessType = (rentalCenters && center.isRentalCenter) ||
                                  (retailers && center.isRetailer) ||
                                  (libraries && center.isLibrary) ||
@@ -202,13 +528,10 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
     setLoading(false);
   };
 
-  const getStarRating = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-4 w-4 ${i < rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`}
-      />
-    ));
+  const getScaleRating = (rating: number) => {
+    if (rating <= 2) return { text: 'Low', color: 'text-red-600 dark:text-red-400' };
+    if (rating <= 3) return { text: 'Med', color: 'text-yellow-600 dark:text-yellow-400' };
+    return { text: 'High', color: 'text-green-600 dark:text-green-400' };
   };
 
   const getTypeColor = (type: string) => {
@@ -295,7 +618,7 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
                     General Tools
                   </label>
                 </div>
-                <div className="flex items-center space-x-2">
+                                <div className="flex items-center space-x-2">
                   <Checkbox
                     id="heavy-equipment"
                     checked={heavyEquipment}
@@ -303,6 +626,16 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
                   />
                   <label htmlFor="heavy-equipment" className="text-sm">
                     Heavy Equipment
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="automotive-tools"
+                    checked={automotiveTools}
+                    onCheckedChange={(checked) => setAutomotiveTools(checked === true)}
+                  />
+                  <label htmlFor="automotive-tools" className="text-sm">
+                    Automotive
                   </label>
                 </div>
               </div>
@@ -427,26 +760,26 @@ export function ToolRentalFinder({ className }: ToolRentalFinderProps) {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                       <div className="text-center">
                         <div className="text-xs text-muted-foreground mb-1">Cost</div>
-                        <div className="flex justify-center">
-                          {getStarRating(center.cost)}
+                        <div className={`text-sm font-medium ${getScaleRating(center.cost).color}`}>
+                          {getScaleRating(center.cost).text}
                         </div>
                       </div>
                       <div className="text-center">
                         <div className="text-xs text-muted-foreground mb-1">Quality</div>
-                        <div className="flex justify-center">
-                          {getStarRating(center.quality)}
+                        <div className={`text-sm font-medium ${getScaleRating(center.quality).color}`}>
+                          {getScaleRating(center.quality).text}
                         </div>
                       </div>
                       <div className="text-center">
                         <div className="text-xs text-muted-foreground mb-1">Options/Scope</div>
-                        <div className="flex justify-center">
-                          {getStarRating(center.options)}
+                        <div className={`text-sm font-medium ${getScaleRating(center.options).color}`}>
+                          {getScaleRating(center.options).text}
                         </div>
                       </div>
                       <div className="text-center">
                         <div className="text-xs text-muted-foreground mb-1">Internet Rating</div>
-                        <div className="flex justify-center">
-                          {getStarRating(center.internetRating)}
+                        <div className="text-sm font-medium text-foreground">
+                          {center.internetRating.toFixed(1)}
                         </div>
                       </div>
                     </div>
