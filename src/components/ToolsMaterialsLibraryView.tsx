@@ -210,6 +210,16 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange }: ToolsMaterials
                   className="pl-10"
                 />
               </div>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  const event = new CustomEvent('show-tools-materials-editor');
+                  window.dispatchEvent(event);
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Items
+              </Button>
               <Button onClick={saveItems} disabled={isLoading}>
                 {isLoading ? "Saving..." : "Save Changes"}
               </Button>

@@ -154,6 +154,24 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ op
     setSelectedTask(null);
   };
 
+  const handleDeleteTask = async (taskId: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_maintenance_tasks')
+        .delete()
+        .eq('id', taskId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
+      fetchTasks(); // Refresh tasks after deletion
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
+  };
+
   const getFilteredTasks = () => {
     if (categoryFilter === 'all') {
       return tasks;
@@ -291,13 +309,21 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ op
                                     <Progress value={progress} className="h-1" />
                                   </div>
                                 </div>
-                                <Button 
-                                  onClick={() => handleTaskComplete(task)}
-                                  size="sm"
-                                  className="ml-3 shrink-0"
-                                >
-                                  Complete
-                                </Button>
+                                <div className="flex gap-2 ml-3 shrink-0">
+                                  <Button 
+                                    onClick={() => handleTaskComplete(task)}
+                                    size="sm"
+                                  >
+                                    Complete
+                                  </Button>
+                                  <Button 
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => handleDeleteTask(task.id)}
+                                  >
+                                    Delete
+                                  </Button>
+                                </div>
                               </div>
                             </CardContent>
                           </Card>
