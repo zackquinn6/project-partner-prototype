@@ -13,7 +13,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AddMaintenanceTaskDialog } from './AddMaintenanceTaskDialog';
 import { TaskCompletionDialog } from './TaskCompletionDialog';
 import { MaintenanceHistoryTab } from './MaintenanceHistoryTab';
-
 interface MaintenanceTask {
   id: string;
   user_id: string;
@@ -30,7 +29,6 @@ interface MaintenanceTask {
   created_at: string;
   updated_at: string;
 }
-
 interface MaintenanceCompletion {
   id: string;
   task_id: string;
@@ -38,7 +36,6 @@ interface MaintenanceCompletion {
   notes?: string;
   photo_url?: string;
 }
-
 interface Home {
   id: string;
   name: string;
@@ -46,14 +43,17 @@ interface Home {
   city?: string;
   state?: string;
 }
-
 interface HomeMaintenanceWindowProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ open, onOpenChange }) => {
-  const { user } = useAuth();
+export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
+  open,
+  onOpenChange
+}) => {
+  const {
+    user
+  } = useAuth();
   const [homes, setHomes] = useState<Home[]>([]);
   const [tasks, setTasks] = useState<MaintenanceTask[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,31 +61,26 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ op
   const [showAddTask, setShowAddTask] = useState(false);
   const [selectedTask, setSelectedTask] = useState<MaintenanceTask | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-
   useEffect(() => {
     if (open && user) {
       fetchHomes();
     }
   }, [open, user]);
-
   useEffect(() => {
     if (selectedHomeId && user) {
       fetchTasks();
     }
   }, [selectedHomeId, user]);
-
   const fetchHomes = async () => {
     if (!user) return;
-
     try {
-      const { data, error } = await supabase
-        .from('homes')
-        .select('id, name, address, city, state')
-        .eq('user_id', user.id)
-        .order('is_primary', { ascending: false });
-
+      const {
+        data,
+        error
+      } = await supabase.from('homes').select('id, name, address, city, state').eq('user_id', user.id).order('is_primary', {
+        ascending: false
+      });
       if (error) throw error;
-
       setHomes(data || []);
       if (data && data.length > 0 && !selectedHomeId) {
         setSelectedHomeId(data[0].id);
@@ -94,22 +89,17 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ op
       console.error('Error fetching homes:', error);
     }
   };
-
   const fetchTasks = async () => {
     if (!user || !selectedHomeId) return;
-
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('user_maintenance_tasks')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('home_id', selectedHomeId)
-        .eq('is_active', true)
-        .order('next_due_date', { ascending: true });
-
+      const {
+        data,
+        error
+      } = await supabase.from('user_maintenance_tasks').select('*').eq('user_id', user.id).eq('home_id', selectedHomeId).eq('is_active', true).order('next_due_date', {
+        ascending: true
+      });
       if (error) throw error;
-
       setTasks(data || []);
     } catch (error) {
       console.error('Error fetching tasks:', error);
@@ -117,68 +107,64 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ op
       setLoading(false);
     }
   };
-
   const getTaskProgress = (task: MaintenanceTask) => {
     if (!task.last_completed_at) return 0;
-    
     const lastCompleted = new Date(task.last_completed_at);
     const nextDue = new Date(task.next_due_date);
     const now = new Date();
-    
     const totalDays = task.frequency_days;
     const daysSinceCompletion = differenceInDays(now, lastCompleted);
-    
-    return Math.min(Math.max((daysSinceCompletion / totalDays) * 100, 0), 100);
+    return Math.min(Math.max(daysSinceCompletion / totalDays * 100, 0), 100);
   };
-
   const getTaskStatus = (task: MaintenanceTask) => {
     const dueDate = new Date(task.next_due_date);
     const now = new Date();
     const daysUntilDue = differenceInDays(dueDate, now);
-
     if (daysUntilDue < 0) {
-      return { status: 'overdue', color: 'destructive', icon: AlertTriangle };
+      return {
+        status: 'overdue',
+        color: 'destructive',
+        icon: AlertTriangle
+      };
     } else if (daysUntilDue <= 7) {
-      return { status: 'due-soon', color: 'secondary', icon: Clock };
+      return {
+        status: 'due-soon',
+        color: 'secondary',
+        icon: Clock
+      };
     } else {
-      return { status: 'upcoming', color: 'default', icon: CheckCircle };
+      return {
+        status: 'upcoming',
+        color: 'default',
+        icon: CheckCircle
+      };
     }
   };
-
   const handleTaskComplete = (task: MaintenanceTask) => {
     setSelectedTask(task);
   };
-
   const handleTaskCompleted = () => {
     fetchTasks(); // Refresh tasks after completion
     setSelectedTask(null);
   };
-
   const handleDeleteTask = async (taskId: string) => {
     if (!user) return;
-    
     try {
-      const { error } = await supabase
-        .from('user_maintenance_tasks')
-        .delete()
-        .eq('id', taskId)
-        .eq('user_id', user.id);
-
+      const {
+        error
+      } = await supabase.from('user_maintenance_tasks').delete().eq('id', taskId).eq('user_id', user.id);
       if (error) throw error;
-      
       fetchTasks(); // Refresh tasks after deletion
     } catch (error) {
       console.error('Error deleting task:', error);
     }
   };
-
   const getFilteredTasks = () => {
     if (categoryFilter === 'all') {
       return tasks;
     }
     return tasks.filter(task => task.category === categoryFilter);
   };
-
   const categories = ['appliances', 'hvac', 'safety', 'plumbing', 'exterior', 'general'];
   const categoryLabels: Record<string, string> = {
     appliances: 'Appliances',
@@ -188,9 +174,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ op
     exterior: 'Exterior',
     general: 'General'
   };
-
-  return (
-    <>
+  return <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
@@ -208,26 +192,19 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ op
                   <SelectValue placeholder="Select a home" />
                 </SelectTrigger>
                 <SelectContent>
-                  {homes.map(home => (
-                    <SelectItem key={home.id} value={home.id}>
+                  {homes.map(home => <SelectItem key={home.id} value={home.id}>
                       {home.name} {home.address && `- ${home.address}`}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
 
-              <Button 
-                onClick={() => setShowAddTask(true)}
-                disabled={!selectedHomeId}
-                className="flex items-center gap-2"
-              >
+              <Button onClick={() => setShowAddTask(true)} disabled={!selectedHomeId} className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
                 Add Task
               </Button>
             </div>
 
-            {selectedHomeId && (
-              <Tabs defaultValue="tasks" className="w-full">
+            {selectedHomeId && <Tabs defaultValue="tasks" className="w-full">
                 <TabsList className="grid grid-cols-2 w-full">
                   <TabsTrigger value="tasks">Active Tasks</TabsTrigger>
                   <TabsTrigger value="history">Completion History</TabsTrigger>
@@ -244,22 +221,17 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ op
                       <SelectContent>
                         <SelectItem value="all">All Categories ({tasks.length})</SelectItem>
                         {categories.map(category => {
-                          const count = tasks.filter(task => task.category === category).length;
-                          return count > 0 ? (
-                            <SelectItem key={category} value={category}>
+                      const count = tasks.filter(task => task.category === category).length;
+                      return count > 0 ? <SelectItem key={category} value={category}>
                               {categoryLabels[category]} ({count})
-                            </SelectItem>
-                          ) : null;
-                        })}
+                            </SelectItem> : null;
+                    })}
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="max-h-[60vh] overflow-y-auto space-y-3">
-                    {loading ? (
-                      <div className="text-center py-8">Loading tasks...</div>
-                    ) : getFilteredTasks().length === 0 ? (
-                      <Card>
+                    {loading ? <div className="text-center py-8">Loading tasks...</div> : getFilteredTasks().length === 0 ? <Card>
                         <CardContent className="pt-6">
                           <div className="text-center py-8">
                             <Home className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -267,10 +239,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ op
                               {tasks.length === 0 ? 'No maintenance tasks yet' : 'No tasks in this category'}
                             </h3>
                             <p className="text-muted-foreground mb-4">
-                              {tasks.length === 0 
-                                ? 'Add your first maintenance task to start tracking your home maintenance.'
-                                : 'Try selecting a different category or add a new task.'
-                              }
+                              {tasks.length === 0 ? 'Add your first maintenance task to start tracking your home maintenance.' : 'Try selecting a different category or add a new task.'}
                             </p>
                             <Button onClick={() => setShowAddTask(true)}>
                               <Plus className="h-4 w-4 mr-2" />
@@ -278,24 +247,20 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ op
                             </Button>
                           </div>
                         </CardContent>
-                      </Card>
-                    ) : (
-                      getFilteredTasks().map(task => {
-                        const progress = getTaskProgress(task);
-                        const { status, color, icon: StatusIcon } = getTaskStatus(task);
-                        
-                        return (
-                          <Card key={task.id} className="hover:shadow-sm transition-shadow">
+                      </Card> : getFilteredTasks().map(task => {
+                  const progress = getTaskProgress(task);
+                  const {
+                    status,
+                    color,
+                    icon: StatusIcon
+                  } = getTaskStatus(task);
+                  return <Card key={task.id} className="hover:shadow-sm transition-shadow">
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between">
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 mb-1">
                                     <h4 className="font-medium text-sm truncate">{task.title}</h4>
-                                    <Badge variant={color as any} className="text-xs">
-                                      <StatusIcon className="h-3 w-3 mr-1" />
-                                      {status === 'overdue' ? 'Overdue' : 
-                                       status === 'due-soon' ? 'Due Soon' : 'Upcoming'}
-                                    </Badge>
+                                    
                                     {task.is_custom && <Badge variant="outline" className="text-xs">Custom</Badge>}
                                   </div>
                                   <div className="text-xs text-muted-foreground mb-2">
@@ -310,54 +275,31 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({ op
                                   </div>
                                 </div>
                                 <div className="flex gap-2 ml-3 shrink-0">
-                                  <Button 
-                                    onClick={() => handleTaskComplete(task)}
-                                    size="sm"
-                                  >
+                                  <Button onClick={() => handleTaskComplete(task)} size="sm">
                                     Complete
                                   </Button>
-                                  <Button 
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => handleDeleteTask(task.id)}
-                                  >
+                                  <Button variant="destructive" size="sm" onClick={() => handleDeleteTask(task.id)}>
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </div>
                             </CardContent>
-                          </Card>
-                        );
-                      })
-                    )}
+                          </Card>;
+                })}
                   </div>
                 </TabsContent>
 
                 <TabsContent value="history">
                   <MaintenanceHistoryTab selectedHomeId={selectedHomeId} />
                 </TabsContent>
-              </Tabs>
-            )}
+              </Tabs>}
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Dialogs */}
-      <AddMaintenanceTaskDialog
-        open={showAddTask}
-        onOpenChange={setShowAddTask}
-        homeId={selectedHomeId}
-        onTaskAdded={fetchTasks}
-      />
+      <AddMaintenanceTaskDialog open={showAddTask} onOpenChange={setShowAddTask} homeId={selectedHomeId} onTaskAdded={fetchTasks} />
 
-      {selectedTask && (
-        <TaskCompletionDialog
-          open={!!selectedTask}
-          onOpenChange={(open) => !open && setSelectedTask(null)}
-          task={selectedTask}
-          onCompleted={handleTaskCompleted}
-        />
-      )}
-    </>
-  );
+      {selectedTask && <TaskCompletionDialog open={!!selectedTask} onOpenChange={open => !open && setSelectedTask(null)} task={selectedTask} onCompleted={handleTaskCompleted} />}
+    </>;
 };
