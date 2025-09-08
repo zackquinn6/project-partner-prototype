@@ -10,6 +10,7 @@ import { Home, Plus, MapPin, Calendar, Trash2, Star, Upload, Image } from 'lucid
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { HomeDetailsWindow } from './HomeDetailsWindow';
 interface Home {
   id: string;
   user_id: string;
@@ -57,6 +58,8 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [selectedHomeForDetails, setSelectedHomeForDetails] = useState<Home | null>(null);
+  const [showHomeDetails, setShowHomeDetails] = useState(false);
   useEffect(() => {
     if (open && user) {
       fetchHomes();
@@ -239,6 +242,11 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
       toast.error('Failed to set primary home');
     }
   };
+
+  const handleHomeClick = (home: Home) => {
+    setSelectedHomeForDetails(home);
+    setShowHomeDetails(true);
+  };
   if (showSelector) {
     // Simple selector mode for project creation
     return <Dialog open={open} onOpenChange={onOpenChange}>
@@ -275,7 +283,8 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
         </DialogContent>
       </Dialog>;
   }
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+  return <>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -310,7 +319,7 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
                   </Button>
                 </CardContent>
               </Card> : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {homes.map(home => <Card key={home.id} className={home.is_primary ? 'ring-2 ring-primary' : ''}>
+                {homes.map(home => <Card key={home.id} className={home.is_primary ? 'ring-2 ring-primary cursor-pointer hover:shadow-md transition-shadow' : 'cursor-pointer hover:shadow-md transition-shadow'} onClick={() => handleHomeClick(home)}>
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -328,7 +337,7 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
                             </CardTitle>
                           </div>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                           <Button variant="ghost" size="sm" onClick={() => handleEdit(home)}>
                             Edit
                           </Button>
@@ -354,7 +363,10 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
                           <span>Built in {home.build_year}</span>
                         </div>}
                       
-                      {!home.is_primary && <Button variant="outline" size="sm" onClick={() => handleSetPrimary(home.id)} className="w-full mt-3">
+                      {!home.is_primary && <Button variant="outline" size="sm" onClick={(e) => {
+                          e.stopPropagation();
+                          handleSetPrimary(home.id);
+                        }} className="w-full mt-3">
                           <Star className="w-4 h-4 mr-2" />
                           Set as Primary
                         </Button>}
@@ -492,5 +504,12 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
             </div>
           </form>)}
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+    
+    <HomeDetailsWindow
+      open={showHomeDetails}
+      onOpenChange={setShowHomeDetails}
+      home={selectedHomeForDetails}
+    />
+  </>;
 };

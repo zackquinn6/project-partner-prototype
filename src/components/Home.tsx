@@ -112,7 +112,7 @@ export default function Home({ onViewChange }: HomeProps) {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden gradient-hero pt-20 pb-20 md:pt-24 md:pb-32">
+      <section className="relative overflow-hidden gradient-hero pt-20 pb-16 md:pt-24 md:pb-24">
         {/* Fixed header navigation bar */}
         <nav className="fixed top-0 left-0 right-0 bg-primary/95 backdrop-blur-md z-50 border-b border-primary-foreground/10 shadow-elegant">
           <div className="container mx-auto px-4 flex items-center justify-between h-16">
@@ -208,7 +208,7 @@ export default function Home({ onViewChange }: HomeProps) {
       </section>
 
       {/* Value Proposition */}
-      <section className="py-20 bg-gradient-to-br from-secondary via-secondary to-accent/5">
+      <section className="py-16 bg-gradient-to-br from-secondary via-secondary to-accent/5">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
@@ -240,7 +240,7 @@ export default function Home({ onViewChange }: HomeProps) {
       </section>
 
       {/* Core Apps */}
-      <section id="core-apps" className="py-20">
+      <section id="core-apps" className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <Badge variant="outline" className="mb-4 text-primary border-primary">
@@ -299,7 +299,7 @@ export default function Home({ onViewChange }: HomeProps) {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 gradient-hero">
+      <section className="py-16 gradient-hero">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-6">
             Ready to Transform Your DIY Experience?
