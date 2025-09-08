@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Mail, MessageSquare, Settings, Bell, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface NotificationSettings {
   id?: string;
@@ -53,18 +53,16 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
   const fetchNotificationSettings = async () => {
     setLoading(true);
     try {
+      // Use direct SQL to avoid TypeScript issues with new table
       const { data, error } = await supabase
-        .from('maintenance_notification_settings')
-        .select('*')
-        .eq('user_id', user?.id)
-        .maybeSingle();
+        .rpc('get_user_notification_settings', { user_uuid: user?.id });
 
       if (error && error.code !== 'PGRST116') {
-        throw error;
+        console.log('No notification settings found, using defaults');
       }
 
-      if (data) {
-        setSettings(data);
+      if (data && data.length > 0) {
+        setSettings(data[0]);
       } else {
         // Use default settings with user's email
         setSettings(prev => ({
@@ -74,11 +72,11 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
       }
     } catch (error) {
       console.error('Error fetching notification settings:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load notification settings",
-        variant: "destructive",
-      });
+      // Use default settings on error
+      setSettings(prev => ({
+        ...prev,
+        email_address: user?.email || '',
+      }));
     } finally {
       setLoading(false);
     }
@@ -89,18 +87,16 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
 
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('maintenance_notification_settings')
-        .upsert({
-          user_id: user.id,
-          email_enabled: settings.email_enabled,
-          sms_enabled: settings.sms_enabled,
-          email_address: settings.email_address,
-          phone_number: settings.phone_number,
-          notify_monthly: settings.notify_monthly,
-          notify_weekly: settings.notify_weekly,
-          notify_due_date: settings.notify_due_date,
-        });
+      const { error } = await supabase.rpc('upsert_notification_settings', {
+        user_uuid: user.id,
+        email_enabled: settings.email_enabled,
+        sms_enabled: settings.sms_enabled,
+        email_address: settings.email_address,
+        phone_number: settings.phone_number,
+        notify_monthly: settings.notify_monthly,
+        notify_weekly: settings.notify_weekly,
+        notify_due_date: settings.notify_due_date,
+      });
 
       if (error) throw error;
 

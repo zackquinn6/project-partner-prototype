@@ -473,6 +473,48 @@ export type Database = {
           },
         ]
       }
+      maintenance_notification_settings: {
+        Row: {
+          created_at: string
+          email_address: string | null
+          email_enabled: boolean
+          id: string
+          notify_due_date: boolean
+          notify_monthly: boolean
+          notify_weekly: boolean
+          phone_number: string | null
+          sms_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_address?: string | null
+          email_enabled?: boolean
+          id?: string
+          notify_due_date?: boolean
+          notify_monthly?: boolean
+          notify_weekly?: boolean
+          phone_number?: string | null
+          sms_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_address?: string | null
+          email_enabled?: boolean
+          id?: string
+          notify_due_date?: boolean
+          notify_monthly?: boolean
+          notify_weekly?: boolean
+          phone_number?: string | null
+          sms_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       maintenance_templates: {
         Row: {
           category: string
