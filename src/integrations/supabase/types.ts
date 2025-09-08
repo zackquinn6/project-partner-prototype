@@ -1328,6 +1328,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_security_metrics: {
+        Args: { timeframe_hours?: number }
+        Returns: {
+          active_sessions_count: number
+          failed_logins_count: number
+          role_changes_count: number
+          unique_ips_count: number
+        }[]
+      }
       get_user_notification_settings: {
         Args: { user_uuid: string }
         Returns: {
