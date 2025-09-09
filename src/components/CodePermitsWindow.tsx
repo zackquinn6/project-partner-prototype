@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ExternalLink, Search, Building2, FileText, MapPin, Home } from "lucide-react";
+import { ExternalLink, Search, Building2, FileText, Home } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 interface CodePermitsWindowProps {
   open: boolean;
@@ -90,7 +89,9 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
   const searchBuildingCodes = async (location: string) => {
     setIsSearching(true);
     try {
-      // Mock building codes data - in a real app, this would call a search API
+      const state = location.split(', ')[1];
+      const city = location.split(', ')[0];
+      
       const mockCodes: BuildingCodeLink[] = [
         {
           title: "International Building Code (IBC) 2021",
@@ -111,25 +112,23 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
           category: "National"
         },
         {
-          title: `${location} Building Codes`,
-          url: `https://library.municode.com/search?searchText=${encodeURIComponent(location)}+building+code`,
-          description: `Local building codes and ordinances for ${location}.`,
-          category: "Local"
+          title: `${city} Building Department`,
+          url: `https://www.${city.toLowerCase().replace(/\s+/g, '')}.gov/building-department`,
+          description: `Official building department website for ${city}.`,
+          category: "Local Government"
         },
         {
-          title: "Code Compliance Search",
-          url: "https://www.iccsafe.org/products-and-services/i-codes/code-development-process/",
-          description: "ICC code compliance and development resources.",
-          category: "Resources"
+          title: `${state} State Building Codes`,
+          url: `https://www.${state.toLowerCase().replace(/\s+/g, '')}.gov/building-codes`,
+          description: `State building code resources for ${state}.`,
+          category: "State Government"
         }
       ];
 
       setBuildingCodes(mockCodes);
       setActiveLocation(location);
-      toast.success(`Found building codes for ${location}`);
     } catch (error) {
       console.error('Error searching building codes:', error);
-      toast.error("Failed to search building codes");
     } finally {
       setIsSearching(false);
     }
@@ -138,46 +137,46 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
   const searchPermits = async (location: string) => {
     setIsSearching(true);
     try {
-      // Mock permit data - in a real app, this would call a search API
+      const state = location.split(', ')[1];
+      const city = location.split(', ')[0];
+      
       const mockPermits: BuildingCodeLink[] = [
         {
-          title: `${location} Building Permits`,
-          url: `https://www.google.com/search?q="${encodeURIComponent(location)}"+building+permits+government`,
-          description: `Find official building permit information for ${location}.`,
+          title: `${city} Building Permits`,
+          url: `https://www.${city.toLowerCase().replace(/\s+/g, '')}.gov/permits`,
+          description: `Official building permit portal for ${city}.`,
           category: "Local Government"
         },
         {
-          title: "PermitFlow Services",
-          url: "https://www.permitflow.com/",
-          description: "Professional permit application service for construction projects.",
-          category: "Online Services"
+          title: `${city} Planning Department`,
+          url: `https://www.${city.toLowerCase().replace(/\s+/g, '')}.gov/planning`,
+          description: `Planning and zoning information for ${city}.`,
+          category: "Local Government"
         },
         {
-          title: "BuildFax Permit Search", 
-          url: "https://www.buildfax.com/",
-          description: "Search building permits and property improvement records.",
-          category: "Database Search"
+          title: `${state} Contractor Licensing`,
+          url: `https://www.${state.toLowerCase().replace(/\s+/g, '')}.gov/licensing/contractors`,
+          description: `State contractor licensing requirements for ${state}.`,
+          category: "State Government"
+        },
+        {
+          title: `${city} Code Enforcement`,
+          url: `https://www.${city.toLowerCase().replace(/\s+/g, '')}.gov/code-enforcement`,
+          description: `Code enforcement and inspection services for ${city}.`,
+          category: "Local Government"
         },
         {
           title: "Permit Requirements Guide",
           url: "https://www.familyhandyman.com/article/building-permits-101/",
           description: "Comprehensive guide to when building permits are required.",
           category: "Resources"
-        },
-        {
-          title: `${location} Contractor Licensing`,
-          url: `https://www.google.com/search?q="${encodeURIComponent(location)}"+contractor+license+requirements`,
-          description: `Contractor licensing requirements for ${location}.`,
-          category: "Professional Services"
         }
       ];
 
       setPermitLinks(mockPermits);
       setActiveLocation(location);
-      toast.success(`Found permit information for ${location}`);
     } catch (error) {
       console.error('Error searching permits:', error);
-      toast.error("Failed to search permit information");
     } finally {
       setIsSearching(false);
     }
@@ -210,7 +209,6 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
 
   const handleManualSearch = (searchType: 'codes' | 'permits') => {
     if (!manualCity || !manualState) {
-      toast.error("Please enter both city and state");
       return;
     }
     
