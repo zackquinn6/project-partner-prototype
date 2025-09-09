@@ -37,6 +37,26 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
   const [selectedHome, setSelectedHome] = useState<string>("");
   const [manualCity, setManualCity] = useState("");
   const [manualState, setManualState] = useState("");
+  
+  const usStates = [
+    { code: "AL", name: "Alabama" }, { code: "AK", name: "Alaska" }, { code: "AZ", name: "Arizona" },
+    { code: "AR", name: "Arkansas" }, { code: "CA", name: "California" }, { code: "CO", name: "Colorado" },
+    { code: "CT", name: "Connecticut" }, { code: "DE", name: "Delaware" }, { code: "FL", name: "Florida" },
+    { code: "GA", name: "Georgia" }, { code: "HI", name: "Hawaii" }, { code: "ID", name: "Idaho" },
+    { code: "IL", name: "Illinois" }, { code: "IN", name: "Indiana" }, { code: "IA", name: "Iowa" },
+    { code: "KS", name: "Kansas" }, { code: "KY", name: "Kentucky" }, { code: "LA", name: "Louisiana" },
+    { code: "ME", name: "Maine" }, { code: "MD", name: "Maryland" }, { code: "MA", name: "Massachusetts" },
+    { code: "MI", name: "Michigan" }, { code: "MN", name: "Minnesota" }, { code: "MS", name: "Mississippi" },
+    { code: "MO", name: "Missouri" }, { code: "MT", name: "Montana" }, { code: "NE", name: "Nebraska" },
+    { code: "NV", name: "Nevada" }, { code: "NH", name: "New Hampshire" }, { code: "NJ", name: "New Jersey" },
+    { code: "NM", name: "New Mexico" }, { code: "NY", name: "New York" }, { code: "NC", name: "North Carolina" },
+    { code: "ND", name: "North Dakota" }, { code: "OH", name: "Ohio" }, { code: "OK", name: "Oklahoma" },
+    { code: "OR", name: "Oregon" }, { code: "PA", name: "Pennsylvania" }, { code: "RI", name: "Rhode Island" },
+    { code: "SC", name: "South Carolina" }, { code: "SD", name: "South Dakota" }, { code: "TN", name: "Tennessee" },
+    { code: "TX", name: "Texas" }, { code: "UT", name: "Utah" }, { code: "VT", name: "Vermont" },
+    { code: "VA", name: "Virginia" }, { code: "WA", name: "Washington" }, { code: "WV", name: "West Virginia" },
+    { code: "WI", name: "Wisconsin" }, { code: "WY", name: "Wyoming" }
+  ];
   const [manualZip, setManualZip] = useState("");
   const [userHomes, setUserHomes] = useState<UserHome[]>([]);
   const [buildingCodes, setBuildingCodes] = useState<BuildingCodeLink[]>([]);
@@ -73,33 +93,33 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
       // Mock building codes data - in a real app, this would call a search API
       const mockCodes: BuildingCodeLink[] = [
         {
-          title: "International Building Code (IBC) 2021 (Final Action)",
+          title: "International Building Code (IBC) 2021",
           url: "https://codes.iccsafe.org/content/IBC2021P1/preface",
-          description: "Latest 2021 International Building Code with final action revisions. Establishes minimum requirements for public safety.",
+          description: "Latest 2021 International Building Code with final action revisions.",
           category: "International"
         },
         {
-          title: "International Residential Code (IRC) 2021 (Final Action)",
-          url: "https://codes.iccsafe.org/content/IRC2021P1/preface",
-          description: "Latest 2021 International Residential Code with final action revisions for one- and two-family dwellings.",
+          title: "International Residential Code (IRC) 2021",
+          url: "https://codes.iccsafe.org/content/IRC2021P1/preface", 
+          description: "Latest 2021 International Residential Code for residential buildings.",
           category: "International"
         },
         {
           title: "National Electrical Code (NEC) 2023",
-          url: "https://www.nfpa.org/codes-and-standards/all-codes-and-standards/list-of-codes-and-standards/detail?code=70",
-          description: "Latest 2023 National Electrical Code - sets the standard for electrical installation in the United States.",
+          url: "https://www.nfpa.org/codes-and-standards/nec/nec-2023",
+          description: "Latest 2023 National Electrical Code standards.",
           category: "National"
         },
         {
-          title: `Local Building Department - ${location}`,
-          url: `https://www.municode.com/search?searchText=${encodeURIComponent(location + ' building code')}`,
-          description: `Search local building codes for ${location}. Visit your city or county website for specific local amendments and requirements.`,
+          title: `${location} Building Codes`,
+          url: `https://library.municode.com/search?searchText=${encodeURIComponent(location)}+building+code`,
+          description: `Local building codes and ordinances for ${location}.`,
           category: "Local"
         },
         {
-          title: "ICC Code Development Process",
-          url: "https://www.iccsafe.org/about/periodical-publications/code-development-process/",
-          description: "Information about International Code Council development process and updates.",
+          title: "Code Compliance Search",
+          url: "https://www.iccsafe.org/products-and-services/i-codes/code-development-process/",
+          description: "ICC code compliance and development resources.",
           category: "Resources"
         }
       ];
@@ -119,38 +139,35 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
     setIsSearching(true);
     try {
       // Mock permit data - in a real app, this would call a search API
-      const state = location.split(', ')[1]?.toLowerCase().replace(/\s/g, '');
-      const city = location.split(', ')[0]?.toLowerCase().replace(/\s/g, '');
-      
       const mockPermits: BuildingCodeLink[] = [
         {
-          title: `Permits.com - ${location}`,
-          url: `https://www.permits.com/permits/${state}/${city}`,
-          description: `Online permit application and tracking service for ${location}. Professional permit expediting available.`,
-          category: "Online Services"
-        },
-        {
-          title: `${location} Government Website`,
-          url: `https://www.google.com/search?q="${location}"+building+permits+site:gov`,
-          description: `Search official government websites for building permit information in ${location}.`,
+          title: `${location} Building Permits`,
+          url: `https://www.google.com/search?q="${encodeURIComponent(location)}"+building+permits+government`,
+          description: `Find official building permit information for ${location}.`,
           category: "Local Government"
         },
         {
-          title: "BuildingPermits.com",
-          url: "https://www.buildingpermits.com/",
-          description: "National permit application service with local jurisdiction information and requirements.",
-          category: "National Service"
+          title: "PermitFlow Services",
+          url: "https://www.permitflow.com/",
+          description: "Professional permit application service for construction projects.",
+          category: "Online Services"
         },
         {
-          title: "ICC Building Permit Guide",
-          url: "https://www.iccsafe.org/building-safety-journal/bsj-technical/building-permits-101/",
-          description: "Comprehensive guide to understanding building permits, requirements, and the application process.",
+          title: "BuildFax Permit Search", 
+          url: "https://www.buildfax.com/",
+          description: "Search building permits and property improvement records.",
+          category: "Database Search"
+        },
+        {
+          title: "Permit Requirements Guide",
+          url: "https://www.familyhandyman.com/article/building-permits-101/",
+          description: "Comprehensive guide to when building permits are required.",
           category: "Resources"
         },
         {
-          title: `PermitPlace - ${location}`,
-          url: `https://www.permitplace.com/permits-by-location/`,
-          description: `Professional permit services for ${location}. Licensed professionals handle permit applications and inspections.`,
+          title: `${location} Contractor Licensing`,
+          url: `https://www.google.com/search?q="${encodeURIComponent(location)}"+contractor+license+requirements`,
+          description: `Contractor licensing requirements for ${location}.`,
           category: "Professional Services"
         }
       ];
@@ -229,16 +246,13 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
 
           <TabsContent value="codes" className="flex-1 space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Building Codes Search
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-1 text-sm">
+                  <FileText className="h-4 w-4" />
+                  Building Codes
                 </CardTitle>
-                <CardDescription>
-                  Find relevant building codes for your location, including international, national, and local requirements.
-                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 p-4">
+              <CardContent className="space-y-2 p-3">
                 {/* Home Selection */}
                 {userHomes.length > 0 && (
                   <div className="space-y-1">
@@ -278,27 +292,32 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
                 {/* Manual Location Entry */}
                 <div className="space-y-1">
                   <Label className="text-sm">Manual Entry:</Label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1">
                     <Input
                       placeholder="City"
                       value={manualCity}
                       onChange={(e) => setManualCity(e.target.value)}
-                      className="h-8 text-sm"
+                      className="h-7 text-xs"
                     />
-                    <Input
-                      placeholder="State"
-                      value={manualState}
-                      onChange={(e) => setManualState(e.target.value)}
-                      className="h-8 text-sm"
-                    />
+                    <Select value={manualState} onValueChange={setManualState}>
+                      <SelectTrigger className="h-7 text-xs w-20">
+                        <SelectValue placeholder="State" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {usStates.map((state) => (
+                          <SelectItem key={state.code} value={state.code}>
+                            {state.code}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <Button 
                       onClick={() => handleManualSearch('codes')} 
                       disabled={isSearching || !manualCity || !manualState}
                       size="sm"
-                      className="h-8 px-3 text-sm whitespace-nowrap"
+                      className="h-7 px-2 text-xs"
                     >
-                      <Search className="h-3 w-3 mr-1" />
-                      {isSearching ? "..." : "Search"}
+                      <Search className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
@@ -343,16 +362,13 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
 
           <TabsContent value="permits" className="flex-1 space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5" />
-                  Permits Search
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-1 text-sm">
+                  <Building2 className="h-4 w-4" />
+                  Permits
                 </CardTitle>
-                <CardDescription>
-                  Find permit requirements and application processes for your location.
-                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 p-4">
+              <CardContent className="space-y-2 p-3">
                 {/* Home Selection */}
                 {userHomes.length > 0 && (
                   <div className="space-y-1">
@@ -392,27 +408,32 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
                 {/* Manual Location Entry */}
                 <div className="space-y-1">
                   <Label className="text-sm">Manual Entry:</Label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1">
                     <Input
                       placeholder="City"
                       value={manualCity}
                       onChange={(e) => setManualCity(e.target.value)}
-                      className="h-8 text-sm"
+                      className="h-7 text-xs"
                     />
-                    <Input
-                      placeholder="State"
-                      value={manualState}
-                      onChange={(e) => setManualState(e.target.value)}
-                      className="h-8 text-sm"
-                    />
+                    <Select value={manualState} onValueChange={setManualState}>
+                      <SelectTrigger className="h-7 text-xs w-20">
+                        <SelectValue placeholder="State" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {usStates.map((state) => (
+                          <SelectItem key={state.code} value={state.code}>
+                            {state.code}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <Button 
                       onClick={() => handleManualSearch('permits')} 
                       disabled={isSearching || !manualCity || !manualState}
                       size="sm"
-                      className="h-8 px-3 text-sm whitespace-nowrap"
+                      className="h-7 px-2 text-xs"
                     >
-                      <Search className="h-3 w-3 mr-1" />
-                      {isSearching ? "..." : "Search"}
+                      <Search className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
