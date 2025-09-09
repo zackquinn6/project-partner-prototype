@@ -142,34 +142,34 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
       
       const mockPermits: BuildingCodeLink[] = [
         {
-          title: `${city} Building Permits`,
-          url: `https://www.${city.toLowerCase().replace(/\s+/g, '')}.gov/permits`,
-          description: `Official building permit portal for ${city}.`,
+          title: `${city} Municipal Website - Building Permits`,
+          url: `https://www.google.com/search?q="${city}"+building+permits+site:gov`,
+          description: `Search for official building permit information for ${city}.`,
           category: "Local Government"
         },
         {
-          title: `${city} Planning Department`,
-          url: `https://www.${city.toLowerCase().replace(/\s+/g, '')}.gov/planning`,
-          description: `Planning and zoning information for ${city}.`,
-          category: "Local Government"
-        },
-        {
-          title: `${state} Contractor Licensing`,
-          url: `https://www.${state.toLowerCase().replace(/\s+/g, '')}.gov/licensing/contractors`,
-          description: `State contractor licensing requirements for ${state}.`,
+          title: `${state} State Building Department`,
+          url: `https://www.google.com/search?q="${state}"+state+building+department+permits+site:gov`,
+          description: `State-level building permit resources for ${state}.`,
           category: "State Government"
         },
         {
-          title: `${city} Code Enforcement`,
-          url: `https://www.${city.toLowerCase().replace(/\s+/g, '')}.gov/code-enforcement`,
-          description: `Code enforcement and inspection services for ${city}.`,
+          title: `${city} City Hall - Planning & Zoning`,
+          url: `https://www.google.com/search?q="${city}"+city+hall+planning+zoning+site:gov`,
+          description: `Planning and zoning permit information for ${city}.`,
           category: "Local Government"
         },
         {
-          title: "Permit Requirements Guide",
-          url: "https://www.familyhandyman.com/article/building-permits-101/",
-          description: "Comprehensive guide to when building permits are required.",
-          category: "Resources"
+          title: `County Building Department - ${city}`,
+          url: `https://www.google.com/search?q="${city}"+county+building+department+permits+site:gov`,
+          description: `County-level building permit services for ${city} area.`,
+          category: "County Government"
+        },
+        {
+          title: "HUD Building Permit Guide",
+          url: "https://www.hud.gov/program_offices/housing/sfh/res/respermit",
+          description: "Federal guidance on building permits and requirements.",
+          category: "Federal Resources"
         }
       ];
 
