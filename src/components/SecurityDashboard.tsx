@@ -8,7 +8,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
-import { AlertTriangle, Shield, Activity, Download, Trash2, AlertCircle } from 'lucide-react';
+import { SecurityDocumentation } from '@/components/SecurityDocumentation';
+import { AlertTriangle, Shield, Activity, Download, Trash2, AlertCircle, FileText } from 'lucide-react';
 
 interface AuditLog {
   id: string;
@@ -171,10 +172,11 @@ export const SecurityDashboard: React.FC = () => {
       </div>
 
       <Tabs defaultValue="audit" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="audit">Audit Logs</TabsTrigger>
           <TabsTrigger value="failed">Failed Logins</TabsTrigger>
           <TabsTrigger value="sessions">User Sessions</TabsTrigger>
+          <TabsTrigger value="documentation">Documentation</TabsTrigger>
         </TabsList>
 
         <TabsContent value="audit" className="space-y-4">
@@ -281,6 +283,20 @@ export const SecurityDashboard: React.FC = () => {
                   ))}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="documentation" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Security Architecture Documentation
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SecurityDocumentation />
             </CardContent>
           </Card>
         </TabsContent>

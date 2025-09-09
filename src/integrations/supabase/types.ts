@@ -1514,6 +1514,10 @@ export type Database = {
         Args: { action_type: string }
         Returns: boolean
       }
+      validate_admin_security_access: {
+        Args: { action_description: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
