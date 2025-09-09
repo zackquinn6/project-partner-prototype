@@ -7,6 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PricingWindow } from '@/components/PricingWindow';
 import DIYSurveyPopup from '@/components/DIYSurveyPopup';
 import { AIRepairWindow } from '@/components/AIRepairWindow';
+import { CodePermitsWindow } from '@/components/CodePermitsWindow';
+import { ContractorFinderWindow } from '@/components/ContractorFinderWindow';
 import { 
   ArrowRight,
   Home as HomeIcon, 
@@ -26,7 +28,8 @@ import {
   Folder,
   Calculator,
   HelpCircle,
-  Camera
+  Camera,
+  Building2
 } from 'lucide-react';
 
 interface HomeProps {
@@ -75,6 +78,8 @@ export default function Home({ onViewChange }: HomeProps) {
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [isDIYQuizOpen, setIsDIYQuizOpen] = useState(false);
   const [isAIRepairOpen, setIsAIRepairOpen] = useState(false);
+  const [isCodePermitsOpen, setIsCodePermitsOpen] = useState(false);
+  const [isContractorFinderOpen, setIsContractorFinderOpen] = useState(false);
 
   useEffect(() => {
     const handleOpenQuiz = () => {
@@ -139,7 +144,7 @@ export default function Home({ onViewChange }: HomeProps) {
             <div className="border-b border-border pb-6 mb-8"></div>
             
             {/* Apps Grid */}
-            <div className="grid grid-cols-4 gap-3 sm:gap-4 max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto mb-8 px-2">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto mb-8 px-2">
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => navigate('/user')}>
                 <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
                   <Folder className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
@@ -215,6 +220,20 @@ export default function Home({ onViewChange }: HomeProps) {
                   <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-indigo-600 text-center leading-tight px-1">AI Repair</span>
+              </div>
+
+              <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-code-permits'))}>
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-purple-500 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+                  <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                </div>
+                <span className="text-xs font-medium text-purple-600 text-center leading-tight px-1">Code & Permits</span>
+              </div>
+
+              <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-contractor-finder'))}>
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+                  <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                </div>
+                <span className="text-xs font-medium text-indigo-600 text-center leading-tight px-1">Contractor Finder</span>
               </div>
              </div>
            </div>
@@ -405,6 +424,16 @@ export default function Home({ onViewChange }: HomeProps) {
       <AIRepairWindow
         open={isAIRepairOpen}
         onOpenChange={(open) => setIsAIRepairOpen(open)}
+      />
+
+      <CodePermitsWindow 
+        open={isCodePermitsOpen}
+        onOpenChange={setIsCodePermitsOpen}
+      />
+      
+      <ContractorFinderWindow 
+        open={isContractorFinderOpen}
+        onOpenChange={setIsContractorFinderOpen}
       />
     </div>
   );
