@@ -81,6 +81,36 @@ export default function Home({ onViewChange }: HomeProps) {
   const [isCodePermitsOpen, setIsCodePermitsOpen] = useState(false);
   const [isContractorFinderOpen, setIsContractorFinderOpen] = useState(false);
 
+  // Randomized color palette for app icons
+  const colorPalette = [
+    'bg-slate-600', 'bg-blue-500', 'bg-green-500', 'bg-orange-500', 
+    'bg-purple-500', 'bg-indigo-500', 'bg-pink-500', 'bg-teal-500',
+    'bg-red-500', 'bg-yellow-500', 'bg-cyan-500', 'bg-emerald-500',
+    'bg-violet-500', 'bg-amber-500', 'bg-lime-500', 'bg-rose-500'
+  ];
+
+  // Function to get random color from palette
+  const getRandomColor = () => {
+    return colorPalette[Math.floor(Math.random() * colorPalette.length)];
+  };
+
+  // Generate random colors for each app (keeping consistent during component lifecycle)
+  const [appColors] = useState(() => ({
+    myProjects: getRandomColor(),
+    rapidPlan: getRandomColor(),
+    homeMaintenance: getRandomColor(),
+    toolLibrary: getRandomColor(),
+    toolAccess: getRandomColor(),
+    projectCatalog: getRandomColor(),
+    expertHelp: getRandomColor(),
+    myProfile: getRandomColor(),
+    community: getRandomColor(),
+    myHomes: getRandomColor(),
+    aiRepair: getRandomColor(),
+    codePermits: getRandomColor(),
+    contractorFinder: getRandomColor()
+  }));
+
   useEffect(() => {
     const handleOpenQuiz = () => {
       setIsDIYQuizOpen(true);
@@ -146,91 +176,91 @@ export default function Home({ onViewChange }: HomeProps) {
             {/* Apps Grid */}
             <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto mb-8 px-2">
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => navigate('/user')}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.myProjects} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <Folder className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-gray-700 text-center leading-tight px-1">My Projects</span>
               </div>
               
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-rapid-assessment'))}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.rapidPlan} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <Calculator className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-blue-600 text-center leading-tight px-1">Rapid Plan</span>
               </div>
               
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-home-maintenance'))}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-green-500 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.homeMaintenance} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <HomeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-green-600 text-center leading-tight px-1">Home Maintenance</span>
               </div>
               
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-user-tools-materials'))}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.toolLibrary} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <Wrench className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-gray-700 text-center leading-tight px-1">Tool Library</span>
               </div>
               
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-tool-rentals'))}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.toolAccess} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <Hammer className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-orange-600 text-center leading-tight px-1">Tool Access</span>
               </div>
               
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => navigate('/projects')}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.projectCatalog} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-orange-600 text-center leading-tight px-1">Project Catalog</span>
               </div>
               
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-help-popup'))}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-green-500 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.expertHelp} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <HelpCircle className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-green-600 text-center leading-tight px-1">Expert Help</span>
               </div>
               
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('open-profile-manager'))}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.myProfile} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <User className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-gray-700 text-center leading-tight px-1">My Profile</span>
               </div>
               
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-community-posts'))}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-purple-500 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.community} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-purple-600 text-center leading-tight px-1">Community</span>
               </div>
               
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-home-manager'))}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.myHomes} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <MapPin className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-gray-700 text-center leading-tight px-1">My Homes</span>
               </div>
 
-              <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-ai-repair'))}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-indigo-500 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+              <div className="flex flex-col items-center group cursor-pointer" onClick={() => setIsAIRepairOpen(true)}>
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.aiRepair} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-indigo-600 text-center leading-tight px-1">AI Repair</span>
               </div>
 
-              <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-code-permits'))}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-purple-500 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
-                  <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+              <div className="flex flex-col items-center group cursor-pointer" onClick={() => setIsCodePermitsOpen(true)}>
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.codePermits} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
+                  <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-purple-600 text-center leading-tight px-1">Code & Permits</span>
               </div>
 
-              <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-contractor-finder'))}>
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg">
+              <div className="flex flex-col items-center group cursor-pointer" onClick={() => setIsContractorFinderOpen(true)}>
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.contractorFinder} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-indigo-600 text-center leading-tight px-1">Contractor Finder</span>
