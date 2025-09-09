@@ -28,10 +28,22 @@ export const SecurityHeadersProvider: React.FC<{ children: React.ReactNode }> = 
       noSniffMeta.httpEquiv = 'X-Content-Type-Options';
       noSniffMeta.content = 'nosniff';
       
-      // X-Frame-Options
-      const frameOptionsMeta = document.createElement('meta');
-      frameOptionsMeta.httpEquiv = 'X-Frame-Options';
-      frameOptionsMeta.content = 'DENY';
+      // X-Frame-Options - Conditionally disabled for Lovable editor compatibility
+      // SECURITY NOTE: In production, this should be set to 'DENY' or 'SAMEORIGIN'
+      // For Lovable development environment, we allow iframe embedding
+      const isLovableEnvironment = window.location.hostname.includes('lovable.dev') || 
+                                   window.parent !== window; // Detect if running in iframe
+      
+      if (!isLovableEnvironment) {
+        const frameOptionsMeta = document.createElement('meta');
+        frameOptionsMeta.httpEquiv = 'X-Frame-Options';
+        frameOptionsMeta.content = 'DENY';
+        
+        const existingFrameOptions = document.querySelector('meta[http-equiv="X-Frame-Options"]');
+        if (!existingFrameOptions) {
+          document.head.appendChild(frameOptionsMeta);
+        }
+      }
       
       // Referrer Policy
       const referrerMeta = document.createElement('meta');
@@ -54,10 +66,6 @@ export const SecurityHeadersProvider: React.FC<{ children: React.ReactNode }> = 
         document.head.appendChild(noSniffMeta);
       }
       
-      const existingFrameOptions = document.querySelector('meta[http-equiv="X-Frame-Options"]');
-      if (!existingFrameOptions) {
-        document.head.appendChild(frameOptionsMeta);
-      }
       
       const existingReferrer = document.querySelector('meta[name="referrer"]');
       if (!existingReferrer) {

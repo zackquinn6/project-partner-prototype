@@ -1411,6 +1411,16 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: Json
       }
+      get_failed_login_summary: {
+        Args: { days_back?: number }
+        Returns: {
+          attempt_count: number
+          date: string
+          top_attempted_domains: string[]
+          unique_emails: number
+          unique_ips: number
+        }[]
+      }
       get_security_headers: {
         Args: Record<PropertyKey, never>
         Returns: Json
