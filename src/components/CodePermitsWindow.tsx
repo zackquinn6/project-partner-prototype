@@ -73,34 +73,34 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
       // Mock building codes data - in a real app, this would call a search API
       const mockCodes: BuildingCodeLink[] = [
         {
-          title: "International Building Code (IBC) 2021",
-          url: "https://codes.iccsafe.org/content/IBC2021P1",
-          description: "The International Building Code establishes minimum requirements to safeguard public health, safety and general welfare.",
+          title: "International Building Code (IBC) 2021 (Final Action)",
+          url: "https://codes.iccsafe.org/content/IBC2021P1/preface",
+          description: "Latest 2021 International Building Code with final action revisions. Establishes minimum requirements for public safety.",
           category: "International"
         },
         {
-          title: "International Residential Code (IRC) 2021",
-          url: "https://codes.iccsafe.org/content/IRC2021P1",
-          description: "The International Residential Code provides requirements for one- and two-family dwellings.",
+          title: "International Residential Code (IRC) 2021 (Final Action)",
+          url: "https://codes.iccsafe.org/content/IRC2021P1/preface",
+          description: "Latest 2021 International Residential Code with final action revisions for one- and two-family dwellings.",
           category: "International"
         },
         {
-          title: `${location} Building Code`,
-          url: `#local-building-code-${location.replace(/\s+/g, '-').toLowerCase()}`,
-          description: `Local building code requirements for ${location}. Contact your local building department for specific regulations.`,
-          category: "Local"
-        },
-        {
-          title: `${location} Electrical Code`,
-          url: `#local-electrical-code-${location.replace(/\s+/g, '-').toLowerCase()}`,
-          description: `Electrical code requirements for ${location}. Based on National Electrical Code (NEC) with local amendments.`,
-          category: "Local"
-        },
-        {
-          title: "National Electrical Code (NEC) 2020",
+          title: "National Electrical Code (NEC) 2023",
           url: "https://www.nfpa.org/codes-and-standards/all-codes-and-standards/list-of-codes-and-standards/detail?code=70",
-          description: "The National Electrical Code sets the standard for electrical installation in the United States.",
+          description: "Latest 2023 National Electrical Code - sets the standard for electrical installation in the United States.",
           category: "National"
+        },
+        {
+          title: `Local Building Department - ${location}`,
+          url: `https://www.municode.com/search?searchText=${encodeURIComponent(location + ' building code')}`,
+          description: `Search local building codes for ${location}. Visit your city or county website for specific local amendments and requirements.`,
+          category: "Local"
+        },
+        {
+          title: "ICC Code Development Process",
+          url: "https://www.iccsafe.org/about/periodical-publications/code-development-process/",
+          description: "Information about International Code Council development process and updates.",
+          category: "Resources"
         }
       ];
 
@@ -119,30 +119,39 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
     setIsSearching(true);
     try {
       // Mock permit data - in a real app, this would call a search API
+      const state = location.split(', ')[1]?.toLowerCase().replace(/\s/g, '');
+      const city = location.split(', ')[0]?.toLowerCase().replace(/\s/g, '');
+      
       const mockPermits: BuildingCodeLink[] = [
         {
-          title: `${location} Building Permits Department`,
-          url: `#permits-department-${location.replace(/\s+/g, '-').toLowerCase()}`,
-          description: `Apply for building permits in ${location}. Contact your local building department for specific requirements.`,
-          category: "Local Government"
-        },
-        {
-          title: `${location} Online Permit Portal`,
-          url: `#online-permits-${location.replace(/\s+/g, '-').toLowerCase()}`,
-          description: `Online portal for permit applications, status tracking, and inspections in ${location}.`,
+          title: `Permits.com - ${location}`,
+          url: `https://www.permits.com/permits/${state}/${city}`,
+          description: `Online permit application and tracking service for ${location}. Professional permit expediting available.`,
           category: "Online Services"
         },
         {
-          title: "Permit Requirements Guide",
-          url: "#permit-requirements-guide",
-          description: "General guide to understanding when permits are required for common home improvement projects.",
+          title: `${location} Government Website`,
+          url: `https://www.google.com/search?q="${location}"+building+permits+site:gov`,
+          description: `Search official government websites for building permit information in ${location}.`,
+          category: "Local Government"
+        },
+        {
+          title: "BuildingPermits.com",
+          url: "https://www.buildingpermits.com/",
+          description: "National permit application service with local jurisdiction information and requirements.",
+          category: "National Service"
+        },
+        {
+          title: "ICC Building Permit Guide",
+          url: "https://www.iccsafe.org/building-safety-journal/bsj-technical/building-permits-101/",
+          description: "Comprehensive guide to understanding building permits, requirements, and the application process.",
           category: "Resources"
         },
         {
-          title: `${location} Inspection Scheduling`,
-          url: `#inspection-scheduling-${location.replace(/\s+/g, '-').toLowerCase()}`,
-          description: `Schedule required inspections for your project in ${location}.`,
-          category: "Inspections"
+          title: `PermitPlace - ${location}`,
+          url: `https://www.permitplace.com/permits-by-location/`,
+          description: `Professional permit services for ${location}. Licensed professionals handle permit applications and inspections.`,
+          category: "Professional Services"
         }
       ];
 
@@ -163,6 +172,22 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
       const location = `${home.city}, ${home.state}`;
       setSelectedHome(homeId);
       setActiveLocation(location);
+      // Clear manual inputs when home is selected
+      setManualCity("");
+      setManualState("");
+      setManualZip("");
+    }
+  };
+
+  const handleHomeSearchCodes = () => {
+    if (activeLocation) {
+      searchBuildingCodes(activeLocation);
+    }
+  };
+
+  const handleHomeSearchPermits = () => {
+    if (activeLocation) {
+      searchPermits(activeLocation);
     }
   };
 
@@ -213,57 +238,69 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
                   Find relevant building codes for your location, including international, national, and local requirements.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 p-4">
                 {/* Home Selection */}
                 {userHomes.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Select from your homes:</Label>
-                    <Select value={selectedHome} onValueChange={handleHomeSelection}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose a home" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {userHomes.map((home) => (
-                          <SelectItem key={home.id} value={home.id}>
-                            <div className="flex items-center gap-2">
-                              <Home className="h-4 w-4" />
-                              {home.address}, {home.city}, {home.state}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="space-y-1">
+                    <Label className="text-sm">Your Homes:</Label>
+                    <div className="flex gap-2">
+                      <Select value={selectedHome} onValueChange={handleHomeSelection}>
+                        <SelectTrigger className="h-8 text-sm">
+                          <SelectValue placeholder="Choose home" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {userHomes.map((home) => (
+                            <SelectItem key={home.id} value={home.id}>
+                              <div className="flex items-center gap-1 text-sm">
+                                <Home className="h-3 w-3" />
+                                {home.city}, {home.state}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {activeLocation && (
+                        <Button 
+                          onClick={handleHomeSearchCodes}
+                          size="sm" 
+                          className="h-8 px-3 text-sm"
+                          disabled={isSearching}
+                        >
+                          <Search className="h-3 w-3 mr-1" />
+                          Search
+                        </Button>
+                      )}
+                    </div>
+                    {activeLocation && <p className="text-xs text-muted-foreground">Selected: {activeLocation}</p>}
                   </div>
                 )}
 
                 {/* Manual Location Entry */}
-                <div className="space-y-2">
-                  <Label>Or enter location manually:</Label>
-                  <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-sm">Manual Entry:</Label>
+                  <div className="flex gap-2">
                     <Input
                       placeholder="City"
                       value={manualCity}
                       onChange={(e) => setManualCity(e.target.value)}
+                      className="h-8 text-sm"
                     />
                     <Input
                       placeholder="State"
                       value={manualState}
                       onChange={(e) => setManualState(e.target.value)}
+                      className="h-8 text-sm"
                     />
-                    <Input
-                      placeholder="Zip Code (optional)"
-                      value={manualZip}
-                      onChange={(e) => setManualZip(e.target.value)}
-                    />
+                    <Button 
+                      onClick={() => handleManualSearch('codes')} 
+                      disabled={isSearching || !manualCity || !manualState}
+                      size="sm"
+                      className="h-8 px-3 text-sm whitespace-nowrap"
+                    >
+                      <Search className="h-3 w-3 mr-1" />
+                      {isSearching ? "..." : "Search"}
+                    </Button>
                   </div>
-                  <Button 
-                    onClick={() => handleManualSearch('codes')} 
-                    disabled={isSearching || !manualCity || !manualState}
-                    className="w-full"
-                  >
-                    <Search className="h-4 w-4 mr-2" />
-                    {isSearching ? "Searching..." : "Search Building Codes"}
-                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -315,57 +352,69 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
                   Find permit requirements and application processes for your location.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 p-4">
                 {/* Home Selection */}
                 {userHomes.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Select from your homes:</Label>
-                    <Select value={selectedHome} onValueChange={handleHomeSelection}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose a home" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {userHomes.map((home) => (
-                          <SelectItem key={home.id} value={home.id}>
-                            <div className="flex items-center gap-2">
-                              <Home className="h-4 w-4" />
-                              {home.address}, {home.city}, {home.state}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="space-y-1">
+                    <Label className="text-sm">Your Homes:</Label>
+                    <div className="flex gap-2">
+                      <Select value={selectedHome} onValueChange={handleHomeSelection}>
+                        <SelectTrigger className="h-8 text-sm">
+                          <SelectValue placeholder="Choose home" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {userHomes.map((home) => (
+                            <SelectItem key={home.id} value={home.id}>
+                              <div className="flex items-center gap-1 text-sm">
+                                <Home className="h-3 w-3" />
+                                {home.city}, {home.state}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {activeLocation && (
+                        <Button 
+                          onClick={handleHomeSearchPermits}
+                          size="sm" 
+                          className="h-8 px-3 text-sm"
+                          disabled={isSearching}
+                        >
+                          <Search className="h-3 w-3 mr-1" />
+                          Search
+                        </Button>
+                      )}
+                    </div>
+                    {activeLocation && <p className="text-xs text-muted-foreground">Selected: {activeLocation}</p>}
                   </div>
                 )}
 
                 {/* Manual Location Entry */}
-                <div className="space-y-2">
-                  <Label>Or enter location manually:</Label>
-                  <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-sm">Manual Entry:</Label>
+                  <div className="flex gap-2">
                     <Input
                       placeholder="City"
                       value={manualCity}
                       onChange={(e) => setManualCity(e.target.value)}
+                      className="h-8 text-sm"
                     />
                     <Input
                       placeholder="State"
                       value={manualState}
                       onChange={(e) => setManualState(e.target.value)}
+                      className="h-8 text-sm"
                     />
-                    <Input
-                      placeholder="Zip Code (optional)"
-                      value={manualZip}
-                      onChange={(e) => setManualZip(e.target.value)}
-                    />
+                    <Button 
+                      onClick={() => handleManualSearch('permits')} 
+                      disabled={isSearching || !manualCity || !manualState}
+                      size="sm"
+                      className="h-8 px-3 text-sm whitespace-nowrap"
+                    >
+                      <Search className="h-3 w-3 mr-1" />
+                      {isSearching ? "..." : "Search"}
+                    </Button>
                   </div>
-                  <Button 
-                    onClick={() => handleManualSearch('permits')} 
-                    disabled={isSearching || !manualCity || !manualState}
-                    className="w-full"
-                  >
-                    <Search className="h-4 w-4 mr-2" />
-                    {isSearching ? "Searching..." : "Search Permit Information"}
-                  </Button>
                 </div>
               </CardContent>
             </Card>
