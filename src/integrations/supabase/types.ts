@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_repair_analyses: {
+        Row: {
+          action_plan: string | null
+          analysis_result: Json
+          created_at: string
+          difficulty_level: string | null
+          estimated_cost_range: string | null
+          estimated_time: string | null
+          id: string
+          issue_category: string | null
+          photos: Json
+          recommended_materials: Json | null
+          recommended_tools: Json | null
+          root_cause_analysis: string | null
+          severity_level: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_plan?: string | null
+          analysis_result?: Json
+          created_at?: string
+          difficulty_level?: string | null
+          estimated_cost_range?: string | null
+          estimated_time?: string | null
+          id?: string
+          issue_category?: string | null
+          photos?: Json
+          recommended_materials?: Json | null
+          recommended_tools?: Json | null
+          root_cause_analysis?: string | null
+          severity_level?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_plan?: string | null
+          analysis_result?: Json
+          created_at?: string
+          difficulty_level?: string | null
+          estimated_cost_range?: string | null
+          estimated_time?: string | null
+          id?: string
+          issue_category?: string | null
+          photos?: Json
+          recommended_materials?: Json | null
+          recommended_tools?: Json | null
+          root_cause_analysis?: string | null
+          severity_level?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       failed_login_attempts: {
         Row: {
           attempt_time: string
