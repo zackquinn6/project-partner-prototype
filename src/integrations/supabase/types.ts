@@ -1029,6 +1029,39 @@ export type Database = {
         }
         Relationships: []
       }
+      sensitive_data_access_log: {
+        Row: {
+          access_type: string
+          accessed_table: string
+          accessed_user_id: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          access_type: string
+          accessed_table: string
+          accessed_user_id: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          access_type?: string
+          accessed_table?: string
+          accessed_user_id?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       tools: {
         Row: {
           created_at: string
@@ -1407,6 +1440,16 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_user_profile_safe: {
+        Args: { user_uuid: string }
+        Returns: {
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+          user_id: string
+        }[]
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: string
@@ -1429,6 +1472,14 @@ export type Database = {
           event_type: string
           ip_addr?: string
           user_email?: string
+        }
+        Returns: undefined
+      }
+      log_sensitive_data_access: {
+        Args: {
+          access_type?: string
+          accessed_table: string
+          accessed_user_id: string
         }
         Returns: undefined
       }
