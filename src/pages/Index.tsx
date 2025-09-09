@@ -28,6 +28,20 @@ const Index = () => {
   const [forceListingMode, setForceListingMode] = useState(false);
   const [showHelpPopup, setShowHelpPopup] = useState(false);
 
+  // Handle navigation state changes (including view parameter)
+  useEffect(() => {
+    if (location.state?.view) {
+      console.log('🎯 Index: Setting view from navigation state:', location.state.view);
+      setCurrentView(location.state.view);
+      
+      if (location.state.resetToListing) {
+        console.log('🔄 Index: Setting reset flags from navigation state');
+        setResetUserView(true);
+        setForceListingMode(true);
+      }
+    }
+  }, [location.state]);
+
   // Listen for edit workflow navigation event
   useEffect(() => {
     const handleEditWorkflowNavigation = () => {
