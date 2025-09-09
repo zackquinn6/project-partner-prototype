@@ -92,6 +92,9 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
       const state = location.split(', ')[1];
       const city = location.split(', ')[0];
       
+      // Get state full name for proper URL construction
+      const stateFullName = usStates.find(s => s.code === state)?.name || state;
+      
       const mockCodes: BuildingCodeLink[] = [
         {
           title: "International Building Code (IBC) 2021",
@@ -112,15 +115,15 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
           category: "National"
         },
         {
-          title: `${city} Building Department`,
-          url: `https://www.${city.toLowerCase().replace(/\s+/g, '')}.gov/building-department`,
-          description: `Official building department website for ${city}.`,
+          title: `${city} Official Website`,
+          url: `https://www.${city.toLowerCase().replace(/\s+/g, '')}.gov`,
+          description: `Official government website for ${city}.`,
           category: "Local Government"
         },
         {
-          title: `${state} State Building Codes`,
-          url: `https://www.${state.toLowerCase().replace(/\s+/g, '')}.gov/building-codes`,
-          description: `State building code resources for ${state}.`,
+          title: `${stateFullName} Official Website`,
+          url: `https://www.${stateFullName.toLowerCase().replace(/\s+/g, '')}.gov`,
+          description: `Official state government website for ${stateFullName}.`,
           category: "State Government"
         }
       ];
@@ -140,30 +143,33 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
       const state = location.split(', ')[1];
       const city = location.split(', ')[0];
       
+      // Get state full name for proper URL construction
+      const stateFullName = usStates.find(s => s.code === state)?.name || state;
+      
       const mockPermits: BuildingCodeLink[] = [
         {
-          title: `${city} Municipal Website - Building Permits`,
-          url: `https://www.google.com/search?q="${city}"+building+permits+site:gov`,
-          description: `Search for official building permit information for ${city}.`,
+          title: `${city} Building Permits`,
+          url: `https://www.${city.toLowerCase().replace(/\s+/g, '')}.gov/permits`,
+          description: `Official building permit portal for ${city}.`,
           category: "Local Government"
         },
         {
-          title: `${state} State Building Department`,
-          url: `https://www.google.com/search?q="${state}"+state+building+department+permits+site:gov`,
-          description: `State-level building permit resources for ${state}.`,
+          title: `${city} Planning Department`,
+          url: `https://www.${city.toLowerCase().replace(/\s+/g, '')}.gov/planning`,
+          description: `Planning and zoning information for ${city}.`,
+          category: "Local Government"
+        },
+        {
+          title: `${stateFullName} Building Department`,
+          url: `https://www.${stateFullName.toLowerCase().replace(/\s+/g, '')}.gov/building-permits`,
+          description: `State-level building permit resources for ${stateFullName}.`,
           category: "State Government"
         },
         {
-          title: `${city} City Hall - Planning & Zoning`,
-          url: `https://www.google.com/search?q="${city}"+city+hall+planning+zoning+site:gov`,
-          description: `Planning and zoning permit information for ${city}.`,
+          title: `${city} Code Enforcement`,
+          url: `https://www.${city.toLowerCase().replace(/\s+/g, '')}.gov/code-enforcement`,
+          description: `Code enforcement and inspection services for ${city}.`,
           category: "Local Government"
-        },
-        {
-          title: `County Building Department - ${city}`,
-          url: `https://www.google.com/search?q="${city}"+county+building+department+permits+site:gov`,
-          description: `County-level building permit services for ${city} area.`,
-          category: "County Government"
         },
         {
           title: "HUD Building Permit Guide",
