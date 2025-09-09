@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FolderOpen, BookOpen, User, ArrowRight, Trophy, Target, Zap, Wrench, Home, Shield, Hammer, HelpCircle, Calculator } from 'lucide-react';
+import { FolderOpen, BookOpen, User, ArrowRight, Trophy, Target, Zap, Wrench, Home, Shield, Hammer, HelpCircle, Calculator, Building2, Users } from 'lucide-react';
 import { useProject } from '@/contexts/ProjectContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { ToolRentalsWindow } from '@/components/ToolRentalsWindow';
 import { HelpPopup } from '@/components/HelpPopup';
 import { RapidProjectAssessment } from '@/components/RapidProjectAssessment';
+import { CodePermitsWindow } from '@/components/CodePermitsWindow';
+import { ContractorFinderWindow } from '@/components/ContractorFinderWindow';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 export const PostAuthLanding = () => {
   const navigate = useNavigate();
@@ -24,6 +26,8 @@ export const PostAuthLanding = () => {
   const [showToolRentals, setShowToolRentals] = useState(false);
   const [showHelpPopup, setShowHelpPopup] = useState(false);
   const [showProjectPlanning, setShowProjectPlanning] = useState(false);
+  const [showCodePermits, setShowCodePermits] = useState(false);
+  const [showContractorFinder, setShowContractorFinder] = useState(false);
   const [stats, setStats] = useState([{
     label: "Active Projects",
     value: "0",
@@ -146,6 +150,18 @@ export const PostAuthLanding = () => {
     action: () => setShowToolRentals(true),
     color: "bg-orange-600",
     textColor: "text-white"
+  }, {
+    icon: Building2,
+    title: "Code & Permits",
+    action: () => setShowCodePermits(true),
+    color: "bg-purple-600",
+    textColor: "text-white"
+  }, {
+    icon: Users,
+    title: "Contractor Finder",
+    action: () => setShowContractorFinder(true),
+    color: "bg-indigo-600",
+    textColor: "text-white"
   }];
 
   // Section 2: Explore
@@ -213,8 +229,8 @@ Pick up where you left off or start your next winning project.</p>
         {/* My Apps - App Icons Grid (4x2) */}
         <div className="mb-8 md:mb-12 px-4 md:px-0">
           <div className="max-w-2xl mx-auto">
-            {/* Responsive 4x2 Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 justify-items-center">
+            {/* Responsive Grid for Apps */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 justify-items-center">
               {[...myWorkActions, ...exploreActions, ...accountActions].map((action, index) => (
                 <div key={index} className="flex flex-col items-center cursor-pointer group" onClick={action.action}>
                   <div className={`w-14 h-14 md:w-16 md:h-16 ${action.color} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-110 transition-all duration-300 shadow-sm group-hover:shadow-md`}>
@@ -237,6 +253,10 @@ Pick up where you left off or start your next winning project.</p>
         <ToolRentalsWindow isOpen={showToolRentals} onClose={() => setShowToolRentals(false)} />
         
         <HelpPopup isOpen={showHelpPopup} onClose={() => setShowHelpPopup(false)} />
+        
+        <CodePermitsWindow open={showCodePermits} onOpenChange={setShowCodePermits} />
+        
+        <ContractorFinderWindow open={showContractorFinder} onOpenChange={setShowContractorFinder} />
         
         <Dialog open={showProjectPlanning} onOpenChange={setShowProjectPlanning}>
           <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden">

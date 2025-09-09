@@ -94,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
         
         <hr style="margin: 30px 0;">
         <p style="color: #666; font-size: 14px;">
-          This feedback was submitted through the DIY Project Assistant app.
+          This feedback was submitted through the Project Partner app.
         </p>
       `,
     });
@@ -103,13 +103,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to user
     const confirmationResponse = await resend.emails.send({
-      from: "DIY Project Assistant <onboarding@resend.dev>",
+      from: "Project Partner <onboarding@resend.dev>",
       to: [sanitizedEmail],
       subject: "Thank you for your feedback!",
       html: `
         <h2>Thank you for your feedback, ${sanitizedUserName}!</h2>
         
-        <p>We've received your feedback about our DIY Project Assistant app and truly appreciate you taking the time to share your thoughts with us.</p>
+        <p>We've received your feedback about our Project Partner app and truly appreciate you taking the time to share your thoughts with us.</p>
         
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3>Your Feedback Summary:</h3>
@@ -125,7 +125,7 @@ const handler = async (req: Request): Promise<Response> => {
         <p>Keep building great things!</p>
         
         <p>Best regards,<br>
-        <strong>The DIY Project Assistant Team</strong></p>
+        <strong>The Project Partner Team</strong></p>
         
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
         <p style="color: #666; font-size: 12px;">
