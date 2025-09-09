@@ -81,12 +81,12 @@ export default function Home({ onViewChange }: HomeProps) {
   const [isCodePermitsOpen, setIsCodePermitsOpen] = useState(false);
   const [isContractorFinderOpen, setIsContractorFinderOpen] = useState(false);
 
-  // Randomized color palette for app icons
+  // Modern, darker color palette for app icons
   const colorPalette = [
-    'bg-slate-600', 'bg-blue-500', 'bg-green-500', 'bg-orange-500', 
-    'bg-purple-500', 'bg-indigo-500', 'bg-pink-500', 'bg-teal-500',
-    'bg-red-500', 'bg-yellow-500', 'bg-cyan-500', 'bg-emerald-500',
-    'bg-violet-500', 'bg-amber-500', 'bg-lime-500', 'bg-rose-500'
+    'bg-slate-600', 'bg-slate-700', 'bg-gray-600', 'bg-gray-700', 
+    'bg-zinc-600', 'bg-zinc-700', 'bg-neutral-600', 'bg-neutral-700',
+    'bg-stone-600', 'bg-stone-700', 'bg-slate-800', 'bg-gray-800',
+    'bg-zinc-800', 'bg-neutral-800', 'bg-stone-800', 'bg-slate-500'
   ];
 
   // Function to get random color from palette
