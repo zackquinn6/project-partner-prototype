@@ -17,7 +17,7 @@ import {
   initializeCSRFProtection,
   validateFormSubmission
 } from '@/utils/enhancedInputSanitization';
-import { logPrivilegeEscalation, logAdminAction, logRateLimitExceeded, getClientInfo } from '@/utils/securityLogger';
+import { logAdminAction, checkEnhancedRateLimit, logSecurityViolation } from '@/utils/enhancedSecurityLogger';
 interface UserRole {
   id: string;
   user_id: string;
@@ -113,19 +113,7 @@ export const UserRoleManager: React.FC = () => {
       return;
     }
 
-    // Check rate limiting for role modifications
-    if (!checkOperationRateLimit('roleModification', user.id)) {
-      const clientInfo = getClientInfo();
-      await logRateLimitExceeded('roleModification', user.id, clientInfo.ipAddress);
-      toast({
-        title: "Rate limit exceeded",
-        description: "Too many role modification attempts. Please wait before trying again.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Sanitize and validate input
+    // Sanitize and validate input first
     const sanitizedData = enhancedSanitizeFormData({
       email: newUserEmail,
       role: newUserRole
@@ -147,6 +135,29 @@ export const UserRoleManager: React.FC = () => {
       });
       return;
     }
+
+    // Enhanced rate limiting check
+    const rateLimitPassed = await checkEnhancedRateLimit(
+      user?.id || 'anonymous',
+      'role_management',
+      10,
+      5
+    );
+    
+    if (!rateLimitPassed) {
+      await logSecurityViolation(
+        'rate_limit_exceeded',
+        'Role management rate limit exceeded',
+        'medium',
+        { userId: user?.id, targetEmail: sanitizedData.email, role: sanitizedData.role }
+      );
+      toast({
+        title: "Too many attempts",
+        description: "Please wait before making more role changes.",
+        variant: "destructive",
+      });
+      return;
+     }
 
     // Record the operation attempt
     recordOperationAttempt('roleModification', user.id);
@@ -181,9 +192,18 @@ export const UserRoleManager: React.FC = () => {
       
       if (error) throw error;
 
-      // Log the privilege escalation
-      await logPrivilegeEscalation(user.id, targetUser.user_id, `add_role_${sanitizedData.role}`, true);
-      await logAdminAction(user.id, 'add_user_role', `${sanitizedData.email}:${sanitizedData.role}`);
+      // Log the admin actions with enhanced logging
+      await logAdminAction(
+        `add_role_${sanitizedData.role}`,
+        `user_roles for ${sanitizedData.email}`,
+        !error,
+        { 
+          targetEmail: sanitizedData.email, 
+          role: sanitizedData.role, 
+          targetUserId: targetUser?.user_id,
+          operation: 'role_assignment'
+        }
+      );
 
       setNewUserEmail('');
       setNewUserRole('user');
@@ -204,10 +224,21 @@ export const UserRoleManager: React.FC = () => {
   const removeUserRole = async (roleId: string, userEmail: string, role: string) => {
     if (!user) return;
 
-    // Check rate limiting for role modifications
-    if (!checkOperationRateLimit('roleModification', user.id)) {
-      const clientInfo = getClientInfo();
-      await logRateLimitExceeded('roleModification', user.id, clientInfo.ipAddress);
+    // Enhanced rate limiting check
+    const rateLimitPassed = await checkEnhancedRateLimit(
+      user?.id || 'anonymous',
+      'role_management',
+      10,
+      5
+    );
+    
+    if (!rateLimitPassed) {
+      await logSecurityViolation(
+        'rate_limit_exceeded',
+        'Role management rate limit exceeded during removal',
+        'medium',
+        { userId: user?.id, targetEmail: userEmail, role: role }
+      );
       toast({
         title: "Rate limit exceeded",
         description: "Too many role modification attempts. Please wait before trying again.",
@@ -223,11 +254,21 @@ export const UserRoleManager: React.FC = () => {
       const { error } = await supabase.from('user_roles').delete().eq('id', roleId);
       if (error) throw error;
 
-      // Log the privilege escalation
+      // Log the admin action with enhanced logging
       const targetUser = allUsers.find(u => u.email === userEmail);
       if (targetUser) {
-        await logPrivilegeEscalation(user.id, targetUser.user_id, `remove_role_${role}`, true);
-        await logAdminAction(user.id, 'remove_user_role', `${userEmail}:${role}`);
+        await logAdminAction(
+          `remove_role_${role}`,
+          `user_roles for ${userEmail}`,
+          !error,
+          {
+            targetEmail: userEmail,
+            role: role,
+            targetUserId: targetUser.user_id,
+            operation: 'role_removal',
+            roleId: roleId
+          }
+        );
       }
 
       await loadUserRoles();

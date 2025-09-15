@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserRoleManager } from '@/components/UserRoleManager';
 import { ProjectAgreementsList } from '@/components/ProjectAgreementsList';
-import { SecurityDashboard } from '@/components/SecurityDashboard';
+import { SecurityMonitoringDashboard } from '@/components/SecurityMonitoringDashboard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -34,7 +34,7 @@ export const UsersSecurityWindow: React.FC<UsersSecurityWindowProps> = ({ open, 
           </TabsContent>
 
           <TabsContent value="security" className="mt-6">
-            <SecurityDashboard />
+            <SecurityMonitoringDashboard />
           </TabsContent>
         </Tabs>
       </DialogContent>

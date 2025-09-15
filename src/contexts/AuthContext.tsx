@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { checkAuthRateLimit, recordAuthAttempt } from '@/utils/securityUtils';
 import { sanitizeInput } from '@/utils/inputSanitization';
+import { logAuthenticationEvent, logSecurityViolation } from '@/utils/enhancedSecurityLogger';
 
 interface AuthContextType {
   user: User | null;
@@ -64,6 +65,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         emailRedirectTo: redirectUrl
       }
     });
+
+    // Log sign-up attempt
+    await logAuthenticationEvent(sanitizedEmail, !error, 'email_signup', {
+      redirectUrl,
+      timestamp: Date.now()
+    });
+
+    if (error) {
+      await logSecurityViolation(
+        'signup_failed',
+        `Sign-up failed for ${sanitizedEmail}: ${error.message}`,
+        'medium',
+        { email: sanitizedEmail, errorCode: error.message }
+      );
+    }
+
     return { error };
   };
 
@@ -81,12 +98,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (!rateLimitResult?.allowed) {
+        await logSecurityViolation(
+          'rate_limit_exceeded',
+          `Authentication rate limit exceeded for ${sanitizedEmail}`,
+          'medium',
+          { email: sanitizedEmail }
+        );
         return { error: { message: 'Too many login attempts. Please try again later.' } };
       }
     } catch (rateLimitError) {
       console.warn('Rate limit check failed, falling back to client-side:', rateLimitError);
       // Fallback to client-side rate limiting
       if (!checkAuthRateLimit(sanitizedEmail)) {
+        await logSecurityViolation(
+          'rate_limit_exceeded',
+          `Authentication rate limit exceeded for ${sanitizedEmail} (client-side)`,
+          'medium',
+          { email: sanitizedEmail }
+        );
         return { error: { message: 'Too many login attempts. Please try again later.' } };
       }
       recordAuthAttempt(sanitizedEmail);
@@ -95,6 +124,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { error } = await supabase.auth.signInWithPassword({
       email: sanitizedEmail,
       password,
+    });
+
+    // Log authentication attempt
+    await logAuthenticationEvent(sanitizedEmail, !error, 'email', {
+      timestamp: Date.now()
     });
     
     // Log failed login attempts on server
@@ -120,6 +154,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.warn('Failed to log login attempt:', fallbackError);
         }
       }
+
+      await logSecurityViolation(
+        'authentication_failed',
+        `Failed login attempt for ${sanitizedEmail}: ${error.message}`,
+        'medium',
+        { email: sanitizedEmail, errorCode: error.message }
+      );
     }
     
     return { error };
@@ -133,8 +174,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           redirectTo: `${window.location.origin}/`
         }
       });
+
+      // Log OAuth attempt
+      await logAuthenticationEvent('google_oauth', !error, 'google', {
+        redirectTo: `${window.location.origin}/`,
+        timestamp: Date.now()
+      });
       
       if (error) {
+        await logSecurityViolation(
+          'oauth_failed',
+          `Google OAuth authentication failed: ${error.message}`,
+          'medium',
+          { provider: 'google', errorCode: error.message }
+        );
+
         // Show user-friendly error message and recommend direct signup
         const userFriendlyError = { 
           message: 'Google sign-up is currently experiencing issues. Please try signing up directly with your email and password instead.' 
@@ -144,6 +198,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       return { error };
     } catch (err) {
+      await logSecurityViolation(
+        'oauth_error',
+        `Google OAuth unexpected error: ${err}`,
+        'medium',
+        { provider: 'google', error: String(err) }
+      );
+
       // Fallback error for any unexpected issues
       return { 
         error: { 

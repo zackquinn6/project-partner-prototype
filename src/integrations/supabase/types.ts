@@ -1029,6 +1029,45 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events_log: {
+        Row: {
+          additional_data: Json | null
+          created_at: string | null
+          description: string
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          severity: string
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          additional_data?: Json | null
+          created_at?: string | null
+          description: string
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          severity: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          additional_data?: Json | null
+          created_at?: string | null
+          description?: string
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          severity?: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       sensitive_data_access_log: {
         Row: {
           access_type: string
@@ -1407,6 +1446,24 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: string
       }
+      detect_suspicious_activity: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          risk_score: number
+          suspicious_events: Json
+          user_email: string
+          user_id: string
+        }[]
+      }
+      enhanced_rate_limit_check: {
+        Args: {
+          identifier: string
+          max_attempts?: number
+          operation_type: string
+          window_minutes?: number
+        }
+        Returns: boolean
+      }
       export_user_data: {
         Args: { user_uuid: string }
         Returns: Json
@@ -1467,6 +1524,19 @@ export type Database = {
       is_admin: {
         Args: { user_id: string }
         Returns: boolean
+      }
+      log_comprehensive_security_event: {
+        Args: {
+          p_additional_data?: Json
+          p_description: string
+          p_event_type: string
+          p_ip_address?: string
+          p_severity: string
+          p_user_agent?: string
+          p_user_email?: string
+          p_user_id?: string
+        }
+        Returns: undefined
       }
       log_failed_login: {
         Args: {
