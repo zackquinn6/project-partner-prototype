@@ -313,7 +313,7 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
             {/* Header */}
             <div className="flex justify-between items-center">
               <p className="text-muted-foreground">
-                Manage your home locations for projects. Each project is associated with a specific home.
+                Manage your home locations for projects and maintenance. Each project/maintenance task is associated with a specific home.
               </p>
               <Button onClick={() => setShowForm(true)}>
                 <Plus className="w-4 h-4 mr-2" />

@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Users, Star, Hammer, CheckCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ExternalLink, Users, Star, Hammer, CheckCircle, HelpCircle } from "lucide-react";
 
 interface ContractorFinderWindowProps {
   open: boolean;
@@ -48,6 +49,21 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
             Contractor Finder
           </DialogTitle>
         </DialogHeader>
+        
+        {/* Beta Banner */}
+        <div className="bg-gradient-to-r from-orange-100 to-yellow-100 border-b border-orange-200 p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-orange-500 text-white">BETA</Badge>
+              <span className="text-sm font-medium text-orange-800">
+                Feature under development - Hit the ? icon in upper right to give us feedback!
+              </span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => window.dispatchEvent(new CustomEvent('show-help-popup'))}>
+              <HelpCircle className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
 
         <div className="space-y-6">
           <div className="text-center">

@@ -38,94 +38,109 @@ export const ToolRentalsWindow = ({ isOpen, onClose }: ToolRentalsWindowProps) =
           
           <TabsContent value="toolio" className="mt-6 max-h-[70vh] overflow-y-auto">
             <div className="space-y-6">
-              {/* Integration Highlight */}
-              <Card className="border-primary/20 bg-primary/5">
+              {/* Hero Section with Toolio Theme */}
+              <Card className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
                 <CardContent className="pt-6">
-                  <div className="text-center space-y-2">
-                    <Badge variant="default" className="mb-2">
-                      Perfect Integration
-                    </Badge>
-                    <h3 className="text-xl font-semibold text-primary">
-                      Toolio is perfectly integrated with Project Partner
-                    </h3>
-                    <p className="text-muted-foreground">
-                      Seamlessly rent tools based on your specific project requirements
+                  <div className="text-center space-y-4">
+                    <div className="inline-flex items-center gap-2 bg-orange-500 text-white px-3 py-1.5 rounded-full text-sm font-medium">
+                      <Wrench className="h-4 w-4" />
+                      The Smarter Way To Rent Tools
+                    </div>
+                    
+                    <h2 className="text-3xl font-bold text-gray-900">
+                      Seamless Integration
+                    </h2>
+                    
+                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                      Match with projects and tool library to rent the exact right tools and save money through rental.
                     </p>
+                    
+                    <div className="bg-white/80 backdrop-blur rounded-lg p-4 inline-block">
+                      <p className="text-sm text-gray-600 font-medium">
+                        <MapPin className="inline h-4 w-4 mr-1" />
+                        Currently Available in Boston, MA
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Hero Section */}
+              {/* Value Proposition */}
+              <div className="grid md:grid-cols-3 gap-4">
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Calendar className="h-6 w-6 text-orange-600" />
+                    </div>
+                    <h3 className="font-semibold mb-2">Project-Based Approach</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Designed around projects, not single tools—giving you bigger value and better results.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <ExternalLink className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <h3 className="font-semibold mb-2">Book Online</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Easy online booking with free delivery. Get professional-grade tools delivered to your door.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Wrench className="h-6 w-6 text-green-600" />
+                    </div>
+                    <h3 className="font-semibold mb-2">Professional Quality</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Access high-quality tools maintained to professional standards for your home projects.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* How it Works */}
               <Card>
-                <CardHeader className="text-center">
-                  <CardTitle className="text-2xl text-primary">Project-Based Tool Rentals</CardTitle>
-                  <CardDescription className="text-lg">
-                    Get the right tools for your project without the commitment
-                  </CardDescription>
+                <CardHeader>
+                  <CardTitle className="text-xl">Great Results Start With The Right Tools</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>Currently Available in Boston, MA</span>
-                  </div>
-                  
-                  <div className="bg-muted/50 rounded-lg p-4">
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      How It Works
-                    </h3>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• Browse professional-grade tools for your specific project</li>
-                      <li>• Rent by the day, week, or project duration</li>
-                      <li>• Local pickup and delivery available</li>
-                      <li>• All tools maintained to professional standards</li>
-                    </ul>
-                  </div>
-
-                  <div className="text-center space-y-3">
-                    <Badge variant="secondary" className="text-sm">
-                      Powered by Toolio
-                    </Badge>
-                    
-                    <Button 
-                      onClick={handleVisitToolio}
-                      className="w-full"
-                      size="lg"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Visit Toolio.us
-                    </Button>
-                    
-                    <p className="text-xs text-muted-foreground">
-                      Seamless tool rentals for your DIY projects
-                    </p>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
+                      <p className="text-sm">Browse professional-grade tools matched to your specific project needs</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
+                      <p className="text-sm">Rent by the day, week, or complete project duration</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
+                      <p className="text-sm">Get free local delivery and pickup service</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Features */}
-              <div className="grid grid-cols-2 gap-4">
-                <Card className="border-dashed">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">Professional Tools</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-sm text-muted-foreground">
-                      Access to high-quality tools you'd typically find at construction sites
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-dashed">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">Project-Focused</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-sm text-muted-foreground">
-                      Rent exactly what you need for your specific project timeline
-                    </p>
-                  </CardContent>
-                </Card>
+              {/* CTA */}
+              <div className="text-center space-y-3">
+                <Button 
+                  onClick={handleVisitToolio}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                  size="lg"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Book Rental at Toolio.us
+                </Button>
+                
+                <p className="text-xs text-muted-foreground">
+                  Seamless tool rentals perfectly integrated with Project Partner
+                </p>
               </div>
             </div>
           </TabsContent>

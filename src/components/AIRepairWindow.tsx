@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Camera, Upload, Loader2, CheckCircle, AlertTriangle, Wrench, Clock, DollarSign, AlertCircle, Sparkles } from 'lucide-react';
+import { Camera, Upload, Loader2, CheckCircle, AlertTriangle, Wrench, Clock, DollarSign, AlertCircle, Sparkles, HelpCircle } from 'lucide-react';
 
 interface AIRepairWindowProps {
   open: boolean;
@@ -198,6 +198,21 @@ export function AIRepairWindow({ open, onOpenChange }: AIRepairWindowProps) {
               AI Repair Analysis
             </DialogTitle>
           </DialogHeader>
+          
+          {/* Beta Banner */}
+          <div className="bg-gradient-to-r from-orange-100 to-yellow-100 border-b border-orange-200 p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-orange-500 text-white">BETA</Badge>
+                <span className="text-sm font-medium text-orange-800">
+                  Feature under development - Hit the ? icon in upper right to share your thoughts!
+                </span>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => window.dispatchEvent(new CustomEvent('show-help-popup'))}>
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
 
           <ScrollArea className="flex-1">
             <div className="pb-4">
