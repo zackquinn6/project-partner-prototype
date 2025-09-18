@@ -11,6 +11,7 @@ import { ExternalLink, Search, Building2, FileText, Home, HelpCircle } from "luc
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { FeedbackDialog } from './FeedbackDialog';
 
 interface CodePermitsWindowProps {
   open: boolean;
@@ -34,6 +35,7 @@ interface BuildingCodeLink {
 
 export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps) {
   const { user } = useAuth();
+  const [showFeedback, setShowFeedback] = useState(false);
   const [selectedHome, setSelectedHome] = useState<string>("");
   const [manualCity, setManualCity] = useState("");
   const [manualState, setManualState] = useState("");
@@ -228,7 +230,8 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -246,7 +249,7 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
                 Feature under development - Hit the ? icon in upper right to give us feedback!
               </span>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => window.dispatchEvent(new CustomEvent('show-help-popup'))}>
+            <Button variant="ghost" size="sm" onClick={() => setShowFeedback(true)}>
               <HelpCircle className="h-4 w-4" />
             </Button>
           </div>
@@ -498,5 +501,11 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
         </Tabs>
       </DialogContent>
     </Dialog>
+    
+    <FeedbackDialog 
+      open={showFeedback}
+      onOpenChange={setShowFeedback}
+    />
+    </>
   );
 }

@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Camera, Upload, Loader2, CheckCircle, AlertTriangle, Wrench, Clock, DollarSign, AlertCircle, Sparkles, HelpCircle } from 'lucide-react';
+import { FeedbackDialog } from './FeedbackDialog';
 
 interface AIRepairWindowProps {
   open: boolean;
@@ -35,6 +36,7 @@ export function AIRepairWindow({ open, onOpenChange }: AIRepairWindowProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [showPricingAlert, setShowPricingAlert] = useState(true);
+  const [showFeedback, setShowFeedback] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoSelect = (files: FileList | null) => {
@@ -186,10 +188,11 @@ export function AIRepairWindow({ open, onOpenChange }: AIRepairWindowProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(open) => {
-      onOpenChange(open);
-      if (!open) reset();
-    }}>
+    <>
+      <Dialog open={open} onOpenChange={(open) => {
+        onOpenChange(open);
+        if (!open) reset();
+      }}>
       <DialogContent className="w-[95vw] h-[95vh] max-w-none max-h-none p-0 overflow-hidden sm:w-[90vw] sm:h-[90vh] lg:w-[80vw] lg:h-[85vh]">
         <div className="h-full flex flex-col">
           <DialogHeader className="p-4 sm:p-6 border-b">
@@ -208,9 +211,9 @@ export function AIRepairWindow({ open, onOpenChange }: AIRepairWindowProps) {
                   Feature under development - Hit the ? icon in upper right to share your thoughts!
                 </span>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => window.dispatchEvent(new CustomEvent('show-help-popup'))}>
-                <HelpCircle className="h-4 w-4" />
-              </Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowFeedback(true)}>
+              <HelpCircle className="h-4 w-4" />
+            </Button>
             </div>
           </div>
 
@@ -441,5 +444,11 @@ export function AIRepairWindow({ open, onOpenChange }: AIRepairWindowProps) {
         </div>
       </DialogContent>
     </Dialog>
+    
+    <FeedbackDialog 
+      open={showFeedback}
+      onOpenChange={setShowFeedback}
+    />
+    </>
   );
 }

@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Users, Star, Hammer, CheckCircle, HelpCircle } from "lucide-react";
+import { FeedbackDialog } from './FeedbackDialog';
+import { useState } from 'react';
 
 interface ContractorFinderWindowProps {
   open: boolean;
@@ -10,6 +12,8 @@ interface ContractorFinderWindowProps {
 }
 
 export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderWindowProps) {
+  const [showFeedback, setShowFeedback] = useState(false);
+
   const contractorServices = [
     {
       name: "Angi's List",
@@ -41,7 +45,8 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -59,7 +64,7 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
                 Feature under development - Hit the ? icon in upper right to give us feedback!
               </span>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => window.dispatchEvent(new CustomEvent('show-help-popup'))}>
+            <Button variant="ghost" size="sm" onClick={() => setShowFeedback(true)}>
               <HelpCircle className="h-4 w-4" />
             </Button>
           </div>
@@ -134,5 +139,11 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
         </div>
       </DialogContent>
     </Dialog>
+    
+    <FeedbackDialog 
+      open={showFeedback}
+      onOpenChange={setShowFeedback}
+    />
+    </>
   );
 }
