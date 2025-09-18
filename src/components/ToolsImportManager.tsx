@@ -142,6 +142,10 @@ Saw,Hand saw for cutting wood,Irwin Universal`;
 
       toast.success(`Successfully uploaded ${validItems.length} tools`);
       onSuccess();
+      // Add a small delay to ensure database changes have propagated
+      setTimeout(() => {
+        onSuccess();
+      }, 500);
       resetCSV();
     } catch (error) {
       console.error('Error uploading tools:', error);
@@ -193,6 +197,10 @@ Saw,Hand saw for cutting wood,Irwin Universal`;
       if (results.success > 0) {
         toast.success(`Successfully imported ${results.success} tools`);
         onSuccess();
+        // Add a small delay to ensure database changes have propagated
+        setTimeout(() => {
+          onSuccess();
+        }, 500);
       }
 
       if (results.errors.length > 0) {

@@ -84,6 +84,9 @@ export function EnhancedVariationViewer({
   const [editingVariation, setEditingVariation] = useState<VariationInstance | null>(null);
   const [editingModel, setEditingModel] = useState<ToolModel | null>(null);
   const [showAddModel, setShowAddModel] = useState<string | null>(null);
+  const [showAddAttribute, setShowAddAttribute] = useState<string | null>(null);
+  const [newAttributeKey, setNewAttributeKey] = useState('');
+  const [newAttributeValue, setNewAttributeValue] = useState('');
 
   useEffect(() => {
     if (open && coreItemId) {
@@ -288,6 +291,34 @@ export function EnhancedVariationViewer({
     }
   };
 
+  const addNewAttribute = async (variationId: string, key: string, value: string) => {
+    try {
+      const variation = variations.find(v => v.id === variationId);
+      if (!variation) return;
+
+      const updatedAttributes = { ...variation.attributes, [key]: value };
+      
+      const { error } = await supabase
+        .from('variation_instances')
+        .update({ attributes: updatedAttributes })
+        .eq('id', variationId);
+
+      if (error) throw error;
+      
+      setVariations(prev => 
+        prev.map(v => v.id === variationId ? { ...v, attributes: updatedAttributes } : v)
+      );
+      
+      setShowAddAttribute(null);
+      setNewAttributeKey('');
+      setNewAttributeValue('');
+      toast.success('Attribute added successfully');
+    } catch (error) {
+      console.error('Error adding attribute:', error);
+      toast.error('Failed to add attribute');
+    }
+  };
+
   const getAveragePricing = (modelId: string): { average: number; count: number } => {
     const pricing = pricingData[modelId] || [];
     if (pricing.length === 0) return { average: 0, count: 0 };
@@ -369,18 +400,74 @@ export function EnhancedVariationViewer({
                       </div>
 
                       {/* Attributes */}
-                      {Object.keys(variation.attributes).length > 0 && (
-                        <div>
+                      <div>
+                        <div className="flex items-center justify-between">
                           <Label className="font-medium">Attributes:</Label>
-                          <div className="flex flex-wrap gap-1 mt-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setShowAddAttribute(variation.id)}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Attribute
+                          </Button>
+                        </div>
+                        
+                        {Object.keys(variation.attributes).length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
                             {Object.entries(variation.attributes).map(([key, value]) => (
                               <Badge key={key} variant="outline" className="text-xs">
                                 {key}: {value}
                               </Badge>
                             ))}
                           </div>
-                        </div>
-                      )}
+                        )}
+
+                        {showAddAttribute === variation.id && (
+                          <div className="mt-2 p-3 border rounded-md space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <Label className="text-xs">Attribute Name</Label>
+                                <Input
+                                  placeholder="e.g., size, color, type"
+                                  value={newAttributeKey}
+                                  onChange={(e) => setNewAttributeKey(e.target.value)}
+                                  className="h-8 text-xs"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Value</Label>
+                                <Input
+                                  placeholder="e.g., large, red, cordless"
+                                  value={newAttributeValue}
+                                  onChange={(e) => setNewAttributeValue(e.target.value)}
+                                  className="h-8 text-xs"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => addNewAttribute(variation.id, newAttributeKey, newAttributeValue)}
+                                disabled={!newAttributeKey.trim() || !newAttributeValue.trim()}
+                              >
+                                Add
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setShowAddAttribute(null);
+                                  setNewAttributeKey('');
+                                  setNewAttributeValue('');
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
                       {/* Warning Flags */}
                       {variation.warning_flags?.length > 0 && (

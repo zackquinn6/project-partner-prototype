@@ -68,9 +68,15 @@ export function EnhancedToolImporter({ open, onOpenChange, onSuccess }: Enhanced
 
       setImportResults(results);
       
+      // Ensure the tools library refreshes by calling onSuccess twice - 
+      // once immediately and once with a small delay to ensure data propagation
       if (results.success > 0) {
         toast.success(`Successfully imported ${results.success} tools`);
         onSuccess?.();
+        // Add a small delay to ensure database changes have propagated
+        setTimeout(() => {
+          onSuccess?.();
+        }, 500);
       }
 
       if (results.errors.length > 0) {

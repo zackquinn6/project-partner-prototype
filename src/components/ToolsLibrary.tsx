@@ -75,7 +75,11 @@ export function ToolsLibrary() {
   };
 
   const handleSave = () => {
+    // Force refresh the tools list twice to ensure data is loaded
     fetchTools();
+    setTimeout(() => {
+      fetchTools();
+    }, 200);
     setShowAddDialog(false);
     setShowEditDialog(false);
     setEditingTool(null);
