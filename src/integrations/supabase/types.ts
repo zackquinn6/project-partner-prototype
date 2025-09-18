@@ -1194,13 +1194,6 @@ export type Database = {
             foreignKeyName: "tool_models_variation_instance_id_fkey"
             columns: ["variation_instance_id"]
             isOneToOne: false
-            referencedRelation: "market_pricing_summary"
-            referencedColumns: ["variation_id"]
-          },
-          {
-            foreignKeyName: "tool_models_variation_instance_id_fkey"
-            columns: ["variation_instance_id"]
-            isOneToOne: false
             referencedRelation: "variation_instances"
             referencedColumns: ["id"]
           },
@@ -1489,13 +1482,6 @@ export type Database = {
             foreignKeyName: "variation_warning_flags_variation_instance_id_fkey"
             columns: ["variation_instance_id"]
             isOneToOne: false
-            referencedRelation: "market_pricing_summary"
-            referencedColumns: ["variation_id"]
-          },
-          {
-            foreignKeyName: "variation_warning_flags_variation_instance_id_fkey"
-            columns: ["variation_instance_id"]
-            isOneToOne: false
             referencedRelation: "variation_instances"
             referencedColumns: ["id"]
           },
@@ -1625,7 +1611,15 @@ export type Database = {
           variation_id: string | null
           variation_name: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tool_models_variation_instance_id_fkey"
+            columns: ["variation_id"]
+            isOneToOne: false
+            referencedRelation: "variation_instances"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
