@@ -80,13 +80,25 @@ export const SecurityHeadersProvider: React.FC<{ children: React.ReactNode }> = 
       strictTransportMeta.httpEquiv = 'Strict-Transport-Security';
       strictTransportMeta.content = 'max-age=31536000; includeSubDomains; preload';
       
-      const crossOriginMeta = document.createElement('meta');
-      crossOriginMeta.httpEquiv = 'Cross-Origin-Embedder-Policy';
-      crossOriginMeta.content = 'require-corp';
+      // Cross-Origin policies disabled for React compatibility
+      // These policies can trigger Trusted Types enforcement which React doesn't support yet
+      // Enable in production environments that have proper Trusted Types polyfills
+      const isDevelopment = window.location.hostname.includes('lovable') || 
+                           window.location.hostname === 'localhost' ||
+                           import.meta.env?.DEV;
       
-      const crossOriginOpenerMeta = document.createElement('meta');
-      crossOriginOpenerMeta.httpEquiv = 'Cross-Origin-Opener-Policy';
-      crossOriginOpenerMeta.content = 'same-origin';
+      let crossOriginMeta: HTMLMetaElement | null = null;
+      let crossOriginOpenerMeta: HTMLMetaElement | null = null;
+      
+      if (!isDevelopment) {
+        crossOriginMeta = document.createElement('meta');
+        crossOriginMeta.httpEquiv = 'Cross-Origin-Embedder-Policy';
+        crossOriginMeta.content = 'require-corp';
+        
+        crossOriginOpenerMeta = document.createElement('meta');
+        crossOriginOpenerMeta.httpEquiv = 'Cross-Origin-Opener-Policy';
+        crossOriginOpenerMeta.content = 'same-origin';
+      }
       
       // Check if meta tags already exist before adding (prevent duplicates)
       const existingCSP = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
@@ -115,14 +127,17 @@ export const SecurityHeadersProvider: React.FC<{ children: React.ReactNode }> = 
         document.head.appendChild(strictTransportMeta);
       }
       
-      const existingCOEP = document.querySelector('meta[http-equiv="Cross-Origin-Embedder-Policy"]');
-      if (!existingCOEP) {
-        document.head.appendChild(crossOriginMeta);
-      }
-      
-      const existingCOOP = document.querySelector('meta[http-equiv="Cross-Origin-Opener-Policy"]');
-      if (!existingCOOP) {
-        document.head.appendChild(crossOriginOpenerMeta);
+      // Only add Cross-Origin policies in production environments
+      if (!isDevelopment && crossOriginMeta && crossOriginOpenerMeta) {
+        const existingCOEP = document.querySelector('meta[http-equiv="Cross-Origin-Embedder-Policy"]');
+        if (!existingCOEP) {
+          document.head.appendChild(crossOriginMeta);
+        }
+        
+        const existingCOOP = document.querySelector('meta[http-equiv="Cross-Origin-Opener-Policy"]');
+        if (!existingCOOP) {
+          document.head.appendChild(crossOriginOpenerMeta);
+        }
       }
     };
 
