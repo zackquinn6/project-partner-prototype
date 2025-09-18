@@ -680,6 +680,60 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_data: {
+        Row: {
+          availability_status: string | null
+          created_at: string
+          currency: string | null
+          id: string
+          last_scraped_at: string | null
+          model_id: string
+          price: number | null
+          product_url: string | null
+          retailer: string
+          updated_at: string
+        }
+        Insert: {
+          availability_status?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          last_scraped_at?: string | null
+          model_id: string
+          price?: number | null
+          product_url?: string | null
+          retailer: string
+          updated_at?: string
+        }
+        Update: {
+          availability_status?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          last_scraped_at?: string | null
+          model_id?: string
+          price?: number | null
+          product_url?: string | null
+          retailer?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_data_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "market_pricing_summary"
+            referencedColumns: ["model_id"]
+          },
+          {
+            foreignKeyName: "pricing_data_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "tool_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1101,6 +1155,57 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_models: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          manufacturer: string | null
+          model_name: string
+          model_number: string | null
+          upc_code: string | null
+          updated_at: string
+          variation_instance_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          manufacturer?: string | null
+          model_name: string
+          model_number?: string | null
+          upc_code?: string | null
+          updated_at?: string
+          variation_instance_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          manufacturer?: string | null
+          model_name?: string
+          model_number?: string | null
+          upc_code?: string | null
+          updated_at?: string
+          variation_instance_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_models_variation_instance_id_fkey"
+            columns: ["variation_instance_id"]
+            isOneToOne: false
+            referencedRelation: "market_pricing_summary"
+            referencedColumns: ["variation_id"]
+          },
+          {
+            foreignKeyName: "tool_models_variation_instance_id_fkey"
+            columns: ["variation_instance_id"]
+            isOneToOne: false
+            referencedRelation: "variation_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tools: {
         Row: {
           created_at: string
@@ -1318,35 +1423,123 @@ export type Database = {
           core_item_id: string
           created_at: string
           description: string | null
+          estimated_rental_lifespan_days: number | null
+          estimated_weight_lbs: number | null
           id: string
           item_type: string
           name: string
           photo_url: string | null
           sku: string | null
           updated_at: string
+          warning_flags: string[] | null
         }
         Insert: {
           attributes?: Json
           core_item_id: string
           created_at?: string
           description?: string | null
+          estimated_rental_lifespan_days?: number | null
+          estimated_weight_lbs?: number | null
           id?: string
           item_type: string
           name: string
           photo_url?: string | null
           sku?: string | null
           updated_at?: string
+          warning_flags?: string[] | null
         }
         Update: {
           attributes?: Json
           core_item_id?: string
           created_at?: string
           description?: string | null
+          estimated_rental_lifespan_days?: number | null
+          estimated_weight_lbs?: number | null
           id?: string
           item_type?: string
           name?: string
           photo_url?: string | null
           sku?: string | null
+          updated_at?: string
+          warning_flags?: string[] | null
+        }
+        Relationships: []
+      }
+      variation_warning_flags: {
+        Row: {
+          created_at: string
+          id: string
+          variation_instance_id: string
+          warning_flag_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          variation_instance_id: string
+          warning_flag_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          variation_instance_id?: string
+          warning_flag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "variation_warning_flags_variation_instance_id_fkey"
+            columns: ["variation_instance_id"]
+            isOneToOne: false
+            referencedRelation: "market_pricing_summary"
+            referencedColumns: ["variation_id"]
+          },
+          {
+            foreignKeyName: "variation_warning_flags_variation_instance_id_fkey"
+            columns: ["variation_instance_id"]
+            isOneToOne: false
+            referencedRelation: "variation_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "variation_warning_flags_warning_flag_id_fkey"
+            columns: ["warning_flag_id"]
+            isOneToOne: false
+            referencedRelation: "warning_flags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      warning_flags: {
+        Row: {
+          color_class: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          icon_class: string | null
+          id: string
+          is_predefined: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color_class?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon_class?: string | null
+          id?: string
+          is_predefined?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color_class?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon_class?: string | null
+          id?: string
+          is_predefined?: boolean
+          name?: string
           updated_at?: string
         }
         Relationships: []
@@ -1419,7 +1612,21 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      market_pricing_summary: {
+        Row: {
+          average_price: number | null
+          last_updated: string | null
+          manufacturer: string | null
+          max_price: number | null
+          min_price: number | null
+          model_id: string | null
+          model_name: string | null
+          retailer_count: number | null
+          variation_id: string | null
+          variation_name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_admin_by_email: {
@@ -1467,6 +1674,10 @@ export type Database = {
       export_user_data: {
         Args: { user_uuid: string }
         Returns: Json
+      }
+      get_average_market_price: {
+        Args: { variation_id: string }
+        Returns: number
       }
       get_failed_login_summary: {
         Args: { days_back?: number }
