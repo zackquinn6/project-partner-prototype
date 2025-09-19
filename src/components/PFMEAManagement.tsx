@@ -471,14 +471,30 @@ export const PFMEAManagement: React.FC = () => {
             ))}
           </SelectContent>
         </Select>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => setShowCreateProject(true)}
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          New PFMEA
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setShowCreateProject(true)}
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            New PFMEA
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => toast.success('PFMEA data saved')}
+          >
+            Save PFMEA
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => toast.success('Export functionality coming soon')}
+          >
+            Export
+          </Button>
+        </div>
       </div>
     );
   };
@@ -488,31 +504,7 @@ export const PFMEAManagement: React.FC = () => {
 
     return (
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              PFMEA Analysis - {selectedPfmeaProject.name}
-            </CardTitle>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toast.success('PFMEA data saved')}
-              >
-                Save PFMEA
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toast.success('Export functionality coming soon')}
-              >
-                Export
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <ScrollArea className="h-[600px] w-full">
             <Table>
               <TableHeader>
@@ -535,6 +527,40 @@ export const PFMEAManagement: React.FC = () => {
               <TableBody>
                 {requirements.map(requirement => {
                   const reqFailureModes = failureModes.filter(fm => fm.requirement_id === requirement.id);
+                  
+                  // If no failure modes exist for this requirement, show an empty row with add button
+                  if (reqFailureModes.length === 0) {
+                    return (
+                      <TableRow key={requirement.id}>
+                        <TableCell className="font-medium">
+                          <div className="text-sm">
+                            {requirement.output_reference?.phase_name || 'Unknown Phase'}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <div className="text-sm">
+                            {requirement.output_reference?.operation_name || 'Unknown Operation'}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <div className="space-y-1">
+                            <div className="text-sm">{requirement.output_reference?.step_name || 'Unknown Step'}</div>
+                            <div className="text-xs text-muted-foreground font-normal">{requirement.requirement_text}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell colSpan={9} className="text-center py-4">
+                          <Button
+                            variant="outline"
+                            onClick={() => addFailureMode(requirement.id)}
+                            className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add First Failure Mode
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
                   
                   return reqFailureModes.map((failureMode, index) => {
                     const rpn = calculateRPN(failureMode);
