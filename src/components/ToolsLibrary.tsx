@@ -24,9 +24,13 @@ interface Tool {
   photo_url: string | null;
   created_at: string;
   updated_at: string;
+  variations?: Array<{
+    id: string;
+    name: string;
+  }>;
 }
 
-type SortField = 'item' | 'description' | 'example_models' | 'created_at';
+type SortField = 'item' | 'description' | 'variations' | 'created_at';
 type SortDirection = 'asc' | 'desc';
 
 export function ToolsLibrary() {
@@ -49,7 +53,26 @@ export function ToolsLibrary() {
         .order('item');
       
       if (error) throw error;
-      setTools((data as unknown as Tool[]) || []);
+      
+      const toolsData = (data as unknown as Tool[]) || [];
+      
+      // Fetch variations for each tool
+      const toolsWithVariations = await Promise.all(
+        toolsData.map(async (tool) => {
+          const { data: variations } = await supabase
+            .from('variation_instances')
+            .select('id, name')
+            .eq('core_item_id', tool.id)
+            .eq('item_type', 'tools');
+          
+          return {
+            ...tool,
+            variations: variations || []
+          };
+        })
+      );
+      
+      setTools(toolsWithVariations);
     } catch (error) {
       console.error('Error fetching tools:', error);
       toast.error('Failed to load tools');
@@ -68,15 +91,18 @@ export function ToolsLibrary() {
   );
 
   const sortedTools = [...filteredTools].sort((a, b) => {
-    let aValue: string | number = a[sortField] || '';
-    let bValue: string | number = b[sortField] || '';
+    let aValue: string | number = '';
+    let bValue: string | number = '';
     
-    if (sortField === 'created_at') {
-      aValue = new Date(aValue as string).getTime();
-      bValue = new Date(bValue as string).getTime();
+    if (sortField === 'variations') {
+      aValue = a.variations?.length || 0;
+      bValue = b.variations?.length || 0;
+    } else if (sortField === 'created_at') {
+      aValue = new Date(a[sortField] as string).getTime();
+      bValue = new Date(b[sortField] as string).getTime();
     } else {
-      aValue = aValue.toString().toLowerCase();
-      bValue = bValue.toString().toLowerCase();
+      aValue = (a[sortField] || '').toString().toLowerCase();
+      bValue = (b[sortField] || '').toString().toLowerCase();
     }
     
     if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
@@ -244,11 +270,11 @@ export function ToolsLibrary() {
                 <TableHead className="bg-background sticky top-0 z-20">
                   <Button
                     variant="ghost"
-                    onClick={() => handleSort('example_models')}
+                    onClick={() => handleSort('variations')}
                     className="h-auto p-0 font-semibold hover:bg-transparent flex items-center"
                   >
                     Variants
-                    {getSortIcon('example_models')}
+                    {getSortIcon('variations')}
                   </Button>
                 </TableHead>
                 <TableHead className="w-32 text-right bg-background sticky top-0 z-20">Actions</TableHead>
@@ -279,12 +305,21 @@ export function ToolsLibrary() {
                   {tool.description || '-'}
                 </TableCell>
                 <TableCell className="text-sm">
-                  {tool.example_models ? (
-                    <Badge variant="secondary" className="text-xs">
-                      {tool.example_models}
-                    </Badge>
+                  {tool.variations && tool.variations.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {tool.variations.slice(0, 2).map((variation) => (
+                        <Badge key={variation.id} variant="secondary" className="text-xs">
+                          {variation.name}
+                        </Badge>
+                      ))}
+                      {tool.variations.length > 2 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{tool.variations.length - 2} more
+                        </Badge>
+                      )}
+                    </div>
                   ) : (
-                    '-'
+                    <span className="text-muted-foreground">No variants</span>
                   )}
                 </TableCell>
                 <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
