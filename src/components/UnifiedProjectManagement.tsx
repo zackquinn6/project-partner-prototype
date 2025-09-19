@@ -86,6 +86,7 @@ export function UnifiedProjectManagement() {
       const { data, error } = await supabase
         .from('projects')
         .select('*')
+        .or('parent_project_id.is.null,is_current_version.eq.true')
         .order('updated_at', { ascending: false });
 
       if (error) throw error;

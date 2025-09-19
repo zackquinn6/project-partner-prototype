@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ProjectManagementWindow } from '@/components/ProjectManagementWindow';
 import { UnifiedProjectManagement } from '@/components/UnifiedProjectManagement';
 import { ProjectAnalyticsWindow } from '@/components/ProjectAnalyticsWindow';
 import { UsersSecurityWindow } from '@/components/UsersSecurityWindow';
@@ -19,7 +18,6 @@ import { AppDescriptionDialog } from './AppDescriptionDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const AdminView: React.FC = () => {
-  const [projectManagementOpen, setProjectManagementOpen] = useState(false);
   const [enhancedProjectManagementOpen, setEnhancedProjectManagementOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [usersSecurityOpen, setUsersSecurityOpen] = useState(false);
@@ -72,23 +70,6 @@ export const AdminView: React.FC = () => {
                <Button className="w-full" onClick={() => setEnhancedProjectManagementOpen(true)}>
                  Project Management
                </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setProjectManagementOpen(true)}>
-            <CardHeader className="text-center flex-1">
-              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                <Cog className="w-6 h-6 text-primary" />
-              </div>
-              <CardTitle>Legacy Project Management</CardTitle>
-              <CardDescription className="min-h-[3rem] flex items-center justify-center">
-                Legacy project workflows, materials, tools, and rollups
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="mt-auto">
-              <Button className="w-full" variant="outline" onClick={() => setProjectManagementOpen(true)}>
-                Legacy Management
-              </Button>
             </CardContent>
           </Card>
 
@@ -240,11 +221,6 @@ export const AdminView: React.FC = () => {
           </DialogContent>
         </Dialog>
 
-        <ProjectManagementWindow 
-          open={projectManagementOpen} 
-          onOpenChange={setProjectManagementOpen} 
-        />
-        
         <ProjectAnalyticsWindow 
           open={analyticsOpen} 
           onOpenChange={setAnalyticsOpen} 
