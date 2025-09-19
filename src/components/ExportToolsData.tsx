@@ -61,21 +61,33 @@ export function ExportToolsData({ className = "" }: ExportToolsDataProps) {
       // Create workbook
       const workbook = XLSX.utils.book_new();
 
-      // Tools sheet with variant summary
-      const toolsWithVariants = await Promise.all(
-        (tools || []).map(async (tool) => {
-          const toolVariations = variations?.filter(v => v.core_item_id === tool.id) || [];
-          
-          return {
+      // Tools sheet with each variant on separate rows
+      const toolsWithVariants = [];
+      for (const tool of tools || []) {
+        const toolVariations = variations?.filter(v => v.core_item_id === tool.id) || [];
+        
+        if (toolVariations.length === 0) {
+          // Tool with no variants
+          toolsWithVariants.push({
             'Tool Name': tool.item,
             'Description': tool.description || '',
-            'Variant Count': toolVariations.length,
-            'Variant Names': toolVariations.map(v => v.name).join(', '),
+            'Variant Name': 'No variants',
             'Created At': new Date(tool.created_at).toLocaleDateString(),
             'Updated At': new Date(tool.updated_at).toLocaleDateString()
-          };
-        })
-      );
+          });
+        } else {
+          // Each variant gets its own row
+          for (const variation of toolVariations) {
+            toolsWithVariants.push({
+              'Tool Name': tool.item,
+              'Description': tool.description || '',
+              'Variant Name': variation.name,
+              'Created At': new Date(tool.created_at).toLocaleDateString(),
+              'Updated At': new Date(tool.updated_at).toLocaleDateString()
+            });
+          }
+        }
+      }
 
       const toolsSheet = XLSX.utils.json_to_sheet(toolsWithVariants);
       XLSX.utils.book_append_sheet(workbook, toolsSheet, 'Tools');
