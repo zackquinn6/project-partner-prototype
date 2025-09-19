@@ -297,6 +297,96 @@ export const PFMEAManagement: React.FC = () => {
     return 'bg-green-100 border-green-500 text-green-900';
   };
 
+  const getAllActionItems = () => {
+    return failureModes.flatMap(failureMode => 
+      failureMode.pfmea_action_items.map(action => ({
+        ...action,
+        failureMode
+      }))
+    );
+  };
+
+  const addPotentialEffect = async (failureModeId: string) => {
+    try {
+      const { error } = await supabase
+        .from('pfmea_potential_effects')
+        .insert({
+          failure_mode_id: failureModeId,
+          effect_description: 'New potential effect',
+          severity_score: 5
+        });
+
+      if (error) throw error;
+
+      toast.success('Potential effect added successfully');
+      if (selectedPfmeaProject) fetchPfmeaDetails(selectedPfmeaProject.id);
+    } catch (error) {
+      console.error('Error adding potential effect:', error);
+      toast.error('Failed to add potential effect');
+    }
+  };
+
+  const addPotentialCause = async (failureModeId: string) => {
+    try {
+      const { error } = await supabase
+        .from('pfmea_potential_causes')
+        .insert({
+          failure_mode_id: failureModeId,
+          cause_description: 'New potential cause',
+          occurrence_score: 5
+        });
+
+      if (error) throw error;
+
+      toast.success('Potential cause added successfully');
+      if (selectedPfmeaProject) fetchPfmeaDetails(selectedPfmeaProject.id);
+    } catch (error) {
+      console.error('Error adding potential cause:', error);
+      toast.error('Failed to add potential cause');
+    }
+  };
+
+  const addControl = async (failureModeId: string, controlType: 'prevention' | 'detection') => {
+    try {
+      const { error } = await supabase
+        .from('pfmea_controls')
+        .insert({
+          failure_mode_id: failureModeId,
+          control_type: controlType,
+          control_description: `New ${controlType} control`,
+          detection_score: controlType === 'detection' ? 5 : null
+        });
+
+      if (error) throw error;
+
+      toast.success(`${controlType} control added successfully`);
+      if (selectedPfmeaProject) fetchPfmeaDetails(selectedPfmeaProject.id);
+    } catch (error) {
+      console.error(`Error adding ${controlType} control:`, error);
+      toast.error(`Failed to add ${controlType} control`);
+    }
+  };
+
+  const addActionItem = async (failureModeId: string) => {
+    try {
+      const { error } = await supabase
+        .from('pfmea_action_items')
+        .insert({
+          failure_mode_id: failureModeId,
+          recommended_action: 'New recommended action',
+          status: 'not_started'
+        });
+
+      if (error) throw error;
+
+      toast.success('Action item added successfully');
+      if (selectedPfmeaProject) fetchPfmeaDetails(selectedPfmeaProject.id);
+    } catch (error) {
+      console.error('Error adding action item:', error);
+      toast.error('Failed to add action item');
+    }
+  };
+
   const renderProjectSelector = () => {
     // If no project is selected, show the full card
     if (!selectedPfmeaProject) {
@@ -418,8 +508,8 @@ export const PFMEAManagement: React.FC = () => {
                   <TableHead className="min-w-[200px]">Controls</TableHead>
                   <TableHead className="w-20">D</TableHead>
                   <TableHead className="w-20">RPN</TableHead>
-                  <TableHead className="min-w-[200px]">Actions</TableHead>
-                  <TableHead className="w-20"></TableHead>
+                  <TableHead className="min-w-[200px]">Recommended Actions</TableHead>
+                  <TableHead className="w-32">Add Content</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -451,6 +541,15 @@ export const PFMEAManagement: React.FC = () => {
                                 {effect.effect_description} (S:{effect.severity_score})
                               </div>
                             ))}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => addPotentialEffect(failureMode.id)}
+                              className="text-xs p-1 h-6"
+                            >
+                              <Plus className="w-3 h-3 mr-1" />
+                              Add Effect
+                            </Button>
                           </div>
                         </TableCell>
                         <TableCell className="text-center font-bold">
@@ -463,6 +562,15 @@ export const PFMEAManagement: React.FC = () => {
                                 {cause.cause_description} (O:{cause.occurrence_score})
                               </div>
                             ))}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => addPotentialCause(failureMode.id)}
+                              className="text-xs p-1 h-6"
+                            >
+                              <Plus className="w-3 h-3 mr-1" />
+                              Add Cause
+                            </Button>
                           </div>
                         </TableCell>
                         <TableCell className="text-center font-bold">
@@ -491,6 +599,26 @@ export const PFMEAManagement: React.FC = () => {
                                 </div>
                               ))
                             }
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => addControl(failureMode.id, 'prevention')}
+                                className="text-xs p-1 h-6"
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Prev
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => addControl(failureMode.id, 'detection')}
+                                className="text-xs p-1 h-6"
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Det
+                              </Button>
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell className="text-center font-bold">
@@ -518,16 +646,74 @@ export const PFMEAManagement: React.FC = () => {
                                 </Badge>
                               </div>
                             ))}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => addActionItem(failureMode.id)}
+                              className="text-xs p-1 h-6"
+                            >
+                              <Plus className="w-3 h-3 mr-1" />
+                              Add Action
+                            </Button>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => addFailureMode(requirement.id)}
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
+                          <div className="flex flex-col gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => addFailureMode(requirement.id)}
+                              title="Add Failure Mode"
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              Failure Mode
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => addPotentialEffect(failureMode.id)}
+                              title="Add Potential Effect"
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              Effect
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => addPotentialCause(failureMode.id)}
+                              title="Add Potential Cause"
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              Cause
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => addControl(failureMode.id, 'prevention')}
+                              title="Add Prevention Control"
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              Prevention
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => addControl(failureMode.id, 'detection')}
+                              title="Add Detection Control"
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              Detection
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => addActionItem(failureMode.id)}
+                              title="Add Action Item"
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              Action
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -580,46 +766,82 @@ export const PFMEAManagement: React.FC = () => {
 
       {selectedPfmeaProject && (
         <Tabs value={currentTab} onValueChange={setCurrentTab}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Overview & Reports</TabsTrigger>
             <TabsTrigger value="table">PFMEA Table</TabsTrigger>
             <TabsTrigger value="actions">Action Tracker</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Project Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <FileText className="w-5 h-5 text-blue-600" />
-                      <span className="font-medium">Requirements</span>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Project Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileText className="w-5 h-5 text-blue-600" />
+                        <span className="font-medium">Requirements</span>
+                      </div>
+                      <div className="text-2xl font-bold text-blue-600">{requirements.length}</div>
                     </div>
-                    <div className="text-2xl font-bold text-blue-600">{requirements.length}</div>
+                    <div className="bg-orange-50 p-4 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertTriangle className="w-5 h-5 text-orange-600" />
+                        <span className="font-medium">Failure Modes</span>
+                      </div>
+                      <div className="text-2xl font-bold text-orange-600">{failureModes.length}</div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                        <span className="font-medium">High Priority (RPN ≥ 200)</span>
+                      </div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {failureModes.filter(fm => calculateRPN(fm) >= 200).length}
+                      </div>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Target className="w-5 h-5 text-purple-600" />
+                        <span className="font-medium">Open Actions</span>
+                      </div>
+                      <div className="text-2xl font-bold text-purple-600">
+                        {failureModes.reduce((count, fm) => 
+                          count + fm.pfmea_action_items.filter(action => action.status !== 'complete').length, 0
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="bg-orange-50 p-4 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <AlertTriangle className="w-5 h-5 text-orange-600" />
-                      <span className="font-medium">Failure Modes</span>
-                    </div>
-                    <div className="text-2xl font-bold text-orange-600">{failureModes.length}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>RPN Distribution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { label: 'Critical (≥ 200)', color: 'bg-red-500', count: failureModes.filter(fm => calculateRPN(fm) >= 200).length },
+                      { label: 'High (100-199)', color: 'bg-orange-500', count: failureModes.filter(fm => { const rpn = calculateRPN(fm); return rpn >= 100 && rpn < 200; }).length },
+                      { label: 'Medium (50-99)', color: 'bg-yellow-500', count: failureModes.filter(fm => { const rpn = calculateRPN(fm); return rpn >= 50 && rpn < 100; }).length },
+                      { label: 'Low (< 50)', color: 'bg-green-500', count: failureModes.filter(fm => calculateRPN(fm) < 50).length }
+                    ].map(item => (
+                      <div key={item.label} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${item.color}`}></div>
+                          <span className="text-sm">{item.label}</span>
+                        </div>
+                        <span className="font-bold">{item.count}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle2 className="w-5 h-5 text-green-600" />
-                      <span className="font-medium">High Priority (RPN ≥ 200)</span>
-                    </div>
-                    <div className="text-2xl font-bold text-green-600">
-                      {failureModes.filter(fm => calculateRPN(fm) >= 200).length}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="table" className="mt-6">
@@ -629,21 +851,101 @@ export const PFMEAManagement: React.FC = () => {
           <TabsContent value="actions" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Action Tracker</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Action Tracker</CardTitle>
+                  <Badge variant="secondary">{getAllActionItems().length} Total Actions</Badge>
+                </div>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Action tracking functionality coming soon...</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="reports" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Reports & Analytics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Reporting functionality coming soon...</p>
+                {getAllActionItems().length === 0 ? (
+                  <div className="text-center py-8">
+                    <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No action items found. Add actions through the PFMEA table.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="cursor-pointer hover:bg-muted/50">Action</TableHead>
+                          <TableHead className="cursor-pointer hover:bg-muted/50">Owner</TableHead>
+                          <TableHead className="cursor-pointer hover:bg-muted/50">Due Date</TableHead>
+                          <TableHead className="cursor-pointer hover:bg-muted/50">Project</TableHead>
+                          <TableHead className="cursor-pointer hover:bg-muted/50">Status</TableHead>
+                          <TableHead className="cursor-pointer hover:bg-muted/50">RPN</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {getAllActionItems()
+                          .sort((a, b) => {
+                            if (a.status === 'complete' && b.status !== 'complete') return 1;
+                            if (a.status !== 'complete' && b.status === 'complete') return -1;
+                            const rpnA = calculateRPN(a.failureMode);
+                            const rpnB = calculateRPN(b.failureMode);
+                            return rpnB - rpnA;
+                          })
+                          .map((actionItem) => {
+                            const rpn = calculateRPN(actionItem.failureMode);
+                            return (
+                              <TableRow key={actionItem.id} className={actionItem.status === 'complete' ? 'opacity-60' : ''}>
+                                <TableCell className="max-w-xs">
+                                  <div className="font-medium">{actionItem.recommended_action}</div>
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    Failure Mode: {actionItem.failureMode.failure_mode}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    {actionItem.responsible_person || 'Unassigned'}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  {actionItem.target_completion_date ? (
+                                    <div className={`text-sm ${
+                                      new Date(actionItem.target_completion_date) < new Date() && actionItem.status !== 'complete'
+                                        ? 'text-red-600 font-medium'
+                                        : ''
+                                    }`}>
+                                      {actionItem.target_completion_date}
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted-foreground">No due date</span>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="text-sm">{selectedPfmeaProject?.name}</div>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge 
+                                    variant={
+                                      actionItem.status === 'complete' ? 'secondary' :
+                                      actionItem.status === 'in_progress' ? 'default' : 'outline'
+                                    }
+                                  >
+                                    {actionItem.status.replace('_', ' ')}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge 
+                                    variant="outline"
+                                    className={`${
+                                      rpn >= 200 ? 'border-red-500 text-red-700' :
+                                      rpn >= 100 ? 'border-orange-500 text-orange-700' :
+                                      rpn >= 50 ? 'border-yellow-500 text-yellow-700' :
+                                      'border-green-500 text-green-700'
+                                    }`}
+                                  >
+                                    {rpn}
+                                  </Badge>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
+                        }
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
