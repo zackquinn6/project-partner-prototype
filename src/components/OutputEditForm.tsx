@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Output } from '@/interfaces/Project';
+import { Output, StepInput } from '@/interfaces/Project';
 
 // Extend Output interface to include allowances field
 interface ExtendedOutput extends Output {
@@ -20,29 +20,54 @@ interface OutputEditFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (updatedOutput: ExtendedOutput) => void;
+  stepInputs?: StepInput[];
+  onAddStepInput?: (inputName: string) => void;
 }
 
 export const OutputEditForm: React.FC<OutputEditFormProps> = ({
   output,
   isOpen,
   onClose,
-  onSave
+  onSave,
+  stepInputs = [],
+  onAddStepInput
 }) => {
   const [formData, setFormData] = useState<ExtendedOutput>({ ...output });
-  const [newKeyInput, setNewKeyInput] = useState('');
+  const [selectedInput, setSelectedInput] = useState<string>('');
+  const [customInputName, setCustomInputName] = useState('');
 
   const handleSave = () => {
     onSave(formData);
     onClose();
   };
 
-  const addKeyInput = () => {
-    if (newKeyInput.trim()) {
+  const addKeyInputFromSelect = () => {
+    if (selectedInput && selectedInput !== 'custom') {
+      const inputName = stepInputs.find(input => input.id === selectedInput)?.name || selectedInput;
+      if (!formData.keyInputs?.includes(inputName)) {
+        setFormData(prev => ({
+          ...prev,
+          keyInputs: [...(prev.keyInputs || []), inputName]
+        }));
+      }
+      setSelectedInput('');
+    }
+  };
+
+  const addCustomKeyInput = () => {
+    if (customInputName.trim()) {
+      // Add to key inputs
       setFormData(prev => ({
         ...prev,
-        keyInputs: [...(prev.keyInputs || []), newKeyInput.trim()]
+        keyInputs: [...(prev.keyInputs || []), customInputName.trim()]
       }));
-      setNewKeyInput('');
+      
+      // Add to step inputs if callback provided
+      if (onAddStepInput) {
+        onAddStepInput(customInputName.trim());
+      }
+      
+      setCustomInputName('');
     }
   };
 
@@ -202,17 +227,52 @@ export const OutputEditForm: React.FC<OutputEditFormProps> = ({
                   </div>
                 ))}
                 
-                <div className="flex gap-2">
-                  <Input
-                    value={newKeyInput}
-                    onChange={(e) => setNewKeyInput(e.target.value)}
-                    placeholder="Add key input..."
-                    onKeyPress={(e) => e.key === 'Enter' && addKeyInput()}
-                  />
-                  <Button onClick={addKeyInput} size="sm">
-                    <Plus className="w-4 h-4" />
-                  </Button>
+                {/* Select from existing step inputs */}
+                <div className="space-y-2">
+                  <Label>Select from Process Variables</Label>
+                  <div className="flex gap-2">
+                    <Select value={selectedInput} onValueChange={setSelectedInput}>
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Choose from step variables..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {stepInputs.map((input) => (
+                          <SelectItem key={input.id} value={input.id}>
+                            {input.name}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="custom">+ Add New Variable</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button 
+                      onClick={addKeyInputFromSelect} 
+                      size="sm"
+                      disabled={!selectedInput || selectedInput === 'custom'}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
+
+                {/* Add custom input */}
+                {selectedInput === 'custom' && (
+                  <div className="space-y-2">
+                    <Label>New Process Variable</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={customInputName}
+                        onChange={(e) => setCustomInputName(e.target.value)}
+                        placeholder="Enter new variable name..."
+                        onKeyPress={(e) => e.key === 'Enter' && addCustomKeyInput()}
+                        className="flex-1"
+                      />
+                      <Button onClick={addCustomKeyInput} size="sm" disabled={!customInputName.trim()}>
+                        <Plus className="w-4 h-4" />
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

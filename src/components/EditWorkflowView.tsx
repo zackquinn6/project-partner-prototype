@@ -164,6 +164,24 @@ export default function EditWorkflowView({
     setOutputEditOpen(false);
     setEditingOutput(null);
   };
+
+  const handleAddStepInput = (inputName: string) => {
+    if (!editingStep || !inputName.trim()) return;
+    
+    // Check if input already exists
+    const existingInput = editingStep.inputs?.find(input => input.name === inputName.trim());
+    if (existingInput) return;
+    
+    // Add new input to step
+    const newInput = {
+      id: `input-${Date.now()}-${Math.random()}`,
+      name: inputName.trim(),
+      type: 'text' as const,
+      required: false
+    };
+    
+    updateEditingStep('inputs', [...(editingStep.inputs || []), newInput]);
+  };
   const updateEditingStep = (field: keyof WorkflowStep, value: any) => {
     if (!editingStep) {
       console.error('updateEditingStep: No editingStep found');
@@ -930,10 +948,17 @@ export default function EditWorkflowView({
       </div>
 
       {/* Output Edit Form */}
-      {editingOutput && <OutputEditForm output={editingOutput} isOpen={outputEditOpen} onClose={() => {
-      setOutputEditOpen(false);
-      setEditingOutput(null);
-    }} onSave={handleSaveOutput} />}
+      {editingOutput && <OutputEditForm 
+        output={editingOutput} 
+        isOpen={outputEditOpen} 
+        onClose={() => {
+          setOutputEditOpen(false);
+          setEditingOutput(null);
+        }} 
+        onSave={handleSaveOutput}
+        stepInputs={editingStep?.inputs || []}
+        onAddStepInput={handleAddStepInput}
+      />}
 
       {/* Import Dialog */}
       <ProjectContentImport open={importOpen} onOpenChange={setImportOpen} onImport={handleImport} />
