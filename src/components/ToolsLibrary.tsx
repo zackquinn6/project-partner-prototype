@@ -12,6 +12,8 @@ import { ToolsImportManager } from "./ToolsImportManager";
 import { supabase } from "@/integrations/supabase/client";
 import { clearAllTools } from "@/utils/variationUtils";
 import { toast } from "sonner";
+// Import the automation
+import "@/utils/executeImport";
 
 interface Tool {
   id: string;
