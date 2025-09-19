@@ -191,8 +191,8 @@ export function ToolsLibrary() {
       }
     };
 
-    // Execute import once on mount
-    executeOneTimeImport();
+    // Execute the clean import once on mount
+    executeCleanImport();
   }, []);  // Empty dependency array ensures this runs only once
 
   if (loading) {
