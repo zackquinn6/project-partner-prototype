@@ -141,16 +141,22 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
 
       if (fullError) throw fullError;
 
-      const formattedAttributes: VariationAttribute[] = (fullAttributesData || []).map(attr => ({
-        id: attr.id,
-        name: attr.name,
-        display_name: attr.display_name,
-        attribute_type: attr.attribute_type,
-        values: (attr.variation_attribute_values || [])
+      const formattedAttributes: VariationAttribute[] = (fullAttributesData || []).map(attr => {
+        const allValues = (attr.variation_attribute_values || [])
           .filter((v: any) => v.core_item_id === coreItemId)
-          .filter((v: any) => v.value !== '_placeholder_')
-          .sort((a: any, b: any) => a.sort_order - b.sort_order)
-      }));
+          .sort((a: any, b: any) => a.sort_order - b.sort_order);
+        
+        // If only placeholder values exist, show empty array but keep the attribute
+        const nonPlaceholderValues = allValues.filter((v: any) => v.value !== '_placeholder_');
+        
+        return {
+          id: attr.id,
+          name: attr.name,
+          display_name: attr.display_name,
+          attribute_type: attr.attribute_type,
+          values: nonPlaceholderValues.length > 0 ? nonPlaceholderValues : []
+        };
+      });
 
       setAttributes(formattedAttributes);
     } catch (error) {
