@@ -46,12 +46,23 @@ export const HomeRiskManager: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('home_risks')
-        .select('*')
-        .order('risk_level', { ascending: false })
-        .order('start_year', { ascending: true });
+        .select('*');
 
       if (error) throw error;
-      setRisks((data || []) as HomeRisk[]);
+      
+      // Sort by risk level (critical -> high -> medium -> low) then by start year
+      const sortedData = (data || []).sort((a, b) => {
+        const riskOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+        const aOrder = riskOrder[a.risk_level] ?? 4;
+        const bOrder = riskOrder[b.risk_level] ?? 4;
+        
+        if (aOrder !== bOrder) {
+          return aOrder - bOrder;
+        }
+        return a.start_year - b.start_year;
+      });
+      
+      setRisks(sortedData as HomeRisk[]);
     } catch (error) {
       console.error('Error fetching home risks:', error);
       toast.error('Failed to load home risks');
