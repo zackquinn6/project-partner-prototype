@@ -266,15 +266,121 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { modelId, searchTerm, includeEstimates = false } = await req.json();
+    const body = await req.json();
+    const { mode, variationIds, modelId, searchTerm, includeEstimates = true } = body;
 
-    console.log(`Starting price scraping for model: ${modelId}, search: ${searchTerm}`);
+    console.log(`Starting price scraping - Mode: ${mode}`);
+
+    // Handle bulk mode processing
+    if (mode === 'bulk' && variationIds) {
+      console.log(`Processing ${variationIds.length} variations in bulk mode`);
+      let processedCount = 0;
+      
+      for (const variationId of variationIds) {
+        try {
+          // Get variation and its model
+          const { data: variation, error: variationError } = await supabase
+            .from('variation_instances')
+            .select(`
+              id, name, attributes,
+              tool_models!inner(id, model_name, manufacturer)
+            `)
+            .eq('id', variationId)
+            .single();
+
+          if (variationError || !variation) {
+            console.log(`Skipping variation ${variationId}: ${variationError?.message || 'not found'}`);
+            continue;
+          }
+
+          // Use variation name for search term
+          const toolSearchTerm = variation.name;
+          console.log(`Processing variation: ${toolSearchTerm}`);
+
+          // Estimate weight and lifespan for each variation
+          const [weightEstimate, lifespanEstimate] = await Promise.all([
+            estimateWeightFromWeb(toolSearchTerm),
+            estimateRentalLifespanFromWeb(toolSearchTerm)
+          ]);
+
+          // Update variation with estimates
+          const updateData: any = {};
+          if (weightEstimate) updateData.estimated_weight_lbs = weightEstimate;
+          if (lifespanEstimate) updateData.estimated_rental_lifespan_days = lifespanEstimate;
+
+          if (Object.keys(updateData).length > 0) {
+            await supabase
+              .from('variation_instances')
+              .update(updateData)
+              .eq('id', variationId);
+          }
+
+          // Process pricing for the tool model if it exists
+          if (variation.tool_models?.length > 0) {
+            const toolModel = variation.tool_models[0];
+            
+            // Scrape pricing from all retailers
+            const retailerPromises = RETAILERS.map(retailer => 
+              scrapeRetailerPricing(retailer, `${toolModel.manufacturer || ''} ${toolModel.model_name || toolSearchTerm}`.trim())
+            );
+            
+            const retailerResults = await Promise.allSettled(retailerPromises);
+            
+            for (let i = 0; i < retailerResults.length; i++) {
+              const retailer = RETAILERS[i];
+              const result = retailerResults[i];
+
+              if (result.status === 'fulfilled' && result.value.length > 0) {
+                const pricingResult = result.value[0];
+                
+                if (pricingResult.price > 0) {
+                  await supabase
+                    .from('pricing_data')
+                    .upsert({
+                      model_id: toolModel.id,
+                      retailer: retailer.name,
+                      price: pricingResult.price,
+                      availability_status: pricingResult.availability,
+                      product_url: pricingResult.productUrl,
+                      last_scraped_at: new Date().toISOString()
+                    }, { 
+                      onConflict: 'model_id,retailer'
+                    });
+                }
+              }
+            }
+          }
+          
+          processedCount++;
+          if (processedCount % 10 === 0) {
+            console.log(`Processed ${processedCount}/${variationIds.length} variations`);
+          }
+          
+        } catch (error) {
+          console.error(`Error processing variation ${variationId}:`, error);
+        }
+      }
+
+      console.log(`Bulk processing completed: ${processedCount}/${variationIds.length} variations processed`);
+      
+      return new Response(JSON.stringify({
+        success: true,
+        processedCount,
+        totalCount: variationIds.length
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Original single model processing
+    const currentModelId = modelId;
+    console.log(`Starting price scraping for model: ${currentModelId}, search: ${searchTerm}`);
 
     // Get the model details
     const { data: model, error: modelError } = await supabase
       .from('tool_models')
       .select('*, variation_instances(*)')
-      .eq('id', modelId)
+      .eq('id', currentModelId)
       .single();
 
     if (modelError) {
