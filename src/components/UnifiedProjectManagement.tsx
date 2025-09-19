@@ -481,10 +481,21 @@ export function UnifiedProjectManagement() {
                           <div className="space-y-2">
                             <Label>Scaling Unit</Label>
                             {editingProject ? (
-                              <Input
+                              <Select
                                 value={editedProject.scaling_unit || ''}
-                                onChange={(e) => setEditedProject(prev => ({ ...prev, scaling_unit: e.target.value }))}
-                              />
+                                onValueChange={(value) => setEditedProject(prev => ({ ...prev, scaling_unit: value }))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select scaling unit" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="per square foot">per square foot</SelectItem>
+                                  <SelectItem value="per 10x10 room">per 10x10 room</SelectItem>
+                                  <SelectItem value="per linear foot">per linear foot</SelectItem>
+                                  <SelectItem value="per cubic yard">per cubic yard</SelectItem>
+                                  <SelectItem value="per item">per item</SelectItem>
+                                </SelectContent>
+                              </Select>
                             ) : (
                               <div className="p-2 bg-muted rounded">{selectedProject.scaling_unit || 'Not specified'}</div>
                             )}
@@ -806,12 +817,21 @@ export function UnifiedProjectManagement() {
 
               <div className="space-y-2">
                 <Label htmlFor="project-scaling">Scaling Unit</Label>
-                <Input
-                  id="project-scaling"
-                  placeholder="e.g., sq ft, linear ft"
+                <Select
                   value={newProject.scaling_unit || ''}
-                  onChange={(e) => setNewProject(prev => ({ ...prev, scaling_unit: e.target.value }))}
-                />
+                  onValueChange={(value) => setNewProject(prev => ({ ...prev, scaling_unit: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select scaling unit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="per square foot">per square foot</SelectItem>
+                    <SelectItem value="per 10x10 room">per 10x10 room</SelectItem>
+                    <SelectItem value="per linear foot">per linear foot</SelectItem>
+                    <SelectItem value="per cubic yard">per cubic yard</SelectItem>
+                    <SelectItem value="per item">per item</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
