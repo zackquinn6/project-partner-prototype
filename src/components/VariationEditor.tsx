@@ -45,6 +45,14 @@ interface PricingData {
   product_url?: string;
 }
 
+interface WarningFlag {
+  id: string;
+  name: string;
+  description?: string;
+  icon_class?: string;
+  color_class?: string;
+}
+
 interface VariationEditorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -58,12 +66,14 @@ export function VariationEditor({ open, onOpenChange, variation, onSave }: Varia
   const [pricing, setPricing] = useState<PricingData[]>([]);
   const [newModel, setNewModel] = useState<Partial<ToolModel>>({});
   const [newPricing, setNewPricing] = useState<Partial<PricingData>>({});
+  const [availableWarnings, setAvailableWarnings] = useState<WarningFlag[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
 
   useEffect(() => {
     setEditedVariation(variation);
     fetchModelsAndPricing();
+    fetchWarningFlags();
   }, [variation]);
 
   const fetchModelsAndPricing = async () => {
@@ -91,6 +101,21 @@ export function VariationEditor({ open, onOpenChange, variation, onSave }: Varia
     } catch (error) {
       console.error('Error fetching models and pricing:', error);
       toast.error('Failed to load variation data');
+    }
+  };
+
+  const fetchWarningFlags = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('warning_flags')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+      setAvailableWarnings(data || []);
+    } catch (error) {
+      console.error('Error fetching warning flags:', error);
+      toast.error('Failed to load warning flags');
     }
   };
 
@@ -254,6 +279,20 @@ export function VariationEditor({ open, onOpenChange, variation, onSave }: Varia
     return pricing.filter(p => p.model_id === modelId);
   };
 
+  const toggleWarningFlag = (flagName: string) => {
+    const currentFlags = editedVariation.warning_flags || [];
+    const isSelected = currentFlags.includes(flagName);
+    
+    let newFlags;
+    if (isSelected) {
+      newFlags = currentFlags.filter(f => f !== flagName);
+    } else {
+      newFlags = [...currentFlags, flagName];
+    }
+    
+    setEditedVariation({ ...editedVariation, warning_flags: newFlags });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -262,8 +301,9 @@ export function VariationEditor({ open, onOpenChange, variation, onSave }: Varia
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="warnings">Warnings</TabsTrigger>
             <TabsTrigger value="models">Models</TabsTrigger>
             <TabsTrigger value="pricing">Pricing</TabsTrigger>
           </TabsList>
@@ -351,6 +391,68 @@ export function VariationEditor({ open, onOpenChange, variation, onSave }: Varia
                   </div>
                 )}
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="warnings" className="space-y-4">
+            <div>
+              <Label className="text-base font-medium">Safety Warning Flags</Label>
+              <div className="text-sm text-muted-foreground mb-4">
+                Select applicable warning flags for this variation to help users identify potential safety considerations.
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                {availableWarnings.map((flag) => {
+                  const isSelected = editedVariation.warning_flags?.includes(flag.name) || false;
+                  return (
+                    <div
+                      key={flag.id}
+                      onClick={() => toggleWarningFlag(flag.name)}
+                      className={`
+                        p-3 rounded-lg border cursor-pointer transition-all
+                        ${isSelected 
+                          ? 'border-yellow-500 bg-yellow-50 shadow-md' 
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        }
+                      `}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className={`
+                          w-5 h-5 rounded border-2 flex items-center justify-center
+                          ${isSelected 
+                            ? 'border-yellow-500 bg-yellow-500' 
+                            : 'border-gray-300'
+                          }
+                        `}>
+                          {isSelected && <span className="text-white text-xs">✓</span>}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium capitalize">{flag.name}</div>
+                          {flag.description && (
+                            <div className="text-xs text-muted-foreground">{flag.description}</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {editedVariation.warning_flags && editedVariation.warning_flags.length > 0 && (
+                <div className="mt-4">
+                  <Label className="text-sm font-medium">Selected Warnings:</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {editedVariation.warning_flags.map((flagName) => {
+                      const flag = availableWarnings.find(f => f.name === flagName);
+                      return (
+                        <Badge key={flagName} variant="secondary" className="bg-yellow-100 text-yellow-800">
+                          ⚠️ {flag?.name || flagName}
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </TabsContent>
 
