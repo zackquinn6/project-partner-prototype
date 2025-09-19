@@ -62,6 +62,8 @@ export const HomeRiskManager: React.FC = () => {
         return a.start_year - b.start_year;
       });
       
+      console.log('Sorted risks by level:', sortedData.map(r => `${r.material_name} (${r.risk_level})`));
+      
       setRisks(sortedData as HomeRisk[]);
     } catch (error) {
       console.error('Error fetching home risks:', error);
