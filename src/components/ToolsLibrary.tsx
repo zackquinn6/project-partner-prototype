@@ -215,42 +215,43 @@ export function ToolsLibrary() {
         </Dialog>
       </div>
 
-      <div className="border rounded-lg max-h-[70vh] overflow-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12 sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b">Photo</TableHead>
-              <TableHead className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('item')}
-                  className="h-auto p-0 font-semibold hover:bg-transparent flex items-center"
-                >
-                  Tool Name
-                  {getSortIcon('item')}
-                </Button>
-              </TableHead>
-              <TableHead className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('description')}
-                  className="h-auto p-0 font-semibold hover:bg-transparent flex items-center"
-                >
-                  Description
-                  {getSortIcon('description')}
-                </Button>
-              </TableHead>
-              <TableHead className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('example_models')}
-                  className="h-auto p-0 font-semibold hover:bg-transparent flex items-center"
-                >
-                  Example Models
-                  {getSortIcon('example_models')}
-                </Button>
-              </TableHead>
-              <TableHead className="w-32 text-right sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b">Actions</TableHead>
+      <div className="border rounded-lg">
+        <div className="overflow-auto max-h-[70vh]">
+          <Table>
+            <TableHeader className="bg-background border-b">
+              <TableRow>
+                <TableHead className="w-12 bg-background sticky top-0 z-20">Photo</TableHead>
+                <TableHead className="bg-background sticky top-0 z-20">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('item')}
+                    className="h-auto p-0 font-semibold hover:bg-transparent flex items-center"
+                  >
+                    Tool Name
+                    {getSortIcon('item')}
+                  </Button>
+                </TableHead>
+                <TableHead className="bg-background sticky top-0 z-20">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('description')}
+                    className="h-auto p-0 font-semibold hover:bg-transparent flex items-center"
+                  >
+                    Description
+                    {getSortIcon('description')}
+                  </Button>
+                </TableHead>
+                <TableHead className="bg-background sticky top-0 z-20">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('example_models')}
+                    className="h-auto p-0 font-semibold hover:bg-transparent flex items-center"
+                  >
+                    Example Models
+                    {getSortIcon('example_models')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-32 text-right bg-background sticky top-0 z-20">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -321,8 +322,9 @@ export function ToolsLibrary() {
                 </TableCell>
               </TableRow>
             ))}
-          </TableBody>
-        </Table>
+           </TableBody>
+          </Table>
+        </div>
         
         {sortedTools.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
