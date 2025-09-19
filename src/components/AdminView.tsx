@@ -15,6 +15,7 @@ import { AdminRoadmapManager } from './AdminRoadmapManager';
 import { AdminFeatureRequestManager } from './AdminFeatureRequestManager';
 import { AdminDataRefresh } from './AdminDataRefresh';
 import { AppDescriptionDialog } from './AppDescriptionDialog';
+import { PFMEAManagement } from './PFMEAManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const AdminView: React.FC = () => {
@@ -182,14 +183,14 @@ export const AdminView: React.FC = () => {
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                 <Cog className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle>Process Design</CardTitle>
+              <CardTitle>Process FMEA</CardTitle>
               <CardDescription className="min-h-[3rem] flex items-center justify-center">
-                Process design and failure modes & effects analysis management
+                Process Failure Mode & Effects Analysis - identify and mitigate potential process failures
               </CardDescription>
             </CardHeader>
             <CardContent className="mt-auto">
               <Button className="w-full" onClick={() => setProcessDesignOpen(true)}>
-                Process Design
+                Process FMEA
               </Button>
             </CardContent>
           </Card>
@@ -271,24 +272,11 @@ export const AdminView: React.FC = () => {
         />
 
         <Dialog open={processDesignOpen} onOpenChange={setProcessDesignOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-[95vw] max-h-[95vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Process Design</DialogTitle>
+              <DialogTitle>Process Failure Mode and Effects Analysis (PFMEA)</DialogTitle>
             </DialogHeader>
-            <div className="p-6 text-center space-y-4">
-              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center">
-                <Cog className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold">Coming Soon</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Process Design and Process Failure Modes & Effects Analysis (PFMEA) management feature in development
-              </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-lg mx-auto">
-                <p className="text-sm text-blue-800">
-                  This feature will help you design robust processes and identify potential failure modes before they occur, ensuring higher quality project outcomes.
-                </p>
-              </div>
-            </div>
+            <PFMEAManagement />
           </DialogContent>
         </Dialog>
 
