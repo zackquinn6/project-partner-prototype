@@ -215,10 +215,10 @@ export function ToolsLibrary() {
         </Dialog>
       </div>
 
-      <div className="border rounded-lg max-h-[70vh] overflow-auto relative">
+      <div className="border rounded-lg max-h-[70vh] overflow-auto">
         <Table>
-          <TableHeader className="sticky top-0 bg-background border-b z-10 shadow-sm">
-            <TableRow>
+          <TableHeader className="sticky top-0 bg-card border-b z-20 backdrop-blur-sm">
+            <TableRow className="bg-card hover:bg-card">
               <TableHead className="w-12">Photo</TableHead>
               <TableHead>
                 <Button
