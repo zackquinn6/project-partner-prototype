@@ -76,40 +76,41 @@ export function KeyCharacteristicsWindow({ open, onOpenChange, operations }: Key
     <>
       {/* Main KC Window */}
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-[98vw] sm:max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader className="flex-shrink-0">
             <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-bold">Key Characteristics (KC's)</DialogTitle>
+              <DialogTitle className="text-lg sm:text-xl font-bold">Key Characteristics (KC's)</DialogTitle>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowHelpPopup(true)}
-                className="flex items-center gap-1"
+                className="flex items-center gap-1 text-xs sm:text-sm"
               >
                 <HelpCircle className="w-4 h-4" />
-                What's a KC?
+                <span className="hidden sm:inline">What's a KC?</span>
+                <span className="sm:hidden">Help</span>
               </Button>
             </div>
           </DialogHeader>
 
           {/* Operation Navigation */}
-          <div className="flex-shrink-0 space-y-4 border-b pb-4">
+          <div className="flex-shrink-0 space-y-3 sm:space-y-4 border-b pb-3 sm:pb-4">
             <div className="flex items-center gap-2 flex-wrap">
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={goToPrevious}
-                className="px-2"
+                className="px-2 sm:px-3"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
               
-              <div className="flex-1 min-w-[200px]">
+              <div className="flex-1 min-w-[150px] sm:min-w-[200px]">
                 <Select 
                   value={selectedOperationIndex.toString()} 
                   onValueChange={(value) => setSelectedOperationIndex(parseInt(value))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="text-xs sm:text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -126,15 +127,15 @@ export function KeyCharacteristicsWindow({ open, onOpenChange, operations }: Key
                 variant="outline" 
                 size="sm" 
                 onClick={goToNext}
-                className="px-2"
+                className="px-2 sm:px-3"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
             
             <div className="text-center">
-              <h3 className="font-semibold text-lg">{currentOperation.name}</h3>
-              <p className="text-sm text-muted-foreground">{currentOperation.description}</p>
+              <h3 className="font-semibold text-base sm:text-lg">{currentOperation.name}</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">{currentOperation.description}</p>
             </div>
           </div>
 
@@ -148,21 +149,21 @@ export function KeyCharacteristicsWindow({ open, onOpenChange, operations }: Key
             ) : (
               <div className="space-y-6">
                 {criticalOutputs.map((stepOutput, stepIndex) => (
-                  <div key={stepIndex} className="space-y-4">
-                    <h4 className="font-medium text-base border-b pb-2 sticky top-0 bg-background z-10">
+                  <div key={stepIndex} className="space-y-3 sm:space-y-4">
+                    <h4 className="font-medium text-sm sm:text-base border-b pb-2 sticky top-0 bg-background z-10">
                       {stepOutput.step}
                     </h4>
                     
                     <div className="space-y-3">
                       {stepOutput.outputs.map((output, outputIndex) => (
-                        <div key={outputIndex} className="grid md:grid-cols-2 gap-4 border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                        <div key={outputIndex} className="grid grid-cols-1 lg:grid-cols-2 gap-4 border rounded-lg p-3 sm:p-4 hover:bg-muted/50 transition-colors">
                           {/* Left Column - Output Details */}
                           <div 
                             className="space-y-2 cursor-pointer"
                             onClick={() => setSelectedOutput(output)}
                           >
-                            <div className="flex items-start justify-between gap-2">
-                              <h5 className="font-semibold text-sm leading-tight">
+                            <div className="flex items-start gap-2 flex-wrap">
+                              <h5 className="font-semibold text-sm leading-tight flex-1 min-w-0">
                                 {output.name}
                               </h5>
                               <div className="flex items-center gap-1 flex-shrink-0">
@@ -178,10 +179,6 @@ export function KeyCharacteristicsWindow({ open, onOpenChange, operations }: Key
                                 {output.description}
                               </p>
                             )}
-                            
-                            <div className="text-xs text-primary underline">
-                              Click for more details →
-                            </div>
                           </div>
                           
                           {/* Right Column - Key Inputs */}
