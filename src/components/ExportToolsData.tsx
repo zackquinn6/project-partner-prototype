@@ -61,17 +61,23 @@ export function ExportToolsData({ className = "" }: ExportToolsDataProps) {
       // Create workbook
       const workbook = XLSX.utils.book_new();
 
-      // Tools sheet
-      const toolsData = (tools || []).map(tool => ({
-        'Tool Name': tool.item,
-        'Description': tool.description || '',
-        'Example Models': tool.example_models || '',
-        'Photo URL': tool.photo_url || '',
-        'Created At': new Date(tool.created_at).toLocaleDateString(),
-        'Updated At': new Date(tool.updated_at).toLocaleDateString()
-      }));
+      // Tools sheet with variant summary
+      const toolsWithVariants = await Promise.all(
+        (tools || []).map(async (tool) => {
+          const toolVariations = variations?.filter(v => v.core_item_id === tool.id) || [];
+          
+          return {
+            'Tool Name': tool.item,
+            'Description': tool.description || '',
+            'Variant Count': toolVariations.length,
+            'Variant Names': toolVariations.map(v => v.name).join(', '),
+            'Created At': new Date(tool.created_at).toLocaleDateString(),
+            'Updated At': new Date(tool.updated_at).toLocaleDateString()
+          };
+        })
+      );
 
-      const toolsSheet = XLSX.utils.json_to_sheet(toolsData);
+      const toolsSheet = XLSX.utils.json_to_sheet(toolsWithVariants);
       XLSX.utils.book_append_sheet(workbook, toolsSheet, 'Tools');
 
       // Variations sheet
@@ -96,10 +102,9 @@ export function ExportToolsData({ className = "" }: ExportToolsDataProps) {
           'Description': variation.description || '',
           'SKU/Model Numbers': variation.sku || '',
           'Attributes': attributeStrings.join('; '),
-          'Estimated Weight (lbs)': variation.estimated_weight_lbs || '',
+          'Weight (lbs)': variation.weight_lbs || variation.estimated_weight_lbs || '',
           'Estimated Rental Lifespan (days)': variation.estimated_rental_lifespan_days || '',
           'Warning Flags': (variation.warning_flags as string[] || []).join(', '),
-          'Photo URL': variation.photo_url || '',
           'Created At': new Date(variation.created_at).toLocaleDateString(),
           'Updated At': new Date(variation.updated_at).toLocaleDateString()
         };
