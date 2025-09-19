@@ -444,13 +444,13 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
       {/* Manage Attributes Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+          <CardTitle className="flex items-center justify-between text-base">
             Variation Attributes
             <div className="space-x-2">
               <Dialog open={showAttributeDialog} onOpenChange={setShowAttributeDialog}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-1" />
                     Add Attribute
                   </Button>
                 </DialogTrigger>
@@ -512,7 +512,7 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
               <Dialog open={showValueDialog} onOpenChange={setShowValueDialog}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-1" />
                     Add Value
                   </Button>
                 </DialogTrigger>
@@ -606,29 +606,11 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
           <CardTitle className="flex items-center justify-between">
             Variations for {coreItemName}
             <div className="flex items-center space-x-2">
-              <Button 
-                variant="destructive" 
-                size="sm"
-                onClick={async () => {
-                  if (confirm(`Are you sure you want to clear ALL ${itemType} variations? This action cannot be undone.`)) {
-                    const success = itemType === 'tools' 
-                      ? await clearAllToolVariations() 
-                      : await clearAllMaterialVariations();
-                    if (success) {
-                      fetchVariations();
-                      onVariationUpdate?.();
-                    }
-                  }
-                }}
-              >
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                Clear All
-              </Button>
               <Dialog open={showVariationDialog} onOpenChange={setShowVariationDialog}>
               <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Variation
+                <Button size="sm" className="text-xs">
+                  <Plus className="h-4 w-4 mr-1" />
+                  Create
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl">

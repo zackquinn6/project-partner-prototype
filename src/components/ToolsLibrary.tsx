@@ -127,8 +127,8 @@ export function ToolsLibrary() {
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm">
-              <Trash2 className="w-4 h-4 mr-2" />
+            <Button variant="destructive" size="sm" className="text-xs">
+              <Trash2 className="w-4 h-4 mr-1" />
               Delete All
             </Button>
           </AlertDialogTrigger>
@@ -149,16 +149,18 @@ export function ToolsLibrary() {
         </AlertDialog>
         <Button
           variant="outline"
+          size="sm"
           onClick={() => setShowImportManager(true)}
+          className="text-xs"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Import Tools
+          <Plus className="w-4 h-4 mr-1" />
+          Import
         </Button>
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Tool
+            <Button size="sm" className="text-xs">
+              <Plus className="w-4 h-4 mr-1" />
+              Add
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -179,7 +181,7 @@ export function ToolsLibrary() {
           <Card key={tool.id} className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => setViewingVariations(tool)}>
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
-                <CardTitle className="text-lg">{tool.item}</CardTitle>
+                <CardTitle className="text-lg capitalize">{tool.item}</CardTitle>
                 <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                   <Button
                     variant="ghost"
