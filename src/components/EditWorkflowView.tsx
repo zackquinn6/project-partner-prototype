@@ -19,6 +19,7 @@ import { ToolsMaterialsWindow } from '@/components/ToolsMaterialsWindow';
 import { MultiSelectLibraryDialog } from '@/components/MultiSelectLibraryDialog';
 import { StructureManager } from '@/components/StructureManager';
 import { OutputEditForm } from '@/components/OutputEditForm';
+import { OutputDetailPopup } from '@/components/OutputDetailPopup';
 import { ProjectContentImport } from '@/components/ProjectContentImport';
 import { ProcessImprovementEngine } from '@/components/ProcessImprovementEngine';
 import { ArrowLeft, Eye, Edit, Package, Wrench, FileOutput, Plus, X, Settings, Save, ChevronLeft, ChevronRight, FileText, List, Upload, Trash2, Brain } from 'lucide-react';
@@ -50,6 +51,8 @@ export default function EditWorkflowView({
   const [editMode, setEditMode] = useState(false);
   const [editingOutput, setEditingOutput] = useState<Output | null>(null);
   const [outputEditOpen, setOutputEditOpen] = useState(false);
+  const [selectedOutput, setSelectedOutput] = useState<Output | null>(null);
+  const [outputDetailOpen, setOutputDetailOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [toolsMaterialsOpen, setToolsMaterialsOpen] = useState(false);
   const [toolsLibraryOpen, setToolsLibraryOpen] = useState(false);
@@ -436,16 +439,16 @@ export default function EditWorkflowView({
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => setToolsLibraryOpen(true)}>
-                            <Wrench className="w-4 h-4 mr-2" />
-                            Select Tools from Library
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => setMaterialsLibraryOpen(true)}>
-                            <Package className="w-4 h-4 mr-2" />
-                            Select Materials from Library
-                          </Button>
-                        </div>
+                         <div className="flex gap-2">
+                           <Button size="sm" variant="outline" onClick={() => setToolsLibraryOpen(true)}>
+                             <Wrench className="w-4 h-4 mr-2" />
+                             Add Tool
+                           </Button>
+                           <Button size="sm" variant="outline" onClick={() => setMaterialsLibraryOpen(true)}>
+                             <Package className="w-4 h-4 mr-2" />
+                             Add Material
+                           </Button>
+                         </div>
                         
                         <Accordion type="multiple" defaultValue={["materials", "tools"]} className="w-full">
                           {/* Materials section */}
@@ -587,19 +590,18 @@ export default function EditWorkflowView({
                 {/* Inputs Card */}
                   <Card className="bg-muted/30 border shadow-sm">
                     <CardHeader>
-                      <CardTitle>Step Inputs</CardTitle>
-                      <CardDescription>Define inputs that users need to provide for this step</CardDescription>
+                       <CardTitle>Process Variables</CardTitle>
+                       <CardDescription>Define process variables for this step</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <Button size="sm" variant="outline" onClick={() => {
-                    const newInput = {
-                      id: `input-${Date.now()}-${Math.random()}`,
-                      name: 'New Input',
-                      description: '',
-                      type: 'text' as const,
-                      required: false
-                    };
+                                    const newInput = {
+                       id: `input-${Date.now()}-${Math.random()}`,
+                       name: '',
+                       type: 'text' as const,
+                       required: false
+                     };
                     updateEditingStep('inputs', [...(editingStep?.inputs || []), newInput]);
                   }}>
                           <Plus className="w-4 h-4 mr-2" />
@@ -608,105 +610,33 @@ export default function EditWorkflowView({
                         
                         {editingStep.inputs && editingStep.inputs.length > 0 && <Accordion type="multiple" defaultValue={["inputs"]} className="w-full">
                             <AccordionItem value="inputs">
-                              <AccordionTrigger className="text-base font-semibold">
-                                Inputs ({editingStep.inputs.length})
-                              </AccordionTrigger>
+                               <AccordionTrigger className="text-base font-semibold">
+                                 Process Variables ({editingStep.inputs.length})
+                               </AccordionTrigger>
                               <AccordionContent>
-                                 <div className="space-y-3 pt-2">
-                                   {editingStep.inputs.map((input, index) => <div key={input.id} className="p-3 bg-background/50 rounded-lg border">
-                                       <div className="space-y-3">
-                                         <div className="grid grid-cols-2 gap-3">
-                                           <div>
-                                             <Label>Input Name</Label>
-                                             <Input value={input.name} onChange={e => {
-                                    const updatedInputs = [...editingStep.inputs!];
-                                    updatedInputs[index] = {
-                                      ...input,
-                                      name: e.target.value
-                                    };
-                                    updateEditingStep('inputs', updatedInputs);
-                                  }} placeholder="Input name" />
-                                           </div>
-                                           <div>
-                                             <Label>Type</Label>
-                                             <Select value={input.type} onValueChange={value => {
-                                    const updatedInputs = [...editingStep.inputs!];
-                                    updatedInputs[index] = {
-                                      ...input,
-                                      type: value as any
-                                    };
-                                    updateEditingStep('inputs', updatedInputs);
-                                  }}>
-                                               <SelectTrigger>
-                                                 <SelectValue />
-                                               </SelectTrigger>
-                                               <SelectContent>
-                                                 <SelectItem value="text">Text</SelectItem>
-                                                 <SelectItem value="number">Number</SelectItem>
-                                                 <SelectItem value="boolean">Yes/No</SelectItem>
-                                                 <SelectItem value="measurement">Measurement</SelectItem>
-                                                 <SelectItem value="selection">Selection</SelectItem>
-                                                 <SelectItem value="file">File</SelectItem>
-                                               </SelectContent>
-                                             </Select>
-                                           </div>
-                                         </div>
-                                         <div>
-                                           <Label>Description</Label>
-                                           <Textarea value={input.description || ''} onChange={e => {
-                                  const updatedInputs = [...editingStep.inputs!];
-                                  updatedInputs[index] = {
-                                    ...input,
-                                    description: e.target.value
-                                  };
-                                  updateEditingStep('inputs', updatedInputs);
-                                }} placeholder="Input description" rows={2} />
-                                         </div>
-                                         {input.type === 'measurement' && <div>
-                                             <Label>Unit</Label>
-                                             <Input value={input.unit || ''} onChange={e => {
-                                  const updatedInputs = [...editingStep.inputs!];
-                                  updatedInputs[index] = {
-                                    ...input,
-                                    unit: e.target.value
-                                  };
-                                  updateEditingStep('inputs', updatedInputs);
-                                }} placeholder="e.g., ft, inches, sq ft" />
-                                           </div>}
-                                         {input.type === 'selection' && <div>
-                                             <Label>Options (one per line)</Label>
-                                             <Textarea value={input.options?.join('\n') || ''} onChange={e => {
-                                  const options = e.target.value.split('\n').filter(opt => opt.trim());
-                                  const updatedInputs = [...editingStep.inputs!];
-                                  updatedInputs[index] = {
-                                    ...input,
-                                    options
-                                  };
-                                  updateEditingStep('inputs', updatedInputs);
-                                }} placeholder="Option 1&#10;Option 2&#10;Option 3" rows={3} />
-                                           </div>}
-                                         <div className="flex justify-between items-center">
-                                           <div className="flex items-center space-x-2">
-                                             <input type="checkbox" checked={input.required || false} onChange={e => {
-                                    const updatedInputs = [...editingStep.inputs!];
-                                    updatedInputs[index] = {
-                                      ...input,
-                                      required: e.target.checked
-                                    };
-                                    updateEditingStep('inputs', updatedInputs);
-                                  }} className="rounded" />
-                                             <Label className="text-sm">Required</Label>
-                                           </div>
-                                           <Button onClick={() => {
-                                  const updatedInputs = editingStep.inputs!.filter((_, i) => i !== index);
-                                  updateEditingStep('inputs', updatedInputs);
-                                }} size="sm" variant="ghost" className="text-destructive hover:text-destructive">
-                                             <Trash2 className="w-4 h-4" />
-                                           </Button>
-                                         </div>
-                                       </div>
-                                     </div>)}
-                                 </div>
+                                  <div className="space-y-2 pt-2">
+                                    {editingStep.inputs.map((input, index) => <div key={input.id} className="flex items-center gap-2 p-2 bg-background/50 rounded border">
+                                        <Input 
+                                          value={input.name} 
+                                          onChange={e => {
+                                            const updatedInputs = [...editingStep.inputs!];
+                                            updatedInputs[index] = {
+                                              ...input,
+                                              name: e.target.value
+                                            };
+                                            updateEditingStep('inputs', updatedInputs);
+                                          }} 
+                                          placeholder="Variable name" 
+                                          className="flex-1"
+                                        />
+                                        <Button onClick={() => {
+                                          const updatedInputs = editingStep.inputs!.filter((_, i) => i !== index);
+                                          updateEditingStep('inputs', updatedInputs);
+                                        }} size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+                                          <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                      </div>)}
+                                  </div>
                               </AccordionContent>
                             </AccordionItem>
                           </Accordion>}
@@ -741,67 +671,74 @@ export default function EditWorkflowView({
                                 Outputs ({editingStep.outputs.length})
                               </AccordionTrigger>
                               <AccordionContent>
-                                 <div className="space-y-3 pt-2">
-                                   {editingStep.outputs.map((output, index) => <div key={output.id} className="p-3 bg-background/50 rounded-lg border">
-                                       <div className="space-y-3">
-                                         <div className="flex items-center justify-between">
-                                           <div className="grid grid-cols-2 gap-3 flex-1">
-                                             <div>
-                                               <Label>Name</Label>
-                                               <Input value={output.name} onChange={e => {
-                                      const updatedOutputs = [...editingStep.outputs];
-                                      updatedOutputs[index] = {
-                                        ...output,
-                                        name: e.target.value
-                                      };
-                                      updateEditingStep('outputs', updatedOutputs);
-                                    }} placeholder="Output name" />
-                                             </div>
-                                             <div>
-                                               <Label>Type</Label>
-                                               <Select value={output.type} onValueChange={value => {
-                                      const updatedOutputs = [...editingStep.outputs];
-                                      updatedOutputs[index] = {
-                                        ...output,
-                                        type: value as Output['type']
-                                      };
-                                      updateEditingStep('outputs', updatedOutputs);
-                                    }}>
-                                                 <SelectTrigger>
-                                                   <SelectValue />
-                                                 </SelectTrigger>
-                                                 <SelectContent>
-                                                   <SelectItem value="none">None</SelectItem>
-                                                   <SelectItem value="major-aesthetics">Major Aesthetics</SelectItem>
-                                                   <SelectItem value="performance-durability">Performance/Durability</SelectItem>
-                                                   <SelectItem value="safety">Safety</SelectItem>
-                                                 </SelectContent>
-                                               </Select>
-                                             </div>
-                                           </div>
-                                         </div>
-                                         <div>
-                                           <Label>Description</Label>
-                                           <Textarea value={output.description} onChange={e => {
-                                  const updatedOutputs = [...editingStep.outputs];
-                                  updatedOutputs[index] = {
-                                    ...output,
-                                    description: e.target.value
-                                  };
-                                  updateEditingStep('outputs', updatedOutputs);
-                                }} placeholder="Output description" rows={2} />
-                                         </div>
-                                         <div className="flex justify-end">
-                                           <Button onClick={() => {
-                                  const updatedOutputs = editingStep.outputs.filter((_, i) => i !== index);
-                                  updateEditingStep('outputs', updatedOutputs);
-                                }} size="sm" variant="ghost" className="text-destructive hover:text-destructive">
-                                             <Trash2 className="w-4 h-4" />
-                                           </Button>
-                                         </div>
-                                       </div>
-                                     </div>)}
-                                 </div>
+                                  <div className="space-y-3 pt-2">
+                                    {editingStep.outputs.map((output, index) => <div key={output.id} className="p-3 bg-background/50 rounded-lg border">
+                                        <div className="space-y-3">
+                                          <div className="flex items-center justify-between">
+                                            <div className="grid grid-cols-2 gap-3 flex-1">
+                                              <div>
+                                                <Label>Name</Label>
+                                                <Input value={output.name} onChange={e => {
+                                       const updatedOutputs = [...editingStep.outputs];
+                                       updatedOutputs[index] = {
+                                         ...output,
+                                         name: e.target.value
+                                       };
+                                       updateEditingStep('outputs', updatedOutputs);
+                                     }} placeholder="Output name" />
+                                              </div>
+                                              <div>
+                                                <Label>Type</Label>
+                                                <Select value={output.type} onValueChange={value => {
+                                       const updatedOutputs = [...editingStep.outputs];
+                                       updatedOutputs[index] = {
+                                         ...output,
+                                         type: value as Output['type']
+                                       };
+                                       updateEditingStep('outputs', updatedOutputs);
+                                     }}>
+                                                  <SelectTrigger>
+                                                    <SelectValue />
+                                                  </SelectTrigger>
+                                                  <SelectContent>
+                                                    <SelectItem value="none">None</SelectItem>
+                                                    <SelectItem value="major-aesthetics">Major Aesthetics</SelectItem>
+                                                    <SelectItem value="performance-durability">Performance/Durability</SelectItem>
+                                                    <SelectItem value="safety">Safety</SelectItem>
+                                                  </SelectContent>
+                                                </Select>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <Label>Description</Label>
+                                            <Textarea value={output.description} onChange={e => {
+                                   const updatedOutputs = [...editingStep.outputs];
+                                   updatedOutputs[index] = {
+                                     ...output,
+                                     description: e.target.value
+                                   };
+                                   updateEditingStep('outputs', updatedOutputs);
+                                 }} placeholder="Output description" rows={2} />
+                                          </div>
+                                          <div className="flex justify-between">
+                                            <Button size="sm" variant="outline" onClick={() => {
+                                              setSelectedOutput(output);
+                                              setOutputDetailOpen(true);
+                                            }}>
+                                              <Edit className="w-4 h-4 mr-2" />
+                                              Edit Details
+                                            </Button>
+                                            <Button onClick={() => {
+                                   const updatedOutputs = editingStep.outputs.filter((_, i) => i !== index);
+                                   updateEditingStep('outputs', updatedOutputs);
+                                 }} size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+                                              <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      </div>)}
+                                  </div>
                               </AccordionContent>
                             </AccordionItem>
                           </Accordion>}
@@ -1032,5 +969,17 @@ export default function EditWorkflowView({
       }));
       updateEditingStep('materials', [...(editingStep?.materials || []), ...newMaterials]);
     }} />
+
+      {/* Output Detail Popup */}
+      {selectedOutput && (
+        <OutputDetailPopup
+          output={selectedOutput}
+          isOpen={outputDetailOpen}
+          onClose={() => {
+            setOutputDetailOpen(false);
+            setSelectedOutput(null);
+          }}
+        />
+      )}
     </div>;
 }

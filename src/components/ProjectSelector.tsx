@@ -209,10 +209,9 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
           <div className="flex gap-2">
             <Dialog open={isNewProjectOpen} onOpenChange={setIsNewProjectOpen}>
               <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
-                  <Plus className="w-4 h-4" />
-                  New Project
-                </Button>
+                 <Button size="icon" variant="outline" className="h-10 w-10">
+                   <Plus className="w-4 h-4" />
+                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
@@ -296,7 +295,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
                               'bg-gray-100 text-gray-800'
                             }
                           >
-                            {currentProject.difficulty || 'Unset'}
+                            {currentProject.difficulty ? `${currentProject.difficulty} Skill` : 'Unset'}
                           </Badge>
                           <Badge 
                             variant="outline"
