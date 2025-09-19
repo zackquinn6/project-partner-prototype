@@ -88,24 +88,12 @@ export const MaterialsAdjustmentWindow: React.FC<MaterialsAdjustmentWindowProps>
   const handleSave = () => {
     const changedMaterials = adjustments.filter(adj => adj.currentQuantity !== adj.newQuantity);
     
-    if (changedMaterials.length === 0 && !additionalMaterials.trim()) {
-      toast.info('No changes detected in material quantities.');
-      return;
-    }
-
     // In a real implementation, this would update the project materials
     console.log('Material adjustments:', {
       adjustments: changedMaterials,
       additionalMaterials: additionalMaterials.trim(),
       generalReason: generalReason.trim()
     });
-
-    toast.success('Material adjustments saved successfully!');
-    
-    // Mark shopping as incomplete if there are changes
-    if (changedMaterials.length > 0 || additionalMaterials.trim()) {
-      toast.info('Shopping list has been marked as incomplete for review.');
-    }
 
     onComplete?.();
     onOpenChange(false);

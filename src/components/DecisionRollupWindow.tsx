@@ -221,19 +221,18 @@ export const DecisionRollupWindow: React.FC<DecisionRollupWindowProps> = ({
         const finalPlanStepId = 'final-planning-step-1';
         if (onNavigateToStep) {
           onNavigateToStep(finalPlanStepId);
-          toast.success(`Navigating to project planning to address: ${option}`);
           onOpenChange(false);
         } else {
-          toast.success(`Selected: ${option}. Please navigate to "Finalize Project Plan" step.`);
-          setTimeout(() => onOpenChange(false), 1500);
+          onOpenChange(false);
         }
         break;
       case 'New materials needed':
-        setShowMaterialsWindow(true);
+        // Close this dialog and open materials window
+        onOpenChange(false);
+        setTimeout(() => setShowMaterialsWindow(true), 100);
         break;
       default:
-        toast.success(`Selected: ${option}. This will help us update your plan accordingly.`);
-        setTimeout(() => onOpenChange(false), 1000);
+        onOpenChange(false);
     }
   };
 
@@ -323,17 +322,13 @@ export const DecisionRollupWindow: React.FC<DecisionRollupWindowProps> = ({
   // Materials adjustment window
   if (showMaterialsWindow) {
     return (
-      <>
-        <MaterialsAdjustmentWindow
-          open={showMaterialsWindow}
-          onOpenChange={setShowMaterialsWindow}
-          onComplete={() => {
-            setShowMaterialsWindow(false);
-            toast.success('Material adjustments completed. Shopping list updated.');
-            onOpenChange(false);
-          }}
-        />
-      </>
+      <MaterialsAdjustmentWindow
+        open={showMaterialsWindow}
+        onOpenChange={setShowMaterialsWindow}
+        onComplete={() => {
+          setShowMaterialsWindow(false);
+        }}
+      />
     );
   }
 
