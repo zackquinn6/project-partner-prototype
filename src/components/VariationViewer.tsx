@@ -14,6 +14,25 @@ interface VariationInstance {
   sku?: string;
   photo_url?: string;
   attributes: Record<string, string>;
+  estimated_weight_lbs?: number;
+  estimated_rental_lifespan_days?: number;
+  warning_flags?: string[];
+}
+
+interface ToolModel {
+  id: string;
+  variation_instance_id: string;
+  model_name: string;
+  manufacturer?: string;
+}
+
+interface PricingData {
+  id: string;
+  model_id: string;
+  retailer: string;
+  price?: number;
+  currency: string;
+  availability_status?: string;
 }
 
 interface VariationAttribute {
@@ -41,31 +60,57 @@ interface VariationViewerProps {
 export function VariationViewer({ open, onOpenChange, coreItemId, itemType, coreItemName }: VariationViewerProps) {
   const [variations, setVariations] = useState<VariationInstance[]>([]);
   const [attributes, setAttributes] = useState<VariationAttribute[]>([]);
+  const [models, setModels] = useState<ToolModel[]>([]);
+  const [pricing, setPricing] = useState<PricingData[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchVariations = async () => {
+  const fetchData = async () => {
     if (!coreItemId) return;
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Fetch variations
+      const { data: variationsData, error: variationsError } = await supabase
         .from('variation_instances')
         .select('*')
         .eq('core_item_id', coreItemId)
         .eq('item_type', itemType);
 
-      if (error) throw error;
-      console.log('Raw variations data:', data);
-      const processedData = (data || []).map(item => ({
+      if (variationsError) throw variationsError;
+      
+      const processedVariations = (variationsData || []).map(item => ({
         ...item,
         item_type: item.item_type as 'tools' | 'materials',
         attributes: item.attributes as Record<string, string>
       }));
-      console.log('Processed variations:', processedData);
-      setVariations(processedData);
+      setVariations(processedVariations);
+
+      // Fetch tool models for these variations
+      const variationIds = processedVariations.map(v => v.id);
+      if (variationIds.length > 0) {
+        const { data: modelsData, error: modelsError } = await supabase
+          .from('tool_models')
+          .select('*')
+          .in('variation_instance_id', variationIds);
+
+        if (modelsError) throw modelsError;
+        setModels(modelsData || []);
+
+        // Fetch pricing data for models
+        const modelIds = (modelsData || []).map(m => m.id);
+        if (modelIds.length > 0) {
+          const { data: pricingData, error: pricingError } = await supabase
+            .from('pricing_data')
+            .select('*')
+            .in('model_id', modelIds);
+
+          if (pricingError) throw pricingError;
+          setPricing(pricingData || []);
+        }
+      }
     } catch (error) {
-      console.error('Error fetching variations:', error);
-      toast.error('Failed to fetch variations');
+      console.error('Error fetching data:', error);
+      toast.error('Failed to fetch variation data');
     } finally {
       setLoading(false);
     }
@@ -101,10 +146,24 @@ export function VariationViewer({ open, onOpenChange, coreItemId, itemType, core
 
   useEffect(() => {
     if (open && coreItemId) {
-      fetchVariations();
+      fetchData();
       fetchAttributes();
     }
   }, [open, coreItemId]);
+
+  const getAveragePricing = (variationId: string) => {
+    const variationModels = models.filter(m => m.variation_instance_id === variationId);
+    const modelIds = variationModels.map(m => m.id);
+    const variationPricing = pricing.filter(p => modelIds.includes(p.model_id) && p.price && p.price > 0);
+    
+    if (variationPricing.length === 0) return null;
+    
+    const avgPrice = variationPricing.reduce((sum, p) => sum + (p.price || 0), 0) / variationPricing.length;
+    return {
+      averagePrice: avgPrice,
+      retailerCount: variationPricing.length
+    };
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -141,6 +200,38 @@ export function VariationViewer({ open, onOpenChange, coreItemId, itemType, core
                         {variation.sku && (
                           <div className="text-xs text-muted-foreground mb-2">Model: {variation.sku}</div>
                         )}
+                        
+                        {/* Weight and Rental Lifespan Info */}
+                        <div className="flex gap-4 mb-2 text-xs text-muted-foreground">
+                          {variation.estimated_weight_lbs && (
+                            <span>Weight: {variation.estimated_weight_lbs} lbs</span>
+                          )}
+                          {variation.estimated_rental_lifespan_days && (
+                            <span>Rental Life: {variation.estimated_rental_lifespan_days} days</span>
+                          )}
+                        </div>
+
+                        {/* Pricing Info */}
+                        {(() => {
+                          const pricingInfo = getAveragePricing(variation.id);
+                          return pricingInfo && (
+                            <div className="text-sm font-medium text-green-600 mb-2">
+                              Avg Price: ${pricingInfo.averagePrice.toFixed(2)} ({pricingInfo.retailerCount} retailer{pricingInfo.retailerCount !== 1 ? 's' : ''})
+                            </div>
+                          );
+                        })()}
+
+                        {/* Warning Flags */}
+                        {variation.warning_flags && variation.warning_flags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {variation.warning_flags.map((flag, index) => (
+                              <Badge key={index} variant="destructive" className="text-xs">
+                                ⚠️ {flag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+
                         <div className="flex flex-wrap gap-1">
                           {Object.entries(variation.attributes).map(([key, value]) => {
                             const attr = attributes.find(a => a.name === key);
