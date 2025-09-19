@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
-  GitBranch, Search, Plus, Edit, Archive, Eye, CheckCircle, Clock, 
-  ArrowRight, ChevronDown, ChevronRight, AlertTriangle 
+  GitBranch, Plus, Edit, Archive, Eye, CheckCircle, Clock, 
+  ArrowRight, AlertTriangle, Settings, Save, X 
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -33,26 +33,40 @@ interface Project {
   is_current_version: boolean;
   category: string | null;
   difficulty: string | null;
+  estimated_time: string | null;
   created_by: string;
 }
 
 export function UnifiedProjectManagement() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
-  const [projectRevisions, setProjectRevisions] = useState<Record<string, Project[]>>({});
-  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [projectRevisions, setProjectRevisions] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'published' | 'beta' | 'draft' | 'archived'>('published');
+  const [editingProject, setEditingProject] = useState(false);
+  const [editedProject, setEditedProject] = useState<Partial<Project>>({});
+  const [activeView, setActiveView] = useState<'details' | 'revisions'>('details');
   
   // Dialog states
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const [createRevisionDialogOpen, setCreateRevisionDialogOpen] = useState(false);
+  const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
   const [selectedRevision, setSelectedRevision] = useState<Project | null>(null);
   const [newStatus, setNewStatus] = useState<'beta' | 'published'>('beta');
   const [releaseNotes, setReleaseNotes] = useState('');
   const [revisionNotes, setRevisionNotes] = useState('');
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [newProject, setNewProject] = useState<{
+    name: string;
+    description: string;
+    category: string;
+    difficulty: string;
+    estimated_time: string;
+  }>({
+    name: '',
+    description: '',
+    category: '',
+    difficulty: 'beginner',
+    estimated_time: '',
+  });
   
   const { toast } = useToast();
 
@@ -61,8 +75,10 @@ export function UnifiedProjectManagement() {
   }, []);
 
   useEffect(() => {
-    filterProjects();
-  }, [projects, searchTerm, activeTab]);
+    if (selectedProject) {
+      fetchProjectRevisions();
+    }
+  }, [selectedProject]);
 
   const fetchProjects = async () => {
     try {
@@ -86,12 +102,11 @@ export function UnifiedProjectManagement() {
     }
   };
 
-  const fetchProjectRevisions = async (projectId: string) => {
+  const fetchProjectRevisions = async () => {
+    if (!selectedProject) return;
+    
     try {
-      const project = projects.find(p => p.id === projectId);
-      if (!project) return;
-
-      const parentId = project.parent_project_id || project.id;
+      const parentId = selectedProject.parent_project_id || selectedProject.id;
       
       const { data: allRevisions, error } = await supabase
         .from('projects')
@@ -100,11 +115,7 @@ export function UnifiedProjectManagement() {
         .order('revision_number', { ascending: false });
 
       if (error) throw error;
-      
-      setProjectRevisions(prev => ({
-        ...prev,
-        [projectId]: (allRevisions || []) as Project[]
-      }));
+      setProjectRevisions((allRevisions || []) as Project[]);
     } catch (error) {
       console.error('Error fetching project revisions:', error);
       toast({
@@ -115,32 +126,52 @@ export function UnifiedProjectManagement() {
     }
   };
 
-  const toggleProjectExpansion = (projectId: string) => {
-    const newExpanded = new Set(expandedProjects);
-    if (newExpanded.has(projectId)) {
-      newExpanded.delete(projectId);
-    } else {
-      newExpanded.add(projectId);
-      if (!projectRevisions[projectId]) {
-        fetchProjectRevisions(projectId);
-      }
-    }
-    setExpandedProjects(newExpanded);
+  const handleProjectSelect = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    setSelectedProject(project || null);
+    setEditingProject(false);
+    setEditedProject({});
   };
 
-  const filterProjects = () => {
-    let filtered = projects.filter(project => {
-      if (project.publish_status !== activeTab) return false;
-      
-      if (searchTerm && !project.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          !project.description?.toLowerCase().includes(searchTerm.toLowerCase())) {
-        return false;
-      }
-      
-      return true;
-    });
+  const startProjectEdit = () => {
+    if (selectedProject) {
+      setEditedProject({ ...selectedProject });
+      setEditingProject(true);
+    }
+  };
 
-    setFilteredProjects(filtered);
+  const saveProjectEdit = async () => {
+    if (!selectedProject || !editedProject) return;
+
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update(editedProject)
+        .eq('id', selectedProject.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Project updated successfully!",
+      });
+
+      setEditingProject(false);
+      setEditedProject({});
+      fetchProjects();
+    } catch (error) {
+      console.error('Error updating project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update project",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const cancelProjectEdit = () => {
+    setEditingProject(false);
+    setEditedProject({});
   };
 
   const handleStatusChange = (revision: Project, status: 'beta' | 'published') => {
@@ -171,15 +202,9 @@ export function UnifiedProjectManagement() {
 
       setPublishDialogOpen(false);
       fetchProjects();
-      
-      // Refresh revisions for the affected project
-      const projectId = selectedRevision.parent_project_id || selectedRevision.id;
-      const affectedProjects = projects.filter(p => p.id === projectId || p.parent_project_id === projectId);
-      affectedProjects.forEach(p => {
-        if (expandedProjects.has(p.id)) {
-          fetchProjectRevisions(p.id);
-        }
-      });
+      if (selectedProject) {
+        fetchProjectRevisions();
+      }
     } catch (error) {
       console.error('Error updating project status:', error);
       toast({
@@ -191,11 +216,11 @@ export function UnifiedProjectManagement() {
   };
 
   const createNewRevision = async () => {
-    if (!selectedProjectId) return;
+    if (!selectedProject) return;
 
     try {
       const { data, error } = await supabase.rpc('create_project_revision', {
-        source_project_id: selectedProjectId,
+        source_project_id: selectedProject.id,
         revision_notes_text: revisionNotes || null,
       });
 
@@ -208,18 +233,56 @@ export function UnifiedProjectManagement() {
 
       setCreateRevisionDialogOpen(false);
       setRevisionNotes('');
-      setSelectedProjectId(null);
       fetchProjects();
-      
-      // Refresh revisions for the affected project
-      if (expandedProjects.has(selectedProjectId)) {
-        fetchProjectRevisions(selectedProjectId);
-      }
+      fetchProjectRevisions();
     } catch (error) {
       console.error('Error creating revision:', error);
       toast({
         title: "Error",
         description: "Failed to create new revision",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const createProject = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .insert([{
+          name: newProject.name,
+          description: newProject.description || '',
+          category: newProject.category || '',
+          difficulty: newProject.difficulty || 'beginner',
+          estimated_time: newProject.estimated_time || '',
+          publish_status: 'draft',
+          phases: [],
+          created_by: (await supabase.auth.getUser()).data.user?.id,
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "New project created!",
+      });
+
+      setCreateProjectDialogOpen(false);
+      setNewProject({
+        name: '',
+        description: '',
+        category: '',
+        difficulty: 'beginner',
+        estimated_time: '',
+      });
+      fetchProjects();
+    } catch (error) {
+      console.error('Error creating project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create project",
         variant: "destructive",
       });
     }
@@ -266,252 +329,307 @@ export function UnifiedProjectManagement() {
     });
   };
 
-  const getProjectCounts = () => {
-    return {
-      published: projects.filter(p => p.publish_status === 'published').length,
-      beta: projects.filter(p => p.publish_status === 'beta').length,
-      draft: projects.filter(p => p.publish_status === 'draft').length,
-      archived: projects.filter(p => p.publish_status === 'archived').length,
-    };
-  };
-
-  const counts = getProjectCounts();
-
   return (
     <>
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <GitBranch className="w-5 h-5" />
-              Project Management & Revision Control
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Project Management & Revision Control
+              </CardTitle>
+              <Button onClick={() => setCreateProjectDialogOpen(true)} className="flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                New Project
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            {/* Search and Filter Controls */}
+            {/* Project Selector */}
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search projects..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+              <div className="flex-1">
+                <Label htmlFor="project-select">Select Project</Label>
+                <Select value={selectedProject?.id || ''} onValueChange={handleProjectSelect}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a project to manage..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{project.name}</span>
+                          {getStatusBadge(project.publish_status, project.is_current_version)}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <Button onClick={fetchProjects} variant="outline">
+              <Button onClick={fetchProjects} variant="outline" className="self-end">
                 Refresh
               </Button>
             </div>
 
-            {/* Status Tabs */}
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="published" className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4" />
-                  Published ({counts.published})
-                </TabsTrigger>
-                <TabsTrigger value="beta" className="flex items-center gap-2">
-                  <Eye className="w-4 h-4" />
-                  Beta ({counts.beta})
-                </TabsTrigger>
-                <TabsTrigger value="draft" className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  Draft ({counts.draft})
-                </TabsTrigger>
-                <TabsTrigger value="archived" className="flex items-center gap-2">
-                  <Archive className="w-4 h-4" />
-                  Archived ({counts.archived})
-                </TabsTrigger>
-              </TabsList>
+            {selectedProject && (
+              <div className="space-y-6">
+                {/* Project Details Section */}
+                <Tabs value={activeView} onValueChange={(value) => setActiveView(value as any)} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="details">Project Details</TabsTrigger>
+                    <TabsTrigger value="revisions">Revision Control</TabsTrigger>
+                  </TabsList>
 
-              {/* Projects List with Integrated Revision Control */}
-              <div className="mt-6">
-                {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : filteredProjects.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Archive className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No {activeTab} projects found</p>
-                    {searchTerm && (
-                      <p className="text-sm mt-1">Try adjusting your search criteria</p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="grid gap-4">
-                    {filteredProjects.map((project) => (
-                      <Card key={project.id} className="hover:shadow-md transition-shadow">
-                        <Collapsible
-                          open={expandedProjects.has(project.id)}
-                          onOpenChange={() => toggleProjectExpansion(project.id)}
-                        >
-                          <CollapsibleTrigger asChild>
-                            <CardContent className="pt-4 cursor-pointer">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-3 mb-2">
-                                    {expandedProjects.has(project.id) ? 
-                                      <ChevronDown className="w-4 h-4 text-muted-foreground" /> : 
-                                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                                    }
-                                    <h3 className="font-semibold">{project.name}</h3>
-                                    {getStatusBadge(project.publish_status, project.is_current_version)}
-                                    {project.revision_number > 1 && (
-                                      <Badge variant="outline" className="text-xs">
-                                        Rev {project.revision_number}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  
-                                  {project.description && (
-                                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2 ml-7">
-                                      {project.description}
-                                    </p>
-                                  )}
-                                  
-                                  <div className="flex flex-wrap gap-4 text-xs text-muted-foreground ml-7">
-                                    {project.category && (
-                                      <span>Category: {project.category}</span>
-                                    )}
-                                    {project.difficulty && (
-                                      <span>Difficulty: {project.difficulty}</span>
-                                    )}
-                                    <span>Updated: {formatDate(project.updated_at)}</span>
-                                    {project.published_at && (
-                                      <span>Published: {formatDate(project.published_at)}</span>
-                                    )}
-                                    {project.beta_released_at && (
-                                      <span>Beta: {formatDate(project.beta_released_at)}</span>
-                                    )}
-                                  </div>
-                                </div>
+                  <TabsContent value="details" className="mt-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle>Project Information</CardTitle>
+                          <div className="flex gap-2">
+                            {editingProject ? (
+                              <>
+                                <Button onClick={saveProjectEdit} className="flex items-center gap-1">
+                                  <Save className="w-4 h-4" />
+                                  Save
+                                </Button>
+                                <Button onClick={cancelProjectEdit} variant="outline" className="flex items-center gap-1">
+                                  <X className="w-4 h-4" />
+                                  Cancel
+                                </Button>
+                              </>
+                            ) : (
+                              <Button onClick={startProjectEdit} className="flex items-center gap-1">
+                                <Edit className="w-4 h-4" />
+                                Edit Project
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Project Name</Label>
+                            {editingProject ? (
+                              <Input
+                                value={editedProject.name || ''}
+                                onChange={(e) => setEditedProject(prev => ({ ...prev, name: e.target.value }))}
+                              />
+                            ) : (
+                              <div className="p-2 bg-muted rounded">{selectedProject.name}</div>
+                            )}
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label>Status</Label>
+                            <div className="p-2">
+                              {getStatusBadge(selectedProject.publish_status, selectedProject.is_current_version)}
+                            </div>
+                          </div>
 
-                                <div className="flex flex-col gap-2 ml-4">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSelectedProjectId(project.id);
-                                      setCreateRevisionDialogOpen(true);
-                                    }}
-                                    className="flex items-center gap-1"
-                                  >
-                                    <Plus className="w-3 h-3" />
-                                    New Revision
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      // Navigate to edit
-                                    }}
-                                    className="flex items-center gap-1"
-                                  >
-                                    <Edit className="w-3 h-3" />
-                                    Edit
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </CollapsibleTrigger>
+                          <div className="space-y-2">
+                            <Label>Category</Label>
+                            {editingProject ? (
+                              <Input
+                                value={editedProject.category || ''}
+                                onChange={(e) => setEditedProject(prev => ({ ...prev, category: e.target.value }))}
+                              />
+                            ) : (
+                              <div className="p-2 bg-muted rounded">{selectedProject.category || 'Not specified'}</div>
+                            )}
+                          </div>
 
-                          <CollapsibleContent>
-                            <CardContent className="pt-0">
-                              <Separator className="mb-4" />
-                              <div className="pl-7">
-                                <h4 className="font-medium mb-3">Revision History</h4>
-                                {projectRevisions[project.id] ? (
-                                  <div className="space-y-3">
-                                    {projectRevisions[project.id].map((revision) => (
-                                      <Card key={revision.id} className="border-l-4 border-l-primary/20">
-                                        <CardContent className="pt-3">
-                                          <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                              <div className="flex items-center gap-3 mb-2">
-                                                <span className="font-medium text-sm">Rev {revision.revision_number}</span>
-                                                {getStatusBadge(revision.publish_status, revision.is_current_version)}
-                                              </div>
-                                              
-                                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-muted-foreground mb-2">
-                                                <div>Created: {formatDate(revision.created_at)}</div>
-                                                {revision.beta_released_at && (
-                                                  <div>Beta: {formatDate(revision.beta_released_at)}</div>
-                                                )}
-                                                {revision.published_at && (
-                                                  <div>Published: {formatDate(revision.published_at)}</div>
-                                                )}
-                                              </div>
+                          <div className="space-y-2">
+                            <Label>Difficulty</Label>
+                            {editingProject ? (
+                              <Select
+                                value={editedProject.difficulty || ''}
+                                onValueChange={(value) => setEditedProject(prev => ({ ...prev, difficulty: value }))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="beginner">Beginner</SelectItem>
+                                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                                  <SelectItem value="advanced">Advanced</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <div className="p-2 bg-muted rounded capitalize">{selectedProject.difficulty || 'Not specified'}</div>
+                            )}
+                          </div>
 
-                                              {revision.revision_notes && (
-                                                <p className="text-xs text-muted-foreground mb-2">
-                                                  <span className="font-medium">Notes:</span> {revision.revision_notes}
-                                                </p>
-                                              )}
+                          <div className="space-y-2">
+                            <Label>Estimated Time</Label>
+                            {editingProject ? (
+                              <Input
+                                value={editedProject.estimated_time || ''}
+                                onChange={(e) => setEditedProject(prev => ({ ...prev, estimated_time: e.target.value }))}
+                              />
+                            ) : (
+                              <div className="p-2 bg-muted rounded">{selectedProject.estimated_time || 'Not specified'}</div>
+                            )}
+                          </div>
 
-                                              {revision.release_notes && (
-                                                <p className="text-xs text-muted-foreground">
-                                                  <span className="font-medium">Release:</span> {revision.release_notes}
-                                                </p>
-                                              )}
-                                            </div>
+                          <div className="space-y-2">
+                            <Label>Revision</Label>
+                            <div className="p-2 bg-muted rounded">Revision {selectedProject.revision_number}</div>
+                          </div>
+                        </div>
 
-                                            <div className="flex gap-1 ml-2">
-                                              {revision.publish_status === 'draft' && (
-                                                <>
-                                                  <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => handleStatusChange(revision, 'beta')}
-                                                    className="text-xs px-2 py-1 h-auto"
-                                                  >
-                                                    <ArrowRight className="w-3 h-3 mr-1" />
-                                                    Beta
-                                                  </Button>
-                                                  <Button
-                                                    size="sm"
-                                                    onClick={() => handleStatusChange(revision, 'published')}
-                                                    className="text-xs px-2 py-1 h-auto"
-                                                  >
-                                                    <ArrowRight className="w-3 h-3 mr-1" />
-                                                    Publish
-                                                  </Button>
-                                                </>
-                                              )}
-                                              {revision.publish_status === 'beta' && (
-                                                <Button
-                                                  size="sm"
-                                                  onClick={() => handleStatusChange(revision, 'published')}
-                                                  className="text-xs px-2 py-1 h-auto"
-                                                >
-                                                  <ArrowRight className="w-3 h-3 mr-1" />
-                                                  Publish
-                                                </Button>
-                                              )}
-                                            </div>
+                        <div className="space-y-2">
+                          <Label>Description</Label>
+                          {editingProject ? (
+                            <Textarea
+                              value={editedProject.description || ''}
+                              onChange={(e) => setEditedProject(prev => ({ ...prev, description: e.target.value }))}
+                              rows={4}
+                            />
+                          ) : (
+                            <div className="p-2 bg-muted rounded min-h-[80px]">
+                              {selectedProject.description || 'No description provided'}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
+                          <div>
+                            <span className="font-medium">Created:</span> {formatDate(selectedProject.created_at)}
+                          </div>
+                          <div>
+                            <span className="font-medium">Updated:</span> {formatDate(selectedProject.updated_at)}
+                          </div>
+                          {selectedProject.published_at && (
+                            <div>
+                              <span className="font-medium">Published:</span> {formatDate(selectedProject.published_at)}
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="revisions" className="mt-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle>Revision Control</CardTitle>
+                          <Button
+                            onClick={() => setCreateRevisionDialogOpen(true)}
+                            className="flex items-center gap-2"
+                          >
+                            <GitBranch className="w-4 h-4" />
+                            Create Revision
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        {loading ? (
+                          <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {projectRevisions.map((revision) => (
+                              <Card key={revision.id} className="border-l-4 border-l-primary/20">
+                                <CardContent className="pt-4">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-3 mb-2">
+                                        <h4 className="font-medium">Revision {revision.revision_number}</h4>
+                                        {getStatusBadge(revision.publish_status, revision.is_current_version)}
+                                      </div>
+                                      
+                                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-muted-foreground mb-3">
+                                        <div>
+                                          <span className="font-medium">Created:</span> {formatDate(revision.created_at)}
+                                        </div>
+                                        {revision.beta_released_at && (
+                                          <div>
+                                            <span className="font-medium">Beta Release:</span> {formatDate(revision.beta_released_at)}
                                           </div>
-                                        </CardContent>
-                                      </Card>
-                                    ))}
+                                        )}
+                                        {revision.published_at && (
+                                          <div>
+                                            <span className="font-medium">Published:</span> {formatDate(revision.published_at)}
+                                          </div>
+                                        )}
+                                        {revision.archived_at && (
+                                          <div>
+                                            <span className="font-medium">Archived:</span> {formatDate(revision.archived_at)}
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {revision.revision_notes && (
+                                        <div className="mb-2">
+                                          <span className="font-medium text-sm">Revision Notes:</span>
+                                          <p className="text-sm text-muted-foreground mt-1">{revision.revision_notes}</p>
+                                        </div>
+                                      )}
+
+                                      {revision.release_notes && (
+                                        <div>
+                                          <span className="font-medium text-sm">Release Notes:</span>
+                                          <p className="text-sm text-muted-foreground mt-1">{revision.release_notes}</p>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <div className="flex flex-col gap-2 ml-4">
+                                      {revision.publish_status === 'draft' && (
+                                        <>
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handleStatusChange(revision, 'beta')}
+                                            className="flex items-center gap-1"
+                                          >
+                                            <ArrowRight className="w-3 h-3" />
+                                            Release to Beta
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            onClick={() => handleStatusChange(revision, 'published')}
+                                            className="flex items-center gap-1"
+                                          >
+                                            <ArrowRight className="w-3 h-3" />
+                                            Publish
+                                          </Button>
+                                        </>
+                                      )}
+                                      {revision.publish_status === 'beta' && (
+                                        <Button
+                                          size="sm"
+                                          onClick={() => handleStatusChange(revision, 'published')}
+                                          className="flex items-center gap-1"
+                                        >
+                                          <ArrowRight className="w-3 h-3" />
+                                          Publish
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
-                                ) : (
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                                  </div>
-                                )}
-                              </div>
-                            </CardContent>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      </Card>
-                    ))}
-                  </div>
-                )}
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
               </div>
-            </Tabs>
+            )}
+
+            {!selectedProject && !loading && (
+              <div className="text-center py-12 text-muted-foreground">
+                <Settings className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium mb-2">No Project Selected</h3>
+                <p>Select a project from the dropdown above to view and edit its details, or create a new project.</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -565,7 +683,7 @@ export function UnifiedProjectManagement() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Plus className="w-5 h-5" />
+              <GitBranch className="w-5 h-5" />
               Create New Revision
             </DialogTitle>
           </DialogHeader>
@@ -591,6 +709,88 @@ export function UnifiedProjectManagement() {
               </Button>
               <Button onClick={createNewRevision}>
                 Create Draft Revision
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Project Dialog */}
+      <Dialog open={createProjectDialogOpen} onOpenChange={setCreateProjectDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5" />
+              Create New Project
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-name">Project Name *</Label>
+              <Input
+                id="project-name"
+                placeholder="Enter project name..."
+                value={newProject.name || ''}
+                onChange={(e) => setNewProject(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="project-description">Description</Label>
+              <Textarea
+                id="project-description"
+                placeholder="Describe the project..."
+                value={newProject.description || ''}
+                onChange={(e) => setNewProject(prev => ({ ...prev, description: e.target.value }))}
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="project-category">Category</Label>
+                <Input
+                  id="project-category"
+                  placeholder="e.g., Home Improvement"
+                  value={newProject.category || ''}
+                  onChange={(e) => setNewProject(prev => ({ ...prev, category: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="project-difficulty">Difficulty</Label>
+                <Select
+                  value={newProject.difficulty || 'beginner'}
+                  onValueChange={(value) => setNewProject(prev => ({ ...prev, difficulty: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="project-time">Estimated Time</Label>
+              <Input
+                id="project-time"
+                placeholder="e.g., 2-4 hours"
+                value={newProject.estimated_time || ''}
+                onChange={(e) => setNewProject(prev => ({ ...prev, estimated_time: e.target.value }))}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setCreateProjectDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={createProject} disabled={!newProject.name?.trim()}>
+                Create Project
               </Button>
             </div>
           </div>
