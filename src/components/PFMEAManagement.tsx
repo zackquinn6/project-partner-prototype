@@ -489,17 +489,37 @@ export const PFMEAManagement: React.FC = () => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            PFMEA Analysis - {selectedPfmeaProject.name}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              PFMEA Analysis - {selectedPfmeaProject.name}
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toast.success('PFMEA data saved')}
+              >
+                Save PFMEA
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toast.success('Export functionality coming soon')}
+              >
+                Export
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[600px] w-full">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="min-w-[200px]">Process Step</TableHead>
+                  <TableHead className="min-w-[120px]">Phase</TableHead>
+                  <TableHead className="min-w-[120px]">Operation</TableHead>
+                  <TableHead className="min-w-[120px]">Process Step</TableHead>
                   <TableHead className="min-w-[200px]">Failure Mode</TableHead>
                   <TableHead className="min-w-[200px]">Potential Effects</TableHead>
                   <TableHead className="w-20">S</TableHead>
@@ -509,7 +529,7 @@ export const PFMEAManagement: React.FC = () => {
                   <TableHead className="w-20">D</TableHead>
                   <TableHead className="w-20">RPN</TableHead>
                   <TableHead className="min-w-[200px]">Recommended Actions</TableHead>
-                  <TableHead className="w-32">Add Content</TableHead>
+                  <TableHead className="w-40">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -523,15 +543,24 @@ export const PFMEAManagement: React.FC = () => {
                     return (
                       <TableRow key={failureMode.id} className={rpnColorClass}>
                         {index === 0 && (
-                          <TableCell rowSpan={reqFailureModes.length} className="font-medium">
-                            <div className="space-y-1">
-                              <div>{requirement.output_reference?.step_name || 'Unknown Step'}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {requirement.output_reference?.phase_name} → {requirement.output_reference?.operation_name}
+                          <>
+                            <TableCell rowSpan={reqFailureModes.length} className="font-medium">
+                              <div className="text-sm">
+                                {requirement.output_reference?.phase_name || 'Unknown Phase'}
                               </div>
-                              <div className="font-normal text-sm">{requirement.requirement_text}</div>
-                            </div>
-                          </TableCell>
+                            </TableCell>
+                            <TableCell rowSpan={reqFailureModes.length} className="font-medium">
+                              <div className="text-sm">
+                                {requirement.output_reference?.operation_name || 'Unknown Operation'}
+                              </div>
+                            </TableCell>
+                            <TableCell rowSpan={reqFailureModes.length} className="font-medium">
+                              <div className="space-y-1">
+                                <div className="text-sm">{requirement.output_reference?.step_name || 'Unknown Step'}</div>
+                                <div className="text-xs text-muted-foreground font-normal">{requirement.requirement_text}</div>
+                              </div>
+                            </TableCell>
+                          </>
                         )}
                         <TableCell>{failureMode.failure_mode}</TableCell>
                         <TableCell>
@@ -658,59 +687,52 @@ export const PFMEAManagement: React.FC = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex flex-col gap-1">
+                          <div className="flex flex-wrap gap-1">
+                            {index === 0 && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => addFailureMode(requirement.id)}
+                                className="text-xs px-2 py-1 h-auto bg-blue-50 hover:bg-blue-100 border-blue-200"
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Failure Mode
+                              </Button>
+                            )}
                             <Button
                               size="sm"
-                              variant="ghost"
-                              onClick={() => addFailureMode(requirement.id)}
-                              title="Add Failure Mode"
-                            >
-                              <Plus className="w-4 h-4 mr-1" />
-                              Failure Mode
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
+                              variant="outline"
                               onClick={() => addPotentialEffect(failureMode.id)}
-                              title="Add Potential Effect"
+                              className="text-xs px-2 py-1 h-auto bg-red-50 hover:bg-red-100 border-red-200"
                             >
-                              <Plus className="w-4 h-4 mr-1" />
+                              <Plus className="w-3 h-3 mr-1" />
                               Effect
                             </Button>
                             <Button
                               size="sm"
-                              variant="ghost"
+                              variant="outline"
                               onClick={() => addPotentialCause(failureMode.id)}
-                              title="Add Potential Cause"
+                              className="text-xs px-2 py-1 h-auto bg-orange-50 hover:bg-orange-100 border-orange-200"
                             >
-                              <Plus className="w-4 h-4 mr-1" />
+                              <Plus className="w-3 h-3 mr-1" />
                               Cause
                             </Button>
                             <Button
                               size="sm"
-                              variant="ghost"
+                              variant="outline"
                               onClick={() => addControl(failureMode.id, 'prevention')}
-                              title="Add Prevention Control"
+                              className="text-xs px-2 py-1 h-auto bg-green-50 hover:bg-green-100 border-green-200"
                             >
-                              <Plus className="w-4 h-4 mr-1" />
-                              Prevention
+                              <Plus className="w-3 h-3 mr-1" />
+                              Control
                             </Button>
                             <Button
                               size="sm"
-                              variant="ghost"
-                              onClick={() => addControl(failureMode.id, 'detection')}
-                              title="Add Detection Control"
-                            >
-                              <Plus className="w-4 h-4 mr-1" />
-                              Detection
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
+                              variant="outline"
                               onClick={() => addActionItem(failureMode.id)}
-                              title="Add Action Item"
+                              className="text-xs px-2 py-1 h-auto bg-purple-50 hover:bg-purple-100 border-purple-200"
                             >
-                              <Plus className="w-4 h-4 mr-1" />
+                              <Plus className="w-3 h-3 mr-1" />
                               Action
                             </Button>
                           </div>
@@ -755,12 +777,6 @@ export const PFMEAManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Process Failure Mode and Effects Analysis</h2>
-          <p className="text-muted-foreground">Identify, assess, and mitigate potential process failures</p>
-        </div>
-      </div>
 
       {renderProjectSelector()}
 
