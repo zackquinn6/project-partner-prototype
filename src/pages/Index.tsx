@@ -191,6 +191,11 @@ const Index = () => {
     
     // Mobile-specific rendering
     if (isMobile && user) {
+      // Handle admin access on mobile by switching to desktop view
+      if (currentView === 'admin') {
+        return <AdminView />;
+      }
+      
       switch (mobileView) {
         case 'projects':
           return (
@@ -207,8 +212,6 @@ const Index = () => {
             </div>
           );
         case 'workflow':
-          // This would need to be integrated with the UserView workflow logic
-          // For now, fall back to regular UserView
           return (
             <div className="h-screen flex flex-col">
               <UserView 
@@ -218,7 +221,7 @@ const Index = () => {
                   setForceListingMode(false);
                   setResetUserView(false);
                   setMobileView('workflow');
-                }}
+                }} 
                 projectRunId={location.state?.projectRunId}
                 showProfile={location.state?.showProfile}
               />
@@ -229,9 +232,6 @@ const Index = () => {
               />
             </div>
           );
-        case 'admin':
-          // For admin on mobile, use desktop view
-          return <AdminView />;
         case 'home':
         default:
           return (
