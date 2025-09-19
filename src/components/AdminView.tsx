@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ProjectManagementWindow } from '@/components/ProjectManagementWindow';
+import { EnhancedProjectManagement } from '@/components/EnhancedProjectManagement';
 import { ProjectAnalyticsWindow } from '@/components/ProjectAnalyticsWindow';
 import { UsersSecurityWindow } from '@/components/UsersSecurityWindow';
 import { ToolsMaterialsWindow } from '@/components/ToolsMaterialsWindow';
@@ -19,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const AdminView: React.FC = () => {
   const [projectManagementOpen, setProjectManagementOpen] = useState(false);
+  const [enhancedProjectManagementOpen, setEnhancedProjectManagementOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [usersSecurityOpen, setUsersSecurityOpen] = useState(false);
   const [toolsMaterialsOpen, setToolsMaterialsOpen] = useState(false);
@@ -56,19 +58,36 @@ export const AdminView: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setProjectManagementOpen(true)}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setEnhancedProjectManagementOpen(true)}>
             <CardHeader className="text-center flex-1">
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                 <Settings className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle>Project Management</CardTitle>
+              <CardTitle>Revision Control</CardTitle>
               <CardDescription className="min-h-[3rem] flex items-center justify-center">
-                Manage project workflows, materials, tools, and rollups
+                Manage project revisions with Draft, Beta, Published, and Archive stages
               </CardDescription>
             </CardHeader>
             <CardContent className="mt-auto">
-              <Button className="w-full" onClick={() => setProjectManagementOpen(true)}>
-                Project Management
+              <Button className="w-full" onClick={() => setEnhancedProjectManagementOpen(true)}>
+                Revision Control
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setProjectManagementOpen(true)}>
+            <CardHeader className="text-center flex-1">
+              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                <Cog className="w-6 h-6 text-primary" />
+              </div>
+              <CardTitle>Legacy Project Management</CardTitle>
+              <CardDescription className="min-h-[3rem] flex items-center justify-center">
+                Legacy project workflows, materials, tools, and rollups
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="mt-auto">
+              <Button className="w-full" variant="outline" onClick={() => setProjectManagementOpen(true)}>
+                Legacy Management
               </Button>
             </CardContent>
           </Card>
@@ -211,6 +230,15 @@ export const AdminView: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+
+        <Dialog open={enhancedProjectManagementOpen} onOpenChange={setEnhancedProjectManagementOpen}>
+          <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Enhanced Project Management - Revision Control</DialogTitle>
+            </DialogHeader>
+            <EnhancedProjectManagement />
+          </DialogContent>
+        </Dialog>
 
         <ProjectManagementWindow 
           open={projectManagementOpen} 

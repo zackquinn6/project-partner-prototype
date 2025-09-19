@@ -963,6 +963,8 @@ export type Database = {
       }
       projects: {
         Row: {
+          archived_at: string | null
+          beta_released_at: string | null
           category: string | null
           created_at: string
           created_by: string | null
@@ -975,11 +977,14 @@ export type Database = {
           estimated_time_per_unit: number | null
           id: string
           image: string | null
+          is_current_version: boolean | null
           name: string
           parent_project_id: string | null
           phases: Json
           plan_end_date: string
           publish_status: string
+          published_at: string | null
+          release_notes: string | null
           revision_notes: string | null
           revision_number: number | null
           scaling_unit: string | null
@@ -988,6 +993,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
+          beta_released_at?: string | null
           category?: string | null
           created_at?: string
           created_by?: string | null
@@ -1000,11 +1007,14 @@ export type Database = {
           estimated_time_per_unit?: number | null
           id?: string
           image?: string | null
+          is_current_version?: boolean | null
           name: string
           parent_project_id?: string | null
           phases?: Json
           plan_end_date?: string
           publish_status?: string
+          published_at?: string | null
+          release_notes?: string | null
           revision_notes?: string | null
           revision_number?: number | null
           scaling_unit?: string | null
@@ -1013,6 +1023,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
+          beta_released_at?: string | null
           category?: string | null
           created_at?: string
           created_by?: string | null
@@ -1025,11 +1037,14 @@ export type Database = {
           estimated_time_per_unit?: number | null
           id?: string
           image?: string | null
+          is_current_version?: boolean | null
           name?: string
           parent_project_id?: string | null
           phases?: Json
           plan_end_date?: string
           publish_status?: string
+          published_at?: string | null
+          release_notes?: string | null
           revision_notes?: string | null
           revision_number?: number | null
           scaling_unit?: string | null
@@ -1645,6 +1660,10 @@ export type Database = {
       cleanup_security_logs: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      create_project_revision: {
+        Args: { revision_notes_text?: string; source_project_id: string }
+        Returns: string
       }
       delete_user_data: {
         Args: { user_uuid: string }
