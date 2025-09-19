@@ -297,47 +297,101 @@ export const PFMEAManagement: React.FC = () => {
     return 'bg-green-100 border-green-500 text-green-900';
   };
 
-  const renderProjectSelector = () => (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Target className="w-5 h-5" />
-          PFMEA Project Selection
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex gap-4 flex-wrap">
-          {pfmeaProjects.map(project => (
-            <Button
-              key={project.id}
-              variant={selectedPfmeaProject?.id === project.id ? "default" : "outline"}
-              onClick={() => {
-                setSelectedPfmeaProject(project);
-                fetchPfmeaDetails(project.id);
-              }}
-              className="h-auto p-4 text-left flex flex-col items-start gap-2"
-            >
-              <div className="font-medium">{project.name}</div>
-              <div className="text-sm opacity-70">{project.description}</div>
-              <Badge variant="secondary" className="text-xs">
-                {project.status}
-              </Badge>
-            </Button>
-          ))}
-          <Button
-            variant="outline"
-            onClick={() => setShowCreateProject(true)}
-            className="h-auto p-4 border-2 border-dashed"
-          >
-            <div className="flex flex-col items-center gap-2">
-              <Plus className="w-6 h-6" />
-              <span>Create New PFMEA</span>
+  const renderProjectSelector = () => {
+    // If no project is selected, show the full card
+    if (!selectedPfmeaProject) {
+      return (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5" />
+              PFMEA Project Selection
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-4 flex-wrap">
+              {pfmeaProjects.map(project => (
+                <Button
+                  key={project.id}
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedPfmeaProject(project);
+                    fetchPfmeaDetails(project.id);
+                  }}
+                  className="h-auto p-4 text-left flex flex-col items-start gap-2"
+                >
+                  <div className="font-medium">{project.name}</div>
+                  <div className="text-sm opacity-70">{project.description}</div>
+                  <Badge variant="secondary" className="text-xs">
+                    {project.status}
+                  </Badge>
+                </Button>
+              ))}
+              <Button
+                variant="outline"
+                onClick={() => setShowCreateProject(true)}
+                className="h-auto p-4 border-2 border-dashed"
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <Plus className="w-6 h-6" />
+                  <span>Create New PFMEA</span>
+                </div>
+              </Button>
             </div>
-          </Button>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // If a project is selected, show a compact project switcher
+    return (
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-2">
+          <Target className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm font-medium text-muted-foreground">Project:</span>
         </div>
-      </CardContent>
-    </Card>
-  );
+        <Select
+          value={selectedPfmeaProject.id}
+          onValueChange={(value) => {
+            const project = pfmeaProjects.find(p => p.id === value);
+            if (project) {
+              setSelectedPfmeaProject(project);
+              fetchPfmeaDetails(project.id);
+            }
+          }}
+        >
+          <SelectTrigger className="w-auto min-w-[200px]">
+            <SelectValue>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{selectedPfmeaProject.name}</span>
+                <Badge variant="secondary" className="text-xs">
+                  {selectedPfmeaProject.status}
+                </Badge>
+              </div>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {pfmeaProjects.map(project => (
+              <SelectItem key={project.id} value={project.id}>
+                <div className="flex flex-col items-start gap-1">
+                  <span className="font-medium">{project.name}</span>
+                  <span className="text-xs text-muted-foreground">{project.description}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setShowCreateProject(true)}
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          New PFMEA
+        </Button>
+      </div>
+    );
+  };
 
   const renderPfmeaTable = () => {
     if (!selectedPfmeaProject) return null;
