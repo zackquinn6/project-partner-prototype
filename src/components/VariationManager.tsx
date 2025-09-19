@@ -114,7 +114,7 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
         name: attr.name,
         display_name: attr.display_name,
         attribute_type: attr.attribute_type,
-        values: attr.variation_attribute_values || []
+        values: (attr.variation_attribute_values || []).filter((v: any) => v.value !== '_placeholder_')
       }));
 
       setAttributes(formattedAttributes);
@@ -152,36 +152,69 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
 
     setLoading(true);
     try {
-      // Create selected common attributes
+      const attributesToCreate = [];
+      
+      // Prepare selected common attributes
       for (const attrName of selectedCommonAttributes) {
         const commonAttr = commonAttributes.find(a => a.name === attrName);
         if (commonAttr) {
-          const { error } = await supabase
-            .from('variation_attributes')
-            .insert({
-              name: commonAttr.name,
-              display_name: commonAttr.display_name,
-              attribute_type: 'text'
-            });
-
-          if (error && error.code !== '23505') { // Ignore if already exists
-            throw error;
-          }
+          attributesToCreate.push({
+            name: commonAttr.name,
+            display_name: commonAttr.display_name,
+            attribute_type: 'text'
+          });
         }
       }
 
-      // Create custom attribute if provided
+      // Prepare custom attribute if provided
       if (newAttributeName.trim()) {
-        const { error } = await supabase
-          .from('variation_attributes')
-          .insert({
-            name: newAttributeName.toLowerCase().replace(/\s+/g, '_'),
-            display_name: newAttributeName,
-            attribute_type: 'text'
-          });
+        attributesToCreate.push({
+          name: newAttributeName.toLowerCase().replace(/\s+/g, '_'),
+          display_name: newAttributeName,
+          attribute_type: 'text'
+        });
+      }
 
-        if (error && error.code !== '23505') { // Ignore if already exists
-          throw error;
+      // Create or get attributes and associate them with the tool
+      for (const attrData of attributesToCreate) {
+        // First, try to insert the attribute (will be ignored if exists)
+        const { data: insertedAttr, error: insertError } = await supabase
+          .from('variation_attributes')
+          .insert(attrData)
+          .select()
+          .single();
+
+        let attributeId = insertedAttr?.id;
+
+        // If attribute already exists, get its ID
+        if (insertError && insertError.code === '23505') {
+          const { data: existingAttr, error: selectError } = await supabase
+            .from('variation_attributes')
+            .select('id')
+            .eq('name', attrData.name)
+            .single();
+
+          if (selectError) throw selectError;
+          attributeId = existingAttr.id;
+        } else if (insertError) {
+          throw insertError;
+        }
+
+        // Now create a placeholder value to associate this attribute with the tool
+        const { error: valueError } = await supabase
+          .from('variation_attribute_values')
+          .insert({
+            attribute_id: attributeId,
+            value: '_placeholder_',
+            display_value: 'No values yet',
+            sort_order: 999,
+            core_item_id: coreItemId
+          })
+          .select();
+
+        // Ignore if placeholder already exists
+        if (valueError && valueError.code !== '23505') {
+          throw valueError;
         }
       }
 
@@ -189,7 +222,7 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
       setSelectedCommonAttributes([]);
       setShowAttributeDialog(false);
       fetchAttributes();
-      fetchGlobalAttributes(); // Fix: refresh global attributes for value dropdown
+      fetchGlobalAttributes();
     } catch (error) {
       console.error('Error creating attribute:', error);
       toast.error('Failed to create attribute');
