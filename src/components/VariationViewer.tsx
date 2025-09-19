@@ -151,18 +151,20 @@ export function VariationViewer({ open, onOpenChange, coreItemId, itemType, core
     }
   }, [open, coreItemId]);
 
-  const getAveragePricing = (variationId: string) => {
-    const variationModels = models.filter(m => m.variation_instance_id === variationId);
-    const modelIds = variationModels.map(m => m.id);
-    const variationPricing = pricing.filter(p => modelIds.includes(p.model_id) && p.price && p.price > 0);
+  const getModelPricing = (modelId: string) => {
+    const modelPricing = pricing.filter(p => p.model_id === modelId && p.price && p.price > 0);
+    if (modelPricing.length === 0) return null;
     
-    if (variationPricing.length === 0) return null;
-    
-    const avgPrice = variationPricing.reduce((sum, p) => sum + (p.price || 0), 0) / variationPricing.length;
+    const avgPrice = modelPricing.reduce((sum, p) => sum + (p.price || 0), 0) / modelPricing.length;
     return {
       averagePrice: avgPrice,
-      retailerCount: variationPricing.length
+      retailerCount: modelPricing.length,
+      prices: modelPricing
     };
+  };
+
+  const getVariationModels = (variationId: string) => {
+    return models.filter(m => m.variation_instance_id === variationId);
   };
 
   return (
@@ -208,15 +210,33 @@ export function VariationViewer({ open, onOpenChange, coreItemId, itemType, core
                           )}
                           {variation.estimated_rental_lifespan_days && (
                             <span>Rental Life: {variation.estimated_rental_lifespan_days} days</span>
-                          )}
+                        )}
                         </div>
 
-                        {/* Pricing Info */}
+                        {/* Models and Pricing */}
                         {(() => {
-                          const pricingInfo = getAveragePricing(variation.id);
-                          return pricingInfo && (
-                            <div className="text-sm font-medium text-green-600 mb-2">
-                              Avg Price: ${pricingInfo.averagePrice.toFixed(2)} ({pricingInfo.retailerCount} retailer{pricingInfo.retailerCount !== 1 ? 's' : ''})
+                          const variationModels = getVariationModels(variation.id);
+                          return variationModels.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                              <div className="text-sm font-medium text-foreground">Models:</div>
+                              {variationModels.map(model => {
+                                const modelPricing = getModelPricing(model.id);
+                                return (
+                                  <div key={model.id} className="bg-muted/50 p-2 rounded text-sm">
+                                    <div className="font-medium">{model.model_name}</div>
+                                    {model.manufacturer && (
+                                      <div className="text-xs text-muted-foreground">by {model.manufacturer}</div>
+                                    )}
+                                    {modelPricing ? (
+                                      <div className="text-sm font-medium text-green-600 mt-1">
+                                        Avg: ${modelPricing.averagePrice.toFixed(2)} ({modelPricing.retailerCount} retailer{modelPricing.retailerCount !== 1 ? 's' : ''})
+                                      </div>
+                                    ) : (
+                                      <div className="text-xs text-muted-foreground mt-1">No pricing data</div>
+                                    )}
+                                  </div>
+                                );
+                              })}
                             </div>
                           );
                         })()}
