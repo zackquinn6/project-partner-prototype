@@ -373,6 +373,10 @@ export default function EditWorkflowView({
                        <Brain className="w-4 h-4" />
                        Process Improvement
                      </Button>
+                     <Button onClick={onBackToAdmin} variant="default" size="sm" className="flex items-center gap-2">
+                       <Save className="w-4 h-4" />
+                       Save and Close
+                     </Button>
                    </>}
                </div>
             </div>
