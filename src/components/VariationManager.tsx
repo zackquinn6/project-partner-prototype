@@ -43,6 +43,11 @@ interface VariationInstance {
   sku?: string;
   photo_url?: string;
   attributes: Record<string, string>;
+  estimated_weight_lbs?: number;
+  estimated_rental_lifespan_days?: number;
+  warning_flags?: string[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface VariationManagerProps {
@@ -98,23 +103,50 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
 
   const fetchAttributes = async () => {
     try {
-      const { data: attributesData, error } = await supabase
+      // First, get all attributes that have values for this core item
+      const { data: attributeValues, error: valuesError } = await supabase
+        .from('variation_attribute_values')
+        .select(`
+          attribute_id,
+          variation_attributes!inner (
+            id,
+            name,
+            display_name,
+            attribute_type
+          )
+        `)
+        .eq('core_item_id', coreItemId);
+
+      if (valuesError) throw valuesError;
+
+      // Get unique attributes
+      const uniqueAttributeIds = [...new Set(attributeValues?.map(v => v.attribute_id))];
+      
+      if (uniqueAttributeIds.length === 0) {
+        setAttributes([]);
+        return;
+      }
+
+      // Now get full attribute data with all their values for this core item
+      const { data: fullAttributesData, error: fullError } = await supabase
         .from('variation_attributes')
         .select(`
           *,
-          variation_attribute_values!inner (*)
+          variation_attribute_values (*)
         `)
-        .eq('variation_attribute_values.core_item_id', coreItemId)
+        .in('id', uniqueAttributeIds)
         .order('display_name');
 
-      if (error) throw error;
+      if (fullError) throw fullError;
 
-      const formattedAttributes: VariationAttribute[] = attributesData.map(attr => ({
+      const formattedAttributes: VariationAttribute[] = (fullAttributesData || []).map(attr => ({
         id: attr.id,
         name: attr.name,
         display_name: attr.display_name,
         attribute_type: attr.attribute_type,
-        values: (attr.variation_attribute_values || []).filter((v: any) => v.value !== '_placeholder_')
+        values: (attr.variation_attribute_values || [])
+          .filter((v: any) => v.core_item_id === coreItemId && v.value !== '_placeholder_')
+          .sort((a: any, b: any) => a.sort_order - b.sort_order)
       }));
 
       setAttributes(formattedAttributes);
@@ -767,47 +799,60 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {variations.map(variation => (
-              <div key={variation.id} className="flex items-start justify-between p-3 border rounded-lg">
-                <div className="flex flex-1 space-x-3">
-                  {variation.photo_url && (
-                    <img
-                      src={variation.photo_url}
-                      alt={variation.name}
-                      className="h-16 w-16 object-cover rounded-md flex-shrink-0"
-                    />
-                  )}
-                  <div className="flex-1">
-                    <div className="font-medium">{variation.name}</div>
-                    {variation.description && (
-                      <div className="text-sm text-muted-foreground">{variation.description}</div>
+                {variations.map(variation => (
+                <div key={variation.id} className="flex items-start justify-between p-3 border rounded-lg">
+                  <div className="flex flex-1 space-x-3">
+                    {variation.photo_url && (
+                      <img
+                        src={variation.photo_url}
+                        alt={variation.name}
+                        className="h-16 w-16 object-cover rounded-md flex-shrink-0"
+                      />
                     )}
-                    {variation.sku && (
-                      <div className="text-xs text-muted-foreground">SKU: {variation.sku}</div>
-                    )}
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {Object.entries(variation.attributes).map(([key, value]) => {
-                        const attr = attributes.find(a => a.name === key);
-                        const attrValue = attr?.values.find(v => v.value === value);
-                        return (
-                          <Badge key={key} variant="outline" className="text-xs">
-                            {attr?.display_name}: {attrValue?.display_value || value}
+                    <div className="flex-1">
+                      <div className="font-medium">{variation.name}</div>
+                      {variation.description && (
+                        <div className="text-sm text-muted-foreground">{variation.description}</div>
+                      )}
+                      {variation.sku && (
+                        <div className="text-xs text-muted-foreground">SKU: {variation.sku}</div>
+                      )}
+                      {/* Display weight and pricing if available */}
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {variation.estimated_weight_lbs && (
+                          <Badge variant="outline" className="text-xs">
+                            Weight: {variation.estimated_weight_lbs} lbs
                           </Badge>
-                        );
-                      })}
+                        )}
+                        {variation.estimated_rental_lifespan_days && (
+                          <Badge variant="outline" className="text-xs">
+                            Rental Life: {variation.estimated_rental_lifespan_days} days
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {Object.entries(variation.attributes).map(([key, value]) => {
+                          const attr = attributes.find(a => a.name === key);
+                          const attrValue = attr?.values.find(v => v.value === value);
+                          return (
+                            <Badge key={key} variant="outline" className="text-xs">
+                              {attr?.display_name || key}: {attrValue?.display_value || value}
+                            </Badge>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeleteVariation(variation.id)}
+                    className="ml-2 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDeleteVariation(variation.id)}
-                  className="ml-2 text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
+              ))}
             {variations.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 No variations created yet. Click "Create Variation" to get started.
