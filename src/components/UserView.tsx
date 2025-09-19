@@ -366,6 +366,20 @@ export default function UserView({
       setCurrentStepIndex(currentStepIndex - 1);
     }
   };
+
+  // Navigate to specific step by ID
+  const navigateToStep = (stepId: string) => {
+    const stepIndex = allSteps.findIndex(step => step.id === stepId);
+    if (stepIndex !== -1) {
+      console.log(`🎯 Navigating to step: ${stepId} at index ${stepIndex}`);
+      setCurrentStepIndex(stepIndex);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return true;
+    } else {
+      console.error(`❌ Step not found: ${stepId}`);
+      return false;
+    }
+  };
   // Helper functions for check-off functionality
   const toggleMaterialCheck = (stepId: string, materialId: string) => {
     setCheckedMaterials(prev => {
@@ -1579,6 +1593,7 @@ export default function UserView({
             decisionRollupMode === 'final-plan' ? 'Final Planning Assessment' :
             'Unplanned Work Decisions'
           }
+          onNavigateToStep={navigateToStep}
         />
       )}
 
