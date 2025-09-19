@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
 import { useProject } from '@/contexts/ProjectContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Navigation from "@/components/Navigation";
 import Home from "@/components/Home";
 import { PostAuthLanding } from "@/components/PostAuthLanding";
@@ -15,18 +16,25 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { HomeManager } from '@/components/HomeManager';
 import { HelpPopup } from '@/components/HelpPopup';
+import { MobileOptimizedHome } from '@/components/MobileOptimizedHome';
+import { MobileBottomNav } from '@/components/MobileBottomNav';
+import { MobileProjectListing } from '@/components/MobileProjectListing';
+import { MobileWorkflowView } from '@/components/MobileWorkflowView';
 
 const Index = () => {
   // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL RETURNS
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
-  const { setCurrentProject, setCurrentProjectRun, currentProject, currentProjectRun } = useProject();
+  const { setCurrentProject, setCurrentProjectRun, currentProject, currentProjectRun, projects, projectRuns } = useProject();
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user' | 'editWorkflow'>('home'); // Default to 'home' for authenticated users
+  const isMobile = useIsMobile();
+  const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user' | 'editWorkflow'>('home');
+  const [mobileView, setMobileView] = useState<'home' | 'projects' | 'workflow'>('home');
   const [resetUserView, setResetUserView] = useState(false);
   const [forceListingMode, setForceListingMode] = useState(false);
   const [showHelpPopup, setShowHelpPopup] = useState(false);
+  const [mobileActiveTab, setMobileActiveTab] = useState<'home' | 'projects' | 'profile' | 'help'>('home');
 
   // Handle navigation state changes (including view parameter)
   useEffect(() => {
@@ -139,10 +147,107 @@ const Index = () => {
     setResetUserView(false); // Also clear reset flag when project is selected
   };
 
+  // Mobile navigation handlers
+  const handleMobileNavigation = (tab: 'home' | 'projects' | 'profile' | 'help') => {
+    setMobileActiveTab(tab);
+    switch (tab) {
+      case 'home':
+        setMobileView('home');
+        break;
+      case 'projects':
+        setMobileView('projects');
+        break;
+      case 'profile':
+        window.dispatchEvent(new CustomEvent('open-profile-manager'));
+        break;
+      case 'help':
+        setShowHelpPopup(true);
+        break;
+    }
+  };
+
+  const handleMobileProjectSelect = (project: any) => {
+    if ('progress' in project) {
+      setCurrentProjectRun(project);
+      setMobileView('workflow');
+    } else {
+      setCurrentProject(project);
+      setMobileView('workflow');
+    }
+  };
+
+  const handleMobileQuickAction = () => {
+    if (currentProjectRun) {
+      setMobileView('workflow');
+    } else {
+      setMobileView('projects');
+    }
+  };
+
   // This useEffect is now at the top with other hooks
 
   const renderView = () => {
     console.log('Index renderView - currentView:', currentView);
+    
+    // Mobile-specific rendering
+    if (isMobile && user) {
+      switch (mobileView) {
+        case 'projects':
+          return (
+            <div className="h-screen flex flex-col">
+              <MobileProjectListing
+                onProjectSelect={handleMobileProjectSelect}
+                onNewProject={() => navigate('/projects')}
+              />
+              <MobileBottomNav
+                currentView="projects"
+                onViewChange={handleMobileNavigation}
+                onQuickAction={handleMobileQuickAction}
+              />
+            </div>
+          );
+        case 'workflow':
+          // This would need to be integrated with the UserView workflow logic
+          // For now, fall back to regular UserView
+          return (
+            <div className="h-screen flex flex-col">
+              <UserView 
+                resetToListing={resetUserView} 
+                forceListingMode={forceListingMode}
+                onProjectSelected={() => {
+                  setForceListingMode(false);
+                  setResetUserView(false);
+                  setMobileView('workflow');
+                }}
+                projectRunId={location.state?.projectRunId}
+                showProfile={location.state?.showProfile}
+              />
+              <MobileBottomNav
+                currentView="projects"
+                onViewChange={handleMobileNavigation}
+                onQuickAction={handleMobileQuickAction}
+              />
+            </div>
+          );
+        case 'admin':
+          // For admin on mobile, use desktop view
+          return <AdminView />;
+        case 'home':
+        default:
+          return (
+            <div className="h-screen flex flex-col">
+              <MobileOptimizedHome />
+              <MobileBottomNav
+                currentView={mobileActiveTab}
+                onViewChange={handleMobileNavigation}
+                onQuickAction={handleMobileQuickAction}
+              />
+            </div>
+          );
+      }
+    }
+    
+    // Desktop rendering
     switch (currentView) {
       case 'admin':
         return <AdminView />;
@@ -175,7 +280,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative z-10">
-      {user && <Navigation currentView={currentView} onViewChange={setCurrentView} onAdminAccess={handleAdminAccess} onProjectsView={handleProjectsView} onProjectSelected={handleProjectSelected} />}
+      {user && !isMobile && <Navigation currentView={currentView} onViewChange={setCurrentView} onAdminAccess={handleAdminAccess} onProjectsView={handleProjectsView} onProjectSelected={handleProjectSelected} />}
       <div className="w-full h-full">
         {renderView()}
       </div>
