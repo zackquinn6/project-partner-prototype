@@ -173,7 +173,7 @@ export function LibraryItemForm({ type, item, onSave, onCancel }: LibraryItemFor
 
           {type === 'tools' && (
             <div>
-              <Label htmlFor="example_models">Example Models</Label>
+              <Label htmlFor="example_models">Variants</Label>
               <Input
                 id="example_models"
                 value={formData.example_models}

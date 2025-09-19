@@ -247,7 +247,7 @@ export function ToolsLibrary() {
                     onClick={() => handleSort('example_models')}
                     className="h-auto p-0 font-semibold hover:bg-transparent flex items-center"
                   >
-                    Example Models
+                    Variants
                     {getSortIcon('example_models')}
                   </Button>
                 </TableHead>
