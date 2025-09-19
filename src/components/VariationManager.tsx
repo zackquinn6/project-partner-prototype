@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, X, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { VariationEditor } from './VariationEditor';
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,7 @@ interface VariationInstance {
   photo_url?: string;
   attributes: Record<string, string>;
   estimated_weight_lbs?: number;
+  weight_lbs?: number;
   estimated_rental_lifespan_days?: number;
   warning_flags?: string[];
   created_at?: string;
@@ -60,6 +62,7 @@ interface VariationManagerProps {
 export function VariationManager({ coreItemId, itemType, coreItemName, onVariationUpdate }: VariationManagerProps) {
   const [attributes, setAttributes] = useState<VariationAttribute[]>([]);
   const [variations, setVariations] = useState<VariationInstance[]>([]);
+  const [editingVariation, setEditingVariation] = useState<VariationInstance | null>(null);
   const [newAttributeName, setNewAttributeName] = useState('');
   const [selectedAttributeId, setSelectedAttributeId] = useState<string>('');
   const [newValueText, setNewValueText] = useState('');
@@ -486,7 +489,14 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
       return value?.display_value || valueKey;
     });
     
-    const generatedName = `${attributeStrings.join(' ')} ${coreItemName}`;
+    // Title case function - capitalize first letter of each word
+    const toTitleCase = (str: string) => {
+      return str.replace(/\w\S*/g, (txt) => 
+        txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+      );
+    };
+    
+    const generatedName = toTitleCase(`${attributeStrings.join(' ')} ${coreItemName}`);
     setVariationName(generatedName);
   };
 
@@ -826,13 +836,13 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
                       {variation.sku && (
                         <div className="text-xs text-muted-foreground">SKU: {variation.sku}</div>
                       )}
-                      {/* Display weight and pricing if available */}
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {variation.estimated_weight_lbs && (
-                          <Badge variant="outline" className="text-xs">
-                            Weight: {variation.estimated_weight_lbs} lbs
-                          </Badge>
-                        )}
+                       {/* Display weight and pricing if available */}
+                       <div className="flex flex-wrap gap-2 mt-2">
+                         {(variation.weight_lbs || variation.estimated_weight_lbs) && (
+                           <Badge variant="outline" className="text-xs">
+                             Weight: {variation.weight_lbs || variation.estimated_weight_lbs} lbs
+                           </Badge>
+                         )}
                         {variation.estimated_rental_lifespan_days && (
                           <Badge variant="outline" className="text-xs">
                             Rental Life: {variation.estimated_rental_lifespan_days} days
@@ -852,14 +862,23 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
                       </div>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteVariation(variation.id)}
-                    className="ml-2 text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditingVariation(variation)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteVariation(variation.id)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             {variations.length === 0 && (
@@ -870,6 +889,20 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
           </div>
         </CardContent>
       </Card>
+
+      {/* Variation Editor Dialog */}
+      {editingVariation && (
+        <VariationEditor
+          open={!!editingVariation}
+          onOpenChange={(open) => !open && setEditingVariation(null)}
+          variation={editingVariation}
+          onSave={() => {
+            setEditingVariation(null);
+            fetchVariations();
+            onVariationUpdate?.();
+          }}
+        />
+      )}
     </div>
   );
 }

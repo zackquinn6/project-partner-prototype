@@ -169,7 +169,14 @@ export function VariationSelector({
       return value?.display_value || valueKey;
     });
     
-    return `${attributeStrings.join(' ')} ${coreItemName}`;
+    // Title case function - capitalize first letter of each word
+    const toTitleCase = (str: string) => {
+      return str.replace(/\w\S*/g, (txt) => 
+        txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+      );
+    };
+    
+    return toTitleCase(`${attributeStrings.join(' ')} ${coreItemName}`);
   };
 
   const getAvailableValuesForAttribute = (attributeName: string) => {

@@ -1425,6 +1425,7 @@ export type Database = {
           sku: string | null
           updated_at: string
           warning_flags: string[] | null
+          weight_lbs: number | null
         }
         Insert: {
           attributes?: Json
@@ -1440,6 +1441,7 @@ export type Database = {
           sku?: string | null
           updated_at?: string
           warning_flags?: string[] | null
+          weight_lbs?: number | null
         }
         Update: {
           attributes?: Json
@@ -1455,6 +1457,7 @@ export type Database = {
           sku?: string | null
           updated_at?: string
           warning_flags?: string[] | null
+          weight_lbs?: number | null
         }
         Relationships: []
       }

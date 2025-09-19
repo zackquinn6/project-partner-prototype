@@ -21,6 +21,7 @@ interface VariationInstance {
   photo_url?: string;
   attributes: Record<string, string>;
   estimated_weight_lbs?: number;
+  weight_lbs?: number;
   estimated_rental_lifespan_days?: number;
   warning_flags?: string[];
 }
@@ -96,19 +97,20 @@ export function VariationEditor({ open, onOpenChange, variation, onSave }: Varia
   const saveVariation = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('variation_instances')
-        .update({
-          name: editedVariation.name,
-          description: editedVariation.description,
-          sku: editedVariation.sku,
-          photo_url: editedVariation.photo_url,
-          estimated_weight_lbs: editedVariation.estimated_weight_lbs,
-          estimated_rental_lifespan_days: editedVariation.estimated_rental_lifespan_days,
-          warning_flags: editedVariation.warning_flags,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', variation.id);
+       const { error } = await supabase
+         .from('variation_instances')
+         .update({
+           name: editedVariation.name,
+           description: editedVariation.description,
+           sku: editedVariation.sku,
+           photo_url: editedVariation.photo_url,
+           weight_lbs: editedVariation.weight_lbs,
+           estimated_weight_lbs: editedVariation.estimated_weight_lbs,
+           estimated_rental_lifespan_days: editedVariation.estimated_rental_lifespan_days,
+           warning_flags: editedVariation.warning_flags,
+           updated_at: new Date().toISOString()
+         })
+         .eq('id', variation.id);
 
       if (error) throw error;
 
@@ -285,16 +287,17 @@ export function VariationEditor({ open, onOpenChange, variation, onSave }: Varia
                 />
               </div>
               <div>
-                <Label htmlFor="weight">Weight (lbs)</Label>
+                <Label htmlFor="weight">Actual Weight (lbs)</Label>
                 <Input
                   id="weight"
                   type="number"
                   step="0.1"
-                  value={editedVariation.estimated_weight_lbs || ''}
+                  value={editedVariation.weight_lbs || ''}
                   onChange={(e) => setEditedVariation({ 
                     ...editedVariation, 
-                    estimated_weight_lbs: e.target.value ? parseFloat(e.target.value) : undefined 
+                    weight_lbs: e.target.value ? parseFloat(e.target.value) : undefined 
                   })}
+                  placeholder="e.g., 10.5"
                 />
               </div>
               <div>
