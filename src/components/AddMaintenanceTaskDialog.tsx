@@ -176,10 +176,15 @@ export function AddMaintenanceTaskDialog({
 
   const categoryLabels: Record<string, string> = {
     appliances: 'Appliances',
-    hvac: 'HVAC',
-    safety: 'Safety',
-    plumbing: 'Plumbing',
+    electrical: 'Electrical',
     exterior: 'Exterior',
+    hvac: 'HVAC',
+    interior: 'Interior',
+    landscaping: 'Landscaping',
+    outdoor: 'Outdoor',
+    plumbing: 'Plumbing',
+    safety: 'Safety',
+    security: 'Security',
     general: 'General'
   };
 
@@ -296,10 +301,15 @@ export function AddMaintenanceTaskDialog({
                       <SelectContent>
                         <SelectItem value="general">General</SelectItem>
                         <SelectItem value="appliances">Appliances</SelectItem>
-                        <SelectItem value="hvac">HVAC</SelectItem>
-                        <SelectItem value="safety">Safety</SelectItem>
-                        <SelectItem value="plumbing">Plumbing</SelectItem>
+                        <SelectItem value="electrical">Electrical</SelectItem>
                         <SelectItem value="exterior">Exterior</SelectItem>
+                        <SelectItem value="hvac">HVAC</SelectItem>
+                        <SelectItem value="interior">Interior</SelectItem>
+                        <SelectItem value="landscaping">Landscaping</SelectItem>
+                        <SelectItem value="outdoor">Outdoor</SelectItem>
+                        <SelectItem value="plumbing">Plumbing</SelectItem>
+                        <SelectItem value="safety">Safety</SelectItem>
+                        <SelectItem value="security">Security</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
