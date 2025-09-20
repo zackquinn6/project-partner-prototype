@@ -33,7 +33,11 @@ interface UserOwnedTool {
   user_photo_url?: string;
 }
 
-export function UserToolsEditor() {
+interface UserToolsEditorProps {
+  initialMode?: 'library' | 'add-tools';
+}
+
+export function UserToolsEditor({ initialMode = 'library' }: UserToolsEditorProps = {}) {
   const [availableTools, setAvailableTools] = useState<Tool[]>([]);
   const [userTools, setUserTools] = useState<UserOwnedTool[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,7 +45,7 @@ export function UserToolsEditor() {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null);
   const [viewingVariations, setViewingVariations] = useState<Tool | null>(null);
-  const [showAddTools, setShowAddTools] = useState(false);
+  const [showAddTools, setShowAddTools] = useState(initialMode === 'add-tools');
   const { user } = useAuth();
 
   // Debounce user tools for auto-save

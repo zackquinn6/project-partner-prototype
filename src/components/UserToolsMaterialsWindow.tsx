@@ -6,9 +6,10 @@ import { UserMaterialsEditor } from "./UserMaterialsEditor";
 interface UserToolsMaterialsWindowProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialToolsMode?: 'library' | 'add-tools';
 }
 
-export function UserToolsMaterialsWindow({ open, onOpenChange }: UserToolsMaterialsWindowProps) {
+export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode }: UserToolsMaterialsWindowProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[80vh] overflow-hidden">
@@ -23,7 +24,7 @@ export function UserToolsMaterialsWindow({ open, onOpenChange }: UserToolsMateri
           </TabsList>
           
           <TabsContent value="tools" className="h-full">
-            <UserToolsEditor />
+            <UserToolsEditor initialMode={initialToolsMode} />
           </TabsContent>
           
           <TabsContent value="materials" className="h-full">

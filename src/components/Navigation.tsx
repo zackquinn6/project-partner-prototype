@@ -42,6 +42,7 @@ export default function Navigation({
   const [isHomeManagerOpen, setIsHomeManagerOpen] = useState(false);
   const [isToolsLibraryOpen, setIsToolsLibraryOpen] = useState(false);
   const [isUserToolsLibraryOpen, setIsUserToolsLibraryOpen] = useState(false);
+  const [userToolsMode, setUserToolsMode] = useState<'library' | 'add-tools'>('library');
   const [isNewToolsLibraryOpen, setIsNewToolsLibraryOpen] = useState(false);
   const [isHomeMaintenanceOpen, setIsHomeMaintenanceOpen] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -119,6 +120,7 @@ export default function Navigation({
     const handleToolsMaterialsEditorEvent = (event: Event) => {
       console.log('🔧 Navigation: Tools materials editor event received');
       event.stopPropagation();
+      setUserToolsMode('add-tools');
       setIsUserToolsLibraryOpen(true);
     };
 
@@ -318,7 +320,11 @@ export default function Navigation({
         
         <UserToolsMaterialsWindow 
           open={isUserToolsLibraryOpen}
-          onOpenChange={setIsUserToolsLibraryOpen}
+          onOpenChange={(open) => {
+            setIsUserToolsLibraryOpen(open);
+            if (!open) setUserToolsMode('library'); // Reset mode when closing
+          }}
+          initialToolsMode={userToolsMode}
         />
         
         <ToolsMaterialsLibraryView 
