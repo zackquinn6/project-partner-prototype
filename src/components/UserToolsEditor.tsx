@@ -118,7 +118,14 @@ export function UserToolsEditor({ initialMode = 'add-tools', onBackToLibrary, on
                            (tool.description && tool.description.toLowerCase().includes(searchTerm.toLowerCase()));
       
       // Check if this core tool or any of its variations are already owned
-      const alreadyOwned = userTools.some(userTool => userTool.id === tool.id);
+      const alreadyOwned = userTools.some(userTool => {
+        // Check if the core tool is owned
+        if (userTool.id === tool.id) return true;
+        
+        // Check if any variation of this core tool is owned
+        // This ensures core items disappear when their variations are added
+        return userTool.item === tool.item;
+      });
       
       return matchesSearch && !alreadyOwned;
     })
