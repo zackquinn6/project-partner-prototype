@@ -64,7 +64,7 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
 
   // Auto-save when materials change (debounced)
   useEffect(() => {
-    if (user && debouncedUserMaterials.length > 0) {
+    if (user && debouncedUserMaterials.length > 0 && userMaterials.length > 0) {
       autoSaveMaterials();
     }
   }, [debouncedUserMaterials, user]);

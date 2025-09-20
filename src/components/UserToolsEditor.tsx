@@ -68,7 +68,7 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSw
 
   // Auto-save when tools change (debounced)
   useEffect(() => {
-    if (user && debouncedUserTools.length > 0) {
+    if (user && debouncedUserTools.length > 0 && userTools.length > 0) {
       autoSaveTools();
     }
   }, [debouncedUserTools, user]);

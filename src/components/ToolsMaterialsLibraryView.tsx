@@ -287,7 +287,7 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
                             ) : (
                               <Wrench className="w-6 h-6 text-primary" />
                             )}
-                            {tool.quantity > 1 && (
+                            {tool.quantity >= 1 && (
                               <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
                                 {tool.quantity}
                               </div>
@@ -329,7 +329,7 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
                             ) : (
                               <Package className="w-6 h-6 text-accent-foreground" />
                             )}
-                            {material.quantity > 1 && (
+                            {material.quantity >= 1 && (
                               <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
                                 {material.quantity}
                               </div>
