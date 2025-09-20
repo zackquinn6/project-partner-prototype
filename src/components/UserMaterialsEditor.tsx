@@ -249,7 +249,39 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
       <div className="space-y-4 h-full">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">Add Materials to Your Library</h3>
-          <Button variant="outline" onClick={() => onBackToLibrary ? onBackToLibrary() : setShowAddMaterials(false)}>
+          <Button 
+            variant="outline" 
+            onClick={async () => {
+              console.log('Back to My Materials clicked');
+              // Save materials before closing
+              if (user && userMaterials.length > 0) {
+                try {
+                  const { error } = await supabase
+                    .from('profiles')
+                    .update({ owned_materials: userMaterials as any })
+                    .eq('user_id', user.id);
+                  
+                  if (error) {
+                    console.error('Failed to save materials:', error);
+                  } else {
+                    console.log('Materials saved successfully');
+                  }
+                } catch (error) {
+                  console.error('Error saving materials:', error);
+                }
+              }
+              
+              // Dispatch event to refresh library and close add window
+              window.dispatchEvent(new CustomEvent('tools-library-updated'));
+              window.dispatchEvent(new CustomEvent('close-add-tools-window'));
+              
+              if (onBackToLibrary) {
+                onBackToLibrary();
+              } else {
+                setShowAddMaterials(false);
+              }
+            }}
+          >
             Back to My Materials
           </Button>
         </div>
@@ -458,6 +490,17 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
           coreItemName={checkingVariations.item}
           itemType="materials"
           onVariationSelect={(variation) => {
+            console.log('Material variation selected:', variation);
+            console.log('Current userMaterials before adding:', userMaterials);
+            
+            // Check if this variation is already in the user's materials
+            const isDuplicate = userMaterials.some(userMaterial => userMaterial.id === variation.id);
+            if (isDuplicate) {
+              console.log('Material variation already exists, skipping add');
+              setCheckingVariations(null);
+              return;
+            }
+            
             // Create a new material based on the selected variation
             const newUserMaterial: UserOwnedMaterial = {
               id: variation.id,
@@ -469,7 +512,28 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
               user_photo_url: '',
               purchase_location: ''
             };
-            setUserMaterials([...userMaterials, newUserMaterial]);
+            console.log('Adding new material:', newUserMaterial);
+            const updatedMaterials = [...userMaterials, newUserMaterial];
+            setUserMaterials(updatedMaterials);
+            console.log('Updated userMaterials:', updatedMaterials);
+            
+            // Save to database immediately
+            if (user) {
+              supabase
+                .from('profiles')
+                .update({ owned_materials: updatedMaterials as any })
+                .eq('user_id', user.id)
+                .then(({ error }) => {
+                  if (error) {
+                    console.error('Failed to save material to database:', error);
+                  } else {
+                    console.log('Material saved to database successfully');
+                    // Dispatch event to refresh library view
+                    window.dispatchEvent(new CustomEvent('tools-library-updated'));
+                  }
+                });
+            }
+            
             setCheckingVariations(null);
           }}
         />

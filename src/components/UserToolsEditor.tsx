@@ -256,9 +256,44 @@ export function UserToolsEditor({ initialMode = 'add-tools', onBackToLibrary, on
     return (
       <>
         <div className="space-y-4 h-full">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Add Tools to Your Library</h3>
-          </div>
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold">Add Tools to Your Library</h3>
+          <Button 
+            variant="outline" 
+            onClick={async () => {
+              console.log('Back to My Tools clicked');
+              // Save tools before closing
+              if (user && userTools.length > 0) {
+                try {
+                  const { error } = await supabase
+                    .from('profiles')
+                    .update({ owned_tools: userTools as any })
+                    .eq('user_id', user.id);
+                  
+                  if (error) {
+                    console.error('Failed to save tools:', error);
+                  } else {
+                    console.log('Tools saved successfully');
+                  }
+                } catch (error) {
+                  console.error('Error saving tools:', error);
+                }
+              }
+              
+              // Dispatch event to refresh library and close add window
+              window.dispatchEvent(new CustomEvent('tools-library-updated'));
+              window.dispatchEvent(new CustomEvent('close-add-tools-window'));
+              
+              if (onBackToLibrary) {
+                onBackToLibrary();
+              } else {
+                setShowAddTools(false);
+              }
+            }}
+          >
+            Back to My Tools
+          </Button>
+        </div>
           
           <div className="space-y-4">
             <div className="relative">
@@ -393,6 +428,41 @@ export function UserToolsEditor({ initialMode = 'add-tools', onBackToLibrary, on
     <div className="space-y-4 h-full">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Add Tools to Your Library</h3>
+        <Button 
+          variant="outline" 
+          onClick={async () => {
+            console.log('Back to My Tools clicked');
+            // Save tools before closing
+            if (user && userTools.length > 0) {
+              try {
+                const { error } = await supabase
+                  .from('profiles')
+                  .update({ owned_tools: userTools as any })
+                  .eq('user_id', user.id);
+                
+                if (error) {
+                  console.error('Failed to save tools:', error);
+                } else {
+                  console.log('Tools saved successfully');
+                }
+              } catch (error) {
+                console.error('Error saving tools:', error);
+              }
+            }
+            
+            // Dispatch event to refresh library and close add window
+            window.dispatchEvent(new CustomEvent('tools-library-updated'));
+            window.dispatchEvent(new CustomEvent('close-add-tools-window'));
+            
+            if (onBackToLibrary) {
+              onBackToLibrary();
+            } else {
+              setShowAddTools(false);
+            }
+          }}
+        >
+          Back to My Tools
+        </Button>
       </div>
       
       <div className="space-y-4">

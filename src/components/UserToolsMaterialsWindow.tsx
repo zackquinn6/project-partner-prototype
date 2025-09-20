@@ -21,9 +21,16 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
     }
   }, [initialToolsMode]);
 
+  // Listen for close add window events
   useEffect(() => {
-    console.log('UserToolsMaterialsWindow - open:', open, 'currentMode:', currentMode);
-  }, [open, currentMode]);
+    const handleCloseAddWindow = () => {
+      console.log('Close add tools window event received');
+      onOpenChange(false);
+    };
+
+    window.addEventListener('close-add-tools-window', handleCloseAddWindow);
+    return () => window.removeEventListener('close-add-tools-window', handleCloseAddWindow);
+  }, [onOpenChange]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
