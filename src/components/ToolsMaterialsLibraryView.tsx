@@ -422,13 +422,12 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange }: ToolsMaterials
 
                 <div className="flex gap-2 pt-4 border-t">
                   <Button
-                    size="sm"
+                    size="icon"
                     variant="destructive"
                     onClick={deleteItem}
-                    className="flex-1"
+                    title="Delete Item"
                   >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete Item
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
