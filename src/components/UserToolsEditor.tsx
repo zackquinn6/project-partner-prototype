@@ -126,6 +126,7 @@ export function UserToolsEditor({ initialMode = 'add-tools', onBackToLibrary, on
     .sort((a, b) => a.item.localeCompare(b.item));
 
   const handleAddTool = async (tool: Tool) => {
+    console.log('Adding tool:', tool.item);
     // Always check if this tool has variations first
     try {
       const { data: variations, error } = await supabase
@@ -136,12 +137,15 @@ export function UserToolsEditor({ initialMode = 'add-tools', onBackToLibrary, on
         .limit(1);
 
       if (error) throw error;
+      console.log('Variations found:', variations);
 
       if (variations && variations.length > 0) {
         // Tool has variations, always show variation selector
+        console.log('Setting checkingVariations to:', tool);
         setCheckingVariations(tool);
       } else {
         // No variations exist, add the core tool directly
+        console.log('No variations, adding directly');
         addTool(tool);
       }
     } catch (error) {
@@ -383,27 +387,34 @@ export function UserToolsEditor({ initialMode = 'add-tools', onBackToLibrary, on
 
       {/* Variation Selection for Adding */}
       {checkingVariations && (
-        <VariationViewer
-          open={!!checkingVariations}
-          onOpenChange={() => setCheckingVariations(null)}
-          coreItemId={checkingVariations.id}
-          coreItemName={checkingVariations.item}
-          itemType="tools"
-          onVariationSelect={(variation) => {
-            // Create a new tool based on the selected variation
-            const newUserTool: UserOwnedTool = {
-              id: variation.id,
-              item: variation.name,
-              description: variation.description,
-              photo_url: variation.photo_url,
-              quantity: 1,
-              model_name: variation.sku || '',
-              user_photo_url: ''
-            };
-            setUserTools([...userTools, newUserTool]);
-            setCheckingVariations(null);
-          }}
-        />
+        <>
+          {console.log('Rendering VariationViewer with:', checkingVariations)}
+          <VariationViewer
+            open={!!checkingVariations}
+            onOpenChange={() => {
+              console.log('VariationViewer onOpenChange called');
+              setCheckingVariations(null);
+            }}
+            coreItemId={checkingVariations.id}
+            coreItemName={checkingVariations.item}
+            itemType="tools"
+            onVariationSelect={(variation) => {
+              console.log('Variation selected:', variation);
+              // Create a new tool based on the selected variation
+              const newUserTool: UserOwnedTool = {
+                id: variation.id,
+                item: variation.name,
+                description: variation.description,
+                photo_url: variation.photo_url,
+                quantity: 1,
+                model_name: variation.sku || '',
+                user_photo_url: ''
+              };
+              setUserTools([...userTools, newUserTool]);
+              setCheckingVariations(null);
+            }}
+          />
+        </>
       )}
 
       {/* Variations Viewer for Information Only */}
