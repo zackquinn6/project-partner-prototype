@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Camera, Wrench, Package, Eye, Save } from "lucide-react";
+import { Search, Plus, Camera, Wrench, Package, Eye, Save, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -165,6 +165,21 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange }: ToolsMaterials
       setUserMaterials(updatedMaterials);
       setSelectedItem({ ...selectedItem, [field]: value } as UserOwnedMaterial);
     }
+  };
+
+  const deleteItem = () => {
+    if (!selectedItem) return;
+
+    if (selectedType === 'tool') {
+      const updatedTools = userTools.filter(tool => tool.id !== selectedItem.id);
+      setUserTools(updatedTools);
+    } else {
+      const updatedMaterials = userMaterials.filter(material => material.id !== selectedItem.id);
+      setUserMaterials(updatedMaterials);
+    }
+    
+    setSelectedItem(null);
+    toast({ title: "Success", description: `${selectedType === 'tool' ? 'Tool' : 'Material'} deleted from your library` });
   };
 
   const saveItems = async () => {
@@ -403,6 +418,18 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange }: ToolsMaterials
                       {uploadingPhoto === selectedItem.id ? "Uploading..." : "Update Photo"}
                     </Button>
                   </div>
+                </div>
+
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={deleteItem}
+                    className="flex-1"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Item
+                  </Button>
                 </div>
               </div>
             </div>
