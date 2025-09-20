@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Users, CheckCircle, HelpCircle, MessageCircle, Building, Store, AlertTriangle } from "lucide-react";
 import { FeedbackDialog } from './FeedbackDialog';
 import { useState } from 'react';
@@ -41,7 +42,8 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-6 p-6">
+          <ScrollArea className="flex-1">
+            <div className="space-y-6 p-6">
           <div className="text-center">
             <p className="text-muted-foreground">
               Connect with trusted professionals to help complete your DIY projects. 
@@ -155,8 +157,9 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
                 </div>
               </div>
             </CardContent>
-          </Card>
-        </div>
+            </Card>
+            </div>
+          </ScrollArea>
       </div>
       </DialogContent>
     </Dialog>
