@@ -11,7 +11,7 @@ interface UserToolsMaterialsWindowProps {
 }
 
 export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode }: UserToolsMaterialsWindowProps) {
-  const [currentMode, setCurrentMode] = useState<'library' | 'add-tools'>('library');
+  const [currentMode, setCurrentMode] = useState<'library' | 'add-tools'>('add-tools');
 
   // Update currentMode when initialToolsMode changes
   useEffect(() => {
@@ -45,7 +45,7 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
           
           <TabsContent value="materials" className="h-full">
             <UserMaterialsEditor 
-              initialMode={currentMode === 'add-tools' ? 'add-materials' : 'library'}
+              initialMode={'add-materials'}
               onBackToLibrary={() => setCurrentMode('library')}
             />
           </TabsContent>

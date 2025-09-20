@@ -39,7 +39,7 @@ interface UserToolsEditorProps {
   onSwitchToAdd?: () => void;
 }
 
-export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSwitchToAdd }: UserToolsEditorProps = {}) {
+export function UserToolsEditor({ initialMode = 'add-tools', onBackToLibrary, onSwitchToAdd }: UserToolsEditorProps = {}) {
   const [availableTools, setAvailableTools] = useState<Tool[]>([]);
   const [userTools, setUserTools] = useState<UserOwnedTool[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -259,9 +259,6 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSw
       <div className="space-y-4 h-full">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">Add Tools to Your Library</h3>
-          <Button variant="outline" onClick={() => onBackToLibrary ? onBackToLibrary() : setShowAddTools(false)}>
-            Back to My Tools
-          </Button>
         </div>
         
         <div className="space-y-4">
@@ -322,129 +319,64 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSw
     );
   }
 
+  // Always show add tools view - library view removed
   return (
     <div className="space-y-4 h-full">
-      {/* User's Tools Panel */}
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">My Tools Library ({userTools.length})</h3>
-        <div className="flex gap-2">
-          <Button 
-            size="icon" 
-            variant="outline" 
-            onClick={() => onSwitchToAdd ? onSwitchToAdd() : setShowAddTools(true)}
-            title="Add Tools"
-          >
-            <Plus className="w-4 h-4" />
-          </Button>
-          <Button 
-            size="icon" 
-            variant="outline" 
-            onClick={saveTools}
-            disabled={isLoading}
-            title="Save Tools Library"
-          >
-            <Save className="w-4 h-4" />
-          </Button>
+        <h3 className="text-lg font-semibold">Add Tools to Your Library</h3>
+      </div>
+      
+      <div className="space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder="Search available tools..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
         </div>
       </div>
 
-      <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-        {userTools.sort((a, b) => a.item.localeCompare(b.item)).map((tool) => (
+      <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+        {filteredTools.map((tool) => (
           <Card key={tool.id} className="p-4">
-            <div className="space-y-3">
-              <div className="flex justify-between items-start">
-                <h4 className="font-medium">{tool.item}</h4>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => removeTool(tool.id)}
-                  title="Delete tool"
-                  className="text-destructive hover:text-destructive h-8 w-8"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor={`quantity-${tool.id}`}>Quantity</Label>
-                  <Input
-                    id={`quantity-${tool.id}`}
-                    type="number"
-                    min="1"
-                    value={tool.quantity}
-                    onChange={(e) => handleFieldUpdate(tool.id, 'quantity', parseInt(e.target.value) || 1)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor={`model-${tool.id}`}>Model/Brand</Label>
-                  <Input
-                    id={`model-${tool.id}`}
-                    value={tool.model_name || ''}
-                    onChange={(e) => handleFieldUpdate(tool.id, 'model_name', e.target.value)}
-                    placeholder="e.g., DeWalt DCD771C2"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor={`description-${tool.id}`}>Personal Notes</Label>
-                <Textarea
-                  id={`description-${tool.id}`}
-                  value={tool.custom_description || ''}
-                  onChange={(e) => handleFieldUpdate(tool.id, 'custom_description', e.target.value)}
-                  placeholder="Add your own notes about this tool..."
-                  className="resize-none"
-                  rows={2}
-                />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="flex-1">
-                  <Label>Item Photo</Label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handlePhotoUpload(tool.id, file);
-                      }}
-                      className="hidden"
-                      id={`photo-${tool.id}`}
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => document.getElementById(`photo-${tool.id}`)?.click()}
-                      disabled={uploadingPhoto === tool.id}
-                    >
-                      <Camera className="w-4 h-4 mr-2" />
-                      {uploadingPhoto === tool.id ? "Uploading..." : "Add Photo"}
-                    </Button>
+            <div className="flex justify-between items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h4 className="font-medium truncate">{tool.item}</h4>
                   </div>
+                  {tool.description && (
+                    <p className="text-sm text-muted-foreground mb-2">{tool.description}</p>
+                  )}
+                  {tool.example_models && (
+                    <p className="text-xs text-muted-foreground">Examples: {tool.example_models}</p>
+                  )}
                 </div>
-                {(tool.user_photo_url || tool.photo_url) && (
-                  <img 
-                    src={tool.user_photo_url || tool.photo_url} 
-                    alt={tool.item}
-                    className="w-16 h-16 object-cover rounded"
-                  />
-                )}
-              </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {tool.photo_url && (
+                    <img 
+                      src={tool.photo_url} 
+                      alt={tool.item}
+                      className="w-12 h-12 object-cover rounded"
+                    />
+                  )}
+                  <Button
+                    size="sm"
+                    onClick={() => handleAddTool(tool)}
+                    className="flex-shrink-0"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add
+                  </Button>
+                </div>
             </div>
           </Card>
         ))}
-
-        {userTools.length === 0 && (
+        
+        {filteredTools.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
-            <ShoppingCart className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-            <h3 className="text-lg font-semibold mb-2">No tools in your library yet</h3>
-            <p className="mb-4">Start building your tool collection by adding from our catalog.</p>
-            <Button onClick={() => setShowAddTools(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Your First Tool
-            </Button>
+            {searchTerm ? "No tools found matching your search" : "All available tools have been added to your library"}
           </div>
         )}
       </div>
