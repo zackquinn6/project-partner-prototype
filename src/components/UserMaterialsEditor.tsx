@@ -62,12 +62,20 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
     }
   }, [user]);
 
-  // Auto-save when materials change (debounced)
+  // Window close auto-save
   useEffect(() => {
-    if (user && debouncedUserMaterials.length > 0 && userMaterials.length > 0) {
-      autoSaveMaterials();
-    }
-  }, [debouncedUserMaterials, user]);
+    const handleBeforeUnload = () => {
+      if (user && userMaterials.length > 0) {
+        navigator.sendBeacon('/api/save-materials', JSON.stringify({
+          userId: user.id,
+          materials: userMaterials
+        }));
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [user, userMaterials]);
 
   const fetchAvailableMaterials = async () => {
     try {
@@ -100,17 +108,19 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
     }
   };
 
-  const filteredMaterials = availableMaterials.filter(material => {
-    const matchesSearch = material.item.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (material.description && material.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const alreadyOwned = userMaterials.some(userMaterial => userMaterial.id === material.id);
-    
-    return matchesSearch && !alreadyOwned;
-  });
+  const filteredMaterials = availableMaterials
+    .filter(material => {
+      const matchesSearch = material.item.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (material.description && material.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const alreadyOwned = userMaterials.some(userMaterial => userMaterial.id === material.id);
+      
+      return matchesSearch && !alreadyOwned;
+    })
+    .sort((a, b) => a.item.localeCompare(b.item));
 
   const handleAddMaterial = async (material: Material) => {
-    // Check if this material has variations
+    // Always check if this material has variations first
     try {
       const { data: variations, error } = await supabase
         .from('variation_instances')
@@ -122,15 +132,15 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
       if (error) throw error;
 
       if (variations && variations.length > 0) {
-        // Material has variations, show variation selector
+        // Material has variations, always show variation selector
         setCheckingVariations(material);
       } else {
-        // No variations, add directly
+        // No variations exist, add the core material directly
         addMaterial(material);
       }
     } catch (error) {
       console.error('Error checking variations:', error);
-      // Fallback to direct add
+      // Fallback to direct add if error occurs
       addMaterial(material);
     }
   };
@@ -148,6 +158,25 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
 
   const removeMaterial = (materialId: string) => {
     setUserMaterials(userMaterials.filter(material => material.id !== materialId));
+  };
+
+  // Immediate save on field changes  
+  const handleMaterialFieldUpdate = (materialId: string, field: keyof UserOwnedMaterial, value: any) => {
+    const updatedMaterials = userMaterials.map(material => 
+      material.id === materialId ? { ...material, [field]: value } : material
+    );
+    setUserMaterials(updatedMaterials);
+    
+    // Trigger immediate save
+    if (user) {
+      supabase
+        .from('profiles')
+        .update({ owned_materials: updatedMaterials as any })
+        .eq('user_id', user.id)
+        .then(({ error }) => {
+          if (error) console.error('Auto-save failed:', error);
+        });
+    }
   };
 
   const updateMaterial = (materialId: string, field: keyof UserOwnedMaterial, value: any) => {
@@ -310,7 +339,7 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
       </div>
 
       <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-        {userMaterials.map((material) => (
+        {userMaterials.sort((a, b) => a.item.localeCompare(b.item)).map((material) => (
           <Card key={material.id} className="p-4">
             <div className="space-y-3">
               <div className="flex justify-between items-start">
@@ -334,7 +363,7 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
                     type="number"
                     min="1"
                     value={material.quantity}
-                    onChange={(e) => updateMaterial(material.id, 'quantity', parseInt(e.target.value) || 1)}
+                    onChange={(e) => handleMaterialFieldUpdate(material.id, 'quantity', parseInt(e.target.value) || 1)}
                   />
                 </div>
                 <div>
@@ -342,7 +371,7 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
                   <Input
                     id={`brand-${material.id}`}
                     value={material.brand || ''}
-                    onChange={(e) => updateMaterial(material.id, 'brand', e.target.value)}
+                    onChange={(e) => handleMaterialFieldUpdate(material.id, 'brand', e.target.value)}
                     placeholder="e.g., Sherwin Williams"
                   />
                 </div>
@@ -353,7 +382,7 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
                 <Input
                   id={`location-${material.id}`}
                   value={material.purchase_location || ''}
-                  onChange={(e) => updateMaterial(material.id, 'purchase_location', e.target.value)}
+                  onChange={(e) => handleMaterialFieldUpdate(material.id, 'purchase_location', e.target.value)}
                   placeholder="e.g., Home Depot, Amazon"
                 />
               </div>
@@ -363,7 +392,7 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
                 <Textarea
                   id={`description-${material.id}`}
                   value={material.custom_description || ''}
-                  onChange={(e) => updateMaterial(material.id, 'custom_description', e.target.value)}
+                  onChange={(e) => handleMaterialFieldUpdate(material.id, 'custom_description', e.target.value)}
                   placeholder="Add your own notes about this material..."
                   className="resize-none"
                   rows={2}

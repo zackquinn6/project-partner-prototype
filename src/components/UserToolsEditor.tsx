@@ -66,12 +66,20 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSw
     }
   }, [user]);
 
-  // Auto-save when tools change (debounced)
+  // Window close auto-save
   useEffect(() => {
-    if (user && debouncedUserTools.length > 0 && userTools.length > 0) {
-      autoSaveTools();
-    }
-  }, [debouncedUserTools, user]);
+    const handleBeforeUnload = () => {
+      if (user && userTools.length > 0) {
+        navigator.sendBeacon('/api/save-tools', JSON.stringify({
+          userId: user.id,
+          tools: userTools
+        }));
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [user, userTools]);
 
   const fetchAvailableTools = async () => {
     try {
@@ -106,17 +114,19 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSw
     }
   };
 
-  const filteredTools = availableTools.filter(tool => {
-    const matchesSearch = tool.item.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (tool.description && tool.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const alreadyOwned = userTools.some(userTool => userTool.id === tool.id);
-    
-    return matchesSearch && !alreadyOwned;
-  });
+  const filteredTools = availableTools
+    .filter(tool => {
+      const matchesSearch = tool.item.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (tool.description && tool.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const alreadyOwned = userTools.some(userTool => userTool.id === tool.id);
+      
+      return matchesSearch && !alreadyOwned;
+    })
+    .sort((a, b) => a.item.localeCompare(b.item));
 
   const handleAddTool = async (tool: Tool) => {
-    // Check if this tool has variations
+    // Always check if this tool has variations first
     try {
       const { data: variations, error } = await supabase
         .from('variation_instances')
@@ -128,15 +138,15 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSw
       if (error) throw error;
 
       if (variations && variations.length > 0) {
-        // Tool has variations, show variation selector
+        // Tool has variations, always show variation selector
         setCheckingVariations(tool);
       } else {
-        // No variations, add directly
+        // No variations exist, add the core tool directly
         addTool(tool);
       }
     } catch (error) {
       console.error('Error checking variations:', error);
-      // Fallback to direct add
+      // Fallback to direct add if error occurs
       addTool(tool);
     }
   };
@@ -153,6 +163,25 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSw
 
   const removeTool = (toolId: string) => {
     setUserTools(userTools.filter(tool => tool.id !== toolId));
+  };
+
+  // Immediate save on field changes
+  const handleFieldUpdate = (toolId: string, field: keyof UserOwnedTool, value: any) => {
+    const updatedTools = userTools.map(tool => 
+      tool.id === toolId ? { ...tool, [field]: value } : tool
+    );
+    setUserTools(updatedTools);
+    
+    // Trigger immediate save
+    if (user) {
+      supabase
+        .from('profiles')
+        .update({ owned_tools: updatedTools as any })
+        .eq('user_id', user.id)
+        .then(({ error }) => {
+          if (error) console.error('Auto-save failed:', error);
+        });
+    }
   };
 
   const updateTool = (toolId: string, field: keyof UserOwnedTool, value: any) => {
@@ -320,7 +349,7 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSw
       </div>
 
       <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-        {userTools.map((tool) => (
+        {userTools.sort((a, b) => a.item.localeCompare(b.item)).map((tool) => (
           <Card key={tool.id} className="p-4">
             <div className="space-y-3">
               <div className="flex justify-between items-start">
@@ -344,7 +373,7 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSw
                     type="number"
                     min="1"
                     value={tool.quantity}
-                    onChange={(e) => updateTool(tool.id, 'quantity', parseInt(e.target.value) || 1)}
+                    onChange={(e) => handleFieldUpdate(tool.id, 'quantity', parseInt(e.target.value) || 1)}
                   />
                 </div>
                 <div>
@@ -352,7 +381,7 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSw
                   <Input
                     id={`model-${tool.id}`}
                     value={tool.model_name || ''}
-                    onChange={(e) => updateTool(tool.id, 'model_name', e.target.value)}
+                    onChange={(e) => handleFieldUpdate(tool.id, 'model_name', e.target.value)}
                     placeholder="e.g., DeWalt DCD771C2"
                   />
                 </div>
@@ -363,7 +392,7 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSw
                 <Textarea
                   id={`description-${tool.id}`}
                   value={tool.custom_description || ''}
-                  onChange={(e) => updateTool(tool.id, 'custom_description', e.target.value)}
+                  onChange={(e) => handleFieldUpdate(tool.id, 'custom_description', e.target.value)}
                   placeholder="Add your own notes about this tool..."
                   className="resize-none"
                   rows={2}
