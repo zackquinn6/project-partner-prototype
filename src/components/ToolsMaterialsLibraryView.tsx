@@ -264,14 +264,14 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange }: ToolsMaterials
                     {filteredTools.map((tool) => (
                       <Card 
                         key={tool.id} 
-                        className="cursor-pointer hover:shadow-md transition-shadow p-3"
+                        className="cursor-pointer hover:shadow-md transition-shadow p-3 relative"
                         onClick={() => {
                           setSelectedItem(tool);
                           setSelectedType('tool');
                         }}
                       >
                         <div className="flex flex-col items-center space-y-2">
-                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center relative">
                             {(tool.user_photo_url || tool.photo_url) ? (
                               <img 
                                 src={tool.user_photo_url || tool.photo_url} 
@@ -281,9 +281,13 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange }: ToolsMaterials
                             ) : (
                               <Wrench className="w-6 h-6 text-primary" />
                             )}
+                            {tool.quantity > 1 && (
+                              <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                                {tool.quantity}
+                              </div>
+                            )}
                           </div>
                           <span className="text-xs text-center font-medium line-clamp-2">{tool.item}</span>
-                          <Badge variant="secondary" className="text-xs">Qty: {tool.quantity}</Badge>
                         </div>
                       </Card>
                     ))}
@@ -302,14 +306,14 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange }: ToolsMaterials
                     {filteredMaterials.map((material) => (
                       <Card 
                         key={material.id} 
-                        className="cursor-pointer hover:shadow-md transition-shadow p-3"
+                        className="cursor-pointer hover:shadow-md transition-shadow p-3 relative"
                         onClick={() => {
                           setSelectedItem(material);
                           setSelectedType('material');
                         }}
                       >
                         <div className="flex flex-col items-center space-y-2">
-                          <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
+                          <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center relative">
                             {(material.user_photo_url || material.photo_url) ? (
                               <img 
                                 src={material.user_photo_url || material.photo_url} 
@@ -319,9 +323,13 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange }: ToolsMaterials
                             ) : (
                               <Package className="w-6 h-6 text-accent-foreground" />
                             )}
+                            {material.quantity > 1 && (
+                              <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                                {material.quantity}
+                              </div>
+                            )}
                           </div>
                           <span className="text-xs text-center font-medium line-clamp-2">{material.item}</span>
-                          <Badge variant="secondary" className="text-xs">Qty: {material.quantity}</Badge>
                         </div>
                       </Card>
                     ))}
@@ -333,7 +341,7 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange }: ToolsMaterials
 
           {/* Detail Panel */}
           {selectedItem && (
-            <div className="w-80 border-l pl-6 space-y-4">
+            <div className="w-96 border-l pl-6 space-y-3">
               <div className="flex items-center gap-3">
                 <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center">
                   {(selectedItem.user_photo_url || selectedItem.photo_url) ? (
@@ -347,56 +355,59 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange }: ToolsMaterials
                   )}
                 </div>
                 <div>
-                  <h3 className="font-semibold">{selectedItem.item}</h3>
-                  <Badge variant="outline">{selectedType === 'tool' ? 'Tool' : 'Material'}</Badge>
+                  <h3 className="text-sm font-semibold">{selectedItem.item}</h3>
+                  <Badge variant="outline" className="text-xs">{selectedType === 'tool' ? 'Tool' : 'Material'}</Badge>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label>Quantity</Label>
+                    <Label className="text-xs">Quantity</Label>
                     <Input
                       type="number"
                       min="1"
                       value={selectedItem.quantity}
                       onChange={(e) => updateItem('quantity', parseInt(e.target.value) || 1)}
+                      className="text-sm h-8"
                     />
                   </div>
                   <div>
-                    <Label>{selectedType === 'tool' ? 'Model/Brand' : 'Brand'}</Label>
+                    <Label className="text-xs">{selectedType === 'tool' ? 'Model/Brand' : 'Brand'}</Label>
                     <Input
                       value={selectedType === 'tool' ? (selectedItem as UserOwnedTool).model_name || '' : (selectedItem as UserOwnedMaterial).brand || ''}
                       onChange={(e) => updateItem(selectedType === 'tool' ? 'model_name' : 'brand', e.target.value)}
                       placeholder={selectedType === 'tool' ? 'e.g., DeWalt DCD771C2' : 'e.g., Sherwin Williams'}
+                      className="text-sm h-8"
                     />
                   </div>
                 </div>
 
                 {selectedType === 'material' && (
                   <div>
-                    <Label>Purchase Location</Label>
+                    <Label className="text-xs">Purchase Location</Label>
                     <Input
                       value={(selectedItem as UserOwnedMaterial).purchase_location || ''}
                       onChange={(e) => updateItem('purchase_location', e.target.value)}
                       placeholder="e.g., Home Depot, Amazon"
+                      className="text-sm h-8"
                     />
                   </div>
                 )}
 
                 <div>
-                  <Label>Personal Notes</Label>
+                  <Label className="text-xs">Personal Notes</Label>
                   <Textarea
                     value={selectedItem.custom_description || ''}
                     onChange={(e) => updateItem('custom_description', e.target.value)}
                     placeholder="Add your own notes..."
-                    className="resize-none"
-                    rows={3}
+                    className="resize-none text-sm"
+                    rows={2}
                   />
                 </div>
 
                 <div>
-                  <Label>Item Photo</Label>
+                  <Label className="text-xs">Item Photo</Label>
                   <div className="flex items-center gap-2 mt-1">
                     <input
                       type="file"
@@ -413,8 +424,9 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange }: ToolsMaterials
                       variant="outline"
                       onClick={() => document.getElementById(`photo-${selectedItem.id}`)?.click()}
                       disabled={uploadingPhoto === selectedItem.id}
+                      className="h-7 text-xs"
                     >
-                      <Camera className="w-4 h-4 mr-2" />
+                      <Camera className="w-3 h-3 mr-1" />
                       {uploadingPhoto === selectedItem.id ? "Uploading..." : "Update Photo"}
                     </Button>
                   </div>

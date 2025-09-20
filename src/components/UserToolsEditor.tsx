@@ -243,7 +243,7 @@ export function UserToolsEditor() {
                   )}
                   <Button
                     size="sm"
-                    onClick={() => addTool(tool)}
+                    onClick={() => setViewingVariations(tool)}
                     className="flex-shrink-0"
                   >
                     <Plus className="w-4 h-4 mr-1" />
@@ -399,6 +399,20 @@ export function UserToolsEditor() {
           coreItemId={viewingVariations.id}
           coreItemName={viewingVariations.item}
           itemType="tools"
+          onVariationSelect={(variation) => {
+            // Create a new tool based on the selected variation
+            const newUserTool: UserOwnedTool = {
+              id: variation.id,
+              item: variation.name,
+              description: variation.description,
+              photo_url: variation.photo_url,
+              quantity: 1,
+              model_name: variation.sku || '',
+              user_photo_url: ''
+            };
+            setUserTools([...userTools, newUserTool]);
+            setViewingVariations(null);
+          }}
         />
       )}
     </div>

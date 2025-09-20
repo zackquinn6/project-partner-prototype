@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Edit } from 'lucide-react';
+import { Edit, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { VariationEditor } from './VariationEditor';
@@ -58,9 +58,10 @@ interface VariationViewerProps {
   coreItemId: string;
   itemType: 'tools' | 'materials';
   coreItemName: string;
+  onVariationSelect?: (variation: VariationInstance) => void;
 }
 
-export function VariationViewer({ open, onOpenChange, coreItemId, itemType, coreItemName }: VariationViewerProps) {
+export function VariationViewer({ open, onOpenChange, coreItemId, itemType, coreItemName, onVariationSelect }: VariationViewerProps) {
   const [variations, setVariations] = useState<VariationInstance[]>([]);
   const [attributes, setAttributes] = useState<VariationAttribute[]>([]);
   const [models, setModels] = useState<ToolModel[]>([]);
@@ -276,6 +277,22 @@ export function VariationViewer({ open, onOpenChange, coreItemId, itemType, core
                             );
                           })}
                         </div>
+                        
+                        {onVariationSelect && (
+                          <div className="mt-3">
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                onVariationSelect(variation);
+                                onOpenChange(false);
+                              }}
+                              className="w-full"
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add This Variation
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>
