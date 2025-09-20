@@ -5,11 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Camera, Wrench, Package, Eye, Save, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface Tool {
@@ -68,7 +67,6 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
   const [selectedType, setSelectedType] = useState<'tool' | 'material'>('tool');
   const [isLoading, setIsLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null);
-  const { toast } = useToast();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -88,11 +86,24 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
         .single();
       
       if (error) throw error;
-      setUserTools((data?.owned_tools as unknown as UserOwnedTool[]) || []);
-      setUserMaterials((data?.owned_materials as unknown as UserOwnedMaterial[]) || []);
+      
+      // Deduplicate tools by ID
+      const rawTools = (data?.owned_tools as unknown as UserOwnedTool[]) || [];
+      const uniqueTools = rawTools.filter((tool, index, arr) => 
+        arr.findIndex(t => t.id === tool.id) === index
+      );
+      console.log('Loaded tools:', rawTools.length, 'Unique tools:', uniqueTools.length);
+      
+      // Deduplicate materials by ID  
+      const rawMaterials = (data?.owned_materials as unknown as UserOwnedMaterial[]) || [];
+      const uniqueMaterials = rawMaterials.filter((material, index, arr) => 
+        arr.findIndex(m => m.id === material.id) === index
+      );
+      
+      setUserTools(uniqueTools);
+      setUserMaterials(uniqueMaterials);
     } catch (error) {
       console.error('Error fetching user items:', error);
-      toast({ title: "Error", description: "Failed to load your library", variant: "destructive" });
     }
   };
 
@@ -142,10 +153,8 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
         }
       }
 
-      toast({ title: "Success", description: "Photo uploaded successfully" });
     } catch (error) {
       console.error('Error uploading photo:', error);
-      toast({ title: "Error", description: "Failed to upload photo", variant: "destructive" });
     } finally {
       setUploadingPhoto(null);
     }
@@ -169,19 +178,57 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
     }
   };
 
-  const deleteItem = () => {
-    if (!selectedItem) return;
+  const deleteItem = async () => {
+    if (!selectedItem || !user) return;
 
+    console.log('Deleting item:', selectedItem.id, selectedItem.item);
+    
+    let updatedTools = userTools;
+    let updatedMaterials = userMaterials;
+    
     if (selectedType === 'tool') {
-      const updatedTools = userTools.filter(tool => tool.id !== selectedItem.id);
+      updatedTools = userTools.filter(tool => tool.id !== selectedItem.id);
       setUserTools(updatedTools);
+      console.log('Tools after delete:', updatedTools.length);
     } else {
-      const updatedMaterials = userMaterials.filter(material => material.id !== selectedItem.id);
+      updatedMaterials = userMaterials.filter(material => material.id !== selectedItem.id);
       setUserMaterials(updatedMaterials);
     }
     
+    // Immediately save to database
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          owned_tools: updatedTools as any,
+          owned_materials: updatedMaterials as any
+        })
+        .eq('user_id', user.id);
+      
+      if (error) {
+        console.error('Failed to delete from database:', error);
+        // Revert local state on error
+        if (selectedType === 'tool') {
+          setUserTools(userTools);
+        } else {
+          setUserMaterials(userMaterials);
+        }
+        return;
+      }
+      
+      console.log('Item successfully deleted from database');
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      // Revert local state on error
+      if (selectedType === 'tool') {
+        setUserTools(userTools);
+      } else {
+        setUserMaterials(userMaterials);
+      }
+      return;
+    }
+    
     setSelectedItem(null);
-    toast({ title: "Success", description: `${selectedType === 'tool' ? 'Tool' : 'Material'} deleted from your library` });
   };
 
   const saveItems = async () => {
@@ -198,10 +245,8 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
         .eq('user_id', user.id);
       
       if (error) throw error;
-      toast({ title: "Success", description: "Your library has been saved" });
     } catch (error) {
       console.error('Error saving items:', error);
-      toast({ title: "Error", description: "Failed to save library", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -212,6 +257,9 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
       <DialogContent className="max-w-6xl h-[80vh]">
         <DialogHeader>
           <DialogTitle>My Tools Library</DialogTitle>
+          <DialogDescription>
+            View and manage your personal collection of tools and materials.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="flex flex-1 gap-6 min-h-0">
