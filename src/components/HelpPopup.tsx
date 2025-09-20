@@ -19,10 +19,6 @@ export const HelpPopup: React.FC<HelpPopupProps> = ({ isOpen, onClose }) => {
         
         <div className="relative">
           <div className="p-4">
-            <h2 className="text-2xl font-bold text-center mb-2">Expert Virtual Consults</h2>
-            <p className="text-muted-foreground text-center mb-6">
-              Schedule a video consultation with our DIY experts
-            </p>
             
             <div className="w-full space-y-4">
               <div className="bg-muted p-6 rounded-lg text-center">
