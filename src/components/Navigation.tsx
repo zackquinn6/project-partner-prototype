@@ -70,57 +70,47 @@ export default function Navigation({
 
   useEffect(() => {
     const handleHomeManagerEvent = (event: Event) => {
-      console.log('🏠 Navigation: Home manager event received');
       event.stopPropagation();
       setIsHomeManagerOpen(true);
     };
 
     const handleToolsLibraryEvent = (event: Event) => {
-      console.log('🔧 Navigation: Tools library event received');
       event.stopPropagation();
       setIsToolsLibraryOpen(true);
     };
 
     const handleUserToolsLibraryEvent = (event: Event) => {
-      console.log('🔧 Navigation: User tools library event received');
       event.stopPropagation();
       setIsNewToolsLibraryOpen(true);
     };
 
     const handleHomeMaintenanceEvent = (event: Event) => {
-      console.log('🏠 Navigation: Home maintenance event received');
       event.stopPropagation();
       setIsHomeMaintenanceOpen(true);
     };
 
     const handleProfileManagerEvent = (event: Event) => {
-      console.log('👤 Navigation: Profile manager event received');
       event.stopPropagation();
       setIsProfileOpen(true);
     };
 
     const handleCommunityPostsEvent = (event: Event) => {
-      console.log('🌐 Navigation: Community posts event received');
       event.stopPropagation();
       setIsCommunityPostsOpen(true);
     };
 
     const handleToolRentalsEvent = (event: Event) => {
-      console.log('🔨 Navigation: Tool rentals event received');
       event.stopPropagation();
       setIsToolRentalsOpen(true);
     };
 
     const handleRapidAssessmentEvent = (event: Event) => {
-      console.log('📊 Navigation: Rapid assessment event received');
       event.stopPropagation();
       setIsRapidAssessmentOpen(true);
     };
 
     const handleToolsMaterialsEditorEvent = (event: Event) => {
-      console.log('🔧 Navigation: Tools materials editor event received');
       event.stopPropagation();
-      console.log('Setting userToolsMode to add-tools and opening user tools library');
       setUserToolsMode('add-tools');
       setIsUserToolsLibraryOpen(true);
     };

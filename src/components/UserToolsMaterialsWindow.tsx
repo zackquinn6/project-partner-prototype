@@ -15,7 +15,6 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
 
   // Update currentMode when initialToolsMode changes
   useEffect(() => {
-    console.log('UserToolsMaterialsWindow initialToolsMode changed:', initialToolsMode);
     if (initialToolsMode) {
       setCurrentMode(initialToolsMode);
     }
@@ -24,14 +23,11 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
   // Listen for close add window events
   useEffect(() => {
     const handleCloseAddWindow = () => {
-      console.log('Close add tools window event received - closing window');
       onOpenChange(false);
     };
 
-    console.log('Setting up close-add-tools-window event listener');
     window.addEventListener('close-add-tools-window', handleCloseAddWindow);
     return () => {
-      console.log('Removing close-add-tools-window event listener');
       window.removeEventListener('close-add-tools-window', handleCloseAddWindow);
     };
   }, [onOpenChange]);

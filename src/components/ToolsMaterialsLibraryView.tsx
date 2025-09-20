@@ -78,7 +78,6 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
   // Listen for tools library updates
   useEffect(() => {
     const handleLibraryUpdate = () => {
-      console.log('Library update event received, refreshing data');
       fetchUserItems();
     };
 
@@ -103,7 +102,6 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
       const uniqueTools = rawTools.filter((tool, index, arr) => 
         arr.findIndex(t => t.id === tool.id) === index
       );
-      console.log('Loaded tools:', rawTools.length, 'Unique tools:', uniqueTools.length);
       
       // Deduplicate materials by ID  
       const rawMaterials = (data?.owned_materials as unknown as UserOwnedMaterial[]) || [];
@@ -173,8 +171,6 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
 
   const updateItem = async (field: string, value: any) => {
     if (!selectedItem || !user) return;
-
-    console.log('Updating item field:', field, 'value:', value);
     
     let updatedTools = userTools;
     let updatedMaterials = userMaterials;
@@ -215,8 +211,6 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
         }
         return;
       }
-      
-      console.log('Item field successfully updated in database');
     } catch (error) {
       console.error('Error updating item:', error);
       // Revert local state on error
@@ -232,8 +226,6 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
 
   const deleteItem = async () => {
     if (!selectedItem || !user) return;
-
-    console.log('Deleting item:', selectedItem.id, selectedItem.item);
     
     let updatedTools = userTools;
     let updatedMaterials = userMaterials;
@@ -241,7 +233,6 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
     if (selectedType === 'tool') {
       updatedTools = userTools.filter(tool => tool.id !== selectedItem.id);
       setUserTools(updatedTools);
-      console.log('Tools after delete:', updatedTools.length);
     } else {
       updatedMaterials = userMaterials.filter(material => material.id !== selectedItem.id);
       setUserMaterials(updatedMaterials);
@@ -267,8 +258,6 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
         }
         return;
       }
-      
-      console.log('Item successfully deleted from database');
     } catch (error) {
       console.error('Error deleting item:', error);
       // Revert local state on error
@@ -331,12 +320,9 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
                 size="icon"
                 variant="outline" 
                 onClick={() => {
-                  console.log('Add tools button clicked');
                   if (onAddMode) {
-                    console.log('Using onAddMode callback');
                     onAddMode();
                   } else {
-                    console.log('Dispatching show-tools-materials-editor event');
                     const event = new CustomEvent('show-tools-materials-editor');
                     window.dispatchEvent(event);
                   }
@@ -349,7 +335,6 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
                 size="icon" 
                 variant="outline"
                 onClick={() => {
-                  console.log('Manual refresh requested');
                   fetchUserItems();
                 }}
                 title="Refresh Library"

@@ -47,7 +47,6 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
         }
         // Create Set to eliminate duplicates, then convert back to Set
         const uniqueSteps = [...new Set(steps)];
-        console.log('Loading unique completed steps:', uniqueSteps.length, 'unique steps from', steps.length, 'total');
         setCompletedSteps(new Set(uniqueSteps));
       } catch (error) {
         console.error('Error parsing completed steps:', error);
@@ -97,14 +96,6 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
 
   const currentStep = allSteps[currentStepIndex];
   const progress = allSteps.length > 0 ? completedSteps.size / allSteps.length * 100 : 0;
-
-  // Debug logging for current step
-  console.log('Current step info:', {
-    id: currentStep?.id,
-    step: currentStep?.step,
-    phaseName: currentStep?.phaseName,
-    operationName: currentStep?.operationName
-  });
 
   const handleNext = () => {
     if (currentStepIndex < allSteps.length - 1) {
@@ -587,13 +578,12 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                                      isInProgress ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
                                      'hover:bg-muted/50 border border-transparent hover:border-muted-foreground/20'
                                    }`} 
-                                   onClick={() => {
-                                     console.log('Step clicked:', step.step, 'stepIndex:', stepIndex);
-                                     if (stepIndex >= 0) {
-                                       setCurrentStepIndex(stepIndex);
-                                       window.scrollTo({ top: 0, behavior: 'smooth' });
-                                     }
-                                   }}
+                                    onClick={() => {
+                                      if (stepIndex >= 0) {
+                                        setCurrentStepIndex(stepIndex);
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                      }
+                                    }}
                                  >
                                   <div className="flex items-center gap-2 justify-between">
                                     <div className="flex items-center gap-2">
@@ -685,7 +675,6 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                   ) && (
                     <Button 
                       onClick={() => {
-                        console.log('Opening ordering window for step:', currentStep.step);
                         setOrderingWindowOpen(true);
                       }}
                       className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -698,12 +687,6 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                   {/* Debug button to always show ordering - remove after testing */}
                   <Button 
                     onClick={() => {
-                      console.log('Debug: Current step details:', {
-                        id: currentStep?.id,
-                        step: currentStep?.step,
-                        phaseName: currentStep?.phaseName,
-                        operationName: currentStep?.operationName
-                      });
                       setOrderingWindowOpen(true);
                     }}
                     variant="outline"

@@ -125,7 +125,6 @@ export function UserToolsEditor({ initialMode = 'add-tools', onBackToLibrary, on
     .sort((a, b) => a.item.localeCompare(b.item));
 
   const handleAddTool = async (tool: Tool) => {
-    console.log('Adding tool:', tool.item);
     // Always check if this tool has variations first
     try {
       const { data: variations, error } = await supabase
@@ -136,15 +135,12 @@ export function UserToolsEditor({ initialMode = 'add-tools', onBackToLibrary, on
         .limit(1);
 
       if (error) throw error;
-      console.log('Variations found:', variations);
 
       if (variations && variations.length > 0) {
         // Tool has variations, always show variation selector
-        console.log('Setting checkingVariations to:', tool);
         setCheckingVariations(tool);
       } else {
         // No variations exist, add the core tool directly
-        console.log('No variations, adding directly');
         addTool(tool);
       }
     } catch (error) {
@@ -352,73 +348,58 @@ export function UserToolsEditor({ initialMode = 'add-tools', onBackToLibrary, on
         </div>
 
         {/* Variation Selection for Adding - MOVED INSIDE showAddTools block */}
-        {(() => {
-          console.log('checkingVariations state:', checkingVariations);
-          return checkingVariations ? (
-            <div>
-              {(() => {
-                console.log('About to render VariationViewer');
-                return null;
-              })()}
-              <VariationViewer
-                open={true}
-                onOpenChange={() => {
-                  console.log('VariationViewer onOpenChange called');
+        {checkingVariations ? (
+          <div>
+            <VariationViewer
+              open={true}
+              onOpenChange={() => {
+                setCheckingVariations(null);
+              }}
+              coreItemId={checkingVariations.id}
+              coreItemName={checkingVariations.item}
+              itemType="tools"
+              onVariationSelect={(variation) => {
+                // Check if this variation is already in the user's tools
+                const isDuplicate = userTools.some(userTool => userTool.id === variation.id);
+                if (isDuplicate) {
                   setCheckingVariations(null);
-                }}
-                coreItemId={checkingVariations.id}
-                coreItemName={checkingVariations.item}
-                itemType="tools"
-                onVariationSelect={(variation) => {
-                  console.log('Variation selected:', variation);
-                  console.log('Current userTools before adding:', userTools);
-                  
-                  // Check if this variation is already in the user's tools
-                  const isDuplicate = userTools.some(userTool => userTool.id === variation.id);
-                  if (isDuplicate) {
-                    console.log('Variation already exists, skipping add');
-                    setCheckingVariations(null);
-                    return;
-                  }
-                  
-                  // Create a new tool based on the selected variation
-                  const newUserTool: UserOwnedTool = {
-                    id: variation.id,
-                    item: variation.name,
-                    description: variation.description,
-                    photo_url: variation.photo_url,
-                    quantity: 1,
-                    model_name: variation.sku || '',
-                    user_photo_url: ''
-                  };
-                  console.log('Adding new tool:', newUserTool);
-                  const updatedTools = [...userTools, newUserTool];
-                  setUserTools(updatedTools);
-                  console.log('Updated userTools:', updatedTools);
-                  
-                  // Save to database immediately
-                  if (user) {
-                    supabase
-                      .from('profiles')
-                      .update({ owned_tools: updatedTools as any })
-                      .eq('user_id', user.id)
-                      .then(({ error }) => {
-                        if (error) {
-                          console.error('Failed to save tool to database:', error);
-                        } else {
-                          console.log('Tool saved to database successfully');
-                          // Dispatch event to refresh library view
-                          window.dispatchEvent(new CustomEvent('tools-library-updated'));
-                        }
-                      });
-                  }
-                  
-                  setCheckingVariations(null);
-                }}
-              />
-            </div>
-          ) : null;
-        })()}
+                  return;
+                }
+                
+                // Create a new tool based on the selected variation
+                const newUserTool: UserOwnedTool = {
+                  id: variation.id,
+                  item: variation.name,
+                  description: variation.description,
+                  photo_url: variation.photo_url,
+                  quantity: 1,
+                  model_name: variation.sku || '',
+                  user_photo_url: ''
+                };
+                const updatedTools = [...userTools, newUserTool];
+                setUserTools(updatedTools);
+                
+                // Save to database immediately
+                if (user) {
+                  supabase
+                    .from('profiles')
+                    .update({ owned_tools: updatedTools as any })
+                    .eq('user_id', user.id)
+                    .then(({ error }) => {
+                      if (error) {
+                        console.error('Failed to save tool to database:', error);
+                      } else {
+                        // Dispatch event to refresh library view
+                        window.dispatchEvent(new CustomEvent('tools-library-updated'));
+                      }
+                    });
+                }
+                
+                setCheckingVariations(null);
+              }}
+            />
+          </div>
+        ) : null}
       </>
     );
   }
@@ -428,44 +409,38 @@ export function UserToolsEditor({ initialMode = 'add-tools', onBackToLibrary, on
     <div className="space-y-4 h-full">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Add Tools to Your Library</h3>
-        <Button 
-          variant="outline" 
-          onClick={async () => {
-            console.log('Back to My Tools clicked');
-            // Save tools before closing
-            if (user && userTools.length > 0) {
-              try {
-                const { error } = await supabase
-                  .from('profiles')
-                  .update({ owned_tools: userTools as any })
-                  .eq('user_id', user.id);
-                
-                if (error) {
-                  console.error('Failed to save tools:', error);
-                } else {
-                  console.log('Tools saved successfully');
+          <Button 
+            variant="outline" 
+            onClick={async () => {
+              // Save tools before closing
+              if (user && userTools.length > 0) {
+                try {
+                  const { error } = await supabase
+                    .from('profiles')
+                    .update({ owned_tools: userTools as any })
+                    .eq('user_id', user.id);
+                  
+                  if (error) {
+                    console.error('Failed to save tools:', error);
+                  }
+                } catch (error) {
+                  console.error('Error saving tools:', error);
                 }
-              } catch (error) {
-                console.error('Error saving tools:', error);
               }
-            }
-            
-            // Dispatch event to refresh library and close add window
-            console.log('Dispatching events: tools-library-updated and close-add-tools-window');
-            window.dispatchEvent(new CustomEvent('tools-library-updated'));
-            window.dispatchEvent(new CustomEvent('close-add-tools-window'));
-            
-            if (onBackToLibrary) {
-              console.log('Calling onBackToLibrary callback');
-              onBackToLibrary();
-            } else {
-              console.log('Setting showAddTools to false');
-              setShowAddTools(false);
-            }
-          }}
-        >
-          Back to My Tools
-        </Button>
+              
+              // Dispatch event to refresh library and close add window
+              window.dispatchEvent(new CustomEvent('tools-library-updated'));
+              window.dispatchEvent(new CustomEvent('close-add-tools-window'));
+              
+              if (onBackToLibrary) {
+                onBackToLibrary();
+              } else {
+                setShowAddTools(false);
+              }
+            }}
+          >
+            Back to My Tools
+          </Button>
       </div>
       
       <div className="space-y-4">

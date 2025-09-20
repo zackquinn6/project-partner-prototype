@@ -127,7 +127,6 @@ export default function Home({
             {/* Apps Grid */}
             <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto mb-8 px-2">
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => {
-            console.log('🔄 My Projects clicked from Home - navigating to / with user view');
             navigate('/', {
               replace: true,
               state: {

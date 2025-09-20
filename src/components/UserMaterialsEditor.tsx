@@ -252,7 +252,6 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
           <Button 
             variant="outline" 
             onClick={async () => {
-              console.log('Back to My Materials clicked');
               // Save materials before closing
               if (user && userMaterials.length > 0) {
                 try {
@@ -263,8 +262,6 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
                   
                   if (error) {
                     console.error('Failed to save materials:', error);
-                  } else {
-                    console.log('Materials saved successfully');
                   }
                 } catch (error) {
                   console.error('Error saving materials:', error);
@@ -490,13 +487,9 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
           coreItemName={checkingVariations.item}
           itemType="materials"
           onVariationSelect={(variation) => {
-            console.log('Material variation selected:', variation);
-            console.log('Current userMaterials before adding:', userMaterials);
-            
             // Check if this variation is already in the user's materials
             const isDuplicate = userMaterials.some(userMaterial => userMaterial.id === variation.id);
             if (isDuplicate) {
-              console.log('Material variation already exists, skipping add');
               setCheckingVariations(null);
               return;
             }
@@ -512,10 +505,8 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
               user_photo_url: '',
               purchase_location: ''
             };
-            console.log('Adding new material:', newUserMaterial);
             const updatedMaterials = [...userMaterials, newUserMaterial];
             setUserMaterials(updatedMaterials);
-            console.log('Updated userMaterials:', updatedMaterials);
             
             // Save to database immediately
             if (user) {
@@ -527,7 +518,6 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
                   if (error) {
                     console.error('Failed to save material to database:', error);
                   } else {
-                    console.log('Material saved to database successfully');
                     // Dispatch event to refresh library view
                     window.dispatchEvent(new CustomEvent('tools-library-updated'));
                   }
