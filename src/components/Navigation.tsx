@@ -116,6 +116,12 @@ export default function Navigation({
       setIsRapidAssessmentOpen(true);
     };
 
+    const handleToolsMaterialsEditorEvent = (event: Event) => {
+      console.log('🔧 Navigation: Tools materials editor event received');
+      event.stopPropagation();
+      setIsUserToolsLibraryOpen(true);
+    };
+
     window.addEventListener('show-home-manager', handleHomeManagerEvent);
     window.addEventListener('show-tools-materials', handleToolsLibraryEvent);
     window.addEventListener('show-user-tools-materials', handleUserToolsLibraryEvent);
@@ -124,6 +130,7 @@ export default function Navigation({
     window.addEventListener('show-community-posts', handleCommunityPostsEvent);
     window.addEventListener('show-tool-rentals', handleToolRentalsEvent);
     window.addEventListener('show-rapid-assessment', handleRapidAssessmentEvent);
+    window.addEventListener('show-tools-materials-editor', handleToolsMaterialsEditorEvent);
     
     return () => {
       window.removeEventListener('show-home-manager', handleHomeManagerEvent);
@@ -134,6 +141,7 @@ export default function Navigation({
       window.removeEventListener('show-community-posts', handleCommunityPostsEvent);
       window.removeEventListener('show-tool-rentals', handleToolRentalsEvent);
       window.removeEventListener('show-rapid-assessment', handleRapidAssessmentEvent);
+      window.removeEventListener('show-tools-materials-editor', handleToolsMaterialsEditorEvent);
     };
   }, []);
   
