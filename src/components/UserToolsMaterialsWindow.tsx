@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserToolsEditor } from "./UserToolsEditor";
 import { UserMaterialsEditor } from "./UserMaterialsEditor";
-import { ToolsMaterialsLibraryView } from "./ToolsMaterialsLibraryView";
 
 interface UserToolsMaterialsWindowProps {
   open: boolean;
@@ -12,27 +11,17 @@ interface UserToolsMaterialsWindowProps {
 }
 
 export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode }: UserToolsMaterialsWindowProps) {
-  const [currentView, setCurrentView] = useState<'library' | 'edit' | 'add'>(
-    initialToolsMode === 'add-tools' ? 'add' : 'library'
+  const [currentMode, setCurrentMode] = useState<'library' | 'add-tools'>(
+    initialToolsMode || 'library'
   );
-
-  // If we're showing the library view, use the existing ToolsMaterialsLibraryView
-  if (currentView === 'library') {
-    return (
-      <ToolsMaterialsLibraryView 
-        open={open} 
-        onOpenChange={onOpenChange}
-        onEditMode={() => setCurrentView('edit')}
-        onAddMode={() => setCurrentView('add')}
-      />
-    );
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[80vh] overflow-hidden">
         <DialogHeader>
-          <DialogTitle>My Tools Library</DialogTitle>
+          <DialogTitle>
+            {currentMode === 'add-tools' ? 'Add to Library' : 'My Tools Library'}
+          </DialogTitle>
         </DialogHeader>
         
         <Tabs defaultValue="tools" className="w-full h-full">
@@ -43,15 +32,16 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
           
           <TabsContent value="tools" className="h-full">
             <UserToolsEditor 
-              initialMode={currentView === 'add' ? 'add-tools' : 'library'} 
-              onBackToLibrary={() => setCurrentView('library')}
+              initialMode={currentMode === 'add-tools' ? 'add-tools' : 'library'}
+              onBackToLibrary={() => setCurrentMode('library')}
+              onSwitchToAdd={() => setCurrentMode('add-tools')}
             />
           </TabsContent>
           
           <TabsContent value="materials" className="h-full">
             <UserMaterialsEditor 
-              initialMode={currentView === 'add' ? 'add-materials' : 'library'} 
-              onBackToLibrary={() => setCurrentView('library')}
+              initialMode={currentMode === 'add-tools' ? 'add-materials' : 'library'}
+              onBackToLibrary={() => setCurrentMode('library')}
             />
           </TabsContent>
         </Tabs>

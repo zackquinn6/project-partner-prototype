@@ -47,6 +47,11 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
   const [showAddMaterials, setShowAddMaterials] = useState(initialMode === 'add-materials');
   const { user } = useAuth();
 
+  // Update showAddMaterials when initialMode changes
+  useEffect(() => {
+    setShowAddMaterials(initialMode === 'add-materials');
+  }, [initialMode]);
+
   // Debounce user materials for auto-save
   const debouncedUserMaterials = useDebounce(userMaterials, 2000);
 

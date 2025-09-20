@@ -36,9 +36,10 @@ interface UserOwnedTool {
 interface UserToolsEditorProps {
   initialMode?: 'library' | 'add-tools';
   onBackToLibrary?: () => void;
+  onSwitchToAdd?: () => void;
 }
 
-export function UserToolsEditor({ initialMode = 'library', onBackToLibrary }: UserToolsEditorProps = {}) {
+export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSwitchToAdd }: UserToolsEditorProps = {}) {
   const [availableTools, setAvailableTools] = useState<Tool[]>([]);
   const [userTools, setUserTools] = useState<UserOwnedTool[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,6 +50,11 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary }: Us
   const [checkingVariations, setCheckingVariations] = useState<Tool | null>(null);
   const [showAddTools, setShowAddTools] = useState(initialMode === 'add-tools');
   const { user } = useAuth();
+
+  // Update showAddTools when initialMode changes
+  useEffect(() => {
+    setShowAddTools(initialMode === 'add-tools');
+  }, [initialMode]);
 
   // Debounce user tools for auto-save
   const debouncedUserTools = useDebounce(userTools, 2000);
@@ -296,7 +302,7 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary }: Us
           <Button 
             size="icon" 
             variant="outline" 
-            onClick={() => setShowAddTools(true)}
+            onClick={() => onSwitchToAdd ? onSwitchToAdd() : setShowAddTools(true)}
             title="Add Tools"
           >
             <Plus className="w-4 h-4" />
