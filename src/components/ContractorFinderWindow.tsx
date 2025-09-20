@@ -18,8 +18,8 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] h-[95vh] max-w-none max-h-none overflow-hidden sm:w-[90vw] sm:h-[90vh] lg:max-w-4xl lg:h-[90vh]">
-        <div className="h-full flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
+        <div className="flex flex-col h-full max-h-[90vh]">
           <DialogHeader className="p-6 border-b flex-shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -42,7 +42,7 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
             </div>
           </div>
 
-          <ScrollArea className="flex-1">
+          <div className="flex-1 overflow-y-auto">
             <div className="space-y-6 p-6">
           <div className="text-center">
             <p className="text-muted-foreground">
@@ -159,8 +159,8 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
             </CardContent>
             </Card>
             </div>
-          </ScrollArea>
-      </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
     
