@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, X, Upload, Camera, Save, Trash2 } from "lucide-react";
+import { Search, Plus, X, Upload, Camera, Save, Trash2, ShoppingCart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDebounce } from "@/hooks/useDebounce";
+import { VariationViewer } from "./VariationViewer";
 
 interface Material {
   id: string;
@@ -30,13 +32,22 @@ interface UserOwnedMaterial {
   purchase_location?: string;
 }
 
-export function UserMaterialsEditor() {
+interface UserMaterialsEditorProps {
+  initialMode?: 'library' | 'add-materials';
+}
+
+export function UserMaterialsEditor({ initialMode = 'library' }: UserMaterialsEditorProps = {}) {
   const [availableMaterials, setAvailableMaterials] = useState<Material[]>([]);
   const [userMaterials, setUserMaterials] = useState<UserOwnedMaterial[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null);
+  const [checkingVariations, setCheckingVariations] = useState<Material | null>(null);
+  const [showAddMaterials, setShowAddMaterials] = useState(initialMode === 'add-materials');
   const { user } = useAuth();
+
+  // Debounce user materials for auto-save
+  const debouncedUserMaterials = useDebounce(userMaterials, 2000);
 
   useEffect(() => {
     if (user) {
@@ -44,6 +55,13 @@ export function UserMaterialsEditor() {
       fetchUserMaterials();
     }
   }, [user]);
+
+  // Auto-save when materials change (debounced)
+  useEffect(() => {
+    if (user && debouncedUserMaterials.length > 0) {
+      autoSaveMaterials();
+    }
+  }, [debouncedUserMaterials, user]);
 
   const fetchAvailableMaterials = async () => {
     try {
@@ -56,7 +74,6 @@ export function UserMaterialsEditor() {
       setAvailableMaterials(data || []);
     } catch (error) {
       console.error('Error fetching materials:', error);
-      // Failed to load available materials - no toast needed
     }
   };
 
@@ -74,7 +91,6 @@ export function UserMaterialsEditor() {
       setUserMaterials((data?.owned_materials as unknown as UserOwnedMaterial[]) || []);
     } catch (error) {
       console.error('Error fetching user materials:', error);
-      // Failed to load your materials - no toast needed
     }
   };
 
@@ -86,6 +102,32 @@ export function UserMaterialsEditor() {
     
     return matchesSearch && !alreadyOwned;
   });
+
+  const handleAddMaterial = async (material: Material) => {
+    // Check if this material has variations
+    try {
+      const { data: variations, error } = await supabase
+        .from('variation_instances')
+        .select('id')
+        .eq('core_item_id', material.id)
+        .eq('item_type', 'materials')
+        .limit(1);
+
+      if (error) throw error;
+
+      if (variations && variations.length > 0) {
+        // Material has variations, show variation selector
+        setCheckingVariations(material);
+      } else {
+        // No variations, add directly
+        addMaterial(material);
+      }
+    } catch (error) {
+      console.error('Error checking variations:', error);
+      // Fallback to direct add
+      addMaterial(material);
+    }
+  };
 
   const addMaterial = (material: Material) => {
     const newUserMaterial: UserOwnedMaterial = {
@@ -127,14 +169,27 @@ export function UserMaterialsEditor() {
         .getPublicUrl(fileName);
 
       updateMaterial(materialId, 'user_photo_url', publicUrl);
-      // Photo uploaded successfully - no toast needed
     } catch (error) {
       console.error('Error uploading photo:', error);
-      // Failed to upload photo - no toast needed
     } finally {
       setUploadingPhoto(null);
     }
   };
+
+  const autoSaveMaterials = useCallback(async () => {
+    if (!user || userMaterials.length === 0) return;
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ owned_materials: userMaterials as any })
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error auto-saving materials:', error);
+    }
+  }, [user, userMaterials]);
 
   const saveMaterials = async () => {
     if (!user) return;
@@ -147,22 +202,24 @@ export function UserMaterialsEditor() {
         .eq('user_id', user.id);
       
       if (error) throw error;
-      // Your materials have been saved - no toast needed
     } catch (error) {
       console.error('Error saving materials:', error);
-      // Failed to save materials - no toast needed
     } finally {
       setIsLoading(false);
     }
   };
 
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-      {/* Available Materials Panel */}
-      <div className="space-y-4">
+  if (showAddMaterials) {
+    return (
+      <div className="space-y-4 h-full">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold">Add Materials to Your Library</h3>
+          <Button variant="outline" onClick={() => setShowAddMaterials(false)}>
+            Back to My Materials
+          </Button>
+        </div>
+        
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Available Materials</h3>
-          
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
@@ -174,19 +231,19 @@ export function UserMaterialsEditor() {
           </div>
         </div>
 
-        <div className="space-y-3 max-h-96 overflow-y-auto">
+        <div className="space-y-3 max-h-[60vh] overflow-y-auto">
           {filteredMaterials.map((material) => (
             <Card key={material.id} className="p-4">
               <div className="flex justify-between items-start gap-3">
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-medium truncate mb-2">{material.item}</h4>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h4 className="font-medium truncate">{material.item}</h4>
+                  </div>
                   {material.description && (
                     <p className="text-sm text-muted-foreground mb-2">{material.description}</p>
                   )}
                   {material.unit_size && (
-                    <Badge variant="secondary" className="text-xs">
-                      {material.unit_size}
-                    </Badge>
+                    <p className="text-xs text-muted-foreground">Unit Size: {material.unit_size}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
@@ -199,7 +256,7 @@ export function UserMaterialsEditor() {
                   )}
                   <Button
                     size="sm"
-                    onClick={() => addMaterial(material)}
+                    onClick={() => handleAddMaterial(material)}
                     className="flex-shrink-0"
                   >
                     <Plus className="w-4 h-4 mr-1" />
@@ -217,134 +274,171 @@ export function UserMaterialsEditor() {
           )}
         </div>
       </div>
+    );
+  }
 
+  return (
+    <div className="space-y-4 h-full">
       {/* User's Materials Panel */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Your Materials ({userMaterials.length})</h3>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">My Materials Library ({userMaterials.length})</h3>
+        <div className="flex gap-2">
           <Button 
-            size="sm" 
-            onClick={saveMaterials} 
+            size="icon" 
+            variant="outline" 
+            onClick={() => setShowAddMaterials(true)}
+            title="Add Materials"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+          <Button 
+            size="icon" 
+            variant="outline" 
+            onClick={saveMaterials}
             disabled={isLoading}
-            title="Save Materials"
-            variant="outline"
+            title="Save Materials Library"
           >
             <Save className="w-4 h-4" />
           </Button>
         </div>
+      </div>
 
-        <div className="space-y-4 max-h-96 overflow-y-auto">
-          {userMaterials.map((material) => (
-            <Card key={material.id} className="p-4">
-              <div className="space-y-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-medium">{material.item}</h4>
-                    {material.unit_size && (
-                      <Badge variant="secondary" className="text-xs mt-1">
-                        {material.unit_size}
-                      </Badge>
-                    )}
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => removeMaterial(material.id)}
-                    title="Delete material"
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+      <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+        {userMaterials.map((material) => (
+          <Card key={material.id} className="p-4">
+            <div className="space-y-3">
+              <div className="flex justify-between items-start">
+                <h4 className="font-medium">{material.item}</h4>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => removeMaterial(material.id)}
+                  title="Delete material"
+                  className="text-destructive hover:text-destructive h-8 w-8"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor={`quantity-${material.id}`}>Quantity</Label>
-                    <Input
-                      id={`quantity-${material.id}`}
-                      type="number"
-                      min="1"
-                      value={material.quantity}
-                      onChange={(e) => updateMaterial(material.id, 'quantity', parseInt(e.target.value) || 1)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor={`brand-${material.id}`}>Brand</Label>
-                    <Input
-                      id={`brand-${material.id}`}
-                      value={material.brand || ''}
-                      onChange={(e) => updateMaterial(material.id, 'brand', e.target.value)}
-                      placeholder="e.g., Sherwin Williams"
-                    />
-                  </div>
-                </div>
-
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor={`location-${material.id}`}>Purchase Location</Label>
+                  <Label htmlFor={`quantity-${material.id}`}>Quantity</Label>
                   <Input
-                    id={`location-${material.id}`}
-                    value={material.purchase_location || ''}
-                    onChange={(e) => updateMaterial(material.id, 'purchase_location', e.target.value)}
-                    placeholder="e.g., Home Depot, Amazon"
+                    id={`quantity-${material.id}`}
+                    type="number"
+                    min="1"
+                    value={material.quantity}
+                    onChange={(e) => updateMaterial(material.id, 'quantity', parseInt(e.target.value) || 1)}
                   />
                 </div>
-
                 <div>
-                  <Label htmlFor={`description-${material.id}`}>Personal Notes</Label>
-                  <Textarea
-                    id={`description-${material.id}`}
-                    value={material.custom_description || ''}
-                    onChange={(e) => updateMaterial(material.id, 'custom_description', e.target.value)}
-                    placeholder="Add your own notes about this material..."
-                    className="resize-none"
-                    rows={2}
+                  <Label htmlFor={`brand-${material.id}`}>Brand</Label>
+                  <Input
+                    id={`brand-${material.id}`}
+                    value={material.brand || ''}
+                    onChange={(e) => updateMaterial(material.id, 'brand', e.target.value)}
+                    placeholder="e.g., Sherwin Williams"
                   />
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="flex-1">
-                    <Label>Item Photo</Label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handlePhotoUpload(material.id, file);
-                        }}
-                        className="hidden"
-                        id={`photo-${material.id}`}
-                      />
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => document.getElementById(`photo-${material.id}`)?.click()}
-                        disabled={uploadingPhoto === material.id}
-                      >
-                        <Camera className="w-4 h-4 mr-2" />
-                        {uploadingPhoto === material.id ? "Uploading..." : "Add Photo"}
-                      </Button>
-                    </div>
-                  </div>
-                  {(material.user_photo_url || material.photo_url) && (
-                    <img 
-                      src={material.user_photo_url || material.photo_url} 
-                      alt={material.item}
-                      className="w-16 h-16 object-cover rounded"
-                    />
-                  )}
                 </div>
               </div>
-            </Card>
-          ))}
 
-          {userMaterials.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No materials in your library yet. Add some from the available materials on the left.
+              <div>
+                <Label htmlFor={`location-${material.id}`}>Purchase Location</Label>
+                <Input
+                  id={`location-${material.id}`}
+                  value={material.purchase_location || ''}
+                  onChange={(e) => updateMaterial(material.id, 'purchase_location', e.target.value)}
+                  placeholder="e.g., Home Depot, Amazon"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor={`description-${material.id}`}>Personal Notes</Label>
+                <Textarea
+                  id={`description-${material.id}`}
+                  value={material.custom_description || ''}
+                  onChange={(e) => updateMaterial(material.id, 'custom_description', e.target.value)}
+                  placeholder="Add your own notes about this material..."
+                  className="resize-none"
+                  rows={2}
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <Label>Item Photo</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handlePhotoUpload(material.id, file);
+                      }}
+                      className="hidden"
+                      id={`photo-${material.id}`}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => document.getElementById(`photo-${material.id}`)?.click()}
+                      disabled={uploadingPhoto === material.id}
+                    >
+                      <Camera className="w-4 h-4 mr-2" />
+                      {uploadingPhoto === material.id ? "Uploading..." : "Add Photo"}
+                    </Button>
+                  </div>
+                </div>
+                {(material.user_photo_url || material.photo_url) && (
+                  <img 
+                    src={material.user_photo_url || material.photo_url} 
+                    alt={material.item}
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                )}
+              </div>
             </div>
-          )}
-        </div>
+          </Card>
+        ))}
+
+        {userMaterials.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <ShoppingCart className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+            <h3 className="text-lg font-semibold mb-2">No materials in your library yet</h3>
+            <p className="mb-4">Start building your material collection by adding from our catalog.</p>
+            <Button onClick={() => setShowAddMaterials(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Your First Material
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* Variation Selection for Adding */}
+      {checkingVariations && (
+        <VariationViewer
+          open={!!checkingVariations}
+          onOpenChange={() => setCheckingVariations(null)}
+          coreItemId={checkingVariations.id}
+          coreItemName={checkingVariations.item}
+          itemType="materials"
+          onVariationSelect={(variation) => {
+            // Create a new material based on the selected variation
+            const newUserMaterial: UserOwnedMaterial = {
+              id: variation.id,
+              item: variation.name,
+              description: variation.description,
+              photo_url: variation.photo_url,
+              quantity: 1,
+              brand: variation.sku || '',
+              user_photo_url: '',
+              purchase_location: ''
+            };
+            setUserMaterials([...userMaterials, newUserMaterial]);
+            setCheckingVariations(null);
+          }}
+        />
+      )}
     </div>
   );
 }

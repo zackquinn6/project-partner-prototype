@@ -28,7 +28,7 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
           </TabsContent>
           
           <TabsContent value="materials" className="h-full">
-            <UserMaterialsEditor />
+            <UserMaterialsEditor initialMode={initialToolsMode === 'add-tools' ? 'add-materials' : 'library'} />
           </TabsContent>
         </Tabs>
       </DialogContent>

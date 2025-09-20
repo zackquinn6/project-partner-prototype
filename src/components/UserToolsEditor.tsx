@@ -45,6 +45,7 @@ export function UserToolsEditor({ initialMode = 'library' }: UserToolsEditorProp
   const [isLoading, setIsLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null);
   const [viewingVariations, setViewingVariations] = useState<Tool | null>(null);
+  const [checkingVariations, setCheckingVariations] = useState<Tool | null>(null);
   const [showAddTools, setShowAddTools] = useState(initialMode === 'add-tools');
   const { user } = useAuth();
 
@@ -106,6 +107,32 @@ export function UserToolsEditor({ initialMode = 'library' }: UserToolsEditorProp
     
     return matchesSearch && !alreadyOwned;
   });
+
+  const handleAddTool = async (tool: Tool) => {
+    // Check if this tool has variations
+    try {
+      const { data: variations, error } = await supabase
+        .from('variation_instances')
+        .select('id')
+        .eq('core_item_id', tool.id)
+        .eq('item_type', 'tools')
+        .limit(1);
+
+      if (error) throw error;
+
+      if (variations && variations.length > 0) {
+        // Tool has variations, show variation selector
+        setCheckingVariations(tool);
+      } else {
+        // No variations, add directly
+        addTool(tool);
+      }
+    } catch (error) {
+      console.error('Error checking variations:', error);
+      // Fallback to direct add
+      addTool(tool);
+    }
+  };
 
   const addTool = (tool: Tool) => {
     const newUserTool: UserOwnedTool = {
@@ -217,43 +244,34 @@ export function UserToolsEditor({ initialMode = 'library' }: UserToolsEditorProp
           {filteredTools.map((tool) => (
             <Card key={tool.id} className="p-4">
               <div className="flex justify-between items-start gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h4 className="font-medium truncate">{tool.item}</h4>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-medium truncate">{tool.item}</h4>
+                    </div>
+                    {tool.description && (
+                      <p className="text-sm text-muted-foreground mb-2">{tool.description}</p>
+                    )}
+                    {tool.example_models && (
+                      <p className="text-xs text-muted-foreground">Examples: {tool.example_models}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {tool.photo_url && (
+                      <img 
+                        src={tool.photo_url} 
+                        alt={tool.item}
+                        className="w-12 h-12 object-cover rounded"
+                      />
+                    )}
                     <Button
                       size="sm"
-                      variant="outline"
-                      onClick={() => setViewingVariations(tool)}
+                      onClick={() => handleAddTool(tool)}
                       className="flex-shrink-0"
                     >
-                      <Eye className="w-4 h-4 mr-1" />
-                      Variations
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add
                     </Button>
                   </div>
-                  {tool.description && (
-                    <p className="text-sm text-muted-foreground mb-2">{tool.description}</p>
-                  )}
-                  {tool.example_models && (
-                    <p className="text-xs text-muted-foreground">Examples: {tool.example_models}</p>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {tool.photo_url && (
-                    <img 
-                      src={tool.photo_url} 
-                      alt={tool.item}
-                      className="w-12 h-12 object-cover rounded"
-                    />
-                  )}
-                  <Button
-                    size="sm"
-                    onClick={() => setViewingVariations(tool)}
-                    className="flex-shrink-0"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add
-                  </Button>
-                </div>
               </div>
             </Card>
           ))}
@@ -395,13 +413,13 @@ export function UserToolsEditor({ initialMode = 'library' }: UserToolsEditorProp
         )}
       </div>
 
-      {/* Variations Viewer */}
-      {viewingVariations && (
+      {/* Variation Selection for Adding */}
+      {checkingVariations && (
         <VariationViewer
-          open={!!viewingVariations}
-          onOpenChange={() => setViewingVariations(null)}
-          coreItemId={viewingVariations.id}
-          coreItemName={viewingVariations.item}
+          open={!!checkingVariations}
+          onOpenChange={() => setCheckingVariations(null)}
+          coreItemId={checkingVariations.id}
+          coreItemName={checkingVariations.item}
           itemType="tools"
           onVariationSelect={(variation) => {
             // Create a new tool based on the selected variation
@@ -415,8 +433,19 @@ export function UserToolsEditor({ initialMode = 'library' }: UserToolsEditorProp
               user_photo_url: ''
             };
             setUserTools([...userTools, newUserTool]);
-            setViewingVariations(null);
+            setCheckingVariations(null);
           }}
+        />
+      )}
+
+      {/* Variations Viewer for Information Only */}
+      {viewingVariations && (
+        <VariationViewer
+          open={!!viewingVariations}
+          onOpenChange={() => setViewingVariations(null)}
+          coreItemId={viewingVariations.id}
+          coreItemName={viewingVariations.item}
+          itemType="tools"
         />
       )}
     </div>
