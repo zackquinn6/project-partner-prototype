@@ -77,29 +77,29 @@ export function WorkflowSidebar({
                     <Button 
                       onClick={onHelpClick}
                       variant="outline"
-                      className="h-16 w-full flex flex-col items-center justify-center gap-1 bg-primary/5 hover:bg-primary/10 border-primary/20 hover:border-primary/30 transition-all"
+                      className="h-12 w-full flex flex-col items-center justify-center gap-0.5 bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-150 border-blue-200 hover:border-blue-300 transition-all shadow-sm hover:shadow-md text-blue-800 hover:text-blue-900"
                     >
-                      <div className="text-xs font-semibold text-primary">Talk to a Pro</div>
-                      <div className="text-[10px] text-muted-foreground">Get Expert Help</div>
+                      <div className="text-xs font-semibold">Talk to a Pro</div>
+                      <div className="text-[9px] opacity-75">Get Expert Help</div>
                     </Button>
                     
                     <Button 
                       onClick={onKeysToSuccessClick}
                       variant="outline"
-                      className="h-16 w-full flex flex-col items-center justify-center gap-1 bg-accent/5 hover:bg-accent/10 border-accent/20 hover:border-accent/30 transition-all"
+                      className="h-12 w-full flex flex-col items-center justify-center gap-0.5 bg-gradient-to-r from-green-50 to-green-100 hover:from-green-100 hover:to-green-150 border-green-200 hover:border-green-300 transition-all shadow-sm hover:shadow-md text-green-800 hover:text-green-900"
                     >
-                      <div className="text-xs font-semibold text-accent-foreground">Pro Tips</div>
-                      <div className="text-[10px] text-muted-foreground">Get To What Really Matters</div>
+                      <div className="text-xs font-semibold">Pro Tips</div>
+                      <div className="text-[9px] opacity-75">Get To What Really Matters</div>
                     </Button>
                     
                     {isKickoffComplete && (
                       <Button 
                         onClick={onUnplannedWorkClick}
                         variant="outline"
-                        className="h-16 w-full flex flex-col items-center justify-center gap-1 bg-secondary/5 hover:bg-secondary/10 border-secondary/20 hover:border-secondary/30 transition-all"
+                        className="h-12 w-full flex flex-col items-center justify-center gap-0.5 bg-gradient-to-r from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-150 border-orange-200 hover:border-orange-300 transition-all shadow-sm hover:shadow-md text-orange-800 hover:text-orange-900"
                       >
-                        <div className="text-xs font-semibold text-secondary-foreground">Change the Plan</div>
-                        <div className="text-[10px] text-muted-foreground">Update With Learnings</div>
+                        <div className="text-xs font-semibold">Change the Plan</div>
+                        <div className="text-[9px] opacity-75">Update With Learnings</div>
                       </Button>
                     )}
                   </div>
