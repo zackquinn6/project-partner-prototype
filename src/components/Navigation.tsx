@@ -108,8 +108,10 @@ export default function Navigation({
     };
 
     const handleToolsMaterialsEditorEvent = (event: Event) => {
+      console.log('handleToolsMaterialsEditorEvent triggered - opening add tools mode');
       event.stopPropagation();
-      setIsToolsLibraryGridOpen(true);
+      setUserToolsMode('add-tools');
+      setIsUserToolsLibraryOpen(true);
     };
 
     window.addEventListener('show-home-manager', handleHomeManagerEvent);

@@ -320,12 +320,14 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
                 size="icon"
                 variant="outline" 
                 onClick={() => {
-                  if (onAddMode) {
-                    onAddMode();
-                  } else {
-                    const event = new CustomEvent('show-tools-materials-editor');
-                    window.dispatchEvent(event);
-                  }
+                  console.log('Add Tools button clicked in grid view');
+                  // Close this grid view and open add mode
+                  onOpenChange(false);
+                  // Dispatch event to open add tools window
+                  setTimeout(() => {
+                    console.log('Dispatching show-tools-materials-editor event');
+                    window.dispatchEvent(new CustomEvent('show-tools-materials-editor'));
+                  }, 100);
                 }}
                 title="Add Items"
               >
