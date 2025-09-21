@@ -28,6 +28,7 @@ import { HomeManager } from '@/components/HomeManager';
 import { CommunityPostsWindow } from '@/components/CommunityPostsWindow';
 import { AIRepairWindow } from '@/components/AIRepairWindow';
 import { UserToolsMaterialsWindow } from '@/components/UserToolsMaterialsWindow';
+import ProfileManager from '@/components/ProfileManager';
 import { Dialog } from '@/components/ui/dialog';
 
 const Index = () => {
@@ -55,6 +56,7 @@ const Index = () => {
   const [showCommunityPosts, setShowCommunityPosts] = useState(false);
   const [showAIRepair, setShowAIRepair] = useState(false);
   const [showUserToolsMaterials, setShowUserToolsMaterials] = useState(false);
+  const [showProfileManager, setShowProfileManager] = useState(false);
 
   // Handle navigation state changes (including view parameter)
   useEffect(() => {
@@ -162,8 +164,7 @@ const Index = () => {
 
     const handleProfileNavigation = () => {
       console.log('🔄 Index: "My Profile" clicked - opening ProfileManager');
-      // Dispatch event to open ProfileManager dialog directly
-      window.dispatchEvent(new CustomEvent('open-profile-manager'));
+      setShowProfileManager(true);
     };
 
     const handleToolLibraryNavigation = (event: Event) => {
@@ -196,7 +197,6 @@ const Index = () => {
     window.addEventListener('show-ai-repair', handleShowAIRepair);
     window.addEventListener('show-code-permits', handleShowCodePermits);
     window.addEventListener('show-contractor-finder', handleShowContractorFinder);
-    window.addEventListener('open-profile-manager', handleProfileNavigation);
     
     return () => {
       window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
@@ -217,7 +217,6 @@ const Index = () => {
       window.removeEventListener('show-ai-repair', handleShowAIRepair);
       window.removeEventListener('show-code-permits', handleShowCodePermits);
       window.removeEventListener('show-contractor-finder', handleShowContractorFinder);
-      window.removeEventListener('open-profile-manager', handleProfileNavigation);
     };
   }, [navigate]);
 
@@ -436,6 +435,11 @@ const Index = () => {
       <UserToolsMaterialsWindow
         open={showUserToolsMaterials}
         onOpenChange={setShowUserToolsMaterials}
+      />
+      
+      <ProfileManager
+        open={showProfileManager}
+        onOpenChange={setShowProfileManager}
       />
     </div>
   );
