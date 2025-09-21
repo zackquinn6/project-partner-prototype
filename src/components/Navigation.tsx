@@ -13,6 +13,7 @@ import { AppDocumentationWindow } from './AppDocumentationWindow';
 import { HomeManager } from './HomeManager';
 import { ToolsMaterialsWindow } from './ToolsMaterialsWindow';
 import { UserToolsMaterialsWindow } from './UserToolsMaterialsWindow';
+import { ToolsMaterialsLibraryView } from './ToolsMaterialsLibraryView';
 
 import { HomeMaintenanceWindow } from './HomeMaintenanceWindow';
 import { CommunityPostsWindow } from './CommunityPostsWindow';
@@ -49,6 +50,7 @@ export default function Navigation({
   const [isCommunityPostsOpen, setIsCommunityPostsOpen] = useState(false);
   const [isToolRentalsOpen, setIsToolRentalsOpen] = useState(false);
   const [isRapidAssessmentOpen, setIsRapidAssessmentOpen] = useState(false);
+  const [isToolsLibraryGridOpen, setIsToolsLibraryGridOpen] = useState(false);
   
   // Add error boundary for useProject hook
   let projectData;
@@ -107,8 +109,7 @@ export default function Navigation({
 
     const handleToolsMaterialsEditorEvent = (event: Event) => {
       event.stopPropagation();
-      setUserToolsMode('library');
-      setIsUserToolsLibraryOpen(true);
+      setIsToolsLibraryGridOpen(true);
     };
 
     window.addEventListener('show-home-manager', handleHomeManagerEvent);
@@ -328,6 +329,11 @@ export default function Navigation({
         <ToolRentalsWindow 
           isOpen={isToolRentalsOpen}
           onClose={() => setIsToolRentalsOpen(false)}
+        />
+
+        <ToolsMaterialsLibraryView 
+          open={isToolsLibraryGridOpen}
+          onOpenChange={setIsToolsLibraryGridOpen}
         />
 
         <Dialog open={isRapidAssessmentOpen} onOpenChange={setIsRapidAssessmentOpen}>
