@@ -107,6 +107,12 @@ export default function Navigation({
       setIsRapidAssessmentOpen(true);
     };
 
+    const handleToolsLibraryGridEvent = (event: Event) => {
+      console.log('Opening tools library grid view');
+      event.stopPropagation();
+      setIsToolsLibraryGridOpen(true);
+    };
+
     const handleToolsMaterialsEditorEvent = (event: Event) => {
       console.log('handleToolsMaterialsEditorEvent triggered - opening add tools mode');
       event.stopPropagation();
@@ -116,7 +122,7 @@ export default function Navigation({
 
     window.addEventListener('show-home-manager', handleHomeManagerEvent);
     window.addEventListener('show-tools-materials', handleToolsLibraryEvent);
-    
+    window.addEventListener('show-tools-library-grid', handleToolsLibraryGridEvent);
     window.addEventListener('show-home-maintenance', handleHomeMaintenanceEvent);
     window.addEventListener('open-profile-manager', handleProfileManagerEvent);
     window.addEventListener('show-community-posts', handleCommunityPostsEvent);
@@ -127,7 +133,7 @@ export default function Navigation({
     return () => {
       window.removeEventListener('show-home-manager', handleHomeManagerEvent);
       window.removeEventListener('show-tools-materials', handleToolsLibraryEvent);
-      
+      window.removeEventListener('show-tools-library-grid', handleToolsLibraryGridEvent);
       window.removeEventListener('show-home-maintenance', handleHomeMaintenanceEvent);
       window.removeEventListener('open-profile-manager', handleProfileManagerEvent);
       window.removeEventListener('show-community-posts', handleCommunityPostsEvent);
