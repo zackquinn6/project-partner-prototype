@@ -106,7 +106,7 @@ export default function Navigation({
 
     const handleToolsMaterialsEditorEvent = (event: Event) => {
       event.stopPropagation();
-      setUserToolsMode('add-tools');
+      setUserToolsMode('library');
       setIsUserToolsLibraryOpen(true);
     };
 
