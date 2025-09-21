@@ -481,4 +481,5 @@ export function UserToolsEditor({ initialMode = 'library', onBackToLibrary, onSw
         </div>
       </div>
     );
+  }
 }
