@@ -78,22 +78,20 @@ export function KeyCharacteristicsWindow({ open, onOpenChange, operations }: Key
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[98vw] sm:max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader className="flex-shrink-0">
-            <DialogTitle className="text-lg sm:text-xl font-bold">Key Characteristics (KC's)</DialogTitle>
+            <div className="flex items-center justify-between gap-4">
+              <DialogTitle className="text-lg sm:text-xl font-bold">Key Characteristics (KC's)</DialogTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowHelpPopup(true)}
+                className="flex items-center gap-1 text-xs sm:text-sm mr-8"
+              >
+                <HelpCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">What's a KC?</span>
+                <span className="sm:hidden">Help</span>
+              </Button>
+            </div>
           </DialogHeader>
-          
-          {/* Help Button - Moved below header to avoid overlap */}
-          <div className="flex-shrink-0 mb-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowHelpPopup(true)}
-              className="flex items-center gap-1 text-xs sm:text-sm"
-            >
-              <HelpCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">What's a KC?</span>
-              <span className="sm:hidden">Help</span>
-            </Button>
-          </div>
 
           {/* Operation Navigation */}
           <div className="flex-shrink-0 space-y-3 sm:space-y-4 border-b pb-3 sm:pb-4">
