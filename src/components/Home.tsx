@@ -9,6 +9,7 @@ import DIYSurveyPopup from '@/components/DIYSurveyPopup';
 import { AIRepairWindow } from '@/components/AIRepairWindow';
 import { CodePermitsWindow } from '@/components/CodePermitsWindow';
 import { ContractorFinderWindow } from '@/components/ContractorFinderWindow';
+import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight, Home as HomeIcon, Wrench, BookOpen, Calendar, ShoppingCart, Hammer, MapPin, CheckCircle, Star, Target, Zap, Shield, User, Users, Folder, Calculator, HelpCircle, Camera, Building2 } from 'lucide-react';
 interface HomeProps {
   onViewChange: (view: 'admin' | 'user') => void;
@@ -41,6 +42,41 @@ export default function Home({
   const [isAIRepairOpen, setIsAIRepairOpen] = useState(false);
   const [isCodePermitsOpen, setIsCodePermitsOpen] = useState(false);
   const [isContractorFinderOpen, setIsContractorFinderOpen] = useState(false);
+  const [stats, setStats] = useState({
+    activeProjects: 0,
+    completedProjects: 0,
+    hoursSaved: 0
+  });
+
+  // Fetch project data to calculate stats
+  useEffect(() => {
+    const fetchProjectStats = async () => {
+      if (!user) return;
+
+      try {
+        const { data: projectRuns, error } = await supabase
+          .from('project_runs')
+          .select('progress')
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        const active = projectRuns?.filter(run => (run.progress || 0) < 100).length || 0;
+        const completed = projectRuns?.filter(run => (run.progress || 0) >= 100).length || 0;
+        const hours = completed * 2; // Estimate 2 hours saved per completed project
+
+        setStats({
+          activeProjects: active,
+          completedProjects: completed,
+          hoursSaved: hours
+        });
+      } catch (error) {
+        console.error('Error fetching project stats:', error);
+      }
+    };
+
+    fetchProjectStats();
+  }, [user]);
 
   // Sophisticated darker color palette for app icons
   const colorPalette = ['bg-blue-700', 'bg-indigo-700', 'bg-purple-700', 'bg-violet-700', 'bg-emerald-700', 'bg-teal-700', 'bg-cyan-700', 'bg-sky-700', 'bg-orange-700', 'bg-amber-700', 'bg-red-700', 'bg-rose-700', 'bg-pink-700', 'bg-fuchsia-700', 'bg-lime-700', 'bg-green-700'];
@@ -100,25 +136,19 @@ export default function Home({
             </p>
             
             {/* Stats */}
-            <div className="border-t border-border pt-6 mb-6">
-              <div className="flex justify-center gap-8">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">1</span>
-                  </div>
-                  <span className="text-muted-foreground">Active Projects</span>
+            <div className="border-t border-border pt-3 mb-3">
+              <div className="flex justify-center gap-4 sm:gap-8">
+                <div className="text-center">
+                  <div className="text-lg sm:text-xl font-bold text-foreground">{stats.activeProjects}</div>
+                  <div className="text-xs text-muted-foreground">active projects</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                    <span className="text-muted-foreground font-bold text-sm">0</span>
-                  </div>
-                  <span className="text-muted-foreground">Completed</span>
+                <div className="text-center">
+                  <div className="text-lg sm:text-xl font-bold text-foreground">{stats.completedProjects}</div>
+                  <div className="text-xs text-muted-foreground">completed</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">2</span>
-                  </div>
-                  <span className="text-muted-foreground">Hours Saved</span>
+                <div className="text-center">
+                  <div className="text-lg sm:text-xl font-bold text-foreground">{stats.hoursSaved}</div>
+                  <div className="text-xs text-muted-foreground">hours saved</div>
                 </div>
               </div>
             </div>

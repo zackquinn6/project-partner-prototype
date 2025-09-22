@@ -251,9 +251,8 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
               </Select>
 
               <div className="flex gap-2 w-full sm:w-auto">
-                <Button onClick={() => setShowAddTask(true)} disabled={!selectedHomeId} className="w-8 h-8 p-0 sm:w-auto sm:h-auto sm:px-4 sm:py-2" title="Add Task">
-                  <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline ml-2">Add Task</span>
+                <Button onClick={() => setShowAddTask(true)} disabled={!selectedHomeId} className="w-6 h-6 p-0" title="Add Task">
+                  <Plus className="h-3 w-3" />
                 </Button>
                 
                 {selectedHomeId && tasks.length > 0 && (
@@ -338,11 +337,11 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                                   </div>
                                 </div>
                                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 ml-2 sm:ml-3 shrink-0">
-                                   <Button onClick={() => handleTaskComplete(task)} size="sm" className="text-xs px-2 sm:px-4">
-                                     Complete
+                                   <Button onClick={() => handleTaskComplete(task)} size="sm" className="w-6 h-6 p-0 bg-green-600 hover:bg-green-700 text-white" title="Complete Task">
+                                     <CheckCircle className="h-3 w-3" />
                                    </Button>
-                                   <Button variant="destructive" size="sm" onClick={() => handleDeleteTask(task.id)} className="w-6 h-6 sm:w-8 sm:h-8 p-0" title="Delete Task">
-                                     <Trash2 className="h-3 w-3" />
+                                   <Button variant="destructive" size="sm" onClick={() => handleDeleteTask(task.id)} className="w-4 h-4 p-0" title="Delete Task">
+                                     <Trash2 className="h-2 w-2" />
                                    </Button>
                                  </div>
                               </div>
@@ -352,12 +351,16 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                   </div>
                 </TabsContent>
 
-                <TabsContent value="history">
-                  <MaintenanceHistoryTab selectedHomeId={selectedHomeId} />
+                <TabsContent value="history" className="max-w-full overflow-hidden">
+                  <div className="max-h-[60vh] overflow-y-auto">
+                    <MaintenanceHistoryTab selectedHomeId={selectedHomeId} />
+                  </div>
                 </TabsContent>
 
-                <TabsContent value="notifications">
-                  <MaintenanceNotifications selectedHomeId={selectedHomeId} />
+                <TabsContent value="notifications" className="max-w-full overflow-hidden">
+                  <div className="max-h-[60vh] overflow-y-auto">
+                    <MaintenanceNotifications selectedHomeId={selectedHomeId} />
+                  </div>
                 </TabsContent>
               </Tabs>}
           </div>

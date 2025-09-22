@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileText, Calendar } from 'lucide-react';
+import { FileText, Calendar, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -86,9 +86,8 @@ export const MaintenancePdfPrinter: React.FC<MaintenancePdfPrinterProps> = ({
 
   return (
     <>
-      <Button onClick={generatePDF} className="flex items-center gap-2">
-        <FileText className="h-4 w-4" />
-        Print to PDF
+      <Button onClick={generatePDF} className="w-6 h-6 p-0" title="Save to PDF">
+        <Download className="h-3 w-3" />
       </Button>
 
       {/* Hidden content for PDF generation */}
