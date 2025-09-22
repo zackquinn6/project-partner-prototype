@@ -283,40 +283,71 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
                           className="w-full h-32 object-cover rounded-lg mb-3"
                         />
                       )}
-                      <p className="text-sm text-muted-foreground">{currentProject.description}</p>
-                      {isAdminMode && (
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge variant="outline">{currentProject.category || 'Uncategorized'}</Badge>
-                          <Badge 
-                            variant="outline"
-                            className={
-                              currentProject.skillLevel === 'Beginner' ? 'bg-green-100 text-green-800' :
-                              currentProject.skillLevel === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                              currentProject.skillLevel === 'Advanced' ? 'bg-red-100 text-red-800' :
-                              'bg-gray-100 text-gray-800'
-                            }
-                          >
-                            {currentProject.skillLevel ? `${currentProject.skillLevel} Skill` : 'Unset'}
-                          </Badge>
-                          <Badge 
-                            variant="outline"
-                            className={
-                              currentProject.effortLevel === 'Low' ? 'bg-blue-100 text-blue-800' :
-                              currentProject.effortLevel === 'Medium' ? 'bg-orange-100 text-orange-800' :
-                              currentProject.effortLevel === 'High' ? 'bg-red-100 text-red-800' :
-                              'bg-gray-100 text-gray-800'
-                            }
-                          >
-                            {currentProject.effortLevel || 'Unset'} Effort
-                          </Badge>
-                          <Badge 
-                            variant={currentProject.publishStatus === 'published' ? 'default' : 'secondary'}
-                            className={currentProject.publishStatus === 'published' ? 'bg-green-500 text-white' : ''}
-                          >
-                            {currentProject.publishStatus}
-                          </Badge>
-                        </div>
-                      )}
+                       <p className="text-sm text-muted-foreground mb-3">{currentProject.description}</p>
+                       
+                       {currentProject.diyLengthChallenges && (
+                         <div className="mb-3">
+                           <h4 className="text-sm font-medium mb-1">DIY Challenges</h4>
+                           <p className="text-sm text-muted-foreground">{currentProject.diyLengthChallenges}</p>
+                         </div>
+                       )}
+                       
+                       <div className="space-y-3">
+                         <div className="grid grid-cols-2 gap-4">
+                           <div>
+                             <h4 className="text-sm font-medium mb-1">Category</h4>
+                             <Badge variant="outline" className="text-sm">
+                               {currentProject.category || 'Not specified'}
+                             </Badge>
+                           </div>
+                           <div>
+                             <h4 className="text-sm font-medium mb-1">Effort Level</h4>
+                             <Badge 
+                               variant="outline"
+                               className={
+                                 currentProject.effortLevel === 'Low' ? 'bg-blue-100 text-blue-800 text-sm' :
+                                 currentProject.effortLevel === 'Medium' ? 'bg-orange-100 text-orange-800 text-sm' :
+                                 currentProject.effortLevel === 'High' ? 'bg-red-100 text-red-800 text-sm' :
+                                 'bg-gray-100 text-gray-800 text-sm'
+                               }
+                             >
+                               {currentProject.effortLevel || 'Not specified'}
+                             </Badge>
+                           </div>
+                           <div>
+                             <h4 className="text-sm font-medium mb-1">Skill Level</h4>
+                             <Badge 
+                               variant="outline"
+                               className={
+                                 currentProject.skillLevel === 'Beginner' ? 'bg-green-100 text-green-800 text-sm' :
+                                 currentProject.skillLevel === 'Intermediate' ? 'bg-yellow-100 text-yellow-800 text-sm' :
+                                 currentProject.skillLevel === 'Advanced' ? 'bg-red-100 text-red-800 text-sm' :
+                                 'bg-gray-100 text-gray-800 text-sm'
+                               }
+                             >
+                               {currentProject.skillLevel || 'Not specified'}
+                             </Badge>
+                           </div>
+                           <div>
+                             <h4 className="text-sm font-medium mb-1">Estimated Time</h4>
+                             <Badge variant="outline" className="text-sm">
+                               {currentProject.estimatedTime || 'Not specified'}
+                             </Badge>
+                           </div>
+                         </div>
+                         
+                         {isAdminMode && (
+                           <div>
+                             <h4 className="text-sm font-medium mb-1">Status</h4>
+                             <Badge 
+                               variant={currentProject.publishStatus === 'published' ? 'default' : 'secondary'}
+                               className={`text-sm ${currentProject.publishStatus === 'published' ? 'bg-green-500 text-white' : ''}`}
+                             >
+                               {currentProject.publishStatus}
+                             </Badge>
+                           </div>
+                         )}
+                       </div>
                       <p className="text-xs text-muted-foreground mt-2">
                         {currentProject.phases.length} phases
                       </p>

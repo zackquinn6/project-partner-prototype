@@ -111,9 +111,8 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
           )}
           
           {isCompleted && (
-            <div className="w-full mt-6 p-3 bg-green-50 border border-green-200 rounded-lg text-center">
-              <CheckCircle className="w-5 h-5 text-green-600 mx-auto mb-2" />
-              <p className="text-green-800 font-medium">Project Overview Completed ✓</p>
+            <div className="w-full mt-6 p-2 bg-green-50 border border-green-200 rounded-lg text-center">
+              <p className="text-green-800 text-sm">Project Overview Completed ✓</p>
             </div>
           )}
         </CardContent>
