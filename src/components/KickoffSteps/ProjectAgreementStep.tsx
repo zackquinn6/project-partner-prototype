@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { CheckCircle, FileText, PenTool, Download } from 'lucide-react';
 import { SignatureCapture } from '@/components/SignatureCapture';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProject } from '@/contexts/ProjectContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProjectAgreementStepProps {
   onComplete: () => void;
@@ -31,7 +32,25 @@ export const ProjectAgreementStep: React.FC<ProjectAgreementStepProps> = ({
   const [isSignatureDialogOpen, setIsSignatureDialogOpen] = useState(false);
   const [signature, setSignature] = useState<string>('');
   const [signedAgreement, setSignedAgreement] = useState<Agreement | null>(null);
-  const [signerName, setSignerName] = useState(user?.email || '');
+  const [signerName, setSignerName] = useState('');
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, display_name')
+          .eq('user_id', user.id)
+          .single();
+        
+        setUserProfile(profile);
+        setSignerName(profile?.full_name || profile?.display_name || '');
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   const agreementText = `
 PROJECT PARTNER AGREEMENT

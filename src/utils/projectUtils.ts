@@ -214,8 +214,8 @@ export const createOrderingPhase = (): Phase => {
 
 export const createCloseProjectPhase = (): Phase => {
   const toolMaterialProcessingOperation: Operation = {
-    id: 'tool-material-processing-operation',
-    name: 'Tool & Material Processing',
+    id: 'tool-material-closeout-operation',
+    name: 'Tool & Material Closeout',
     description: 'Handle tools and materials after project completion',
     steps: [
       {
@@ -282,8 +282,8 @@ export const createCloseProjectPhase = (): Phase => {
   };
 
   const celebrateOperation: Operation = {
-    id: 'celebrate-operation',
-    name: 'Celebrate',
+    id: 'celebration-operation',
+    name: 'Celebration',
     description: 'Celebrate your successful project completion',
     steps: [
       {
