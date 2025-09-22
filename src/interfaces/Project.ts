@@ -60,6 +60,8 @@ export interface Output {
   keyInputs?: string[];
   qualityChecks?: string;
   mustGetRight?: string;
+  allowances?: string;
+  referenceSpecification?: string;
 }
 
 export interface ContentSection {

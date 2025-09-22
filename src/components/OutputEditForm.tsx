@@ -10,17 +10,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Plus, X, Save } from 'lucide-react';
 import { Output, StepInput } from '@/interfaces/Project';
 
-// Extend Output interface to include allowances and reference specification fields
-interface ExtendedOutput extends Output {
-  allowances?: string;
-  referenceSpecification?: string;
-}
-
 interface OutputEditFormProps {
-  output: ExtendedOutput;
+  output: Output;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (updatedOutput: ExtendedOutput) => void;
+  onSave: (updatedOutput: Output) => void;
   stepInputs?: StepInput[];
   onAddStepInput?: (inputName: string) => void;
 }
@@ -33,7 +27,7 @@ export const OutputEditForm: React.FC<OutputEditFormProps> = ({
   stepInputs = [],
   onAddStepInput
 }) => {
-  const [formData, setFormData] = useState<ExtendedOutput>({ ...output });
+  const [formData, setFormData] = useState<Output>({ ...output });
   const [selectedInput, setSelectedInput] = useState<string>('');
   const [customInputName, setCustomInputName] = useState('');
 
