@@ -68,6 +68,9 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
   const [selectedTask, setSelectedTask] = useState<MaintenanceTask | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [completions, setCompletions] = useState<MaintenanceCompletion[]>([]);
+  const [swipedTaskId, setSwipedTaskId] = useState<string | null>(null);
+  const [touchStart, setTouchStart] = useState<number>(0);
+  const [touchEnd, setTouchEnd] = useState<number>(0);
   useEffect(() => {
     if (open && user) {
       fetchHomes();
@@ -226,6 +229,30 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
     exterior: 'Exterior',
     general: 'General'
   };
+
+  // Touch handlers for swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(0);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (taskId: string) => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe && swipedTaskId !== taskId) {
+      setSwipedTaskId(taskId);
+    } else if (isRightSwipe || (isLeftSwipe && swipedTaskId === taskId)) {
+      setSwipedTaskId(null);
+    }
+  };
   return <>
     <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[95vw] sm:max-w-6xl max-h-[90vh] overflow-hidden">
@@ -292,7 +319,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     </Button>
                   </div>
 
-                  <div className="max-h-[60vh] overflow-y-auto space-y-3">
+                  <div className="max-h-[60vh] overflow-y-auto space-y-3" onClick={() => setSwipedTaskId(null)}>
                     {loading ? <div className="text-center py-8">Loading tasks...</div> : getFilteredTasks().length === 0 ? <Card>
                         <CardContent className="pt-6">
                           <div className="text-center py-8">
@@ -316,8 +343,13 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     color,
                     icon: StatusIcon
                   } = getTaskStatus(task);
-                  return <Card key={task.id} className="hover:shadow-sm transition-shadow">
-                            <CardContent className="p-4">
+                  return <Card key={task.id} className="hover:shadow-sm transition-shadow relative overflow-hidden">
+                            <CardContent 
+                              className="p-4"
+                              onTouchStart={handleTouchStart}
+                              onTouchMove={handleTouchMove}
+                              onTouchEnd={() => handleTouchEnd(task.id)}
+                            >
                               <div className="flex items-center justify-between">
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 mb-1">
@@ -340,9 +372,24 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                                    <Button onClick={() => handleTaskComplete(task)} size="sm" className="w-6 h-6 p-0 bg-green-600 hover:bg-green-700 text-white" title="Complete Task">
                                      <CheckCircle className="h-3 w-3" />
                                    </Button>
-                                    <Button variant="destructive" size="sm" onClick={() => handleDeleteTask(task.id)} className="w-3 h-3 p-0" title="Delete Task">
-                                      <Trash2 className="h-1.5 w-1.5" />
-                                    </Button>
+                                   
+                                   {/* Show delete button on desktop or when swiped on mobile */}
+                                   <div className={`transition-all duration-200 ${
+                                     swipedTaskId === task.id ? 'opacity-100 w-6' : 'sm:opacity-100 sm:w-3 opacity-0 w-0'
+                                   }`}>
+                                     <Button 
+                                       variant="destructive" 
+                                       size="sm" 
+                                       onClick={() => {
+                                         handleDeleteTask(task.id);
+                                         setSwipedTaskId(null);
+                                       }} 
+                                       className="w-full h-3 p-0" 
+                                       title="Delete Task"
+                                     >
+                                       <Trash2 className="h-1.5 w-1.5" />
+                                     </Button>
+                                   </div>
                                  </div>
                               </div>
                             </CardContent>
