@@ -54,7 +54,6 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
     name: '',
     description: '',
     category: '',
-    difficulty: '',
     status: 'completed',
     progress: 100,
     estimatedTime: '',
@@ -83,7 +82,6 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
         name: formData.name,
         description: formData.description || null,
         category: formData.category || null,
-        difficulty: formData.difficulty || null,
         status: formData.status,
         progress: formData.progress,
         estimated_time: formData.estimatedTime || null,
@@ -112,7 +110,6 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
         name: '',
         description: '',
         category: '',
-        difficulty: '',
         status: 'completed',
         progress: 100,
         estimatedTime: '',
@@ -198,38 +195,20 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="category">Category</Label>
-                <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categoryOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="difficulty">Difficulty</Label>
-                <Select value={formData.difficulty} onValueChange={(value) => handleInputChange('difficulty', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select difficulty" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {difficultyOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label htmlFor="category">Category</Label>
+              <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

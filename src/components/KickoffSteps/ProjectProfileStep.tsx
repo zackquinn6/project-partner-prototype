@@ -161,7 +161,7 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
               <strong>Project Template:</strong>
             </p>
             <p className="text-sm font-medium">
-              {currentProjectRun.name?.replace(/ \(Rev \d+\)$/i, '')}
+              {currentProjectRun.name}
             </p>
           </div>
 

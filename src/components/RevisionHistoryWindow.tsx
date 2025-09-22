@@ -92,7 +92,7 @@ export const RevisionHistoryWindow: React.FC<RevisionHistoryWindowProps> = ({
       const newRevision: Project = {
         ...revisionToRestore,
         id: `${Date.now()}`, // Generate new ID
-        name: `${revisionToRestore.name.replace(/ \(Rev \d+\)/, '')} (Rev ${(currentProject.revisionNumber || 1) + 1})`,
+        name: `${revisionToRestore.name}`,
         parentProjectId: currentProject.parentProjectId || currentProject.id,
         revisionNumber: (currentProject.revisionNumber || 1) + 1,
         revisionNotes: `Restored from revision ${revisionToRestore.revisionNumber}`,

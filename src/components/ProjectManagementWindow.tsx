@@ -356,7 +356,7 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
       // Create new revision that replaces current
       const newRevision = {
         ...currentProject,
-        name: `${currentProject.name.replace(/ \(Rev \d+\)/, '')} (Rev ${(currentProject.revisionNumber || 1) + 1})`,
+        name: `${currentProject.name}`,
         parentProjectId: currentProject.parentProjectId || currentProject.id,
         revisionNumber: (currentProject.revisionNumber || 1) + 1,
         revisionNotes: revisionNotes || '',

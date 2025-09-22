@@ -248,100 +248,54 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       }
       
       if (isAdminMode) {
-      // In admin mode, create a new template project
-      const newProject = {
-        id: crypto.randomUUID(),
-        name: project.name,
-        description: project.description,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        startDate: new Date(),
-        planEndDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-        status: 'not-started' as const,
-        publishStatus: 'draft' as const,
-        category: project.category,
-        difficulty: project.difficulty,
-        estimatedTime: project.estimatedTime,
-        phases: []
-      };
-      addProject(newProject);
-      setCurrentProject(newProject);
+        // In admin mode, create a new template project
+        const newProject = {
+          id: crypto.randomUUID(),
+          name: project.name,
+          description: project.description,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          startDate: new Date(),
+          planEndDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+          status: 'not-started' as const,
+          publishStatus: 'draft' as const,
+          category: project.category,
+          difficulty: project.difficulty,
+          estimatedTime: project.estimatedTime,
+          phases: []
+        };
+        addProject(newProject);
+        setCurrentProject(newProject);
         navigate('/', {
           state: {
             view: 'admin'
           }
         });
-      } else {
-        // User mode - handling project selection
-        console.log('👤 USER MODE - Processing project selection');
-        
-        // Check if project is beta and show warning first
-        if (project.publishStatus === 'beta-testing') {
-          console.log('⚠️ Beta project detected, showing warning');
-          setSelectedTemplate(project);
-          setIsBetaWarningOpen(true);
-          return;
-        }
-      
-      // For published projects, proceed normally
-      console.log('✅ User mode - proceeding with project setup for:', project.name);
+        return;
+      }
+
+      // User mode - always create a new project run regardless of existing runs
+      console.log('👤 USER MODE - Creating new project run for:', project.name);
       
       if (!user) {
         console.log('❌ No user found - redirecting to auth');
         navigate('/auth?return=projects');
         return;
       }
-      
-      setSelectedTemplate(project);
-      setProjectSetupForm(prev => ({
-        ...prev,
-        customProjectName: project.name.replace(/ \(Rev \d+\)$/i, '')
-      }));
-      
-      // Fetch homes when opening project setup dialog
-      fetchHomes();
-      
-      console.log('🔍 Checking for existing project runs...');
-      // Check if there's an active project run for this user
-      const existingRun = projectRuns.find(run => 
-        run.templateId === project.id && 
-        run.status !== 'complete'
-      );
-      
-      console.log('📊 Existing run found:', !!existingRun, existingRun?.id);
-      
-      // If there's an existing project run, check if kickoff is complete
-      if (existingRun) {
-        const kickoffStepIds = ['kickoff-step-1', 'kickoff-step-2', 'kickoff-step-3', 'kickoff-step-4'];
-        const kickoffComplete = kickoffStepIds.every(stepId => 
-          existingRun.completedSteps.includes(stepId)
-        );
-        
-        console.log('🚀 Kickoff complete:', kickoffComplete, 'Completed steps:', existingRun.completedSteps);
-        
-        // Only show project setup dialog if kickoff is complete
-        if (kickoffComplete) {
-          console.log('✅ Kickoff complete - showing setup dialog');
-          setIsProjectSetupOpen(true);
-          return; // Exit immediately after showing dialog
-        } else {
-          // Kickoff is not complete, navigate to continue the existing project run
-          console.log('🔄 Kickoff not complete, continuing existing project run:', existingRun.id);
-          console.log('🧭 Navigating to home with projectRunId:', existingRun.id);
-          navigate('/', {
-            state: {
-              view: 'user',
-              projectRunId: existingRun.id
-            }
-          });
-          return; // Exit immediately after navigation
-        }
-      } else {
-        // New project run, will go through kickoff flow - don't show setup dialog
-        console.log('🚀 New project detected, proceeding directly to kickoff');
-        proceedToNewProject();
+
+      // Check if project is beta and show warning first
+      if (project.publishStatus === 'beta-testing') {
+        console.log('⚠️ Beta project detected, showing warning');
+        setSelectedTemplate(project);
+        setIsBetaWarningOpen(true);
+        return;
       }
-      } // Close the user mode else block
+
+      // Always create a new project run - user expects a fresh start
+      setSelectedTemplate(project);
+      console.log('✅ Creating new project run for:', project.name);
+      proceedToNewProject();
+      
     } catch (error) {
       console.error('❌ Error in handleSelectProject:', error);
     }
@@ -593,7 +547,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
     
     setProjectSetupForm(prev => ({
       ...prev,
-      customProjectName: selectedTemplate.name.replace(/ \(Rev \d+\)$/i, '')
+      customProjectName: selectedTemplate.name
     }));
     
     // Check if there's an active project run for this template
@@ -850,7 +804,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
                   
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                      {project.name.replace(/ \(Rev \d+\)$/i, '')}
+                      {project.name}
                     </CardTitle>
                     <CardDescription className="text-sm line-clamp-2">
                       {project.description}
@@ -906,7 +860,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
               <DialogHeader>
                 <DialogTitle>Let's get this project going! 🚀</DialogTitle>
                 <DialogDescription>
-                  Time to set up your {selectedTemplate?.name.replace(/ \(Rev \d+\)$/i, '')} project team and timeline. Let's make this happen!
+                  Time to set up your {selectedTemplate?.name} project team and timeline. Let's make this happen!
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
@@ -917,7 +871,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
                 customProjectName: e.target.value
               }))} />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Based on: {selectedTemplate?.name.replace(/ \(Rev \d+\)$/i, '')}
+                    Based on: {selectedTemplate?.name}
                   </p>
                 </div>
                 <div>
