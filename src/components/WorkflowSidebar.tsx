@@ -70,9 +70,9 @@ export function WorkflowSidebar({
                   </div>
                 </div>
 
-                {/* DIY Playbook Section */}
+                {/* DIY Tools Section */}
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-primary">DIY Playbook</h3>
+                  <h3 className="text-sm font-semibold text-primary">DIY Tools</h3>
                   <div className="grid grid-cols-1 gap-2">
                     <Button 
                       onClick={onHelpClick}

@@ -46,11 +46,18 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
   };
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
+    const formatted = new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     }).format(new Date(date));
+    
+    // Split into month/day and year
+    const parts = formatted.split(', ');
+    return {
+      monthDay: parts[0],
+      year: parts[1] || ''
+    };
   };
 
   const handleOpenProjectRun = (projectRun: ProjectRun) => {
@@ -128,8 +135,18 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                           <div className="text-sm text-muted-foreground">{projectRun.description}</div>
                         </div>
                       </TableCell>
-                      <TableCell>{formatDate(projectRun.startDate)}</TableCell>
-                      <TableCell>{formatDate(projectRun.planEndDate)}</TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div>{formatDate(projectRun.startDate).monthDay}</div>
+                          <div className="text-muted-foreground">{formatDate(projectRun.startDate).year}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div>{formatDate(projectRun.planEndDate).monthDay}</div>
+                          <div className="text-muted-foreground">{formatDate(projectRun.planEndDate).year}</div>
+                        </div>
+                      </TableCell>
                       <TableCell className="w-32">
                         <div className="space-y-1">
                           <Progress value={progress} className="h-2" />
@@ -144,7 +161,14 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {projectRun.endDate ? formatDate(projectRun.endDate) : '-'}
+                        {projectRun.endDate ? (
+                          <div className="text-sm">
+                            <div>{formatDate(projectRun.endDate).monthDay}</div>
+                            <div className="text-muted-foreground">{formatDate(projectRun.endDate).year}</div>
+                          </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground">-</div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">

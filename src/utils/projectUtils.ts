@@ -52,8 +52,11 @@ export const createKickoffPhase = (): Phase => {
 };
 
 export const createPlanningPhase = (): Phase => {
-  const planningSteps: WorkflowStep[] = [
-    {
+  const initialPlanningOperation: Operation = {
+    id: 'initial-planning-operation',
+    name: 'Initial Planning',
+    description: 'Define project scope and select phases',
+    steps: [{
       id: 'planning-step-1',
       step: 'Project Work Scope',
       description: 'Define project scope, measurements, timing, and customize workflow',
@@ -67,34 +70,12 @@ export const createPlanningPhase = (): Phase => {
         description: 'Project scope, timing, and workflow customized',
         type: 'none' as const
       }]
-    },
-    {
-      id: 'planning-step-2',
-      step: 'Project Scheduling',
-      description: 'Create project timeline and schedule phases',
-      contentType: 'text' as const,
-      content: 'Plan your project timeline by scheduling phases, setting realistic deadlines, and coordinating with your calendar.',
-      materials: [],
-      tools: [],
-      outputs: [{
-        id: 'scheduling-output',
-        name: 'Project Scheduled',
-        description: 'Project timeline and schedule established',
-        type: 'none' as const
-      }]
-    }
-  ];
-
-  const initialPlanningOperation: Operation = {
-    id: 'initial-planning-operation',
-    name: 'Initial Planning',
-    description: 'Define project scope and select phases',
-    steps: planningSteps
+    }]
   };
 
   const measurementOperation: Operation = {
     id: 'measurement-operation',
-    name: 'Measurement & Assessment',
+    name: 'Measure & Assess',
     description: 'Measure spaces and assess project requirements',
     steps: [{
       id: 'measurement-step-1',
@@ -134,11 +115,32 @@ export const createPlanningPhase = (): Phase => {
     }]
   };
 
+  const projectSchedulingOperation: Operation = {
+    id: 'project-scheduling-operation',
+    name: 'Project Scheduling',
+    description: 'Create project timeline and schedule phases',
+    steps: [{
+      id: 'planning-step-2',
+      step: 'Project Scheduling',
+      description: 'Create project timeline and schedule phases',
+      contentType: 'text' as const,
+      content: 'Plan your project timeline by scheduling phases, setting realistic deadlines, and coordinating with your calendar.',
+      materials: [],
+      tools: [],
+      outputs: [{
+        id: 'scheduling-output',
+        name: 'Project Scheduled',
+        description: 'Project timeline and schedule established',
+        type: 'none' as const
+      }]
+    }]
+  };
+
   const planningPhase: Phase = {
     id: 'planning-phase',
     name: 'Planning',
     description: 'Comprehensive project planning and preparation',
-    operations: [initialPlanningOperation, measurementOperation, finalPlanningOperation]
+    operations: [initialPlanningOperation, measurementOperation, finalPlanningOperation, projectSchedulingOperation]
   };
 
   return planningPhase;
@@ -181,76 +183,68 @@ export const createOrderingPhase = (): Phase => {
 };
 
 export const createCloseProjectPhase = (): Phase => {
-  const manageMaterialsOperation: Operation = {
-    id: 'manage-materials-operation',
-    name: 'Manage Materials',
-    description: 'Properly handle remaining materials and waste',
+  const toolMaterialProcessingOperation: Operation = {
+    id: 'tool-material-processing-operation',
+    name: 'Tool & Material Processing',
+    description: 'Handle tools and materials after project completion',
     steps: [
       {
-        id: 'store-spare-materials-step',
-        step: 'Store Spare Materials',
-        description: 'Organize and store leftover materials for future use',
-        contentType: 'text' as const,
-        content: 'Properly organize and store any remaining materials in a dry, safe location. Label containers and keep receipts for warranty purposes.',
-        materials: [],
-        tools: [],
-        outputs: [{
-          id: 'spare-materials-output',
-          name: 'Materials Stored',
-          description: 'Leftover materials properly organized and stored',
-          type: 'none' as const
-        }]
-      },
-      {
-        id: 'dispose-waste-materials-step',
-        step: 'Dispose Waste Materials',
-        description: 'Responsibly dispose of construction waste and debris',
-        contentType: 'text' as const,
-        content: 'Dispose of construction waste according to local regulations. Separate recyclable materials and hazardous waste for proper disposal.',
-        materials: [],
-        tools: [],
-        outputs: [{
-          id: 'waste-disposal-output',
-          name: 'Waste Disposed',
-          description: 'Construction waste responsibly disposed of',
-          type: 'none' as const
-        }]
-      }
-    ]
-  };
-
-  const returnToolsOperation: Operation = {
-    id: 'return-tools-operation',
-    name: 'Return Tools',
-    description: 'Return rented tools and organize purchased tools',
-    steps: [
-      {
-        id: 'return-rented-tools-step',
-        step: 'Return Rented Tools',
+        id: 'return-tools-step',
+        step: 'Return Tools',
         description: 'Clean and return any rented tools to avoid late fees',
         contentType: 'text' as const,
         content: 'Clean all rented tools thoroughly and return them to the rental facility. Check rental agreements for return deadlines to avoid additional charges.',
         materials: [],
         tools: [],
         outputs: [{
-          id: 'rented-tools-output',
+          id: 'return-tools-output',
           name: 'Rented Tools Returned',
           description: 'All rented tools cleaned and returned on time',
           type: 'none' as const
         }]
       },
       {
-        id: 'store-purchased-tools-step',
-        step: 'Store Purchased Tools',
+        id: 'store-tools-step',
+        step: 'Store Tools',
         description: 'Organize and store newly purchased tools',
         contentType: 'text' as const,
         content: 'Clean and properly store all purchased tools in your tool storage area. Keep receipts and warranty information in a safe place.',
         materials: [],
         tools: [],
         outputs: [{
-          id: 'purchased-tools-output',
+          id: 'store-tools-output',
           name: 'Tools Organized',
           description: 'Purchased tools cleaned and properly stored',
+          type: 'none' as const
+        }]
+      },
+      {
+        id: 'store-materials-step',
+        step: 'Store Materials',
+        description: 'Organize and store leftover materials for future use',
+        contentType: 'text' as const,
+        content: 'Properly organize and store any remaining materials in a dry, safe location. Label containers and keep receipts for warranty purposes.',
+        materials: [],
+        tools: [],
+        outputs: [{
+          id: 'store-materials-output',
+          name: 'Materials Stored',
+          description: 'Leftover materials properly organized and stored',
+          type: 'none' as const
+        }]
+      },
+      {
+        id: 'dispose-materials-step',
+        step: 'Dispose Materials',
+        description: 'Responsibly dispose of construction waste and debris',
+        contentType: 'text' as const,
+        content: 'Dispose of construction waste according to local regulations. Separate recyclable materials and hazardous waste for proper disposal.',
+        materials: [],
+        tools: [],
+        outputs: [{
+          id: 'dispose-materials-output',
+          name: 'Waste Disposed',
+          description: 'Construction waste responsibly disposed of',
           type: 'none' as const
         }]
       }
@@ -284,7 +278,7 @@ export const createCloseProjectPhase = (): Phase => {
     id: 'close-project-phase',
     name: 'Close Project',
     description: 'Final cleanup, organization, and celebration of project completion',
-    operations: [manageMaterialsOperation, returnToolsOperation, celebrateOperation]
+    operations: [toolMaterialProcessingOperation, celebrateOperation]
   };
 
   return closeProjectPhase;
