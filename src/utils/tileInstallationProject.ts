@@ -763,7 +763,7 @@ export const createTileInstallationProject = (): Project => {
     startDate: new Date(),
     planEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     endDate: undefined,
-    revisionNumber: 1,
+    revisionNumber: 4,
     parentProjectId: undefined,
     createdFromRevision: undefined,
     revisionNotes: undefined
