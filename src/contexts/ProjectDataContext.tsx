@@ -102,6 +102,7 @@ export const ProjectDataProvider: React.FC<ProjectDataProviderProps> = ({ childr
         templateId: run.template_id,
         name: run.name,
         description: run.description || '',
+        isManualEntry: run.is_manual_entry || false,
         createdAt: new Date(run.created_at),
         updatedAt: new Date(run.updated_at),
         startDate: new Date(run.start_date),

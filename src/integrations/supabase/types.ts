@@ -1222,6 +1222,7 @@ export type Database = {
           estimated_time: string | null
           home_id: string | null
           id: string
+          is_manual_entry: boolean
           issue_reports: Json | null
           name: string
           phase_ratings: Json | null
@@ -1253,6 +1254,7 @@ export type Database = {
           estimated_time?: string | null
           home_id?: string | null
           id?: string
+          is_manual_entry?: boolean
           issue_reports?: Json | null
           name: string
           phase_ratings?: Json | null
@@ -1284,6 +1286,7 @@ export type Database = {
           estimated_time?: string | null
           home_id?: string | null
           id?: string
+          is_manual_entry?: boolean
           issue_reports?: Json | null
           name?: string
           phase_ratings?: Json | null

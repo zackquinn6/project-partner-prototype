@@ -6,6 +6,7 @@ export interface ProjectRun {
   name: string;
   description: string;
   diyLengthChallenges?: string; // Copied from template project
+  isManualEntry?: boolean; // True for user-uploaded manual project entries
   createdAt: Date;
   updatedAt: Date;
   startDate: Date;

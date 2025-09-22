@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Play, Trash2, Plus, User, Wrench, Home, Users, Zap, Folder, Calculator, HelpCircle, Hammer, BookOpen, MapPin } from "lucide-react";
+import { Play, Trash2, Plus, User, Wrench, Home, Users, Zap, Folder, Calculator, HelpCircle, Hammer, BookOpen, MapPin, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProject } from '@/contexts/ProjectContext';
 import { Project } from '@/interfaces/Project';
@@ -15,6 +15,8 @@ import { ToolsMaterialsWindow } from '@/components/ToolsMaterialsWindow';
 import { HomeManager } from '@/components/HomeManager';
 import { useState } from "react";
 import { CommunityPostsWindow } from '@/components/CommunityPostsWindow';
+import { ManualProjectDialog } from '@/components/ManualProjectDialog';
+import { ManualProjectEditDialog } from '@/components/ManualProjectEditDialog';
 
 interface ProjectListingProps {
   onProjectSelect?: (project: Project | null | 'workflow') => void;
@@ -27,6 +29,7 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
   const [showToolsLibrary, setShowToolsLibrary] = useState(false);
   const [showHomeManager, setShowHomeManager] = useState(false);
   const [showCommunityPosts, setShowCommunityPosts] = useState(false);
+  const [showManualProjectDialog, setShowManualProjectDialog] = useState(false);
 
   const calculateProgress = (projectRun: ProjectRun) => {
     return projectRun.progress || 0;
@@ -105,6 +108,7 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
               <Button 
                 variant="outline"
                 size="sm"
+                onClick={() => setShowManualProjectDialog(true)}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Manual Project Log
@@ -150,7 +154,14 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                     <TableRow key={projectRun.id}>
                       <TableCell className="font-medium">
                         <div>
-                          <div className="font-semibold">{projectRun.customProjectName || projectRun.name}</div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold">{projectRun.customProjectName || projectRun.name}</span>
+                            {projectRun.isManualEntry && (
+                              <Badge variant="secondary" className="text-xs">
+                                User-uploaded
+                              </Badge>
+                            )}
+                          </div>
                           <div className="text-sm text-muted-foreground">{projectRun.description}</div>
                         </div>
                       </TableCell>
@@ -191,7 +202,22 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {projectRun.status !== 'complete' && (
+                          {/* Edit button for manual projects only */}
+                          {projectRun.isManualEntry && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                // TODO: Open edit dialog for manual project
+                                console.log('Edit manual project:', projectRun.id);
+                              }}
+                              className="transition-fast"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          )}
+                          
+                          {projectRun.status !== 'complete' && !projectRun.isManualEntry && (
                             <Button 
                               size="sm" 
                               onClick={() => handleOpenProjectRun(projectRun)}
@@ -210,9 +236,13 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Project Run</AlertDialogTitle>
+                                <AlertDialogTitle>Delete Project {projectRun.isManualEntry ? 'Entry' : 'Run'}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete "{projectRun.customProjectName || projectRun.name}"? This will only delete your personal project instance, not the original template.
+                                  Are you sure you want to delete "{projectRun.customProjectName || projectRun.name}"? 
+                                  {projectRun.isManualEntry 
+                                    ? ' This will permanently delete your manual project entry.'
+                                    : ' This will only delete your personal project instance, not the original template.'
+                                  }
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -245,6 +275,15 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
       <HomeManager 
         open={showHomeManager} 
         onOpenChange={setShowHomeManager} 
+      />
+      <ManualProjectDialog
+        open={showManualProjectDialog}
+        onOpenChange={setShowManualProjectDialog}
+        onProjectCreated={() => {
+          // The project runs should automatically refresh via the ProjectContext
+          // since it's using real-time subscriptions or polling
+          console.log('Manual project created');
+        }}
       />
       {/* Removed duplicate CommunityPostsWindow - handled by Navigation */}
     </div>
