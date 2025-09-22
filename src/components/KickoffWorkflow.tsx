@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { useProject } from '@/contexts/ProjectContext';
+import { DIYProfileStep } from './KickoffSteps/DIYProfileStep';
 import { ProjectOverviewStep } from './KickoffSteps/ProjectOverviewStep';
+import { ProjectProfileStep } from './KickoffSteps/ProjectProfileStep';
 import { ProjectAgreementStep } from './KickoffSteps/ProjectAgreementStep';
-import { ProjectCustomizationStep } from './KickoffSteps/ProjectCustomizationStep';
 
 interface KickoffWorkflowProps {
   onKickoffComplete: () => void;
@@ -21,11 +22,21 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
   const kickoffSteps = [
     {
       id: 'kickoff-step-1',
+      title: 'DIY Profile',
+      description: 'Complete your DIY profile for personalized guidance'
+    },
+    {
+      id: 'kickoff-step-2',
       title: 'Project Overview',
       description: 'Review and customize your project details'
     },
     {
-      id: 'kickoff-step-2', 
+      id: 'kickoff-step-3',
+      title: 'Project Profile',
+      description: 'Set up your project team and home selection'
+    },
+    {
+      id: 'kickoff-step-4', 
       title: 'Project Partner Agreement',
       description: 'Review and sign the project agreement'
     }
@@ -34,7 +45,7 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
   // Initialize completed steps from project run data
   useEffect(() => {
     if (currentProjectRun?.completedSteps) {
-      const kickoffStepIds = ['kickoff-step-1', 'kickoff-step-2'];
+      const kickoffStepIds = ['kickoff-step-1', 'kickoff-step-2', 'kickoff-step-3', 'kickoff-step-4'];
       const completedIndices = new Set<number>();
       
       console.log("KickoffWorkflow - Initializing from project run:", {
@@ -62,7 +73,7 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
         setCurrentKickoffStep(firstIncomplete);
       } else {
         console.log("KickoffWorkflow - All steps complete, showing last step");
-        setCurrentKickoffStep(1); // All complete, show last step
+        setCurrentKickoffStep(3); // All complete, show last step (index 3 for 4 steps)
       }
     }
   }, [currentProjectRun]);
@@ -165,8 +176,12 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
 
     switch (currentKickoffStep) {
       case 0:
-        return <ProjectOverviewStep {...stepProps} />;
+        return <DIYProfileStep {...stepProps} />;
       case 1:
+        return <ProjectOverviewStep {...stepProps} />;
+      case 2:
+        return <ProjectProfileStep {...stepProps} />;
+      case 3:
         return <ProjectAgreementStep {...stepProps} />;
       default:
         return null;

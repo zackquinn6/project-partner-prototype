@@ -4,6 +4,21 @@ export const createKickoffPhase = (): Phase => {
   const kickoffSteps: WorkflowStep[] = [
     {
       id: 'kickoff-step-1',
+      step: 'DIY Profile',
+      description: 'Complete your DIY profile for personalized project guidance',
+      contentType: 'text' as const,
+      content: 'Set up your DIY profile to receive personalized project recommendations, tool suggestions, and guidance tailored to your skill level and preferences.',
+      materials: [],
+      tools: [],
+      outputs: [{
+        id: 'diy-profile-output',
+        name: 'DIY Profile Complete',
+        description: 'Personal DIY profile completed and saved',
+        type: 'none' as const
+      }]
+    },
+    {
+      id: 'kickoff-step-2',
       step: 'Project Overview',
       description: 'Review and customize your project details, timeline, and objectives',
       contentType: 'text' as const,
@@ -18,7 +33,22 @@ export const createKickoffPhase = (): Phase => {
       }]
     },
     {
-      id: 'kickoff-step-2',
+      id: 'kickoff-step-3',
+      step: 'Project Profile',
+      description: 'Set up your project team, home selection, and customization',
+      contentType: 'text' as const,
+      content: 'Configure your project profile including project name, team members, home selection, and any project-specific customizations.',
+      materials: [],
+      tools: [],
+      outputs: [{
+        id: 'project-profile-output',
+        name: 'Project Profile Complete',
+        description: 'Project profile configured and saved',
+        type: 'none' as const
+      }]
+    },
+    {
+      id: 'kickoff-step-4',
       step: 'Project Partner Agreement',
       description: 'Review and sign the project partner agreement',
       contentType: 'text' as const,
@@ -339,7 +369,9 @@ export const addKickoffPhaseToProjectRun = addStandardPhasesToProjectRun;
 export const isKickoffPhaseComplete = (completedSteps: string[]): boolean => {
   const kickoffStepIds = [
     'kickoff-step-1',
-    'kickoff-step-2'
+    'kickoff-step-2',
+    'kickoff-step-3',
+    'kickoff-step-4'
   ];
   
   return kickoffStepIds.every(stepId => completedSteps.includes(stepId));
@@ -348,7 +380,9 @@ export const isKickoffPhaseComplete = (completedSteps: string[]): boolean => {
 export const getKickoffStepIndex = (stepId: string): number => {
   const kickoffStepIds = [
     'kickoff-step-1',
-    'kickoff-step-2'
+    'kickoff-step-2',
+    'kickoff-step-3',
+    'kickoff-step-4'
   ];
   
   return kickoffStepIds.indexOf(stepId);

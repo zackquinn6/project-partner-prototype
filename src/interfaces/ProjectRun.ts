@@ -16,6 +16,7 @@ export interface ProjectRun {
   projectLeader?: string;
   accountabilityPartner?: string;
   customProjectName?: string;
+  home_id?: string; // Reference to the home where this project is being done
   
   // Runtime data
   currentPhaseId?: string;
