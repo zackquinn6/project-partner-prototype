@@ -151,6 +151,7 @@ export interface Project {
   id: string;
   name: string;
   description: string;
+  diyLengthChallenges?: string; // Admin-defined field explaining most difficult aspects
   image?: string;
   createdAt: Date;
   updatedAt: Date;

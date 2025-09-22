@@ -63,63 +63,25 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            Project Details
-            {!isEditing && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-              >
-                <Edit3 className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-            )}
-          </CardTitle>
+          <CardTitle>Project Details</CardTitle>
           <CardDescription>
             Review and customize your project information
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {isEditing ? (
-            <>
-              <div>
-                <Label htmlFor="project-name">Project Name</Label>
-                <Input
-                  id="project-name"
-                  value={editForm.name}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="project-description">Project Description</Label>
-                <Textarea
-                  id="project-description"
-                  value={editForm.description}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                  rows={4}
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={handleSave} size="icon" variant="outline">
-                  <Save className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" onClick={handleCancel} size="icon">
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div>
-                <Label>Project Name</Label>
-                <p className="text-lg font-medium mt-1">{currentProjectRun.name}</p>
-              </div>
-              <div>
-                <Label>Description</Label>
-                <p className="mt-1 text-muted-foreground">{currentProjectRun.description}</p>
-              </div>
-            </>
+          <div>
+            <Label>Project Name</Label>
+            <p className="text-lg font-medium mt-1">{currentProjectRun.name}</p>
+          </div>
+          <div>
+            <Label>Description</Label>
+            <p className="mt-1 text-muted-foreground">{currentProjectRun.description}</p>
+          </div>
+          {currentProjectRun.diyLengthChallenges && (
+            <div>
+              <Label>DIY Challenges</Label>
+              <p className="mt-1 text-muted-foreground">{currentProjectRun.diyLengthChallenges}</p>
+            </div>
           )}
 
           <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t">
@@ -139,13 +101,9 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
               <Label>Estimated Time</Label>
               <p className="font-medium">{currentProjectRun.estimatedTime || 'Not specified'}</p>
             </div>
-            <div>
-              <Label>Project Leader</Label>
-              <p className="font-medium">{currentProjectRun.projectLeader || 'Not specified'}</p>
-            </div>
           </div>
 
-          {!isCompleted && !isEditing && (
+          {!isCompleted && (
             <Button onClick={onComplete} className="w-full mt-6 bg-green-600 hover:bg-green-700">
               <CheckCircle className="w-4 h-4 mr-2" />
               I'm Ready, Let's Go

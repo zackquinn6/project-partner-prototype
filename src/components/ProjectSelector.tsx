@@ -50,6 +50,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
       id: crypto.randomUUID(),
       name: newProjectForm.name,
       description: newProjectForm.description,
+      diyLengthChallenges: '', // Initialize empty DIY challenges field for new projects
       createdAt: new Date(),
       updatedAt: new Date(),
       startDate: new Date(),

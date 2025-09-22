@@ -5,6 +5,7 @@ export interface ProjectRun {
   templateId: string; // Reference to the template project
   name: string;
   description: string;
+  diyLengthChallenges?: string; // Copied from template project
   createdAt: Date;
   updatedAt: Date;
   startDate: Date;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Home, CheckCircle, Plus } from 'lucide-react';
@@ -36,7 +37,8 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
   const [projectForm, setProjectForm] = useState({
     customProjectName: '',
     projectLeader: '',
-    accountabilityPartner: ''
+    accountabilityPartner: '',
+    description: ''
   });
   const [loading, setLoading] = useState(true);
   const [showHomeManager, setShowHomeManager] = useState(false);
@@ -50,7 +52,8 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
       setProjectForm({
         customProjectName: currentProjectRun.customProjectName || currentProjectRun.name || '',
         projectLeader: currentProjectRun.projectLeader || '',
-        accountabilityPartner: currentProjectRun.accountabilityPartner || ''
+        accountabilityPartner: currentProjectRun.accountabilityPartner || '',
+        description: currentProjectRun.description || ''
       });
       
       if (currentProjectRun.home_id) {
@@ -109,6 +112,7 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
         customProjectName: projectForm.customProjectName.trim(),
         projectLeader: projectForm.projectLeader.trim(),
         accountabilityPartner: projectForm.accountabilityPartner.trim(),
+        description: projectForm.description.trim(),
         home_id: selectedHomeId,
         updatedAt: new Date()
       };
@@ -176,6 +180,19 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
             </div>
 
             <div>
+              <label className="text-sm font-medium mb-2 block">Project Description</label>
+              <Textarea
+                value={projectForm.description}
+                onChange={(e) => setProjectForm(prev => ({
+                  ...prev,
+                  description: e.target.value
+                }))}
+                placeholder="Describe your project goals and any special considerations"
+                rows={3}
+              />
+            </div>
+
+            <div>
               <label className="text-sm font-medium mb-2 block">Project Leader</label>
               <Input
                 value={projectForm.projectLeader}
@@ -213,7 +230,7 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="flex items-center gap-2">
                   <Select value={selectedHomeId} onValueChange={setSelectedHomeId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a home for this project" />
@@ -233,12 +250,10 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
                   </Select>
                   <Button 
                     variant="outline" 
-                    size="sm" 
+                    size="icon" 
                     onClick={() => setShowHomeManager(true)}
-                    className="w-full"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Another Home
+                    <Plus className="w-4 h-4" />
                   </Button>
                 </div>
               )}
