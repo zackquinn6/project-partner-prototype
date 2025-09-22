@@ -312,15 +312,18 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
         if (kickoffComplete) {
           console.log('✅ Kickoff complete - showing setup dialog');
           setIsProjectSetupOpen(true);
+          return; // Exit immediately after showing dialog
         } else {
           // Kickoff is not complete, navigate to continue the existing project run
           console.log('🔄 Kickoff not complete, continuing existing project run:', existingRun.id);
+          console.log('🧭 Navigating to home with projectRunId:', existingRun.id);
           navigate('/', {
             state: {
               view: 'user',
               projectRunId: existingRun.id
             }
           });
+          return; // Exit immediately after navigation
         }
       } else {
         // New project run, will go through kickoff flow - don't show setup dialog
