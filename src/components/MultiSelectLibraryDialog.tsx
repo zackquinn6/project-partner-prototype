@@ -89,7 +89,9 @@ export function MultiSelectLibraryDialog({
       
       if (error) throw error;
       
-      setUserOwnedItems((data?.[columnName] as any[]) || []);
+      const ownedItems = (data?.[columnName] as any[]) || [];
+      console.log(`User owned ${type}:`, ownedItems);
+      setUserOwnedItems(ownedItems);
     } catch (error) {
       console.error(`Error fetching user owned ${type}:`, error);
       setUserOwnedItems([]);
@@ -111,6 +113,7 @@ export function MultiSelectLibraryDialog({
         
         variationsMap[item.id] = variations || [];
       }
+      console.log('Item variations map:', variationsMap);
       setItemVariations(variationsMap);
     } catch (error) {
       console.error('Error fetching variations:', error);
@@ -127,6 +130,16 @@ export function MultiSelectLibraryDialog({
       // Get all variations for this core item
       const variations = itemVariations[item.id] || [];
       
+      // Debug logging for air compressor
+      if (item.item.toLowerCase().includes('air compressor')) {
+        console.log(`Checking ${item.item}:`, {
+          coreItemId: item.id,
+          variations,
+          userOwnedItems,
+          ownedItemIds: userOwnedItems.map(ownedItem => ownedItem.id)
+        });
+      }
+      
       // If item has no variations, check if core item itself is owned
       if (variations.length === 0) {
         const coreItemOwned = userOwnedItems.some(ownedItem => ownedItem.id === item.id);
@@ -141,6 +154,15 @@ export function MultiSelectLibraryDialog({
       
       // Also check if the core item itself is owned (for items that have both core and variations)
       const coreItemOwned = ownedItemIds.has(item.id);
+      
+      // Debug logging for air compressor
+      if (item.item.toLowerCase().includes('air compressor')) {
+        console.log(`Air compressor filtering result:`, {
+          allVariationsOwned,
+          coreItemOwned,
+          shouldShow: !allVariationsOwned && !coreItemOwned
+        });
+      }
       
       // Show item only if:
       // 1. Not all variations are owned AND
