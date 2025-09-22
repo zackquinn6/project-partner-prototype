@@ -296,7 +296,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       // Always create a new project run - user expects a fresh start
       setSelectedTemplate(project);
       console.log('✅ Creating new project run for:', project.name);
-      proceedToNewProject();
+      proceedToNewProject(project);
       
     } catch (error) {
       console.error('❌ Error in handleSelectProject:', error);
@@ -438,10 +438,11 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       setIsDIYSurveyOpen(true);
     }
   };
-  const proceedToNewProject = () => {
-    if (!selectedTemplate) return;
+  const proceedToNewProject = (template?: any) => {
+    const projectTemplate = template || selectedTemplate;
+    if (!projectTemplate) return;
 
-    console.log('🎯 proceedToNewProject: Starting new project creation for:', selectedTemplate.name);
+    console.log('🎯 proceedToNewProject: Starting new project creation for:', projectTemplate.name);
     
     // Set flag to prevent double-clicks during creation
     if (isCreatingNewProject) {
@@ -458,9 +459,9 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
 
     // Create a new project RUN based on the template without setup info
     const newProjectRun = {
-      templateId: selectedTemplate.id,
-      name: selectedTemplate.name,
-      description: selectedTemplate.description,
+      templateId: projectTemplate.id,
+      name: projectTemplate.name,
+      description: projectTemplate.description,
       createdAt: new Date(),
       updatedAt: new Date(),
       startDate: new Date(),
@@ -470,11 +471,11 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       completedSteps: [],
       progress: 0,
       // Copy template data
-      phases: selectedTemplate.phases,
-      category: selectedTemplate.category,
-      effortLevel: selectedTemplate.effortLevel,
-      skillLevel: selectedTemplate.skillLevel,
-      estimatedTime: selectedTemplate.estimatedTime
+      phases: projectTemplate.phases,
+      category: projectTemplate.category,
+      effortLevel: projectTemplate.effortLevel,
+      skillLevel: projectTemplate.skillLevel,
+      estimatedTime: projectTemplate.estimatedTime
     };
     
     // Pass navigation callback to addProjectRun
@@ -581,7 +582,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       } else {
         // New project run, will go through kickoff flow - start project creation process
         console.log('🚀 ProjectCatalog: New project after beta accept, proceeding directly to kickoff');
-        proceedToNewProject();
+        proceedToNewProject(selectedTemplate);
       }
   };
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
