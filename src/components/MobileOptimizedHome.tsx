@@ -242,9 +242,6 @@ export function MobileOptimizedHome() {
           
           <Card className="gradient-card">
             <CardContent className="p-3 text-center">
-              <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Clock className="h-4 w-4 text-white" />
-              </div>
               <p className="text-lg font-bold text-card-foreground">{stats.hoursSaved}</p>
               <p className="text-xs text-muted-foreground">Hours Saved</p>
             </CardContent>

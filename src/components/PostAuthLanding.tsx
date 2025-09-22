@@ -29,17 +29,17 @@ export const PostAuthLanding = () => {
   const [showCodePermits, setShowCodePermits] = useState(false);
   const [showContractorFinder, setShowContractorFinder] = useState(false);
   const [stats, setStats] = useState([{
-    label: "Active Projects",
+    label: "Active Projects", 
     value: "0",
     icon: Target
   }, {
     label: "Completed",
-    value: "0",
+    value: "0", 
     icon: Trophy
   }, {
     label: "Hours Saved",
     value: "0",
-    icon: Zap
+    icon: null
   }]);
   useEffect(() => {
     const handleKickoffNavigation = (event: CustomEvent) => {

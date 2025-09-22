@@ -154,8 +154,8 @@ export default function Home({
             </div>
             <div className="border-b border-border pb-4 mb-6"></div>
             
-            {/* Apps Grid */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto mb-8 px-2">
+            {/* Core Apps Grid */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto mb-6 px-2">
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => {
             navigate('/', {
               replace: true,
@@ -220,61 +220,71 @@ export default function Home({
                 <span className="text-xs font-medium text-black text-center leading-tight px-1">My Profile</span>
               </div>
               
-              <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-community-posts'))}>
-                <div className="relative">
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.community} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
-                    <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
-                    BETA
-                  </Badge>
-                </div>
-                <span className="text-xs font-medium text-black text-center leading-tight px-1">Community</span>
-              </div>
-              
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-home-manager'))}>
                 <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.myHomes} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
                   <MapPin className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-black text-center leading-tight px-1">My Homes</span>
               </div>
+            </div>
 
-              <div className="flex flex-col items-center group cursor-pointer" onClick={() => setIsAIRepairOpen(true)}>
-                <div className="relative">
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.aiRepair} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
-                    <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
-                    BETA
-                  </Badge>
-                </div>
-                <span className="text-xs font-medium text-black text-center leading-tight px-1">AI Repair</span>
+            {/* Beta Apps Section */}
+            <div className="mb-6">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Badge className="bg-orange-500 text-white">BETA</Badge>
+                <span className="text-sm font-medium text-muted-foreground">New Features in Development</span>
               </div>
+              
+              <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto px-2">
+                <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-community-posts'))}>
+                  <div className="relative">
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.community} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
+                      <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                    </div>
+                    <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
+                      BETA
+                    </Badge>
+                  </div>
+                  <span className="text-xs font-medium text-black text-center leading-tight px-1">Community</span>
+                </div>
 
-              <div className="flex flex-col items-center group cursor-pointer" onClick={() => setIsCodePermitsOpen(true)}>
-                <div className="relative">
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.codePermits} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
-                    <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                <div className="flex flex-col items-center group cursor-pointer" onClick={() => setIsContractorFinderOpen(true)}>
+                  <div className="relative">
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.contractorFinder} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
+                      <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                    </div>
+                    <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
+                      BETA
+                    </Badge>
                   </div>
-                  <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
-                    BETA
-                  </Badge>
+                  <span className="text-xs font-medium text-black text-center leading-tight px-1">Contractor Finder</span>
                 </div>
-                <span className="text-xs font-medium text-black text-center leading-tight px-1">Code & Permits</span>
-              </div>
 
-              <div className="flex flex-col items-center group cursor-pointer" onClick={() => setIsContractorFinderOpen(true)}>
-                <div className="relative">
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.contractorFinder} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
-                    <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                <div className="flex flex-col items-center group cursor-pointer" onClick={() => setIsAIRepairOpen(true)}>
+                  <div className="relative">
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.aiRepair} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
+                      <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                    </div>
+                    <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
+                      BETA
+                    </Badge>
                   </div>
-                  <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
-                    BETA
-                  </Badge>
+                  <span className="text-xs font-medium text-black text-center leading-tight px-1">AI Repair</span>
                 </div>
-                <span className="text-xs font-medium text-black text-center leading-tight px-1">Contractor Finder</span>
+
+                <div className="flex flex-col items-center group cursor-pointer" onClick={() => setIsCodePermitsOpen(true)}>
+                  <div className="relative">
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.codePermits} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
+                      <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                    </div>
+                    <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
+                      BETA
+                    </Badge>
+                  </div>
+                  <span className="text-xs font-medium text-black text-center leading-tight px-1">Code & Permits</span>
+                </div>
               </div>
-             </div>
+            </div>
            </div>
          </div> :
     // Non-logged-in users see the marketing homepage
