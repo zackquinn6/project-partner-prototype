@@ -38,6 +38,7 @@ interface Project {
   skill_level: string | null;
   estimated_time: string | null;
   scaling_unit: string | null;
+  diy_length_challenges: string | null;
   created_by: string;
   phases?: any; // JSON field for phases
 }

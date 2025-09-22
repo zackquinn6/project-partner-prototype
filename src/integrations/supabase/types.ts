@@ -1326,6 +1326,7 @@ export type Database = {
           created_from_revision: number | null
           description: string | null
           difficulty: string | null
+          diy_length_challenges: string | null
           effort_level: string | null
           end_date: string | null
           estimated_time: string | null
@@ -1357,6 +1358,7 @@ export type Database = {
           created_from_revision?: number | null
           description?: string | null
           difficulty?: string | null
+          diy_length_challenges?: string | null
           effort_level?: string | null
           end_date?: string | null
           estimated_time?: string | null
@@ -1388,6 +1390,7 @@ export type Database = {
           created_from_revision?: number | null
           description?: string | null
           difficulty?: string | null
+          diy_length_challenges?: string | null
           effort_level?: string | null
           end_date?: string | null
           estimated_time?: string | null
