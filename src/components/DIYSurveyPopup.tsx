@@ -370,10 +370,7 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
         } else if (personalityProfile) {
           // User is not signed in - save temporarily
           saveTempPersonalityProfile(personalityProfile);
-          toast({
-            title: "Quiz Results Saved!",
-            description: "Your DIY Builder Profile has been saved. Sign in to keep it permanently!",
-          });
+          // Removed toast notification during kickoff to prevent distraction
         }
       } catch (error) {
         console.error('Error saving personality profile:', error);
@@ -436,10 +433,7 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
         } else {
           // User is not signed in - save temporarily
           saveTempProfileAnswers(answers);
-          toast({
-            title: "Profile Saved!",
-            description: "Your profile has been saved. Sign in to keep it permanently!",
-          });
+          // Removed toast notification during kickoff to prevent distraction
         }
         onOpenChange(false);
       } catch (error) {

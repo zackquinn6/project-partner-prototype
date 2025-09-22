@@ -320,8 +320,8 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       } else {
         // New project run, will go through kickoff flow - don't show setup dialog
         console.log('ProjectCatalog: New project, will go through kickoff - skipping setup dialog');
-        // For new projects, we should start the project creation process
-        handleSkipSetup();
+        // For new projects, we should start the project creation process immediately
+        proceedToNewProject();
       }
     }
   };
@@ -455,6 +455,49 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       setIsDIYSurveyOpen(true);
     }
   };
+  const proceedToNewProject = () => {
+    if (!selectedTemplate) return;
+
+    // Create a new project RUN based on the template without setup info
+    const newProjectRun = {
+      templateId: selectedTemplate.id,
+      name: selectedTemplate.name,
+      description: selectedTemplate.description,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      startDate: new Date(),
+      planEndDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      status: 'not-started' as const,
+      // No user customization data when skipping
+      completedSteps: [],
+      progress: 0,
+      // Copy template data
+      phases: selectedTemplate.phases,
+      category: selectedTemplate.category,
+      effortLevel: selectedTemplate.effortLevel,
+      skillLevel: selectedTemplate.skillLevel,
+      estimatedTime: selectedTemplate.estimatedTime
+    };
+    
+    // Pass navigation callback to addProjectRun
+    addProjectRun(newProjectRun, (projectRunId: string) => {
+      console.log("🎯 ProjectCatalog: Project run created (new project), navigating to kickoff with ID:", projectRunId);
+      
+      // Reset state immediately
+      setSelectedTemplate(null);
+      
+      // Navigate immediately without delay
+      setTimeout(() => {
+        navigate('/', {
+          state: {
+            view: 'user',
+            projectRunId: projectRunId
+          }
+        });
+      }, 100); // Small delay to ensure state updates
+    });
+  };
+
   const handleSkipSetup = () => {
     if (!selectedTemplate) return;
 
