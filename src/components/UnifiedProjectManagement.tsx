@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useProject } from '@/contexts/ProjectContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +22,7 @@ interface Project {
   id: string;
   name: string;
   description: string;
-  publish_status: 'draft' | 'beta' | 'published' | 'archived';
+  publish_status: 'draft' | 'beta-testing' | 'published' | 'archived';
   revision_number: number;
   parent_project_id: string | null;
   created_at: string;
@@ -37,9 +39,12 @@ interface Project {
   estimated_time: string | null;
   scaling_unit: string | null;
   created_by: string;
+  phases?: any; // JSON field for phases
 }
 
 export function UnifiedProjectManagement() {
+  const navigate = useNavigate();
+  const { setCurrentProject } = useProject();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projectRevisions, setProjectRevisions] = useState<Project[]>([]);
@@ -53,7 +58,7 @@ export function UnifiedProjectManagement() {
   const [createRevisionDialogOpen, setCreateRevisionDialogOpen] = useState(false);
   const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
   const [selectedRevision, setSelectedRevision] = useState<Project | null>(null);
-  const [newStatus, setNewStatus] = useState<'beta' | 'published'>('beta');
+  const [newStatus, setNewStatus] = useState<'beta-testing' | 'published'>('beta-testing');
   const [releaseNotes, setReleaseNotes] = useState('');
   const [revisionNotes, setRevisionNotes] = useState('');
   const [newProject, setNewProject] = useState<{
@@ -181,7 +186,7 @@ export function UnifiedProjectManagement() {
     setEditedProject({});
   };
 
-  const handleStatusChange = (revision: Project, status: 'beta' | 'published') => {
+  const handleStatusChange = (revision: Project, status: 'beta-testing' | 'published') => {
     setSelectedRevision(revision);
     setNewStatus(status);
     setReleaseNotes('');
@@ -204,7 +209,7 @@ export function UnifiedProjectManagement() {
 
       toast({
         title: "Success",
-        description: `Project ${newStatus === 'beta' ? 'released to Beta' : 'published'}!`,
+        description: `Project ${newStatus === 'beta-testing' ? 'released to Beta' : 'published'}!`,
       });
 
       setPublishDialogOpen(false);
@@ -434,7 +439,7 @@ export function UnifiedProjectManagement() {
                                 if (!projectRevisions || projectRevisions.length === 0) return 'No revisions';
                                 const latestRevision = projectRevisions.find(r => r.is_current_version) || projectRevisions[0];
                                 const statusText = latestRevision.publish_status === 'published' ? 'Production' : 
-                                                 latestRevision.publish_status === 'beta' ? 'Beta' : 
+                                                 latestRevision.publish_status === 'beta-testing' ? 'Beta' : 
                                                  latestRevision.publish_status === 'draft' ? 'Draft' : 'Archived';
                                 return `Revision ${latestRevision.revision_number} - ${statusText}`;
                               })()}
@@ -642,8 +647,20 @@ export function UnifiedProjectManagement() {
                           size="sm"
                           variant="outline"
                           onClick={() => {
-                            // Navigate to edit workflow
-                            window.location.href = `/#/edit-project/${revision.id}`;
+                            // Set the current project and navigate to edit workflow
+                            setCurrentProject({ 
+                              id: revision.id, 
+                              name: revision.name,
+                              description: revision.description || '',
+                              createdAt: new Date(revision.created_at),
+                              updatedAt: new Date(revision.updated_at),
+                              startDate: new Date(),
+                              planEndDate: new Date(),
+                              status: 'not-started' as const,
+                              publishStatus: revision.publish_status as 'draft' | 'published' | 'beta-testing',
+                              phases: revision.phases ? (typeof revision.phases === 'string' ? JSON.parse(revision.phases) : revision.phases) : []
+                            });
+                            navigate('/', { state: { view: 'editWorkflow' } });
                           }}
                           className="flex items-center gap-1"
                         >
@@ -656,7 +673,7 @@ export function UnifiedProjectManagement() {
                                           <Button
                                             size="sm"
                                             variant="outline"
-                                            onClick={() => handleStatusChange(revision, 'beta')}
+                                            onClick={() => handleStatusChange(revision, 'beta-testing')}
                                             className="flex items-center gap-1"
                                           >
                                             <ArrowRight className="w-3 h-3" />
@@ -672,7 +689,7 @@ export function UnifiedProjectManagement() {
                                            </Button>
                                         </>
                                       )}
-                                      {revision.publish_status === 'beta' && (
+                                      {revision.publish_status === 'beta-testing' && (
                                          <Button
                                            size="sm"
                                            onClick={() => handleStatusChange(revision, 'published')}
@@ -713,12 +730,12 @@ export function UnifiedProjectManagement() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-orange-500" />
-              Confirm {newStatus === 'beta' ? 'Beta Release' : 'Publication'}
+              Confirm {newStatus === 'beta-testing' ? 'Beta Release' : 'Publication'}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              {newStatus === 'beta' 
+              {newStatus === 'beta-testing' 
                 ? 'This will release the project to beta testing. Beta projects are visible to users but marked as experimental.'
                 : 'This will publish the project for all users. This action will archive all previous versions.'
               }
@@ -744,7 +761,7 @@ export function UnifiedProjectManagement() {
                 disabled={!releaseNotes.trim()}
                 className={newStatus === 'published' ? 'bg-green-600 hover:bg-green-700' : ''}
               >
-                {newStatus === 'beta' ? 'Release to Beta' : 'Publish'}
+                {newStatus === 'beta-testing' ? 'Release to Beta' : 'Publish'}
               </Button>
             </div>
           </div>
