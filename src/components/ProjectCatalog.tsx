@@ -130,8 +130,10 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
         project.publishStatus === 'published' || 
         project.publishStatus === 'beta-testing' || 
         isAdminMode
-      ))
-    : publicProjects;
+      ) && project.id !== '00000000-0000-0000-0000-000000000000') // Hide manual project template
+    : publicProjects.filter(project => 
+        project.id !== '00000000-0000-0000-0000-000000000000' // Hide manual project template
+      );
 
   // Get unique filter options
   const availableCategories = useMemo(() => 
