@@ -284,8 +284,11 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       setSelectedTemplate(project);
       setProjectSetupForm(prev => ({
         ...prev,
-        customProjectName: project.name
+        customProjectName: project.name.replace(/ \(Rev \d+\)$/i, '')
       }));
+      
+      // Fetch homes when opening project setup dialog
+      fetchHomes();
       
       // Show project setup dialog first
       setIsProjectSetupOpen(true);
@@ -475,7 +478,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
     
     setProjectSetupForm(prev => ({
       ...prev,
-      customProjectName: selectedTemplate.name
+      customProjectName: selectedTemplate.name.replace(/ \(Rev \d+\)$/i, '')
     }));
     
     // Show project setup dialog
@@ -735,7 +738,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
               <DialogHeader>
                 <DialogTitle>Let's get this project going! 🚀</DialogTitle>
                 <DialogDescription>
-                  Time to set up your {selectedTemplate?.name} project team and timeline. Let's make this happen!
+                  Time to set up your {selectedTemplate?.name.replace(/ \(Rev \d+\)$/i, '')} project team and timeline. Let's make this happen!
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
@@ -746,7 +749,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
                 customProjectName: e.target.value
               }))} />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Based on: {selectedTemplate?.name}
+                    Based on: {selectedTemplate?.name.replace(/ \(Rev \d+\)$/i, '')}
                   </p>
                 </div>
                 <div>
@@ -837,7 +840,18 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
           />
         )}
 
-        {/* Beta Project Warning Dialog - Only show in user mode */}
+         {/* Home Manager Dialog - Only show in user mode */}
+         {!isAdminMode && (
+           <HomeManager
+             open={showHomeManager}
+             onOpenChange={(open) => {
+               setShowHomeManager(open);
+               if (!open) {
+                 fetchHomes(); // Refresh homes when dialog closes
+               }
+             }}
+           />
+         )}
         {!isAdminMode && selectedTemplate && (
           <BetaProjectWarning
             projectName={selectedTemplate.name}

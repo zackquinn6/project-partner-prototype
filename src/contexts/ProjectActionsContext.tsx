@@ -403,10 +403,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
         setCurrentProjectRun(null);
       }
 
-      toast({
-        title: "Success",
-        description: "Project run deleted successfully",
-      });
+      // Success - no toast notification needed
     } catch (error) {
       console.error('Error deleting project run:', error);
       toast({
