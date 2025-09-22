@@ -21,9 +21,7 @@ interface ManualProjectEditDialogProps {
 const statusOptions = [
   { value: 'not-started', label: 'Not Started' },
   { value: 'in-progress', label: 'In Progress' },
-  { value: 'on-hold', label: 'On Hold' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'cancelled', label: 'Cancelled' }
+  { value: 'complete', label: 'Complete' }
 ];
 
 const categoryOptions = [
@@ -49,7 +47,7 @@ export function ManualProjectEditDialog({ open, onOpenChange, projectRun, onProj
     name: '',
     description: '',
     category: '',
-    status: 'completed',
+    status: 'complete',
     progress: 100,
     estimatedTime: '',
     startDate: '',
@@ -70,7 +68,7 @@ export function ManualProjectEditDialog({ open, onOpenChange, projectRun, onProj
         name: projectRun.customProjectName || projectRun.name || '',
         description: projectRun.description || '',
         category: projectRun.category || '',
-        status: projectRun.status || 'completed',
+        status: projectRun.status || 'complete',
         progress: projectRun.progress || 100,
         estimatedTime: projectRun.estimatedTime || '',
         startDate: formatDate(projectRun.startDate),
@@ -148,11 +146,8 @@ export function ManualProjectEditDialog({ open, onOpenChange, projectRun, onProj
       case 'on-hold':
         // Keep current progress
         break;
-      case 'completed':
+      case 'complete':
         progress = 100;
-        break;
-      case 'cancelled':
-        // Keep current progress
         break;
     }
     
