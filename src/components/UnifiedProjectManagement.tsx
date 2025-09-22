@@ -636,8 +636,8 @@ export function UnifiedProjectManagement() {
                                       )}
                                     </div>
 
-                                    <div className="flex flex-col gap-2 ml-4">
-                      {revision.publish_status === 'draft' && revision.is_current_version && (
+                                     <div className="flex flex-col gap-2 ml-4">
+                      {revision.publish_status === 'draft' && (
                         <Button
                           size="sm"
                           variant="outline"

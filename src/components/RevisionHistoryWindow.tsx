@@ -103,7 +103,7 @@ export const RevisionHistoryWindow: React.FC<RevisionHistoryWindowProps> = ({
       };
 
       await updateProject(newRevision);
-      toast.success(`Restored from revision ${revisionToRestore.revisionNumber}`);
+      // Revision restored successfully - no toast needed
       onOpenChange(false);
     } catch (error) {
       console.error('Error restoring revision:', error);

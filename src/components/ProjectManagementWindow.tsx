@@ -369,7 +369,7 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
       await updateProject(archivedVersion);
       await updateProject(newRevision);
       
-      toast.success(`Created revision ${newRevision.revisionNumber} and archived previous version`);
+      // Revision created successfully - no toast needed
     } catch (error) {
       console.error('Error creating revision:', error);
       toast.error('Failed to create revision');

@@ -87,8 +87,8 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
       <Card className="gradient-card border-0 shadow-card">
         <CardHeader>
           <div>
-            <CardTitle className="text-2xl">My Projects</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl">My Projects</CardTitle>
+            <CardDescription className="text-sm">
               View and manage your project portfolio
             </CardDescription>
           </div>
@@ -136,14 +136,14 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm">
-                          <div>{formatDate(projectRun.startDate).monthDay}</div>
+                        <div className="text-xs leading-tight">
+                          <div className="font-medium">{formatDate(projectRun.startDate).monthDay}</div>
                           <div className="text-muted-foreground">{formatDate(projectRun.startDate).year}</div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm">
-                          <div>{formatDate(projectRun.planEndDate).monthDay}</div>
+                        <div className="text-xs leading-tight">
+                          <div className="font-medium">{formatDate(projectRun.planEndDate).monthDay}</div>
                           <div className="text-muted-foreground">{formatDate(projectRun.planEndDate).year}</div>
                         </div>
                       </TableCell>
@@ -162,12 +162,12 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                       </TableCell>
                       <TableCell>
                         {projectRun.endDate ? (
-                          <div className="text-sm">
-                            <div>{formatDate(projectRun.endDate).monthDay}</div>
+                          <div className="text-xs leading-tight">
+                            <div className="font-medium">{formatDate(projectRun.endDate).monthDay}</div>
                             <div className="text-muted-foreground">{formatDate(projectRun.endDate).year}</div>
                           </div>
                         ) : (
-                          <div className="text-sm text-muted-foreground">-</div>
+                          <div className="text-xs text-muted-foreground">-</div>
                         )}
                       </TableCell>
                       <TableCell>
