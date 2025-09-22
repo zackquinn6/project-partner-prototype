@@ -214,12 +214,9 @@ Pick up where you left off or start your next winning project.</p>
         </div>
 
         {/* Quick Stats - Compact Bar */}
-        <div className="bg-card rounded-lg border shadow-sm p-2 md:p-3 mb-6 md:mb-8 mx-4 md:mx-0">
+        <div className="bg-card rounded-lg border shadow-sm p-2 md:p-2 mb-6 md:mb-8 mx-4 md:mx-0">
           <div className="flex justify-center items-center space-x-4 md:space-x-8 overflow-x-auto">
             {stats.map((stat, index) => <div key={index} className="flex items-center space-x-1 md:space-x-2 min-w-0">
-                <div className="w-5 h-5 md:w-6 md:h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                  <stat.icon className="h-2 w-2 md:h-3 md:w-3 text-primary-foreground" />
-                </div>
                 <div className="text-base md:text-lg font-semibold text-foreground whitespace-nowrap">{stat.value}</div>
                 <div className="text-xs text-muted-foreground whitespace-nowrap">{stat.label}</div>
               </div>)}

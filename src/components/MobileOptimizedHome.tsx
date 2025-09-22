@@ -221,27 +221,21 @@ export function MobileOptimizedHome() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
           <Card className="gradient-card">
-            <CardContent className="p-3 text-center">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center mx-auto mb-2">
-                <TrendingUp className="h-4 w-4 text-primary-foreground" />
-              </div>
+            <CardContent className="p-2 text-center">
               <p className="text-lg font-bold text-card-foreground">{stats.activeProjects}</p>
               <p className="text-xs text-muted-foreground">Active</p>
             </CardContent>
           </Card>
           
           <Card className="gradient-card">
-            <CardContent className="p-3 text-center">
-              <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                <CheckCircle className="h-4 w-4 text-white" />
-              </div>
+            <CardContent className="p-2 text-center">
               <p className="text-lg font-bold text-card-foreground">{stats.completedProjects}</p>
               <p className="text-xs text-muted-foreground">Completed</p>
             </CardContent>
           </Card>
           
           <Card className="gradient-card">
-            <CardContent className="p-3 text-center">
+            <CardContent className="p-2 text-center">
               <p className="text-lg font-bold text-card-foreground">{stats.hoursSaved}</p>
               <p className="text-xs text-muted-foreground">Hours Saved</p>
             </CardContent>
