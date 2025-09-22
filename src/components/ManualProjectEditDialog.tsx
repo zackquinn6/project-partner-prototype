@@ -115,19 +115,10 @@ export function ManualProjectEditDialog({ open, onOpenChange, projectRun, onProj
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Manual project updated successfully!"
-      });
       onOpenChange(false);
       onProjectUpdated?.();
     } catch (error) {
       console.error('Error updating manual project:', error);
-      toast({
-        title: "Error", 
-        description: "Failed to update project. Please try again.",
-        variant: "destructive"
-      });
     } finally {
       setIsSubmitting(false);
     }
@@ -142,9 +133,6 @@ export function ManualProjectEditDialog({ open, onOpenChange, projectRun, onProj
         break;
       case 'in-progress':
         progress = Math.max(progress, 1); // Keep current progress if > 1
-        break;
-      case 'on-hold':
-        // Keep current progress
         break;
       case 'complete':
         progress = 100;
