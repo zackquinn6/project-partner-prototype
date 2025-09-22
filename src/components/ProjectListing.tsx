@@ -23,7 +23,7 @@ interface ProjectListingProps {
 }
 
 export default function ProjectListing({ onProjectSelect }: ProjectListingProps) {
-  const { projectRuns, currentProjectRun, setCurrentProjectRun, deleteProjectRun } = useProject();
+  const { projectRuns, currentProjectRun, setCurrentProjectRun, deleteProjectRun, fetchProjectRuns } = useProject();
   const navigate = useNavigate();
   const [showProfileManager, setShowProfileManager] = useState(false);
   const [showToolsLibrary, setShowToolsLibrary] = useState(false);
@@ -282,9 +282,7 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
         open={showManualProjectDialog}
         onOpenChange={setShowManualProjectDialog}
         onProjectCreated={() => {
-          // The project runs should automatically refresh via the ProjectContext
-          // since it's using real-time subscriptions or polling
-          console.log('Manual project created');
+          fetchProjectRuns();
         }}
       />
       <ManualProjectEditDialog

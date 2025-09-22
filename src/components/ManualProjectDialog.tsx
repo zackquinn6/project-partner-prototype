@@ -98,11 +98,6 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Manual project logged successfully!"
-      });
-      
       // Reset form
       setFormData({
         name: '',
