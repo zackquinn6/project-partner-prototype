@@ -273,10 +273,10 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       }
       
       // For published projects, proceed normally
-      console.log('User mode - showing project setup');
+      console.log('✅ User mode - proceeding with project setup for:', project.name);
       
       if (!user) {
-        console.log('No user found - showing sign in dialog');
+        console.log('❌ No user found - redirecting to auth');
         navigate('/auth?return=projects');
         return;
       }
@@ -290,11 +290,14 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
       // Fetch homes when opening project setup dialog
       fetchHomes();
       
+      console.log('🔍 Checking for existing project runs...');
       // Check if there's an active project run for this user
       const existingRun = projectRuns.find(run => 
         run.templateId === project.id && 
         run.status !== 'complete'
       );
+      
+      console.log('📊 Existing run found:', !!existingRun, existingRun?.id);
       
       // If there's an existing project run, check if kickoff is complete
       if (existingRun) {
@@ -303,12 +306,15 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
           existingRun.completedSteps.includes(stepId)
         );
         
+        console.log('🚀 Kickoff complete:', kickoffComplete, 'Completed steps:', existingRun.completedSteps);
+        
         // Only show project setup dialog if kickoff is complete
         if (kickoffComplete) {
+          console.log('✅ Kickoff complete - showing setup dialog');
           setIsProjectSetupOpen(true);
         } else {
           // Kickoff is not complete, navigate to continue the existing project run
-          console.log('ProjectCatalog: Kickoff not complete, continuing existing project run:', existingRun.id);
+          console.log('🔄 Kickoff not complete, continuing existing project run:', existingRun.id);
           navigate('/', {
             state: {
               view: 'user',
@@ -318,7 +324,7 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
         }
       } else {
         // New project run, will go through kickoff flow - don't show setup dialog
-        console.log('🚀 ProjectCatalog: New project detected, proceeding directly to kickoff');
+        console.log('🚀 New project detected, proceeding directly to kickoff');
         proceedToNewProject();
       }
     }
