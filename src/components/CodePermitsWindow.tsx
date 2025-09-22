@@ -238,6 +238,9 @@ export function CodePermitsWindow({ open, onOpenChange }: CodePermitsWindowProps
             <Building2 className="h-5 w-5" />
             Code & Permits
           </DialogTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            This helps identify relevant building codes and permitting process when beginning a new project
+          </p>
         </DialogHeader>
         
         {/* Beta Banner */}

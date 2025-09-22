@@ -203,10 +203,7 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
         open={showHomeManager} 
         onOpenChange={setShowHomeManager} 
       />
-      <CommunityPostsWindow 
-        open={showCommunityPosts} 
-        onOpenChange={setShowCommunityPosts} 
-      />
+      {/* Removed duplicate CommunityPostsWindow - handled by Navigation */}
     </div>
   );
 }

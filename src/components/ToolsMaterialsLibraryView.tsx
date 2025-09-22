@@ -501,7 +501,7 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
                      <Label className="text-xs">
                        Quantity
                        {selectedType === 'material' && (selectedItem as UserOwnedMaterial).unit_size && (
-                         <span className="text-muted-foreground ml-1">
+                         <span className="text-muted-foreground ml-1 text-[10px]">
                            ({(selectedItem as UserOwnedMaterial).unit_size})
                          </span>
                        )}

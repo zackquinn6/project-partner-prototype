@@ -10,9 +10,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Plus, X, Save } from 'lucide-react';
 import { Output, StepInput } from '@/interfaces/Project';
 
-// Extend Output interface to include allowances field
+// Extend Output interface to include allowances and reference specification fields
 interface ExtendedOutput extends Output {
   allowances?: string;
+  referenceSpecification?: string;
 }
 
 interface OutputEditFormProps {
@@ -155,6 +156,16 @@ export const OutputEditForm: React.FC<OutputEditFormProps> = ({
                   onChange={(e) => setFormData(prev => ({ ...prev, allowances: e.target.value }))}
                   placeholder="Acceptable variations or tolerances..."
                   rows={2}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="referenceSpecification">Reference Specification</Label>
+                <Input
+                  id="referenceSpecification"
+                  value={formData.referenceSpecification || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, referenceSpecification: e.target.value }))}
+                  placeholder="e.g., International Building Code Section 2302"
                 />
               </div>
             </CardContent>
