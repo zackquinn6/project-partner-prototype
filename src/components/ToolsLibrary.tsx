@@ -222,9 +222,8 @@ export function ToolsLibrary() {
         </Button>
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogTrigger asChild>
-            <Button size="sm" className="text-xs">
-              <Plus className="w-4 h-4 mr-1" />
-              Add
+            <Button size="sm" className="w-8 h-8 p-0" title="Add Tool">
+              <Plus className="w-3 h-3" />
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -328,13 +327,14 @@ export function ToolsLibrary() {
                       size="sm"
                       onClick={() => handleEdit(tool)}
                       title="Edit Variations"
+                      className="w-8 h-8 p-0"
                     >
-                      <Edit className="w-4 h-4" />
+                      <Edit className="w-3 h-3" />
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <Trash2 className="w-4 h-4 text-destructive" />
+                        <Button variant="ghost" size="sm" className="w-8 h-8 p-0" title="Delete Tool">
+                          <Trash2 className="w-3 h-3 text-destructive" />
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>

@@ -227,20 +227,20 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
     general: 'General'
   };
   return <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-[95vw] sm:max-w-6xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Home className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <Home className="h-4 w-4 sm:h-5 sm:w-5" />
               Home Maintenance Tracker
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
             {/* Home Selection */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
               <Select value={selectedHomeId} onValueChange={setSelectedHomeId}>
-                <SelectTrigger className="w-[300px]">
+                <SelectTrigger className="w-full sm:w-[300px]">
                   <SelectValue placeholder="Select a home" />
                 </SelectTrigger>
                 <SelectContent>
@@ -250,10 +250,10 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                 </SelectContent>
               </Select>
 
-              <div className="flex gap-2">
-                <Button onClick={() => setShowAddTask(true)} disabled={!selectedHomeId} className="flex items-center gap-2">
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button onClick={() => setShowAddTask(true)} disabled={!selectedHomeId} className="w-8 h-8 p-0 sm:w-auto sm:h-auto sm:px-4 sm:py-2" title="Add Task">
                   <Plus className="h-4 w-4" />
-                  Add Task
+                  <span className="hidden sm:inline ml-2">Add Task</span>
                 </Button>
                 
                 {selectedHomeId && tasks.length > 0 && (
@@ -278,7 +278,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4 text-muted-foreground" />
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                      <SelectTrigger className="w-[200px]">
+                      <SelectTrigger className="w-full sm:w-[200px]">
                         <SelectValue placeholder="Filter by category" />
                       </SelectTrigger>
                       <SelectContent>
@@ -337,14 +337,14 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                                     <Progress value={progress} className="h-1" />
                                   </div>
                                 </div>
-                                <div className="flex gap-2 ml-3 shrink-0">
-                                  <Button onClick={() => handleTaskComplete(task)} size="sm">
-                                    Complete
-                                  </Button>
-                                  <Button variant="destructive" size="sm" onClick={() => handleDeleteTask(task.id)}>
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
+                                 <div className="flex gap-2 ml-3 shrink-0">
+                                   <Button onClick={() => handleTaskComplete(task)} size="sm" className="text-xs">
+                                     Complete
+                                   </Button>
+                                   <Button variant="destructive" size="sm" onClick={() => handleDeleteTask(task.id)} className="w-8 h-8 p-0" title="Delete Task">
+                                     <Trash2 className="h-3 w-3" />
+                                   </Button>
+                                 </div>
                               </div>
                             </CardContent>
                           </Card>;

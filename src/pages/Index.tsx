@@ -321,7 +321,7 @@ const Index = () => {
             <div className="h-screen flex flex-col">
               <MobileProjectListing
                 onProjectSelect={handleMobileProjectSelect}
-                onNewProject={() => navigate('/projects')}
+                onNewProject={() => setMobileView('home')}
               />
               <MobileBottomNav
                 currentView="projects"
