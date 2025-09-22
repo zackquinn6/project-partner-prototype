@@ -31,20 +31,17 @@ export function MobileOptimizedHome() {
   
   const [stats, setStats] = useState({
     activeProjects: 0,
-    completedProjects: 0,
-    hoursSaved: 0
+    completedProjects: 0
   });
 
   // Calculate stats
   useEffect(() => {
     const active = projectRuns.filter(run => (run.progress || 0) < 100).length;
     const completed = projectRuns.filter(run => (run.progress || 0) >= 100).length;
-    const hours = completed * 2; // Estimate 2 hours saved per completed project
     
     setStats({
       activeProjects: active,
-      completedProjects: completed,
-      hoursSaved: hours
+      completedProjects: completed
     });
   }, [projectRuns]);
 
@@ -225,28 +222,24 @@ export function MobileOptimizedHome() {
           </Card>
         )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="gradient-card">
-            <CardContent className="p-2 text-center">
-              <p className="text-lg font-bold text-card-foreground">{stats.activeProjects}</p>
-              <p className="text-xs text-muted-foreground">Active</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="gradient-card">
-            <CardContent className="p-2 text-center">
-              <p className="text-lg font-bold text-card-foreground">{stats.completedProjects}</p>
-              <p className="text-xs text-muted-foreground">Completed</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="gradient-card">
-            <CardContent className="p-2 text-center">
-              <p className="text-lg font-bold text-card-foreground">{stats.hoursSaved}</p>
-              <p className="text-xs text-muted-foreground">Hours Saved</p>
-            </CardContent>
-          </Card>
+        {/* Project Scoreboard */}
+        <div>
+          <h2 className="text-sm font-medium text-muted-foreground mb-3 text-center">Project Scoreboard</h2>
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="gradient-card">
+              <CardContent className="p-2 text-center">
+                <p className="text-lg font-bold text-card-foreground">{stats.activeProjects}</p>
+                <p className="text-xs text-muted-foreground">Active</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="gradient-card">
+              <CardContent className="p-2 text-center">
+                <p className="text-lg font-bold text-card-foreground">{stats.completedProjects}</p>
+                <p className="text-xs text-muted-foreground">Completed</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Quick Actions */}

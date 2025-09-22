@@ -36,10 +36,6 @@ export const PostAuthLanding = () => {
     label: "Completed",
     value: "0", 
     icon: Trophy
-  }, {
-    label: "Hours Saved",
-    value: "0",
-    icon: null
   }]);
   useEffect(() => {
     const handleKickoffNavigation = (event: CustomEvent) => {
@@ -72,8 +68,6 @@ export const PostAuthLanding = () => {
         if (projectError) throw projectError;
         const activeProjects = projectRuns?.filter(run => run.status !== 'complete' && run.progress < 100).length || 0;
         const completedProjects = projectRuns?.filter(run => run.status === 'complete' || run.progress >= 100).length || 0;
-        const totalProjectsStarted = projectRuns?.length || 0;
-        const hoursSaved = totalProjectsStarted * 2; // 2 hours research time saved per project
 
         setStats([{
           label: "Active Projects",
@@ -83,10 +77,6 @@ export const PostAuthLanding = () => {
           label: "Completed",
           value: completedProjects.toString(),
           icon: Trophy
-        }, {
-          label: "Hours Saved",
-          value: hoursSaved.toString(),
-          icon: Zap
         }]);
 
         // Fetch user profile for nickname

@@ -308,12 +308,20 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
         if (kickoffComplete) {
           setIsProjectSetupOpen(true);
         } else {
-          // Kickoff is not complete, let KickoffWorkflow handle the flow
-          console.log('ProjectCatalog: Kickoff not complete, skipping setup dialog');
+          // Kickoff is not complete, navigate to continue the existing project run
+          console.log('ProjectCatalog: Kickoff not complete, continuing existing project run:', existingRun.id);
+          navigate('/', {
+            state: {
+              view: 'user',
+              projectRunId: existingRun.id
+            }
+          });
         }
       } else {
         // New project run, will go through kickoff flow - don't show setup dialog
         console.log('ProjectCatalog: New project, will go through kickoff - skipping setup dialog');
+        // For new projects, we should start the project creation process
+        handleSkipSetup();
       }
     }
   };
@@ -517,17 +525,24 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
         existingRun.completedSteps.includes(stepId)
       );
       
-      // Only show project setup dialog if kickoff is complete
-      if (kickoffComplete) {
-        setIsProjectSetupOpen(true);
+        // Only show project setup dialog if kickoff is complete
+        if (kickoffComplete) {
+          setIsProjectSetupOpen(true);
+        } else {
+          // Kickoff not complete, navigate to continue the existing project run
+          console.log('ProjectCatalog: Kickoff not complete after beta accept, continuing existing project run:', existingRun.id);
+          navigate('/', {
+            state: {
+              view: 'user',
+              projectRunId: existingRun.id
+            }
+          });
+        }
       } else {
-        // Kickoff not complete, let KickoffWorkflow handle it
-        console.log('ProjectCatalog: Kickoff not complete after beta accept, skipping setup dialog');
+        // New project run, will go through kickoff flow - start project creation process
+        console.log('ProjectCatalog: New project after beta accept, starting project creation');
+        handleSkipSetup();
       }
-    } else {
-      // New project run, will go through kickoff flow - don't show setup dialog
-      console.log('ProjectCatalog: New project after beta accept, will go through kickoff - skipping setup dialog');
-    }
   };
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto px-6 py-8">

@@ -44,8 +44,7 @@ export default function Home({
   const [isContractorFinderOpen, setIsContractorFinderOpen] = useState(false);
   const [stats, setStats] = useState({
     activeProjects: 0,
-    completedProjects: 0,
-    hoursSaved: 0
+    completedProjects: 0
   });
 
   // Fetch project data to calculate stats
@@ -63,12 +62,10 @@ export default function Home({
 
         const active = projectRuns?.filter(run => (run.progress || 0) < 100).length || 0;
         const completed = projectRuns?.filter(run => (run.progress || 0) >= 100).length || 0;
-        const hours = completed * 2; // Estimate 2 hours saved per completed project
 
         setStats({
           activeProjects: active,
-          completedProjects: completed,
-          hoursSaved: hours
+          completedProjects: completed
         });
       } catch (error) {
         console.error('Error fetching project stats:', error);
@@ -135,8 +132,9 @@ export default function Home({
               Your DIY journey continues here. Pick up where you left off or start your next winning project.
             </p>
             
-            {/* Stats */}
+            {/* Project Scoreboard */}
             <div className="border-t border-border pt-1 mb-1">
+              <h3 className="text-sm font-medium text-muted-foreground mb-3 text-center">Project Scoreboard</h3>
               <div className="flex justify-center gap-6 sm:gap-8">
                 <div className="text-center">
                   <div className="text-base font-bold text-foreground">{stats.activeProjects || 0}</div>
@@ -145,10 +143,6 @@ export default function Home({
                 <div className="text-center">
                   <div className="text-base font-bold text-foreground">{stats.completedProjects || 0}</div>
                   <div className="text-xs text-muted-foreground">completed</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-base font-bold text-foreground">{stats.hoursSaved || 0}</div>
-                  <div className="text-xs text-muted-foreground">hours saved</div>
                 </div>
               </div>
             </div>

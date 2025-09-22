@@ -86,11 +86,30 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
       
       <Card className="gradient-card border-0 shadow-card">
         <CardHeader>
-          <div>
-            <CardTitle className="text-xl">My Projects</CardTitle>
-            <CardDescription className="text-sm">
-              View and manage your project portfolio
-            </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl">My Projects</CardTitle>
+              <CardDescription className="text-sm">
+                View and manage your project portfolio
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={() => navigate('/projects')}
+                variant="default"
+                size="sm"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Start a New Project
+              </Button>
+              <Button 
+                variant="outline"
+                size="sm"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Manual Project Log
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
