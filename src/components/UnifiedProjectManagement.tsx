@@ -368,10 +368,7 @@ export function UnifiedProjectManagement() {
                   <SelectContent>
                     {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
-                        <div className="flex items-center gap-2">
-                          <span>{project.name}</span>
-                          {getStatusBadge(project.publish_status, project.is_current_version)}
-                        </div>
+                        <span>{project.name}</span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -577,38 +574,6 @@ export function UnifiedProjectManagement() {
                               <GitBranch className="w-4 h-4" />
                               Create Revision
                             </Button>
-                            {projectRevisions.length > 0 && projectRevisions[0].is_current_version && (
-                              <>
-                                <Button
-                                  onClick={() => {
-                                    // Navigate to edit workflow - placeholder for now
-                                    console.log('Edit Workflow clicked');
-                                  }}
-                                  variant="outline"
-                                  className="flex items-center gap-2"
-                                >
-                                  <Edit className="w-4 h-4" />
-                                  Edit Workflow
-                                </Button>
-                                <Button
-                                  onClick={() => handleStatusChange(projectRevisions[0], 'beta')}
-                                  variant="outline"
-                                  className="flex items-center gap-2"
-                                  disabled={projectRevisions[0].publish_status !== 'draft'}
-                                >
-                                  <ArrowRight className="w-4 h-4" />
-                                  Release to Beta
-                                </Button>
-                                <Button
-                                  onClick={() => handleStatusChange(projectRevisions[0], 'published')}
-                                  className="flex items-center gap-2"
-                                  disabled={projectRevisions[0].publish_status === 'published'}
-                                >
-                                  <ArrowRight className="w-4 h-4" />
-                                  Release to Production
-                                </Button>
-                              </>
-                            )}
                           </div>
                         </div>
                       </CardHeader>
@@ -666,6 +631,18 @@ export function UnifiedProjectManagement() {
                                     </div>
 
                                     <div className="flex flex-col gap-2 ml-4">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => {
+                                          // Navigate to edit workflow - placeholder for now
+                                          console.log('Edit Workflow clicked for revision:', revision.id);
+                                        }}
+                                        className="flex items-center gap-1"
+                                      >
+                                        <Edit className="w-3 h-3" />
+                                        Edit Workflow
+                                      </Button>
                                       {revision.publish_status === 'draft' && (
                                         <>
                                           <Button
