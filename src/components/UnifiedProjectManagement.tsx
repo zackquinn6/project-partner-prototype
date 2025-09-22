@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   GitBranch, Plus, Edit, Archive, Eye, CheckCircle, Clock, 
-  ArrowRight, AlertTriangle, Settings, Save, X 
+  ArrowRight, AlertTriangle, Settings, Save, X, RefreshCw 
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -92,7 +92,7 @@ export function UnifiedProjectManagement() {
       const { data, error } = await supabase
         .from('projects')
         .select('*')
-        .or('parent_project_id.is.null,is_current_version.eq.true')
+        .is('parent_project_id', null)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
@@ -350,9 +350,9 @@ export function UnifiedProjectManagement() {
                 <Settings className="w-5 h-5" />
                 Project Management & Revision Control
               </CardTitle>
-              <Button onClick={() => setCreateProjectDialogOpen(true)} className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                New Project
+              <Button onClick={fetchProjects} variant="outline" className="flex items-center gap-2">
+                <RefreshCw className="w-4 h-4" />
+                Refresh
               </Button>
             </div>
           </CardHeader>
@@ -377,8 +377,8 @@ export function UnifiedProjectManagement() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={fetchProjects} variant="outline" className="self-end">
-                Refresh
+              <Button onClick={() => setCreateProjectDialogOpen(true)} className="self-end flex items-center gap-2">
+                <Plus className="w-4 h-4" />
               </Button>
             </div>
 
@@ -568,13 +568,48 @@ export function UnifiedProjectManagement() {
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <CardTitle>Revision Control</CardTitle>
-                          <Button
-                            onClick={() => setCreateRevisionDialogOpen(true)}
-                            className="flex items-center gap-2"
-                          >
-                            <GitBranch className="w-4 h-4" />
-                            Create Revision
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => setCreateRevisionDialogOpen(true)}
+                              variant="outline"
+                              className="flex items-center gap-2"
+                            >
+                              <GitBranch className="w-4 h-4" />
+                              Create Revision
+                            </Button>
+                            {projectRevisions.length > 0 && projectRevisions[0].is_current_version && (
+                              <>
+                                <Button
+                                  onClick={() => {
+                                    // Navigate to edit workflow - placeholder for now
+                                    console.log('Edit Workflow clicked');
+                                  }}
+                                  variant="outline"
+                                  className="flex items-center gap-2"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                  Edit Workflow
+                                </Button>
+                                <Button
+                                  onClick={() => handleStatusChange(projectRevisions[0], 'beta')}
+                                  variant="outline"
+                                  className="flex items-center gap-2"
+                                  disabled={projectRevisions[0].publish_status !== 'draft'}
+                                >
+                                  <ArrowRight className="w-4 h-4" />
+                                  Release to Beta
+                                </Button>
+                                <Button
+                                  onClick={() => handleStatusChange(projectRevisions[0], 'published')}
+                                  className="flex items-center gap-2"
+                                  disabled={projectRevisions[0].publish_status === 'published'}
+                                >
+                                  <ArrowRight className="w-4 h-4" />
+                                  Release to Production
+                                </Button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent>
@@ -642,25 +677,25 @@ export function UnifiedProjectManagement() {
                                             <ArrowRight className="w-3 h-3" />
                                             Release to Beta
                                           </Button>
-                                          <Button
-                                            size="sm"
-                                            onClick={() => handleStatusChange(revision, 'published')}
-                                            className="flex items-center gap-1"
-                                          >
-                                            <ArrowRight className="w-3 h-3" />
-                                            Publish
-                                          </Button>
+                                           <Button
+                                             size="sm"
+                                             onClick={() => handleStatusChange(revision, 'published')}
+                                             className="flex items-center gap-1"
+                                           >
+                                             <ArrowRight className="w-3 h-3" />
+                                             Release to Production
+                                           </Button>
                                         </>
                                       )}
                                       {revision.publish_status === 'beta' && (
-                                        <Button
-                                          size="sm"
-                                          onClick={() => handleStatusChange(revision, 'published')}
-                                          className="flex items-center gap-1"
-                                        >
-                                          <ArrowRight className="w-3 h-3" />
-                                          Publish
-                                        </Button>
+                                         <Button
+                                           size="sm"
+                                           onClick={() => handleStatusChange(revision, 'published')}
+                                           className="flex items-center gap-1"
+                                         >
+                                           <ArrowRight className="w-3 h-3" />
+                                           Release to Production
+                                         </Button>
                                       )}
                                     </div>
                                   </div>
