@@ -50,27 +50,10 @@ const Index = () => {
   const [showHelpPopup, setShowHelpPopup] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState<'home' | 'projects' | 'profile' | 'help'>('home');
   
-  // Modal states for mobile app buttons (removed more duplicates handled by Navigation.tsx)
-  const [showToolRentals, setShowToolRentals] = useState(false);
-  const [showCodePermits, setShowCodePermits] = useState(false);
-  const [showContractorFinder, setShowContractorFinder] = useState(false);
-  const [showCommunityPosts, setShowCommunityPosts] = useState(false);
-  const [showAIRepair, setShowAIRepair] = useState(false);
-  const [showProfileManager, setShowProfileManager] = useState(false);
-  const [showRapidAssessment, setShowRapidAssessment] = useState(false);
-  const [showHomeManager, setShowHomeManager] = useState(false);
-  const [showHomeMaintenanceWindow, setShowHomeMaintenanceWindow] = useState(false);
-  const [showUserToolsMaterials, setShowUserToolsMaterials] = useState(false);
+  // Modal states - only keeping mobile-specific ones that Navigation.tsx doesn't handle
   const [showKCExplainer, setShowKCExplainer] = useState(false);
 
-  // Add debug logging for modal state
-  useEffect(() => {
-    console.log('🔍 Index: Modal states changed:', {
-      showProfileManager,
-      showToolRentals,
-      showCodePermits
-    });
-  }, [showProfileManager, showToolRentals, showCodePermits]);
+  // Removed debug logging - no longer tracking duplicate modals
 
   // Handle navigation state changes (including view parameter)
   useEffect(() => {
@@ -131,53 +114,9 @@ const Index = () => {
       setShowHelpPopup(true);
     };
 
-    // handleRapidAssessment removed - handled by Navigation.tsx
-
-    // More handlers removed - handled by Navigation.tsx
-
-    const handleShowToolRentals = () => {
-      setShowToolRentals(true);
-    };
-
-    const handleShowCommunityPosts = () => {
-      setShowCommunityPosts(true);
-    };
-
-    const handleShowAIRepair = () => {
-      setShowAIRepair(true);
-    };
-
-    const handleShowCodePermits = () => {
-      setShowCodePermits(true);
-    };
-
-    const handleShowContractorFinder = () => {
-      setShowContractorFinder(true);
-    };
-
-    // Mobile-only event handlers (since Navigation isn't rendered on mobile)
-    const handleShowRapidAssessment = () => {
-      setShowRapidAssessment(true);
-    };
-
-    const handleShowHomeManager = () => {
-      setShowHomeManager(true);
-    };
-
-    const handleShowHomeMaintenanceWindow = () => {
-      setShowHomeMaintenanceWindow(true);
-    };
-
-    const handleShowUserToolsMaterials = () => {
-      setShowUserToolsMaterials(true);
-    };
-
+    // Only keep mobile-specific handlers that Navigation.tsx doesn't handle
     const handleShowKCExplainer = () => {
       setShowKCExplainer(true);
-    };
-
-    const handleOpenProfileManager = () => {
-      setShowProfileManager(true);
     };
 
     const handleProjectsNavigation = () => {
@@ -192,8 +131,9 @@ const Index = () => {
     };
 
     const handleProfileNavigation = () => {
-      console.log('🔄 Index: "My Profile" clicked - opening ProfileManager');
-      setShowProfileManager(true);
+      console.log('🔄 Index: "My Profile" clicked - dispatching to Navigation');
+      // Let Navigation.tsx handle this
+      window.dispatchEvent(new CustomEvent('open-profile-manager'));
     };
 
     const handleToolLibraryNavigation = (event: Event) => {
@@ -216,18 +156,7 @@ const Index = () => {
     window.addEventListener('show-tools-materials', handleToolLibraryNavigation);
     window.addEventListener('show-admin-panel', handleAdminPanelNavigation);
     
-    // Add mobile app event listeners
-    window.addEventListener('show-tool-rentals', handleShowToolRentals);
-    window.addEventListener('show-community-posts', handleShowCommunityPosts);
-    window.addEventListener('show-ai-repair', handleShowAIRepair);
-    window.addEventListener('show-code-permits', handleShowCodePermits);
-    window.addEventListener('show-contractor-finder', handleShowContractorFinder);
-    
-    // Add the mobile-specific event listeners
-    window.addEventListener('show-rapid-assessment', handleShowRapidAssessment);
-    window.addEventListener('show-home-manager', handleShowHomeManager);
-    window.addEventListener('show-user-tools-materials', handleShowUserToolsMaterials);
-    window.addEventListener('open-profile-manager', handleOpenProfileManager);
+    // Only add mobile-specific event listeners that Navigation.tsx doesn't handle
     window.addEventListener('show-kc-explainer', handleShowKCExplainer);
     
     return () => {
@@ -239,18 +168,7 @@ const Index = () => {
       window.removeEventListener('show-tools-materials', handleToolLibraryNavigation);
       window.removeEventListener('show-admin-panel', handleAdminPanelNavigation);
       
-      // Mobile app event listener cleanup
-      window.removeEventListener('show-tool-rentals', handleShowToolRentals);
-      window.removeEventListener('show-community-posts', handleShowCommunityPosts);
-      window.removeEventListener('show-ai-repair', handleShowAIRepair);
-      window.removeEventListener('show-code-permits', handleShowCodePermits);
-      window.removeEventListener('show-contractor-finder', handleShowContractorFinder);
-      
       // Clean up mobile-specific listeners
-      window.removeEventListener('show-rapid-assessment', handleShowRapidAssessment);
-      window.removeEventListener('show-home-manager', handleShowHomeManager);
-      window.removeEventListener('show-user-tools-materials', handleShowUserToolsMaterials);
-      window.removeEventListener('open-profile-manager', handleOpenProfileManager);
       window.removeEventListener('show-kc-explainer', handleShowKCExplainer);
     };
   }, [isMobile, navigate]);
@@ -296,7 +214,7 @@ const Index = () => {
         setMobileView('projects');
         break;
       case 'profile':
-        window.dispatchEvent(new CustomEvent('open-profile-manager'));
+        // Don't set showProfileManager here, Navigation handles this
         break;
       case 'help':
         setShowHelpPopup(true);
@@ -428,65 +346,7 @@ const Index = () => {
         onClose={() => setShowHelpPopup(false)}
       />
       
-      {/* Mobile App Modals - Re-added for mobile compatibility */}
-      
-      <ToolRentalsWindow
-        isOpen={showToolRentals}
-        onClose={() => setShowToolRentals(false)}
-      />
-      
-      <CodePermitsWindow
-        open={showCodePermits}
-        onOpenChange={setShowCodePermits}
-      />
-      
-      <ContractorFinderWindow
-        open={showContractorFinder}
-        onOpenChange={setShowContractorFinder}
-      />
-      
-      <CommunityPostsWindow
-        open={showCommunityPosts}
-        onOpenChange={setShowCommunityPosts}
-      />
-      
-      <AIRepairWindow
-        open={showAIRepair}
-        onOpenChange={setShowAIRepair}
-      />
-      
-      <ProfileManager
-        open={showProfileManager}
-        onOpenChange={setShowProfileManager}
-      />
-
-      {/* Mobile-specific modals */}
-      <Dialog open={showRapidAssessment} onOpenChange={setShowRapidAssessment}>
-        <DialogContent className="w-full h-full sm:max-w-7xl sm:max-h-[90vh] overflow-hidden border-none sm:border p-0 sm:p-6">
-          <DialogHeader className="p-4 sm:p-0 border-b sm:border-none">
-            <DialogTitle>Rapid Project Assessment</DialogTitle>
-          </DialogHeader>
-          <div className="overflow-y-auto max-h-[calc(90vh-8rem)]">
-            <RapidProjectAssessment />
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <HomeManager
-        open={showHomeManager}
-        onOpenChange={setShowHomeManager}
-      />
-
-      <HomeMaintenanceWindow
-        open={showHomeMaintenanceWindow}
-        onOpenChange={setShowHomeMaintenanceWindow}
-      />
-
-      <UserToolsMaterialsWindow
-        open={showUserToolsMaterials}
-        onOpenChange={setShowUserToolsMaterials}
-      />
-
+      {/* Only mobile-specific modals that Navigation.tsx doesn't handle */}
       <KeyCharacteristicsExplainer
         open={showKCExplainer}
         onOpenChange={setShowKCExplainer}
