@@ -255,7 +255,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
   };
   return <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-full h-full sm:max-w-[95vw] sm:max-w-6xl sm:max-h-[90vh] overflow-hidden border-none sm:border p-0 sm:p-6">
+        <DialogContent className="w-full h-full sm:max-w-6xl sm:max-h-[90vh] overflow-hidden border-none sm:border p-0 sm:p-6">
           <DialogHeader className="p-4 sm:p-0 border-b sm:border-none">
             <div className="flex items-center justify-between">
               <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
@@ -401,7 +401,9 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                 </TabsContent>
 
                 <TabsContent value="history" className="space-y-2">
-                  <MaintenanceHistoryTab selectedHomeId={selectedHomeId} />
+                  <div className="max-h-[60vh] overflow-y-auto">
+                    <MaintenanceHistoryTab selectedHomeId={selectedHomeId} />
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="notifications" className="space-y-4">
