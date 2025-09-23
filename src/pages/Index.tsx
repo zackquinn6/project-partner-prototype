@@ -14,7 +14,6 @@ import UserView from "@/components/UserView";
 import ProjectCatalog from "@/components/ProjectCatalog";
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { HelpPopup } from '@/components/HelpPopup';
 import { MobileOptimizedHome } from '@/components/MobileOptimizedHome';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { MobileProjectListing } from '@/components/MobileProjectListing';
@@ -47,7 +46,6 @@ const Index = () => {
   const [mobileView, setMobileView] = useState<'home' | 'projects' | 'workflow'>('home');
   const [resetUserView, setResetUserView] = useState(false);
   const [forceListingMode, setForceListingMode] = useState(false);
-  const [showHelpPopup, setShowHelpPopup] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState<'home' | 'projects' | 'profile' | 'help'>('home');
   
   // Modal states - only keeping mobile-specific ones that Navigation.tsx doesn't handle
@@ -110,10 +108,6 @@ const Index = () => {
       });
     };
 
-    const handleShowHelpPopup = () => {
-      setShowHelpPopup(true);
-    };
-
     // Only keep mobile-specific handlers that Navigation.tsx doesn't handle
     const handleShowKCExplainer = () => {
       setShowKCExplainer(true);
@@ -152,7 +146,6 @@ const Index = () => {
     window.addEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
     window.addEventListener('navigate-to-projects', handleProjectsNavigation);
     window.addEventListener('show-profile', handleProfileNavigation);
-    window.addEventListener('show-help-popup', handleShowHelpPopup);
     window.addEventListener('show-tools-materials', handleToolLibraryNavigation);
     window.addEventListener('show-admin-panel', handleAdminPanelNavigation);
     
@@ -162,7 +155,6 @@ const Index = () => {
     return () => {
       window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
       window.removeEventListener('navigate-to-kickoff', handleKickoffNavigation as EventListener);
-      window.removeEventListener('show-help-popup', handleShowHelpPopup);
       window.removeEventListener('navigate-to-projects', handleProjectsNavigation);
       window.removeEventListener('show-profile', handleProfileNavigation);
       window.removeEventListener('show-tools-materials', handleToolLibraryNavigation);
@@ -217,7 +209,7 @@ const Index = () => {
         // Don't set showProfileManager here, Navigation handles this
         break;
       case 'help':
-        setShowHelpPopup(true);
+        window.dispatchEvent(new CustomEvent('show-help-popup'));
         break;
     }
   };
@@ -341,10 +333,6 @@ const Index = () => {
       <div className="w-full h-full">
         {renderView()}
       </div>
-      <HelpPopup
-        isOpen={showHelpPopup}
-        onClose={() => setShowHelpPopup(false)}
-      />
       
       {/* Only mobile-specific modals that Navigation.tsx doesn't handle */}
       <KeyCharacteristicsExplainer
