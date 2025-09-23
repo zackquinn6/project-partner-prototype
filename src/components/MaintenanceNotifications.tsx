@@ -15,6 +15,7 @@ interface MaintenanceNotificationsProps {
 }
 
 export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotificationsProps) {
+  console.log('🔔 MaintenanceNotifications render - checking spacing');
   const { user } = useAuth();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
@@ -87,14 +88,17 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
   };
 
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="shrink-0 mb-2">
+    <div>
+      {/* Header - matching Active tab spacing */}
+      <div className="mb-4 shrink-0">
         <h3 className="flex items-center gap-2 text-lg font-semibold">
           <Bell className="h-5 w-5" />
           Notification Settings
         </h3>
       </div>
-      <div className="space-y-4">
+      
+      {/* Content - matching Active tab content area */}
+      <div className="flex-1 overflow-y-auto space-y-4">
         {/* Email Settings */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2">

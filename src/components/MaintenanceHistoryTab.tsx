@@ -24,6 +24,7 @@ interface MaintenanceHistoryTabProps {
 }
 
 export const MaintenanceHistoryTab: React.FC<MaintenanceHistoryTabProps> = ({ selectedHomeId }) => {
+  console.log('📊 MaintenanceHistoryTab render - checking spacing');
   const { user } = useAuth();
   const [completions, setCompletions] = useState<MaintenanceCompletion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,9 +124,9 @@ export const MaintenanceHistoryTab: React.FC<MaintenanceHistoryTabProps> = ({ se
   const filteredCompletions = getFilteredAndSortedCompletions();
 
   return (
-    <div className="h-full overflow-y-auto">
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-2 mb-2 shrink-0">
+    <div>
+      {/* Filters - matching Active tab spacing */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-4 shrink-0">
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filter by category" />
@@ -153,59 +154,61 @@ export const MaintenanceHistoryTab: React.FC<MaintenanceHistoryTabProps> = ({ se
         </Select>
       </div>
 
-      {/* Completion History */}
-      {loading ? (
-        <div className="text-center py-8">Loading completion history...</div>
-      ) : filteredCompletions.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No completion history</h3>
-              <p className="text-muted-foreground">
-                Complete some maintenance tasks to see your history here.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {filteredCompletions.map(completion => (
-            <Card key={completion.id} className="hover:shadow-sm transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h4 className="font-medium">{completion.task.title}</h4>
-                      <Badge variant="secondary" className="text-xs">
-                        {categoryLabels[completion.task.category]}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {format(new Date(completion.completed_at), 'MMM dd, yyyy')}
+      {/* Completion History - matching Active tab content area */}
+      <div className="flex-1 overflow-y-auto space-y-3">
+        {loading ? (
+          <div className="text-center py-8">Loading completion history...</div>
+        ) : filteredCompletions.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">No completion history</h3>
+                <p className="text-muted-foreground">
+                  Complete some maintenance tasks to see your history here.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {filteredCompletions.map(completion => (
+              <Card key={completion.id} className="hover:shadow-sm transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="font-medium">{completion.task.title}</h4>
+                        <Badge variant="secondary" className="text-xs">
+                          {categoryLabels[completion.task.category]}
+                        </Badge>
                       </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {format(new Date(completion.completed_at), 'MMM dd, yyyy')}
+                        </div>
+                      </div>
+                      {completion.notes && (
+                        <p className="text-sm text-muted-foreground mt-2">{completion.notes}</p>
+                      )}
                     </div>
-                    {completion.notes && (
-                      <p className="text-sm text-muted-foreground mt-2">{completion.notes}</p>
+                    {completion.photo_url && (
+                      <div className="ml-4">
+                        <img 
+                          src={completion.photo_url} 
+                          alt="Completion photo"
+                          className="w-16 h-16 rounded-lg object-cover border"
+                        />
+                      </div>
                     )}
                   </div>
-                  {completion.photo_url && (
-                    <div className="ml-4">
-                      <img 
-                        src={completion.photo_url} 
-                        alt="Completion photo"
-                        className="w-16 h-16 rounded-lg object-cover border"
-                      />
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

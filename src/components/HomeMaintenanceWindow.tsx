@@ -57,6 +57,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
   open,
   onOpenChange
 }) => {
+  console.log('🏠 HomeMaintenanceWindow render - debugging spacing issues');
   const {
     user
   } = useAuth();
@@ -300,7 +301,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     <TabsTrigger value="notifications">Alerts</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="tasks" className="flex-1 flex flex-col mt-2 overflow-hidden">
+                  <TabsContent value="tasks" className="flex-1 flex flex-col overflow-hidden">
                     {/* Category Filter */}
                     <div className="flex items-center gap-2 mb-4 shrink-0">
                       <Filter className="h-4 w-4 text-muted-foreground" />
@@ -403,11 +404,11 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="history" className="flex-1 overflow-hidden mt-2">
+                  <TabsContent value="history" className="flex-1 overflow-hidden">
                     <MaintenanceHistoryTab selectedHomeId={selectedHomeId} />
                   </TabsContent>
 
-                  <TabsContent value="notifications" className="flex-1 overflow-hidden mt-2">
+                  <TabsContent value="notifications" className="flex-1 overflow-hidden">
                     <MaintenanceNotifications selectedHomeId={selectedHomeId} />
                   </TabsContent>
                 </Tabs>
