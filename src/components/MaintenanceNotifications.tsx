@@ -87,8 +87,8 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-0 shadow-none">
+      <CardHeader className="px-0 pt-0">
         <CardTitle className="flex items-center gap-2">
           <Bell className="h-5 w-5" />
           Notification Settings
