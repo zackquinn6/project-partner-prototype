@@ -88,49 +88,173 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
 
   return (
     <div className="container mx-auto px-6 py-8 space-y-6">
+      {/* Mobile Close Button */}
+      <div className="md:hidden flex justify-end mb-4">
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={() => onProjectSelect?.(null)}
+          className="text-sm"
+        >
+          Close
+        </Button>
+      </div>
       
       <Card className="gradient-card border-0 shadow-card">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-xl">My Projects</CardTitle>
               <CardDescription className="text-sm">
                 View and manage your project portfolio
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
               <Button 
                 onClick={() => navigate('/projects')}
                 variant="default"
                 size="sm"
+                className="w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Start a New Project
+                <span className="hidden sm:inline">Start a New Project</span>
+                <span className="sm:hidden">New Project</span>
               </Button>
               <Button 
                 variant="outline"
                 size="sm"
                 onClick={() => setShowManualProjectDialog(true)}
+                className="w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Manual Project Log
+                <span className="hidden sm:inline">Manual Project Log</span>
+                <span className="sm:hidden">Manual Log</span>
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Project Name</TableHead>
-                <TableHead>Start Date</TableHead>
-                <TableHead>Plan End Date</TableHead>
-                <TableHead>Progress</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actual End Date</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
+          {/* Mobile: Stack layout */}
+          <div className="md:hidden space-y-4">
+            {projectRuns.length === 0 ? (
+              <div className="h-24 flex flex-col items-center justify-center space-y-2 text-center">
+                <p className="text-muted-foreground">No projects yet.</p>
+                <Button 
+                  onClick={() => navigate('/projects')}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Start Your First Project
+                </Button>
+              </div>
+            ) : (
+              projectRuns.map((projectRun) => {
+                const progress = calculateProgress(projectRun);
+                return (
+                  <Card key={projectRun.id} className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{projectRun.customProjectName || projectRun.name}</h3>
+                            {projectRun.isManualEntry && (
+                              <Badge variant="secondary" className="text-xs">
+                                Manual
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">{projectRun.description}</p>
+                        </div>
+                        <Badge className={getStatusColor(projectRun.status)}>
+                          {projectRun.status.replace('-', ' ')}
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Progress value={progress} className="h-2" />
+                        <div className="text-xs text-muted-foreground text-center">
+                          {Math.round(progress)}% complete
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <div>Started: {formatDate(projectRun.startDate).monthDay}</div>
+                        <div>Due: {formatDate(projectRun.planEndDate).monthDay}</div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 pt-2">
+                        {projectRun.isManualEntry && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setEditingProjectRun(projectRun);
+                              setShowManualProjectEditDialog(true);
+                            }}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        )}
+                        
+                        {projectRun.status !== 'complete' && !projectRun.isManualEntry && (
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleOpenProjectRun(projectRun)}
+                            className="flex-1"
+                          >
+                            <Play className="w-4 h-4 mr-2" />
+                            Continue
+                          </Button>
+                        )}
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="sm">
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Project {projectRun.isManualEntry ? 'Entry' : 'Run'}</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{projectRun.customProjectName || projectRun.name}"? 
+                                {projectRun.isManualEntry 
+                                  ? ' This will permanently delete your manual project entry.'
+                                  : ' This will only delete your personal project instance, not the original template.'
+                                }
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteProjectRun(projectRun.id)}>
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })
+            )}
+          </div>
+
+          {/* Desktop: Table layout */}
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Project Name</TableHead>
+                  <TableHead>Start Date</TableHead>
+                  <TableHead>Plan End Date</TableHead>
+                  <TableHead>Progress</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actual End Date</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
             <TableBody>
               {projectRuns.length === 0 ? (
                 <TableRow>
@@ -261,8 +385,9 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                   );
                 })
               )}
-            </TableBody>
-          </Table>
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
       

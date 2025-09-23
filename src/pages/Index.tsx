@@ -207,12 +207,19 @@ const Index = () => {
     window.addEventListener('show-tools-materials', handleToolLibraryNavigation);
     window.addEventListener('show-admin-panel', handleAdminPanelNavigation);
     
-    // Mobile app event listeners (removed more duplicates handled by Navigation.tsx)
+    // Add mobile app event listeners
     window.addEventListener('show-tool-rentals', handleShowToolRentals);
     window.addEventListener('show-community-posts', handleShowCommunityPosts);
     window.addEventListener('show-ai-repair', handleShowAIRepair);
     window.addEventListener('show-code-permits', handleShowCodePermits);
     window.addEventListener('show-contractor-finder', handleShowContractorFinder);
+    
+    // Add the mobile-specific event listeners
+    window.addEventListener('show-rapid-assessment', handleShowRapidAssessment);
+    window.addEventListener('show-home-manager', handleShowHomeManager);
+    window.addEventListener('show-home-maintenance', handleShowHomeMaintenanceWindow);
+    window.addEventListener('show-user-tools-materials', handleShowUserToolsMaterials);
+    window.addEventListener('open-profile-manager', handleOpenProfileManager);
     
     return () => {
       window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
@@ -223,21 +230,19 @@ const Index = () => {
       window.removeEventListener('show-tools-materials', handleToolLibraryNavigation);
       window.removeEventListener('show-admin-panel', handleAdminPanelNavigation);
       
-      // Mobile app event listener cleanup (removed more duplicates handled by Navigation.tsx)
+      // Mobile app event listener cleanup
       window.removeEventListener('show-tool-rentals', handleShowToolRentals);
       window.removeEventListener('show-community-posts', handleShowCommunityPosts);
       window.removeEventListener('show-ai-repair', handleShowAIRepair);
       window.removeEventListener('show-code-permits', handleShowCodePermits);
       window.removeEventListener('show-contractor-finder', handleShowContractorFinder);
       
-      // Clean up mobile-only listeners
-      if (isMobile) {
-        window.removeEventListener('show-rapid-assessment', handleShowRapidAssessment);
-        window.removeEventListener('show-home-manager', handleShowHomeManager);
-        window.removeEventListener('show-home-maintenance', handleShowHomeMaintenanceWindow);
-        window.removeEventListener('show-user-tools-materials', handleShowUserToolsMaterials);
-        window.removeEventListener('open-profile-manager', handleOpenProfileManager);
-      }
+      // Clean up mobile-specific listeners
+      window.removeEventListener('show-rapid-assessment', handleShowRapidAssessment);
+      window.removeEventListener('show-home-manager', handleShowHomeManager);
+      window.removeEventListener('show-home-maintenance', handleShowHomeMaintenanceWindow);
+      window.removeEventListener('show-user-tools-materials', handleShowUserToolsMaterials);
+      window.removeEventListener('open-profile-manager', handleOpenProfileManager);
     };
   }, [isMobile, navigate]);
 

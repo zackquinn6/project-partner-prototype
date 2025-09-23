@@ -607,11 +607,24 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Select a base project to get started with confidence</p>
         </div>
 
+        {/* Mobile Close Button */}
+        <div className="md:hidden flex justify-end mb-4">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => navigate('/')}
+            className="text-sm"
+          >
+            Close
+          </Button>
+        </div>
+
         {/* Filters Header Bar */}
         <div className="bg-card border rounded-lg p-6 mb-8 space-y-4">
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+          {/* Mobile: Compact filter layout */}
+          <div className="md:hidden space-y-3">
             {/* Search */}
-            <div className="relative flex-1 min-w-0">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Search projects..."
@@ -621,81 +634,170 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
               />
             </div>
 
-            {/* Category Filter */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full lg:w-auto justify-between">
-                  <span className="flex items-center gap-2">
-                    <Filter className="w-4 h-4" />
+            {/* Compact filter row */}
+            <div className="flex gap-2">
+              {/* Category Filter */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex-1 text-xs">
+                    <Filter className="w-3 h-3 mr-1" />
                     Category {selectedCategories.length > 0 && `(${selectedCategories.length})`}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                {availableCategories.map((category) => (
-                  <DropdownMenuCheckboxItem
-                    key={category}
-                    checked={selectedCategories.includes(category)}
-                    onCheckedChange={() => handleCategoryToggle(category)}
-                  >
-                    {category}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-48">
+                  {availableCategories.map((category) => (
+                    <DropdownMenuCheckboxItem
+                      key={category}
+                      checked={selectedCategories.includes(category)}
+                      onCheckedChange={() => handleCategoryToggle(category)}
+                    >
+                      {category}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-            {/* Skill Level Filter */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full lg:w-auto justify-between">
-                  <span className="flex items-center gap-2">
-                    <Filter className="w-4 h-4" />
-                    Skill Level {selectedDifficulties.length > 0 && `(${selectedDifficulties.length})`}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                {availableDifficulties.map((difficulty) => (
-                  <DropdownMenuCheckboxItem
-                    key={difficulty}
-                    checked={selectedDifficulties.includes(difficulty)}
-                    onCheckedChange={() => handleDifficultyToggle(difficulty)}
-                  >
-                    {difficulty}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              {/* Skill Level Filter */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex-1 text-xs">
+                    <Filter className="w-3 h-3 mr-1" />
+                    Skill {selectedDifficulties.length > 0 && `(${selectedDifficulties.length})`}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-48">
+                  {availableDifficulties.map((difficulty) => (
+                    <DropdownMenuCheckboxItem
+                      key={difficulty}
+                      checked={selectedDifficulties.includes(difficulty)}
+                      onCheckedChange={() => handleDifficultyToggle(difficulty)}
+                    >
+                      {difficulty}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-            {/* Effort Level Filter */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full lg:w-auto justify-between">
-                  <span className="flex items-center gap-2">
-                    <Filter className="w-4 h-4" />
-                    Effort Level {selectedEffortLevels.length > 0 && `(${selectedEffortLevels.length})`}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                {availableEffortLevels.map((effortLevel) => (
-                  <DropdownMenuCheckboxItem
-                    key={effortLevel}
-                    checked={selectedEffortLevels.includes(effortLevel)}
-                    onCheckedChange={() => handleEffortLevelToggle(effortLevel)}
-                  >
-                    {effortLevel}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              {/* Effort Level Filter */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex-1 text-xs">
+                    <Filter className="w-3 h-3 mr-1" />
+                    Effort {selectedEffortLevels.length > 0 && `(${selectedEffortLevels.length})`}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-48">
+                  {availableEffortLevels.map((effortLevel) => (
+                    <DropdownMenuCheckboxItem
+                      key={effortLevel}
+                      checked={selectedEffortLevels.includes(effortLevel)}
+                      onCheckedChange={() => handleEffortLevelToggle(effortLevel)}
+                    >
+                      {effortLevel}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
             {/* Clear Filters */}
             {(searchTerm || selectedCategories.length > 0 || selectedDifficulties.length > 0 || selectedEffortLevels.length > 0) && (
-              <Button variant="ghost" onClick={clearAllFilters} className="text-muted-foreground">
+              <Button variant="ghost" onClick={clearAllFilters} className="text-muted-foreground text-xs" size="sm">
                 Clear All
               </Button>
             )}
+          </div>
+
+          {/* Desktop: Original layout */}
+          <div className="hidden md:block">
+            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+              {/* Search */}
+              <div className="relative flex-1 min-w-0">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search projects..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Category Filter */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full lg:w-auto justify-between">
+                    <span className="flex items-center gap-2">
+                      <Filter className="w-4 h-4" />
+                      Category {selectedCategories.length > 0 && `(${selectedCategories.length})`}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  {availableCategories.map((category) => (
+                    <DropdownMenuCheckboxItem
+                      key={category}
+                      checked={selectedCategories.includes(category)}
+                      onCheckedChange={() => handleCategoryToggle(category)}
+                    >
+                      {category}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Skill Level Filter */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full lg:w-auto justify-between">
+                    <span className="flex items-center gap-2">
+                      <Filter className="w-4 h-4" />
+                      Skill Level {selectedDifficulties.length > 0 && `(${selectedDifficulties.length})`}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  {availableDifficulties.map((difficulty) => (
+                    <DropdownMenuCheckboxItem
+                      key={difficulty}
+                      checked={selectedDifficulties.includes(difficulty)}
+                      onCheckedChange={() => handleDifficultyToggle(difficulty)}
+                    >
+                      {difficulty}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Effort Level Filter */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full lg:w-auto justify-between">
+                    <span className="flex items-center gap-2">
+                      <Filter className="w-4 h-4" />
+                      Effort Level {selectedEffortLevels.length > 0 && `(${selectedEffortLevels.length})`}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  {availableEffortLevels.map((effortLevel) => (
+                    <DropdownMenuCheckboxItem
+                      key={effortLevel}
+                      checked={selectedEffortLevels.includes(effortLevel)}
+                      onCheckedChange={() => handleEffortLevelToggle(effortLevel)}
+                    >
+                      {effortLevel}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Clear Filters */}
+              {(searchTerm || selectedCategories.length > 0 || selectedDifficulties.length > 0 || selectedEffortLevels.length > 0) && (
+                <Button variant="ghost" onClick={clearAllFilters} className="text-muted-foreground">
+                  Clear All
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Active filters display */}
@@ -743,113 +845,199 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
           Showing {filteredProjects.length} of {publishedProjects.length} projects
         </div>
 
-        {/* Project Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProjects.length === 0 ? <div className="col-span-full text-center py-12">
+        {/* Project Grid - Mobile: Row layout, Desktop: Grid */}
+        <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6">
+          {filteredProjects.length === 0 ? (
+            <div className="col-span-full text-center py-12">
               <p className="text-muted-foreground mb-4">
                 {publishedProjects.length === 0 
                   ? (isAdminMode ? "No template projects exist yet. Create your first template project to get started." : "No published projects available yet. Check back soon!")
                   : "No projects match your current filters. Try adjusting your search or filters."
                 }
               </p>
-              {publishedProjects.length === 0 && isAdminMode && <Button onClick={() => navigate('/', {
-            state: {
-              view: 'admin'
-            }
-          })}>
+              {publishedProjects.length === 0 && isAdminMode && (
+                <Button onClick={() => navigate('/', {
+                  state: {
+                    view: 'admin'
+                  }
+                })}>
                   Create First Template
-                </Button>}
+                </Button>
+              )}
               {filteredProjects.length === 0 && publishedProjects.length > 0 && (
                 <Button variant="outline" onClick={clearAllFilters}>
                   Clear All Filters
                 </Button>
               )}
-            </div> : filteredProjects.map(project => {
-          const IconComponent = getIconForCategory(project.category || '');
-            return <Card 
-              key={project.id} 
-              className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 overflow-hidden" 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🖱️ CARD CLICK - Project:', project.name);
-                console.log('🖱️ CARD CLICK - Event:', e.type);
-                try {
-                  handleSelectProject(project);
-                } catch (error) {
-                  console.error('❌ Error in handleSelectProject:', error);
-                }
-              }}
-            >
-                  <div className={`h-32 bg-gradient-to-br from-primary to-orange-500 relative overflow-hidden`}>
-                    <div className="absolute inset-0 bg-black/20" />
-                    <div className="absolute bottom-4 left-4 text-white">
-                      <IconComponent className="w-8 h-8" />
-                    </div>
-                    <div className="absolute top-4 right-4 flex gap-2">
-                      <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                        {project.category}
-                      </Badge>
-                      {/* Beta badge for beta-testing projects */}
-                      {project.publishStatus === 'beta-testing' && (
-                        <Badge variant="secondary" className="bg-orange-500/20 text-orange-200 border-orange-300/30">
-                          <AlertTriangle className="w-3 h-3 mr-1" />
-                          BETA
-                        </Badge>
-                      )}
-                      {isAdminMode && (
-                        <Badge variant="secondary" className={`${project.publishStatus === 'published' ? 'bg-green-500/20 text-green-300' : project.publishStatus === 'beta-testing' ? 'bg-orange-500/20 text-orange-300' : 'bg-yellow-500/20 text-yellow-300'}`}>
-                          {project.publishStatus}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                      {project.name}
-                    </CardTitle>
-                    <CardDescription className="text-sm line-clamp-2">
-                      {project.description}
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Clock className="w-4 h-4" />
-                        {project.estimatedTime}
+            </div>
+          ) : (
+            filteredProjects.map(project => {
+              const IconComponent = getIconForCategory(project.category || '');
+              return (
+                <div key={project.id}>
+                  {/* Mobile: Row layout */}
+                  <Card 
+                    className="md:hidden group hover:shadow-lg transition-all duration-300 cursor-pointer border bg-card p-4" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('🖱️ MOBILE CARD CLICK - Project:', project.name);
+                      try {
+                        handleSelectProject(project);
+                      } catch (error) {
+                        console.error('❌ Error in handleSelectProject:', error);
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Icon and category */}
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-gradient-to-br from-primary to-orange-500 rounded-lg flex items-center justify-center">
+                          <IconComponent className="w-6 h-6 text-white" />
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Layers className="w-4 h-4" />
-                        {project.phases?.length || 0} phases
+                      
+                      {/* Project info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
+                            {project.name}
+                          </h3>
+                          {project.publishStatus === 'beta-testing' && (
+                            <Badge variant="secondary" className="bg-orange-100 text-orange-800 text-xs">
+                              BETA
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        <p className="text-xs text-muted-foreground mb-2 line-clamp-1">
+                          {project.description}
+                        </p>
+                        
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {project.estimatedTime}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Layers className="w-3 h-3" />
+                            {project.phases?.length || 0} phases
+                          </div>
+                          <Badge className={getDifficultyColor(project.difficulty || '')} variant="secondary">
+                            {project.difficulty}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      {/* Action button */}
+                      <div className="flex-shrink-0">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="text-xs px-3"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('🔘 MOBILE BUTTON CLICK - Project:', project.name);
+                            try {
+                              handleSelectProject(project);
+                            } catch (error) {
+                              console.error('❌ Error in button handleSelectProject:', error);
+                            }
+                          }}
+                        >
+                          {isAdminMode ? 'Edit' : 'Start'}
+                        </Button>
                       </div>
                     </div>
+                  </Card>
 
-                    <div className="flex items-center justify-between">
-                      <Badge className={getDifficultyColor(project.difficulty || '')} variant="secondary">
-                        {project.difficulty}
-                      </Badge>
-                      <Button 
-                        size="sm" 
-                        className="opacity-0 group-hover:opacity-100 transition-opacity" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          console.log('🔘 BUTTON CLICK - Project:', project.name);
-                          try {
-                            handleSelectProject(project);
-                          } catch (error) {
-                            console.error('❌ Error in button handleSelectProject:', error);
-                          }
-                        }}
-                      >
-                        {isAdminMode ? 'Edit Template' : 'Start Project'}
-                      </Button>
+                  {/* Desktop: Card layout */}
+                  <Card 
+                    className="hidden md:block group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 overflow-hidden" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('🖱️ DESKTOP CARD CLICK - Project:', project.name);
+                      try {
+                        handleSelectProject(project);
+                      } catch (error) {
+                        console.error('❌ Error in handleSelectProject:', error);
+                      }
+                    }}
+                  >
+                    <div className={`h-32 bg-gradient-to-br from-primary to-orange-500 relative overflow-hidden`}>
+                      <div className="absolute inset-0 bg-black/20" />
+                      <div className="absolute bottom-4 left-4 text-white">
+                        <IconComponent className="w-8 h-8" />
+                      </div>
+                      <div className="absolute top-4 right-4 flex gap-2">
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                          {project.category}
+                        </Badge>
+                        {/* Beta badge for beta-testing projects */}
+                        {project.publishStatus === 'beta-testing' && (
+                          <Badge variant="secondary" className="bg-orange-500/20 text-orange-200 border-orange-300/30">
+                            <AlertTriangle className="w-3 h-3 mr-1" />
+                            BETA
+                          </Badge>
+                        )}
+                        {isAdminMode && (
+                          <Badge variant="secondary" className={`${project.publishStatus === 'published' ? 'bg-green-500/20 text-green-300' : project.publishStatus === 'beta-testing' ? 'bg-orange-500/20 text-orange-300' : 'bg-yellow-500/20 text-yellow-300'}`}>
+                            {project.publishStatus}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>;
-        })}
+                    
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                        {project.name}
+                      </CardTitle>
+                      <CardDescription className="text-sm line-clamp-2">
+                        {project.description}
+                      </CardDescription>
+                    </CardHeader>
+
+                    <CardContent className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Clock className="w-4 h-4" />
+                          {project.estimatedTime}
+                        </div>
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Layers className="w-4 h-4" />
+                          {project.phases?.length || 0} phases
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <Badge className={getDifficultyColor(project.difficulty || '')} variant="secondary">
+                          {project.difficulty}
+                        </Badge>
+                        <Button 
+                          size="sm" 
+                          className="opacity-0 group-hover:opacity-100 transition-opacity" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('🔘 DESKTOP BUTTON CLICK - Project:', project.name);
+                            try {
+                              handleSelectProject(project);
+                            } catch (error) {
+                              console.error('❌ Error in button handleSelectProject:', error);
+                            }
+                          }}
+                        >
+                          {isAdminMode ? 'Edit Template' : 'Start Project'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              );
+            })
+          )}
         </div>
 
         {/* Categories Filter (Future Enhancement) */}
