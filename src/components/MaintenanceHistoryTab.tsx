@@ -124,7 +124,7 @@ export const MaintenanceHistoryTab: React.FC<MaintenanceHistoryTabProps> = ({ se
   const filteredCompletions = getFilteredAndSortedCompletions();
 
   return (
-    <div className="flex flex-col">
+    <div className="flex-1 flex flex-col">
       {/* Filters - matching Active tab spacing */}
       <div className="flex flex-col sm:flex-row gap-2 mb-4 shrink-0">
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
