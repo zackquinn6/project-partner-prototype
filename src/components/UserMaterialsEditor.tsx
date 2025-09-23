@@ -274,6 +274,7 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
           <h3 className="text-lg font-semibold">Add Materials to Your Library</h3>
           <Button 
             variant="outline" 
+            size="sm"
             onClick={async () => {
               // Save materials before closing
               if (user && userMaterials.length > 0) {
@@ -301,6 +302,7 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
                 setShowAddMaterials(false);
               }
             }}
+            className="text-xs px-3 py-1 h-7"
           >
             Back to My Materials
           </Button>
@@ -392,107 +394,37 @@ export function UserMaterialsEditor({ initialMode = 'library', onBackToLibrary }
         </div>
       </div>
 
-      <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+      <div className="space-y-3 max-h-[70vh] overflow-y-auto">
         {userMaterials.sort((a, b) => a.item.localeCompare(b.item)).map((material) => (
-          <Card key={material.id} className="p-4">
-            <div className="space-y-3">
-              <div className="flex justify-between items-start">
-                <h4 className="font-medium">{material.item}</h4>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => removeMaterial(material.id)}
-                  title="Delete material"
-                  className="text-destructive hover:text-destructive h-8 w-8"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor={`quantity-${material.id}`}>
-                    Quantity
-                  </Label>
-                  {material.unit_size && (
-                    <div className="text-xs text-muted-foreground mt-1">
-                      Unit: {material.unit_size}
-                    </div>
-                  )}
-                  <Input
-                    id={`quantity-${material.id}`}
-                    type="number"
-                    min="1"
-                    value={material.quantity}
-                    onChange={(e) => handleMaterialFieldUpdate(material.id, 'quantity', parseInt(e.target.value) || 1)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor={`brand-${material.id}`}>Brand</Label>
-                  <Input
-                    id={`brand-${material.id}`}
-                    value={material.brand || ''}
-                    onChange={(e) => handleMaterialFieldUpdate(material.id, 'brand', e.target.value)}
-                    placeholder="e.g., Sherwin Williams"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor={`location-${material.id}`}>Purchase Location</Label>
-                <Input
-                  id={`location-${material.id}`}
-                  value={material.purchase_location || ''}
-                  onChange={(e) => handleMaterialFieldUpdate(material.id, 'purchase_location', e.target.value)}
-                  placeholder="e.g., Home Depot, Amazon"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor={`description-${material.id}`}>Personal Notes</Label>
-                <Textarea
-                  id={`description-${material.id}`}
-                  value={material.custom_description || ''}
-                  onChange={(e) => handleMaterialFieldUpdate(material.id, 'custom_description', e.target.value)}
-                  placeholder="Add your own notes about this material..."
-                  className="resize-none"
-                  rows={2}
-                />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="flex-1">
-                  <Label>Item Photo</Label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handlePhotoUpload(material.id, file);
-                      }}
-                      className="hidden"
-                      id={`photo-${material.id}`}
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => document.getElementById(`photo-${material.id}`)?.click()}
-                      disabled={uploadingPhoto === material.id}
-                    >
-                      <Camera className="w-4 h-4 mr-2" />
-                      {uploadingPhoto === material.id ? "Uploading..." : "Add Photo"}
-                    </Button>
-                  </div>
-                </div>
+          <Card key={material.id} className="p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 {(material.user_photo_url || material.photo_url) && (
                   <img 
                     src={material.user_photo_url || material.photo_url} 
                     alt={material.item}
-                    className="w-16 h-16 object-cover rounded"
+                    className="w-10 h-10 object-cover rounded flex-shrink-0"
                   />
                 )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium text-sm truncate">{material.item}</h4>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>Qty: {material.quantity}</span>
+                    {material.brand && <span>• {material.brand}</span>}
+                  </div>
+                  {material.custom_description && (
+                    <p className="text-xs text-muted-foreground mt-1 truncate">{material.custom_description}</p>
+                  )}
+                </div>
               </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => removeMaterial(material.id)}
+                className="w-6 h-6 p-0 text-destructive hover:bg-destructive/10 flex-shrink-0"
+              >
+                <Trash2 className="w-3 h-3" />
+              </Button>
             </div>
           </Card>
         ))}

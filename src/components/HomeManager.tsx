@@ -315,9 +315,12 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
               <p className="text-muted-foreground">
                 Manage your home locations for projects and maintenance. Each project/maintenance task is associated with a specific home.
               </p>
-              <Button onClick={() => setShowForm(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Home
+              <Button 
+                onClick={() => setShowForm(true)}
+                size="sm"
+                className="w-8 h-8 p-0"
+              >
+                <Plus className="w-4 h-4" />
               </Button>
             </div>
 
@@ -329,10 +332,13 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
                   <p className="text-muted-foreground mb-4">
                     Add your first home to start organizing your DIY projects by location.
                   </p>
-                  <Button onClick={() => setShowForm(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Your First Home
-                  </Button>
+              <Button 
+                size="sm"
+                onClick={() => setShowForm(true)}
+                className="w-8 h-8 p-0"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
                 </CardContent>
               </Card> : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {homes.map(home => <Card key={home.id} className={home.is_primary ? 'ring-2 ring-primary cursor-pointer hover:shadow-md transition-shadow' : 'cursor-pointer hover:shadow-md transition-shadow'} onClick={() => handleHomeClick(home)}>

@@ -30,6 +30,7 @@ import { HomeMaintenanceWindow } from '@/components/HomeMaintenanceWindow';
 import { UserToolsMaterialsWindow } from '@/components/UserToolsMaterialsWindow';
 import ProfileManager from '@/components/ProfileManager';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL RETURNS
@@ -455,7 +456,16 @@ const Index = () => {
       <Dialog open={showRapidAssessment} onOpenChange={setShowRapidAssessment}>
         <DialogContent className="w-full h-full sm:max-w-7xl sm:max-h-[90vh] overflow-hidden border-none sm:border p-0 sm:p-6">
           <DialogHeader className="p-4 sm:p-0 border-b sm:border-none">
-            <DialogTitle>Rapid Project Assessment</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle>Rapid Project Assessment</DialogTitle>
+              <Button 
+                variant="ghost" 
+                onClick={() => setShowRapidAssessment(false)}
+                className="sm:hidden text-xs px-2 py-1 h-6"
+              >
+                Close
+              </Button>
+            </div>
           </DialogHeader>
           <div className="overflow-y-auto max-h-[calc(90vh-8rem)]">
             <RapidProjectAssessment />
