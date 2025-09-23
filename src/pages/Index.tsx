@@ -332,6 +332,7 @@ const Index = () => {
               <MobileProjectListing
                 onProjectSelect={handleMobileProjectSelect}
                 onNewProject={() => setMobileView('home')}
+                onClose={() => setMobileView('home')}
               />
               <MobileBottomNav
                 currentView="projects"

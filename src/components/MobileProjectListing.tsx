@@ -11,12 +11,12 @@ import { ProjectRun } from '@/interfaces/ProjectRun';
 interface MobileProjectListingProps {
   onProjectSelect: (project: Project | ProjectRun) => void;
   onNewProject?: () => void;
+  onClose?: () => void;
 }
 
-export function MobileProjectListing({ onProjectSelect, onNewProject }: MobileProjectListingProps) {
+export function MobileProjectListing({ onProjectSelect, onNewProject, onClose }: MobileProjectListingProps) {
   const { projects, projectRuns, currentProjectRun } = useProject();
   const [searchQuery, setSearchQuery] = useState('');
-  const [showTemplates, setShowTemplates] = useState(false);
   const [sortBy, setSortBy] = useState<'recent' | 'name' | 'progress'>('recent');
 
   // Filter and sort project runs
@@ -60,6 +60,19 @@ export function MobileProjectListing({ onProjectSelect, onNewProject }: MobilePr
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex-shrink-0 p-4 space-y-4 bg-background/95 backdrop-blur-sm border-b border-border">
+        {/* Close Button and Actions */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">My Projects</h2>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="text-sm text-muted-foreground hover:text-foreground px-3 py-1 rounded-md hover:bg-accent/10 transition-colors"
+            >
+              Close
+            </button>
+          )}
+        </div>
+        
         {/* Search and Actions */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
@@ -93,7 +106,7 @@ export function MobileProjectListing({ onProjectSelect, onNewProject }: MobilePr
         </div>
 
         {/* Continue Current Project (if any) */}
-        {currentProjectRun && !showTemplates && (
+        {currentProjectRun && (
           <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
@@ -113,112 +126,56 @@ export function MobileProjectListing({ onProjectSelect, onNewProject }: MobilePr
         )}
       </div>
 
-      {/* Toggle between Projects and Templates */}
-      <div className="flex-shrink-0 bg-background/95 backdrop-blur-sm">
-        <div className="px-4 mb-4">
-          <div className="flex gap-2">
-            <Button
-              variant={!showTemplates ? "default" : "outline"}
-              onClick={() => setShowTemplates(false)}
-              className="flex-1"
-            >
-              My Projects
-              {(activeCount + completedCount) > 0 && (
-                <Badge className="ml-2 bg-background text-foreground text-xs h-5 w-5 rounded-full p-0 flex items-center justify-center">
-                  {activeCount + completedCount}
-                </Badge>
-              )}
-            </Button>
-            <Button
-              variant={showTemplates ? "default" : "outline"}
-              onClick={() => setShowTemplates(true)}
-              className="flex-1"
-            >
-              Templates
-              {filteredProjects.length > 0 && (
-                <Badge className="ml-2 bg-background text-foreground text-xs h-5 w-5 rounded-full p-0 flex items-center justify-center">
-                  {filteredProjects.length}
-                </Badge>
-              )}
-            </Button>
-          </div>
-        </div>
-      </div>
-
       {/* Content */}
       <div className="flex-1 overflow-auto p-4 space-y-3">
-        {showTemplates ? (
-          // Templates view
-          filteredProjects.length > 0 ? (
-            filteredProjects.map((project) => (
-              <MobileProjectCard
-                key={project.id}
-                project={project}
-                variant="project"
-                onSelect={() => onProjectSelect(project)}
-              />
-            ))
-          ) : (
-            <EmptyState
-              title="No templates found"
-              description="Try adjusting your search"
-              actionLabel="Clear Search"
-              onAction={() => setSearchQuery('')}
-            />
-          )
-        ) : (
-          // Projects view - active and completed together
+        {/* Active Projects Section */}
+        {filteredProjectRuns.filter(run => (run.progress || 0) < 100).length > 0 && (
           <>
-            {/* Active Projects Section */}
-            {filteredProjectRuns.filter(run => (run.progress || 0) < 100).length > 0 && (
-              <>
-                <div className="text-sm font-medium text-muted-foreground px-1 mb-2">
-                  Active Projects ({activeCount})
-                </div>
-                {filteredProjectRuns
-                  .filter(run => (run.progress || 0) < 100)
-                  .map((run) => (
-                    <MobileProjectCard
-                      key={run.id}
-                      project={run}
-                      variant="run"
-                      onSelect={() => onProjectSelect(run)}
-                    />
-                  ))
-                }
-              </>
-            )}
-
-            {/* Completed Projects Section */}
-            {filteredProjectRuns.filter(run => (run.progress || 0) >= 100).length > 0 && (
-              <>
-                <div className="text-sm font-medium text-muted-foreground px-1 mb-2 mt-6">
-                  Completed Projects ({completedCount})
-                </div>
-                {filteredProjectRuns
-                  .filter(run => (run.progress || 0) >= 100)
-                  .map((run) => (
-                    <MobileProjectCard
-                      key={run.id}
-                      project={run}
-                      variant="run"
-                      onSelect={() => onProjectSelect(run)}
-                    />
-                  ))
-                }
-              </>
-            )}
-
-            {/* Empty State */}
-            {filteredProjectRuns.length === 0 && (
-              <EmptyState
-                title="No projects yet"
-                description="Start a new project from our templates"
-                actionLabel="Browse Templates"
-                onAction={() => setShowTemplates(true)}
-              />
-            )}
+            <div className="text-sm font-medium text-muted-foreground px-1 mb-2">
+              Active Projects ({activeCount})
+            </div>
+            {filteredProjectRuns
+              .filter(run => (run.progress || 0) < 100)
+              .map((run) => (
+                <MobileProjectCard
+                  key={run.id}
+                  project={run}
+                  variant="run"
+                  onSelect={() => onProjectSelect(run)}
+                />
+              ))
+            }
           </>
+        )}
+
+        {/* Completed Projects Section */}
+        {filteredProjectRuns.filter(run => (run.progress || 0) >= 100).length > 0 && (
+          <>
+            <div className="text-sm font-medium text-muted-foreground px-1 mb-2 mt-6">
+              Completed Projects ({completedCount})
+            </div>
+            {filteredProjectRuns
+              .filter(run => (run.progress || 0) >= 100)
+              .map((run) => (
+                <MobileProjectCard
+                  key={run.id}
+                  project={run}
+                  variant="run"
+                  onSelect={() => onProjectSelect(run)}
+                />
+              ))
+            }
+          </>
+        )}
+
+        {/* Empty State */}
+        {filteredProjectRuns.length === 0 && (
+          <EmptyState
+            title="No projects yet"
+            description="Start a new project by tapping the + button"
+            actionLabel="New Project"
+            onAction={() => onNewProject?.()}
+          />
         )}
       </div>
     </div>
