@@ -1071,13 +1071,6 @@ export type Database = {
             foreignKeyName: "pricing_data_model_id_fkey"
             columns: ["model_id"]
             isOneToOne: false
-            referencedRelation: "market_pricing_summary"
-            referencedColumns: ["model_id"]
-          },
-          {
-            foreignKeyName: "pricing_data_model_id_fkey"
-            columns: ["model_id"]
-            isOneToOne: false
             referencedRelation: "tool_models"
             referencedColumns: ["id"]
           },
@@ -1980,29 +1973,7 @@ export type Database = {
       }
     }
     Views: {
-      market_pricing_summary: {
-        Row: {
-          average_price: number | null
-          last_updated: string | null
-          manufacturer: string | null
-          max_price: number | null
-          min_price: number | null
-          model_id: string | null
-          model_name: string | null
-          retailer_count: number | null
-          variation_id: string | null
-          variation_name: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tool_models_variation_instance_id_fkey"
-            columns: ["variation_id"]
-            isOneToOne: false
-            referencedRelation: "variation_instances"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       add_admin_by_email: {
