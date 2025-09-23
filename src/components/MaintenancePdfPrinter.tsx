@@ -6,6 +6,7 @@ import { FileText, Calendar, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MaintenanceTask {
   id: string;
@@ -38,6 +39,7 @@ export const MaintenancePdfPrinter: React.FC<MaintenancePdfPrinterProps> = ({
   homeName 
 }) => {
   const printRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   const generatePDF = async () => {
     if (!printRef.current) return;
@@ -86,9 +88,16 @@ export const MaintenancePdfPrinter: React.FC<MaintenancePdfPrinterProps> = ({
 
   return (
     <>
-      <Button onClick={generatePDF} className="w-6 h-6 p-0" title="Save to PDF">
-        <Download className="h-3 w-3" />
-      </Button>
+      {isMobile ? (
+        <Button onClick={generatePDF} className="w-6 h-6 p-0" title="Save to PDF">
+          <Download className="h-3 w-3" />
+        </Button>
+      ) : (
+        <Button onClick={generatePDF} className="flex items-center gap-2" title="Save to PDF">
+          <Download className="h-4 w-4" />
+          Export PDF
+        </Button>
+      )}
 
       {/* Hidden content for PDF generation */}
       <div ref={printRef} style={{ position: 'absolute', left: '-9999px', width: '210mm', backgroundColor: 'white', padding: '20px' }}>
