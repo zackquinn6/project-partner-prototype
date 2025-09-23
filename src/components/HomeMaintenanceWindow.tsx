@@ -266,7 +266,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
 
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Home Selection - Fixed at top */}
-            <div className="px-4 sm:px-6 shrink-0">
+            <div className="px-4 sm:px-6 shrink-0 mb-3">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
                 <div className="flex items-center gap-2">
                   <Select value={selectedHomeId} onValueChange={setSelectedHomeId}>

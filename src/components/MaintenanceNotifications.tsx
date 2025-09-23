@@ -88,7 +88,7 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
   };
 
   return (
-    <div>
+    <div className="flex flex-col h-full">
       {/* Header - matching Active tab spacing */}
       <div className="mb-4 shrink-0">
         <h3 className="flex items-center gap-2 text-lg font-semibold">
@@ -98,7 +98,8 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
       </div>
       
       {/* Content - matching Active tab content area */}
-      <div className="flex-1 overflow-y-auto space-y-4">
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="space-y-4">
         {/* Email Settings */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
@@ -238,6 +239,7 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
             <strong>Note:</strong> Notifications will be sent 7 days before each maintenance task is due. 
             You can disable notifications for specific tasks or adjust your preferences above.
           </p>
+        </div>
         </div>
       </div>
     </div>
