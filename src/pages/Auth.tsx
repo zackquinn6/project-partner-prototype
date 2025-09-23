@@ -278,6 +278,24 @@ export default function Auth() {
               </AlertDescription>
             </Alert>
           )}
+
+          {/* Key Characteristics Section */}
+          <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/10">
+            <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
+              🔑 Key Characteristics
+            </h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              KCs are how we personalize our projects to each builder. We tailor detail to skill level: first‑timers get the full play‑by‑play, while seasoned DIYers aren't stuck reading what a miter saw looks like.
+            </p>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.dispatchEvent(new CustomEvent('show-kc-explainer'))}
+              className="text-primary border-primary hover:bg-primary/10"
+            >
+              Learn More
+            </Button>
+          </div>
         </CardContent>
       </Card>
       

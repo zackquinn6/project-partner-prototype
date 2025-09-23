@@ -360,8 +360,7 @@ export default function Home({
             <div className="bg-gradient-subtle p-6 rounded-lg max-w-4xl mx-auto mb-12">
               <h3 className="text-xl font-semibold text-foreground mb-3">🔑 Key Characteristics: Engineered Processes, Personalized</h3>
               <p className="text-muted-foreground mb-4">
-                KCs are the way that engineered processes are personalized to each builder. Get the right level of detail 
-                for your skill level—from step-by-step for beginners to quick reminders for experts.
+                KCs are how we personalize our projects to each builder. We tailor detail to skill level: first‑timers get the full play‑by‑play, while seasoned DIYers aren't stuck reading what a miter saw looks like.
               </p>
               <Button 
                 variant="outline" 

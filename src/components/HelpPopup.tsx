@@ -18,13 +18,6 @@ export const HelpPopup: React.FC<HelpPopupProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center gap-2">
               <DialogTitle>Expert Virtual Consults</DialogTitle>
             </div>
-            <Button 
-              variant="ghost" 
-              onClick={onClose}
-              className="sm:hidden text-xs px-2 py-1 h-6"
-            >
-              Close
-            </Button>
           </div>
             
           <div className="w-full space-y-4">

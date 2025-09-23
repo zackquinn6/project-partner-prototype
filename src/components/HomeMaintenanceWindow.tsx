@@ -262,13 +262,6 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                 <Home className="h-4 w-4 sm:h-5 sm:w-5" />
                 Home Maintenance Tracker
               </DialogTitle>
-              <Button 
-                variant="ghost" 
-                onClick={() => onOpenChange(false)}
-                className="sm:hidden text-xs px-2 py-1 h-6"
-              >
-                Close
-              </Button>
             </div>
           </DialogHeader>
 

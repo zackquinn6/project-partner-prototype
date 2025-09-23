@@ -465,11 +465,11 @@ export function RapidProjectAssessment() {
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Calculator className="w-5 h-5" />
-              Rapid Plan
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Calculator className="w-5 h-5" />
+                Rapid Plan
+              </CardTitle>
               <div className="flex gap-2">
                 <Button 
                   variant="outline" 
@@ -488,7 +488,7 @@ export function RapidProjectAssessment() {
                   <Save className="w-4 h-4" />
                 </Button>
               </div>
-          </div>
+            </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Project Details */}

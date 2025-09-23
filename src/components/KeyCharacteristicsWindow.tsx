@@ -220,12 +220,11 @@ export function KeyCharacteristicsWindow({ open, onOpenChange, operations }: Key
           </DialogHeader>
           <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
             <p className="text-primary font-medium">
-              KCs are the way that engineered processes are personalized to each builder.
+              KCs are how we personalize our projects to each builder.
             </p>
             <p>
-              Key Characteristics match instruction detail to your skill level. Whether you're a beginner who needs 
-              step-by-step guidance or an expert who just needs quick reminders, KCs deliver the right level of detail 
-              for successful project completion.
+              We tailor detail to skill level: first‑timers get the full play‑by‑play, while seasoned DIYers aren't stuck reading what a miter saw looks like. 
+              KCs deliver the right level of detail for successful project completion.
             </p>
             <div className="flex justify-center mt-4">
               <Button 

@@ -241,21 +241,6 @@ export function MobileOptimizedHome() {
           </div>
         </div>
 
-        {/* Key Characteristics Section */}
-        <div className="bg-gradient-subtle p-4 rounded-lg">
-          <h2 className="text-lg font-semibold text-foreground mb-2">🔑 Key Characteristics</h2>
-          <p className="text-sm text-muted-foreground mb-3">
-            KCs are the way that engineered processes are personalized to each builder. Get the right level of detail for your skill level.
-          </p>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => window.dispatchEvent(new CustomEvent('show-kc-explainer'))}
-            className="text-primary border-primary hover:bg-primary/10 text-xs px-3 py-1 h-7"
-          >
-            Learn More
-          </Button>
-        </div>
 
         {/* Quick Actions */}
         <div>
@@ -304,6 +289,22 @@ export function MobileOptimizedHome() {
               );
             })}
           </div>
+        </div>
+
+        {/* Key Characteristics Section */}
+        <div className="bg-gradient-subtle p-4 rounded-lg">
+          <h2 className="text-lg font-semibold text-foreground mb-2">🔑 Key Characteristics</h2>
+          <p className="text-sm text-muted-foreground mb-3">
+            KCs are how we personalize our projects to each builder. We tailor detail to skill level: first‑timers get the full play‑by‑play, while seasoned DIYers aren't stuck reading what a miter saw looks like.
+          </p>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => window.dispatchEvent(new CustomEvent('show-kc-explainer'))}
+            className="text-primary border-primary hover:bg-primary/10 text-xs px-3 py-1 h-7"
+          >
+            Learn More
+          </Button>
         </div>
 
         {/* Beta Apps */}

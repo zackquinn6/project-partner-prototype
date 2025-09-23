@@ -41,13 +41,6 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
             <DialogTitle className="text-sm sm:text-base">
               {currentMode === 'add-tools' ? 'Add to Library' : 'My Tools Library'}
             </DialogTitle>
-            <Button 
-              variant="ghost" 
-              onClick={() => onOpenChange(false)}
-              className="sm:hidden text-xs px-2 py-1 h-6"
-            >
-              Close
-            </Button>
           </div>
         </DialogHeader>
         

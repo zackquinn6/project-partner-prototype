@@ -19,8 +19,7 @@ export function KeyCharacteristicsExplainer({ open, onOpenChange }: KeyCharacter
         <div className="space-y-6">
           <div className="bg-primary/10 p-4 rounded-lg">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Key Characteristics (KC) is about matching instruction detail to skill level. The task is always the same, 
-              but the way we communicate it changes depending on whether someone is brand new, somewhat familiar, or highly experienced.
+              KCs are how we personalize our projects to each builder. We tailor detail to skill level: first‑timers get the full play‑by‑play, while seasoned DIYers aren't stuck reading what a miter saw looks like.
             </p>
           </div>
 
