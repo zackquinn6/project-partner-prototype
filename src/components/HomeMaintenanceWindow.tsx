@@ -297,7 +297,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                   <TabsTrigger value="notifications">Alerts</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="tasks" className="space-y-4">
+                <TabsContent value="tasks" className="space-y-4 mt-4">
                   {/* Category Filter */}
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4 text-muted-foreground" />
@@ -400,13 +400,13 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                   </div>
                 </TabsContent>
 
-                <TabsContent value="history" className="space-y-2">
+                <TabsContent value="history" className="space-y-2 mt-4">
                   <div className="max-h-[60vh] overflow-y-auto">
                     <MaintenanceHistoryTab selectedHomeId={selectedHomeId} />
                   </div>
                 </TabsContent>
 
-                <TabsContent value="notifications" className="space-y-4">
+                <TabsContent value="notifications" className="space-y-4 mt-4">
                   <div className="max-h-[60vh] overflow-y-auto">
                     <MaintenanceNotifications selectedHomeId={selectedHomeId} />
                   </div>
