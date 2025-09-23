@@ -256,7 +256,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
   return <>
     <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="w-full h-full sm:max-w-6xl sm:max-h-[90vh] overflow-hidden border-none sm:border flex flex-col">
-          <DialogHeader className="p-4 sm:p-6 pb-2 border-b sm:border-none shrink-0">
+          <DialogHeader className="p-4 sm:p-6 pb-0 border-b sm:border-none shrink-0">
             <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
               <Home className="h-4 w-4 sm:h-5 sm:w-5" />
               Home Maintenance Tracker
@@ -265,7 +265,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
 
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Home Selection - Fixed at top */}
-            <div className="px-4 sm:px-6 pt-0 pb-2 sm:pb-2 shrink-0">
+            <div className="px-4 sm:px-6 pt-2 pb-2 sm:pb-2 shrink-0">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
                 <div className="flex items-center gap-2">
                   <Select value={selectedHomeId} onValueChange={setSelectedHomeId}>
@@ -300,7 +300,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     <TabsTrigger value="notifications">Alerts</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="tasks" className="flex-1 flex flex-col mt-4 overflow-hidden">
+                  <TabsContent value="tasks" className="flex-1 flex flex-col mt-2 overflow-hidden">
                     {/* Category Filter */}
                     <div className="flex items-center gap-2 mb-4 shrink-0">
                       <Filter className="h-4 w-4 text-muted-foreground" />
@@ -403,13 +403,13 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="history" className="flex-1 overflow-hidden mt-0">
+                  <TabsContent value="history" className="flex-1 overflow-hidden mt-2">
                     <div className="h-full overflow-y-auto">
                       <MaintenanceHistoryTab selectedHomeId={selectedHomeId} />
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="notifications" className="flex-1 overflow-hidden mt-0">
+                  <TabsContent value="notifications" className="flex-1 overflow-hidden mt-2">
                     <div className="h-full overflow-y-auto">
                       <MaintenanceNotifications selectedHomeId={selectedHomeId} />
                     </div>

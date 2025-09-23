@@ -87,14 +87,14 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
   };
 
   return (
-    <Card className="border-0 shadow-none">
-      <CardHeader className="px-0 pt-0">
-        <CardTitle className="flex items-center gap-2">
+    <div>
+      <div className="pb-4">
+        <h3 className="flex items-center gap-2 text-lg font-semibold">
           <Bell className="h-5 w-5" />
           Notification Settings
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+        </h3>
+      </div>
+      <div className="space-y-6">
         {/* Email Settings */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
@@ -227,7 +227,15 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
             {saving ? "Saving..." : "Save Settings"}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Help text */}
+        <div className="bg-muted/30 p-4 rounded-lg">
+          <p className="text-sm text-muted-foreground">
+            <strong>Note:</strong> Notifications will be sent 7 days before each maintenance task is due. 
+            You can disable notifications for specific tasks or adjust your preferences above.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
