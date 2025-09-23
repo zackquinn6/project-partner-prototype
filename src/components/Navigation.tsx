@@ -20,6 +20,8 @@ import { CommunityPostsWindow } from './CommunityPostsWindow';
 import { ToolRentalsWindow } from './ToolRentalsWindow';
 import { RapidProjectAssessment } from './RapidProjectAssessment';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AIRepairWindow } from './AIRepairWindow';
+import { ContractorFinderWindow } from './ContractorFinderWindow';
 
 interface NavigationProps {
   currentView: 'home' | 'admin' | 'user' | 'editWorkflow';
@@ -51,6 +53,8 @@ export default function Navigation({
   const [isToolRentalsOpen, setIsToolRentalsOpen] = useState(false);
   const [isRapidAssessmentOpen, setIsRapidAssessmentOpen] = useState(false);
   const [isToolsLibraryGridOpen, setIsToolsLibraryGridOpen] = useState(false);
+  const [isAIRepairOpen, setIsAIRepairOpen] = useState(false);
+  const [isContractorFinderOpen, setIsContractorFinderOpen] = useState(false);
   
   // Add error boundary for useProject hook
   let projectData;
@@ -127,6 +131,31 @@ export default function Navigation({
       setIsUserToolsLibraryOpen(true);
     };
 
+    const handleNavigateToProjectsEvent = (event: Event) => {
+      console.log('handleNavigateToProjectsEvent triggered');
+      event.stopPropagation();
+      onViewChange('user');
+      onProjectsView?.();
+    };
+
+    const handleHelpPopupEvent = (event: Event) => {
+      console.log('handleHelpPopupEvent triggered');
+      event.stopPropagation();
+      setIsDocumentationOpen(true);
+    };
+
+    const handleAIRepairEvent = (event: Event) => {
+      console.log('handleAIRepairEvent triggered');
+      event.stopPropagation();
+      setIsAIRepairOpen(true);
+    };
+
+    const handleContractorFinderEvent = (event: Event) => {
+      console.log('handleContractorFinderEvent triggered');
+      event.stopPropagation();
+      setIsContractorFinderOpen(true);
+    };
+
     window.addEventListener('show-home-manager', handleHomeManagerEvent);
     window.addEventListener('show-tools-materials', handleToolsLibraryEvent);
     window.addEventListener('show-tools-library-grid', handleToolsLibraryGridEvent);
@@ -137,6 +166,10 @@ export default function Navigation({
     window.addEventListener('show-rapid-assessment', handleRapidAssessmentEvent);
     window.addEventListener('show-tools-materials-editor', handleToolsMaterialsEditorEvent);
     window.addEventListener('show-user-tools-materials', handleUserToolsMaterialsEvent);
+    window.addEventListener('navigate-to-projects', handleNavigateToProjectsEvent);
+    window.addEventListener('show-help-popup', handleHelpPopupEvent);
+    window.addEventListener('show-ai-repair', handleAIRepairEvent);
+    window.addEventListener('show-contractor-finder', handleContractorFinderEvent);
     
     return () => {
       window.removeEventListener('show-home-manager', handleHomeManagerEvent);
@@ -149,6 +182,10 @@ export default function Navigation({
       window.removeEventListener('show-rapid-assessment', handleRapidAssessmentEvent);
       window.removeEventListener('show-tools-materials-editor', handleToolsMaterialsEditorEvent);
       window.removeEventListener('show-user-tools-materials', handleUserToolsMaterialsEvent);
+      window.removeEventListener('navigate-to-projects', handleNavigateToProjectsEvent);
+      window.removeEventListener('show-help-popup', handleHelpPopupEvent);
+      window.removeEventListener('show-ai-repair', handleAIRepairEvent);
+      window.removeEventListener('show-contractor-finder', handleContractorFinderEvent);
     };
   }, []);
   
@@ -372,6 +409,16 @@ export default function Navigation({
             </div>
           </DialogContent>
         </Dialog>
+        
+        <AIRepairWindow 
+          open={isAIRepairOpen}
+          onOpenChange={setIsAIRepairOpen}
+        />
+        
+        <ContractorFinderWindow 
+          open={isContractorFinderOpen}
+          onOpenChange={setIsContractorFinderOpen}
+        />
     </>
   );
 }
