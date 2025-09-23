@@ -37,28 +37,19 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full h-full sm:max-w-6xl sm:max-h-[80vh] overflow-hidden border-none sm:border p-0 sm:p-6">
         <DialogHeader className="p-4 sm:p-0 border-b sm:border-none">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-sm sm:text-base">
-              {currentMode === 'add-tools' ? 'Add to Library' : 'My Tools Library'}
-            </DialogTitle>
-            <Button 
-              variant="ghost" 
-              onClick={() => onOpenChange(false)}
-              className="sm:hidden text-xs px-2 py-1 h-6"
-            >
-              Close
-            </Button>
-          </div>
+          <DialogTitle className="text-sm sm:text-base">
+            {currentMode === 'add-tools' ? 'Add to Library' : 'My Tools Library'}
+          </DialogTitle>
         </DialogHeader>
         
-        <div className="p-4 sm:p-0">
-          <Tabs defaultValue="tools" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+        <div className="flex flex-col h-full p-4 sm:p-0">
+          <Tabs defaultValue="tools" className="w-full flex flex-col h-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
               <TabsTrigger value="tools">My Tools</TabsTrigger>
               <TabsTrigger value="materials">My Materials</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="tools" className="mt-4 min-h-[60vh]">
+            <TabsContent value="tools" className="flex-1 min-h-0">
               <UserToolsEditor 
                 initialMode={currentMode}
                 onBackToLibrary={() => setCurrentMode('library')}
@@ -66,7 +57,7 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
               />
             </TabsContent>
             
-            <TabsContent value="materials" className="mt-4 min-h-[60vh]">
+            <TabsContent value="materials" className="flex-1 min-h-0">
               <UserMaterialsEditor 
                 initialMode={'library'}
                 onBackToLibrary={() => setCurrentMode('library')}

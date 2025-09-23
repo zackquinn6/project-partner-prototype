@@ -303,19 +303,10 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full h-full sm:max-w-4xl sm:max-h-[90vh] overflow-y-auto border-none sm:border p-0 sm:p-6">
         <DialogHeader className="p-4 sm:p-0 border-b sm:border-none">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2">
-              <Home className="w-5 h-5" />
-              Manage Your Homes
-            </DialogTitle>
-            <Button 
-              variant="ghost" 
-              onClick={() => onOpenChange(false)}
-              className="sm:hidden text-xs px-2 py-1 h-6"
-            >
-              Close
-            </Button>
-          </div>
+          <DialogTitle className="flex items-center gap-2">
+            <Home className="w-5 h-5" />
+            Manage Your Homes
+          </DialogTitle>
         </DialogHeader>
 
         {!showForm ? <div className="space-y-6 p-4 sm:p-0">

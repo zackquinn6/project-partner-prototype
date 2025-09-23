@@ -21,19 +21,10 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
       <DialogContent className="w-full h-full sm:max-w-4xl sm:max-h-[90vh] p-0 overflow-hidden border-none sm:border">
         <div className="flex flex-col h-full">
           <DialogHeader className="p-4 sm:p-6 border-b flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Contractor Finder
-              </DialogTitle>
-              <Button 
-                variant="ghost" 
-                onClick={() => onOpenChange(false)}
-                className="sm:hidden text-xs px-2 py-1 h-6"
-              >
-                Close
-              </Button>
-            </div>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Contractor Finder
+            </DialogTitle>
           </DialogHeader>
           
           {/* Beta Banner */}

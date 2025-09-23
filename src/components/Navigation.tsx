@@ -78,37 +78,44 @@ export default function Navigation({
 
   useEffect(() => {
     const handleHomeManagerEvent = (event: Event) => {
+      console.log('🏠 Opening Home Manager');
       event.stopPropagation();
       setIsHomeManagerOpen(true);
     };
 
     const handleToolsLibraryEvent = (event: Event) => {
+      console.log('🔧 Opening Tools Library');
       event.stopPropagation();
       setIsToolsLibraryOpen(true);
     };
 
 
     const handleHomeMaintenanceEvent = (event: Event) => {
+      console.log('🏡 Opening Home Maintenance');
       event.stopPropagation();
       setIsHomeMaintenanceOpen(true);
     };
 
     const handleProfileManagerEvent = (event: Event) => {
+      console.log('👤 Opening Profile Manager');
       event.stopPropagation();
       setIsProfileOpen(true);
     };
 
     const handleCommunityPostsEvent = (event: Event) => {
+      console.log('👥 Opening Community Posts');
       event.stopPropagation();
       setIsCommunityPostsOpen(true);
     };
 
     const handleToolRentalsEvent = (event: Event) => {
+      console.log('🔨 Opening Tool Rentals');
       event.stopPropagation();
       setIsToolRentalsOpen(true);
     };
 
     const handleRapidAssessmentEvent = (event: Event) => {
+      console.log('⚡ Opening Rapid Assessment');
       event.stopPropagation();
       setIsRapidAssessmentOpen(true);
     };
@@ -147,9 +154,11 @@ export default function Navigation({
     };
 
     const handleExpertHelpPopupEvent = (event: Event) => {
-      console.log('handleExpertHelpPopupEvent triggered');
+      console.log('handleExpertHelpPopupEvent triggered - opening Expert Help only');
       event.stopPropagation();
       setIsHelpPopupOpen(true);
+      // Ensure documentation doesn't open too
+      setIsDocumentationOpen(false);
     };
 
     const handleAIRepairEvent = (event: Event) => {
@@ -403,16 +412,7 @@ export default function Navigation({
         <Dialog open={isRapidAssessmentOpen} onOpenChange={setIsRapidAssessmentOpen}>
           <DialogContent className="w-full h-full sm:max-w-7xl sm:max-h-[90vh] overflow-hidden border-none sm:border p-0 sm:p-6">
             <DialogHeader className="p-4 sm:p-0 border-b sm:border-none">
-              <div className="flex items-center justify-between">
-                <DialogTitle>Rapid Project Assessment</DialogTitle>
-                <Button 
-                  variant="ghost" 
-                  onClick={() => setIsRapidAssessmentOpen(false)}
-                  className="sm:hidden text-xs px-2 py-1 h-6"
-                >
-                  close
-                </Button>
-              </div>
+              <DialogTitle>Rapid Project Assessment</DialogTitle>
             </DialogHeader>
             <div className="overflow-y-auto max-h-[calc(90vh-8rem)]">
               <RapidProjectAssessment />
