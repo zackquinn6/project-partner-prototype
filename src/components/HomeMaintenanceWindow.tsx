@@ -256,7 +256,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
   };
   return <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-full h-full sm:max-w-6xl sm:max-h-[90vh] overflow-hidden border-none sm:border flex flex-col">
+        <DialogContent className="w-full sm:max-w-6xl sm:max-h-[90vh] overflow-hidden border-none sm:border flex flex-col">
           <DialogHeader className="p-4 sm:p-6 pb-0 border-b sm:border-none shrink-0">
             <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
               <Home className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -264,7 +264,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
             </DialogTitle>
           </DialogHeader>
 
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex flex-col min-h-[60vh] overflow-hidden">
             {/* Home Selection - Fixed at top */}
             <div className="px-4 sm:px-6 shrink-0 mb-3">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
@@ -293,8 +293,8 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
 
             {/* Tabs - Fixed structure */}
             {selectedHomeId && (
-              <div className="flex-1 flex flex-col overflow-hidden px-4 sm:px-6">
-                <Tabs defaultValue="tasks" className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex flex-col overflow-hidden px-4 sm:px-6">
+                <Tabs defaultValue="tasks" className="flex flex-col overflow-hidden">
                   <TabsList className="grid grid-cols-3 w-full shrink-0">
                     <TabsTrigger value="tasks">Active</TabsTrigger>
                     <TabsTrigger value="history">History</TabsTrigger>
