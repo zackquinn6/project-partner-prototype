@@ -14,7 +14,7 @@ import { StructureManager } from './StructureManager';
 import { AdminRoadmapManager } from './AdminRoadmapManager';
 import { AdminFeatureRequestManager } from './AdminFeatureRequestManager';
 import { AdminDataRefresh } from './AdminDataRefresh';
-import { AppDescriptionDialog } from './AppDescriptionDialog';
+import { AdminGuideWindow } from './AdminGuideWindow';
 import { PFMEAManagement } from './PFMEAManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -29,7 +29,7 @@ export const AdminView: React.FC = () => {
   const [processDesignOpen, setProcessDesignOpen] = useState(false);
   const [roadmapManagerOpen, setRoadmapManagerOpen] = useState(false);
   const [featureRequestManagerOpen, setFeatureRequestManagerOpen] = useState(false);
-  const [appDescriptionOpen, setAppDescriptionOpen] = useState(false);
+  const [adminGuideOpen, setAdminGuideOpen] = useState(false);
   const [dataRefreshOpen, setDataRefreshOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'admin' | 'structure-manager'>('admin');
 
@@ -46,11 +46,11 @@ export const AdminView: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setAppDescriptionOpen(true)}
+              onClick={() => setAdminGuideOpen(true)}
               className="text-xs"
             >
               <FileText className="w-4 h-4 mr-2" />
-              App Guide
+              Admin Guide
             </Button>
           </div>
           <p className="text-lg text-muted-foreground">Manage projects, analytics, and user permissions</p>
@@ -266,9 +266,9 @@ export const AdminView: React.FC = () => {
           onOpenChange={setFeatureRequestManagerOpen}
         />
 
-        <AppDescriptionDialog
-          open={appDescriptionOpen}
-          onOpenChange={setAppDescriptionOpen}
+        <AdminGuideWindow
+          open={adminGuideOpen}
+          onOpenChange={setAdminGuideOpen}
         />
 
         <Dialog open={processDesignOpen} onOpenChange={setProcessDesignOpen}>

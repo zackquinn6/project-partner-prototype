@@ -52,6 +52,16 @@ export default function Navigation({
   const { isAdmin } = useUserRole();
   const isMobile = useIsMobile();
 
+  // Listen for user documentation request from admin guide
+  useEffect(() => {
+    const handleOpenUserDocs = () => {
+      setIsDocumentationOpen(true);
+    };
+
+    window.addEventListener('open-user-documentation', handleOpenUserDocs);
+    return () => window.removeEventListener('open-user-documentation', handleOpenUserDocs);
+  }, []);
+
   useEffect(() => {
     // Only handle Navigation-specific events
     const handleToolsLibraryEvent = (event: Event) => {

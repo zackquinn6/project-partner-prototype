@@ -341,79 +341,79 @@ export function AppDocumentationWindow({ open, onOpenChange }: AppDocumentationW
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] h-[95vh] max-w-none max-h-none p-0 overflow-hidden">
+      <DialogContent className="w-full h-full max-w-[100vw] max-h-[100vh] md:w-[95vw] md:h-[95vh] md:max-w-none md:max-h-none p-0 overflow-hidden rounded-none md:rounded-lg">
         <div className="h-full flex flex-col">
-          <DialogHeader className="p-6 border-b bg-gradient-to-r from-primary/5 to-primary/10">
-            <DialogTitle className="text-2xl font-bold flex items-center gap-3">
-              <BookOpen className="w-6 h-6 text-primary" />
-              App Documentation & User Guide
+          <DialogHeader className="p-4 md:p-6 border-b bg-gradient-to-r from-primary/5 to-primary/10">
+            <DialogTitle className="text-xl md:text-2xl font-bold flex items-center gap-2 md:gap-3">
+              <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+              <span className="truncate">App Documentation & User Guide</span>
             </DialogTitle>
           </DialogHeader>
 
           <div className="flex-1 overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="grid grid-cols-3 w-full bg-muted/50 border-b border-border">
-                <TabsTrigger value="overview" className="flex items-center gap-2">
-                  <Star className="w-4 h-4" />
-                  App Overview
+              <TabsList className="grid grid-cols-3 w-full bg-muted/50 border-b border-border rounded-none">
+                <TabsTrigger value="overview" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                  <Star className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">App</span> Overview
                 </TabsTrigger>
-                <TabsTrigger value="features" className="flex items-center gap-2">
-                  <Target className="w-4 h-4" />
+                <TabsTrigger value="features" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                  <Target className="w-3 h-3 md:w-4 md:h-4" />
                   Feature Guide
                 </TabsTrigger>
-                <TabsTrigger value="getting-started" className="flex items-center gap-2">
-                  <Zap className="w-4 h-4" />
-                  Getting Started
+                <TabsTrigger value="getting-started" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                  <Zap className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Getting</span> Started
                 </TabsTrigger>
               </TabsList>
 
               <div className="flex-1 overflow-y-auto">
-                <TabsContent value="overview" className="p-6 space-y-6 h-full">
-                  <div className="text-center space-y-4">
-                    <h2 className="text-3xl font-bold text-foreground">Welcome to Project Partner</h2>
-                    <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                <TabsContent value="overview" className="p-4 md:p-6 space-y-4 md:space-y-6 h-full">
+                  <div className="text-center space-y-3 md:space-y-4">
+                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">Welcome to Project Partner</h2>
+                    <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-2">
                       The complete homeowners app with everything you need to manage your home - maintenance, projects, tools, and expert guidance all in one place.
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Target className="w-5 h-5 text-primary" />
+                      <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                          <Target className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                           Personalized Management
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground">
+                      <CardContent className="pt-0">
+                        <p className="text-xs md:text-sm text-muted-foreground">
                           DIY + Home Profile tracking with 100+ project templates for guaranteed first-time success.
                         </p>
                       </CardContent>
                     </Card>
 
                     <Card className="border-secondary/20 bg-gradient-to-br from-secondary/5 to-secondary/10">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Users className="w-5 h-5 text-secondary" />
+                      <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                          <Users className="w-4 h-4 md:w-5 md:h-5 text-secondary" />
                           Virtual Expert Platform
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground">
+                      <CardContent className="pt-0">
+                        <p className="text-xs md:text-sm text-muted-foreground">
                           One-on-one video consultations with DIY experts for real-time guidance and problem solving.
                         </p>
                       </CardContent>
                     </Card>
 
                     <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-accent/10">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Hammer className="w-5 h-5 text-accent" />
+                      <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                          <Hammer className="w-4 h-4 md:w-5 md:h-5 text-accent" />
                           Tool Rental Platform
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground">
+                      <CardContent className="pt-0">
+                        <p className="text-xs md:text-sm text-muted-foreground">
                           Direct rentals in Boston via Toolio Rentals, smart rental finder nationwide. Never buy tools you'll only use once.
                         </p>
                       </CardContent>
