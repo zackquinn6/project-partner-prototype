@@ -13,6 +13,7 @@ import { HelpPopup } from '@/components/HelpPopup';
 import { RapidProjectAssessment } from '@/components/RapidProjectAssessment';
 import { CodePermitsWindow } from '@/components/CodePermitsWindow';
 import { ContractorFinderWindow } from '@/components/ContractorFinderWindow';
+import { ResponsiveDialog } from '@/components/ResponsiveDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 export const PostAuthLanding = () => {
   const navigate = useNavigate();
@@ -282,19 +283,14 @@ Pick up where you left off or start your next winning project.</p>
         
         <ContractorFinderWindow open={showContractorFinder} onOpenChange={setShowContractorFinder} />
         
-        <Dialog open={showProjectPlanning} onOpenChange={setShowProjectPlanning}>
-          <DialogContent 
-            className="w-full h-full overflow-hidden border-none md:border p-0 md:p-6"
-            style={{ maxWidth: '90vw', maxHeight: '90vh' }}
-          >
-            <DialogHeader className="p-4 md:p-0 border-b md:border-b-0">
-              <DialogTitle>Rapid Project Assessment</DialogTitle>
-            </DialogHeader>
-            <div className="overflow-y-auto flex-1 p-4 md:p-0">
-              <RapidProjectAssessment />
-            </div>
-          </DialogContent>
-        </Dialog>
+        <ResponsiveDialog
+          open={showProjectPlanning}
+          onOpenChange={setShowProjectPlanning}
+          size="content-large"
+          title="Rapid Project Assessment"
+        >
+          <RapidProjectAssessment />
+        </ResponsiveDialog>
       </div>
     </div>;
 };
