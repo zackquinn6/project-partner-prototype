@@ -28,7 +28,7 @@ export function ResponsiveDialog({
     xlarge: responsiveDialogClasses.contentXLarge,
     'modal-sm': responsiveDialogClasses.modalSm,
     'modal-md': responsiveDialogClasses.modalMd,
-    'content-large': `!w-full !h-full !max-w-[100vw] !max-h-[100vh] md:!max-w-[90vw] md:!max-h-[90vh]`,
+    'content-large': "!max-w-[100vw] !max-h-[100vh] md:!max-w-[90vw] md:!max-h-[90vh] !w-full !h-full",
     'content-full': responsiveDialogClasses.contentFull,
   };
 
@@ -44,12 +44,16 @@ export function ResponsiveDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn(
-        sizeClasses[size],
-        paddingClasses[size],
-        "overflow-hidden",
-        className
-      )}>
+      <DialogContent 
+        className={cn(
+          sizeClasses[size],
+          paddingClasses[size],
+          "overflow-hidden",
+          // Force override base dialog sizing for content-large
+          size === 'content-large' && "[&]:!max-w-[90vw] [&]:!w-[90vw] md:[&]:!max-w-[90vw] md:[&]:!w-[90vw]",
+          className
+        )}
+      >
         {(title || description) && (
           <DialogHeader>
             {title && (
