@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Folder, 
   Calculator, 
@@ -450,9 +451,10 @@ export function AppDocumentationWindow({ open, onOpenChange }: AppDocumentationW
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="features" className="p-6 space-y-6">
-                  <div className="space-y-6">
-                    {appFeatures.map((feature) => (
+                <TabsContent value="features" className="p-0">
+                  <ScrollArea className="h-[60vh]">
+                    <div className="p-6 space-y-6">
+                      {appFeatures.map((feature) => (
                       <Card key={feature.id} className="border-l-4 border-l-primary">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-3">
@@ -499,19 +501,22 @@ export function AppDocumentationWindow({ open, onOpenChange }: AppDocumentationW
                           </Accordion>
                         </CardContent>
                       </Card>
-                    ))}
-                  </div>
+                     ))}
+                   </div>
+                  </ScrollArea>
                 </TabsContent>
 
-                <TabsContent value="getting-started" className="p-6 space-y-6">
-                  <div className="text-center space-y-4">
-                    <h2 className="text-2xl font-bold">Getting Started Guide</h2>
-                    <p className="text-muted-foreground">
-                      Follow these steps to set up your account and start your first project successfully.
-                    </p>
-                  </div>
+                <TabsContent value="getting-started" className="p-0">
+                  <ScrollArea className="h-[60vh]">
+                    <div className="p-6 space-y-6">
+                      <div className="text-center space-y-4">
+                        <h2 className="text-2xl font-bold">Getting Started Guide</h2>
+                        <p className="text-muted-foreground">
+                          Follow these steps to set up your account and start your first project successfully.
+                        </p>
+                      </div>
 
-                  <div className="grid gap-6">
+                      <div className="grid gap-6">
                     <Card className="border-l-4 border-l-blue-500">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -607,8 +612,10 @@ export function AppDocumentationWindow({ open, onOpenChange }: AppDocumentationW
                           <p className="text-muted-foreground">Contact support through "Give us feedback"</p>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                    </div>
+                  </ScrollArea>
                 </TabsContent>
               </div>
             </Tabs>
