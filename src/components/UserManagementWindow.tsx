@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserRoleManager } from '@/components/UserRoleManager';
 import { ProjectAgreementsList } from '@/components/ProjectAgreementsList';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ResponsiveDialog } from '@/components/ResponsiveDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface UserManagementWindowProps {
@@ -11,27 +11,26 @@ interface UserManagementWindowProps {
 
 export const UserManagementWindow: React.FC<UserManagementWindowProps> = ({ open, onOpenChange }) => {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>User Management</DialogTitle>
-        </DialogHeader>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="content-large"
+      title="User Management"
+    >
+      <Tabs defaultValue="roles" className="w-full flex-1 flex flex-col min-h-0">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="roles">User Roles</TabsTrigger>
+          <TabsTrigger value="agreements">Project Agreements</TabsTrigger>
+        </TabsList>
         
-        <Tabs defaultValue="roles" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="roles">User Roles</TabsTrigger>
-            <TabsTrigger value="agreements">Project Agreements</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="roles" className="mt-6">
-            <UserRoleManager />
-          </TabsContent>
-          
-          <TabsContent value="agreements" className="mt-6">
-            <ProjectAgreementsList />
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+        <TabsContent value="roles" className="flex-1 overflow-y-auto">
+          <UserRoleManager />
+        </TabsContent>
+        
+        <TabsContent value="agreements" className="flex-1 overflow-y-auto">
+          <ProjectAgreementsList />
+        </TabsContent>
+      </Tabs>
+    </ResponsiveDialog>
   );
 };

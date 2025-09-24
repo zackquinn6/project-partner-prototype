@@ -7,18 +7,31 @@ export const MOBILE_BREAKPOINT = 768;
 
 // Responsive class generators
 export const responsiveDialogClasses = {
-  // Dialog sizing that works consistently across devices
+  // Small modal - confirmations, simple forms
+  modalSm: "max-w-[95vw] max-h-[95vh] md:max-w-md md:max-h-[80vh]",
+  
+  // Medium modal - detailed forms, settings
+  modalMd: "max-w-[95vw] max-h-[95vh] md:max-w-2xl md:max-h-[85vh]",
+  
+  // Large content - main feature windows (90% screen utilization)
+  contentLarge: "w-full h-full max-w-[100vw] max-h-[100vh] md:max-w-[90vw] md:max-h-[90vh]",
+  
+  // Full experience - immersive full-screen
+  contentFull: "w-full h-full max-w-[100vw] max-h-[100vh]",
+  
+  // Legacy sizes for compatibility
   content: "max-w-[95vw] max-h-[95vh] md:max-w-lg md:max-h-[85vh]",
-  contentLarge: "max-w-[95vw] max-h-[95vh] md:max-w-2xl md:max-h-[85vh]", 
   contentXLarge: "max-w-[95vw] max-h-[95vh] md:max-w-4xl md:max-h-[85vh]",
   
   // Padding that scales appropriately
   padding: "p-4 md:p-6",
   paddingSmall: "p-3 md:p-4",
+  paddingGenerous: "p-6 md:p-8",
   
   // Touch-friendly vs desktop-optimized spacing
   gap: "gap-3 md:gap-4",
   gapLarge: "gap-4 md:gap-6",
+  gapGenerous: "gap-6 md:gap-8",
 };
 
 export const responsiveSpacing = {

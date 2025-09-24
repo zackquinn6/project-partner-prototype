@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/ResponsiveDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToolsLibrary } from "./ToolsLibrary";
 import { MaterialsLibrary } from "./MaterialsLibrary";
@@ -17,47 +17,44 @@ export function ToolsMaterialsWindow({ open, onOpenChange }: ToolsMaterialsWindo
 
   if (loading) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[80vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>Loading...</DialogTitle>
-          </DialogHeader>
-          <div className="flex items-center justify-center p-8">
-            <div className="text-muted-foreground">Loading tools & materials...</div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        size="content-large"
+        title="Loading..."
+      >
+        <div className="flex items-center justify-center py-12">
+          <div className="text-muted-foreground">Loading tools & materials...</div>
+        </div>
+      </ResponsiveDialog>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[80vh] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle>
-            {isAdmin ? "Tools & Materials Library (Admin)" : "My Tools & Materials Library"}
-          </DialogTitle>
-        </DialogHeader>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="content-large"
+      title={isAdmin ? "Tools & Materials Library (Admin)" : "My Tools & Materials Library"}
+    >
+      <Tabs defaultValue="tools" className="w-full flex-1 flex flex-col min-h-0">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="tools">
+            {isAdmin ? "Tools Library" : "My Tools"}
+          </TabsTrigger>
+          <TabsTrigger value="materials">
+            {isAdmin ? "Materials Library" : "My Materials"}
+          </TabsTrigger>
+        </TabsList>
         
-        <Tabs defaultValue="tools" className="w-full h-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="tools">
-              {isAdmin ? "Tools Library" : "My Tools"}
-            </TabsTrigger>
-            <TabsTrigger value="materials">
-              {isAdmin ? "Materials Library" : "My Materials"}
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="tools" className="h-full">
-            {isAdmin ? <ToolsLibrary /> : <UserToolsEditor />}
-          </TabsContent>
-          
-          <TabsContent value="materials" className="h-full">
-            {isAdmin ? <MaterialsLibrary /> : <UserMaterialsEditor />}
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+        <TabsContent value="tools" className="flex-1 overflow-y-auto">
+          {isAdmin ? <ToolsLibrary /> : <UserToolsEditor />}
+        </TabsContent>
+        
+        <TabsContent value="materials" className="flex-1 overflow-y-auto">
+          {isAdmin ? <MaterialsLibrary /> : <UserMaterialsEditor />}
+        </TabsContent>
+      </Tabs>
+    </ResponsiveDialog>
   );
 }

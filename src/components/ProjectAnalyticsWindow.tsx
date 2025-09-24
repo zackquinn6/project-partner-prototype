@@ -1,6 +1,6 @@
 import React from 'react';
 import ProjectAnalytics from '@/components/ProjectAnalytics';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ResponsiveDialog } from '@/components/ResponsiveDialog';
 
 interface ProjectAnalyticsWindowProps {
   open: boolean;
@@ -9,15 +9,17 @@ interface ProjectAnalyticsWindowProps {
 
 export const ProjectAnalyticsWindow: React.FC<ProjectAnalyticsWindowProps> = ({ open, onOpenChange }) => {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Project Analytics</DialogTitle>
-        </DialogHeader>
-        <div className="p-6">
+    <ResponsiveDialog 
+      open={open} 
+      onOpenChange={onOpenChange}
+      size="content-large"
+      title="Project Analytics"
+    >
+      <div className="grid grid-cols-1 gap-6 min-h-0 flex-1">
+        <div className="overflow-y-auto">
           <ProjectAnalytics />
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </ResponsiveDialog>
   );
 };

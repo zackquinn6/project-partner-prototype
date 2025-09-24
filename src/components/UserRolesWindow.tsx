@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserRoleManager } from '@/components/UserRoleManager';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ResponsiveDialog } from '@/components/ResponsiveDialog';
 
 interface UserRolesWindowProps {
   open: boolean;
@@ -9,15 +9,15 @@ interface UserRolesWindowProps {
 
 export const UserRolesWindow: React.FC<UserRolesWindowProps> = ({ open, onOpenChange }) => {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>User Role Management</DialogTitle>
-        </DialogHeader>
-        <div className="p-6">
-          <UserRoleManager />
-        </div>
-      </DialogContent>
-    </Dialog>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="modal-md"
+      title="User Role Management"
+    >
+      <div className="overflow-y-auto">
+        <UserRoleManager />
+      </div>
+    </ResponsiveDialog>
   );
 };

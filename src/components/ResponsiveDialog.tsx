@@ -8,7 +8,7 @@ interface ResponsiveDialogProps {
   onOpenChange: (open: boolean) => void;
   title?: string;
   description?: string;
-  size?: 'default' | 'large' | 'xlarge';
+  size?: 'default' | 'large' | 'xlarge' | 'modal-sm' | 'modal-md' | 'content-large' | 'content-full';
   children: React.ReactNode;
   className?: string;
 }
@@ -26,13 +26,27 @@ export function ResponsiveDialog({
     default: responsiveDialogClasses.content,
     large: responsiveDialogClasses.contentLarge,
     xlarge: responsiveDialogClasses.contentXLarge,
+    'modal-sm': responsiveDialogClasses.modalSm,
+    'modal-md': responsiveDialogClasses.modalMd,
+    'content-large': responsiveDialogClasses.contentLarge,
+    'content-full': responsiveDialogClasses.contentFull,
+  };
+
+  const paddingClasses = {
+    default: responsiveDialogClasses.padding,
+    large: responsiveDialogClasses.padding,
+    xlarge: responsiveDialogClasses.padding,
+    'modal-sm': responsiveDialogClasses.paddingSmall,
+    'modal-md': responsiveDialogClasses.padding,
+    'content-large': responsiveDialogClasses.paddingGenerous,
+    'content-full': responsiveDialogClasses.paddingGenerous,
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={cn(
         sizeClasses[size],
-        responsiveDialogClasses.padding,
+        paddingClasses[size],
         "overflow-hidden",
         className
       )}>
@@ -51,7 +65,10 @@ export function ResponsiveDialog({
           </DialogHeader>
         )}
         
-        <div className="flex flex-col min-h-0 flex-1">
+        <div className={cn(
+          "flex flex-col min-h-0 flex-1",
+          size === 'content-large' || size === 'content-full' ? responsiveDialogClasses.gapGenerous : responsiveDialogClasses.gap
+        )}>
           {children}
         </div>
       </DialogContent>
