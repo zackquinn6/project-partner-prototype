@@ -459,7 +459,9 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                        </Select>
                      </div>
 
-                     <MaintenanceHistoryTab selectedHomeId={selectedHomeId} sortBy={sortBy} categoryFilter={historyCategoryFilter} />
+                     <div className="flex-1 overflow-y-auto space-y-2 pb-3 px-3 md:px-6">
+                       <MaintenanceHistoryTab selectedHomeId={selectedHomeId} sortBy={sortBy} categoryFilter={historyCategoryFilter} />
+                     </div>
                    </TabsContent>
 
                    <TabsContent value="notifications" className="flex-1 flex flex-col h-full px-3 md:px-6">
