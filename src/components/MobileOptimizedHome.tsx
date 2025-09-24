@@ -105,7 +105,7 @@ export function MobileOptimizedHome() {
       icon: Wrench,
       title: 'My Tools',
       color: 'bg-orange-600',
-      action: () => window.dispatchEvent(new CustomEvent('show-user-tools-materials'))
+      action: () => window.dispatchEvent(new CustomEvent('show-tools-library-grid'))
     },
     {
       id: 'profile',

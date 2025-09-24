@@ -258,10 +258,19 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="w-full sm:max-w-6xl sm:max-h-[90vh] overflow-hidden border-none sm:border flex flex-col">
           <DialogHeader className="p-4 sm:p-6 pb-0 border-b sm:border-none shrink-0">
-            <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
-              <Home className="h-4 w-4 sm:h-5 sm:w-5" />
-              Home Maintenance Tracker
-            </DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
+                <Home className="h-4 w-4 sm:h-5 sm:w-5" />
+                Home Maintenance Tracker
+              </DialogTitle>
+              <Button 
+                variant="ghost" 
+                onClick={() => onOpenChange(false)}
+                className="sm:hidden text-xs px-2 py-1 h-6"
+              >
+                Close
+              </Button>
+            </div>
           </DialogHeader>
 
           <div className="flex flex-col min-h-[60vh] overflow-hidden">
