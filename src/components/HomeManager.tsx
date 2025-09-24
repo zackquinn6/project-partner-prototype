@@ -207,13 +207,14 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
     }
   };
   const handleEdit = (home: Home) => {
+    console.log('🏠 DEBUG: Editing home with type:', home.home_type);
     setEditingHome(home);
     setFormData({
       name: home.name,
       address: home.address || '',
       city: home.city || '',
       state: home.state || '',
-      home_type: home.home_type || '',
+      home_type: home.home_type === 'condo' ? '' : (home.home_type || ''), // Clear condo values
       build_year: home.build_year || '',
       home_ownership: home.home_ownership || '',
       purchase_date: home.purchase_date || '',
@@ -426,17 +427,17 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
               ...prev,
               home_type: value
             }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select home type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="single-family">Single Family</SelectItem>
-                    <SelectItem value="townhouse">Townhouse</SelectItem>
-                    <SelectItem value="apartment">Apartment</SelectItem>
-                    <SelectItem value="duplex">Duplex</SelectItem>
-                    <SelectItem value="mobile">Mobile Home</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
+                   <SelectTrigger>
+                     <SelectValue placeholder="Select home type" />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="single-family">Single Family</SelectItem>
+                     <SelectItem value="townhouse">Townhouse</SelectItem>
+                     <SelectItem value="apartment">Apartment</SelectItem>
+                     <SelectItem value="duplex">Duplex</SelectItem>
+                     <SelectItem value="mobile">Mobile Home</SelectItem>
+                     <SelectItem value="other">Other</SelectItem>
+                   </SelectContent>
                 </Select>
               </div>
 
