@@ -430,8 +430,8 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                   </TabsContent>
 
                    <TabsContent value="history" className="flex-1 flex flex-col h-full">
-                     {/* Category Filter */}
-                     <div className="flex flex-col sm:flex-row gap-2 py-3 shrink-0 px-3 md:px-6">
+                      {/* Category Filter */}
+                      <div className="flex items-center gap-2 py-3 shrink-0 px-3 md:px-6">
                        <Select value={historyCategoryFilter} onValueChange={setHistoryCategoryFilter}>
                          <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
                            <SelectValue placeholder="Filter by category" />
