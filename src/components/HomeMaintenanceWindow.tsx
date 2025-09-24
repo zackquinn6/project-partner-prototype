@@ -312,9 +312,9 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     </TabsList>
                   </div>
 
-                   <TabsContent value="tasks" className="flex-1 flex flex-col h-full px-3 md:px-6">
-                     {/* Category Filter */}
-                     <div className="flex items-center gap-2 py-3 shrink-0">
+                   <TabsContent value="tasks" className="flex-1 flex flex-col h-full">
+                      {/* Category Filter */}
+                      <div className="flex items-center gap-2 py-3 shrink-0 px-3 md:px-6">
                       <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
                       <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                         <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
@@ -336,7 +336,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                       </Button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto space-y-2 pb-3" onClick={() => setSwipedTaskId(null)}>
+                    <div className="flex-1 overflow-y-auto space-y-2 pb-3 px-3 md:px-6" onClick={() => setSwipedTaskId(null)}>
                       {loading ? (
                         <div className="text-center py-8">Loading tasks...</div>
                       ) : getFilteredTasks().length === 0 ? (
