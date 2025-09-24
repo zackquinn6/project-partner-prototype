@@ -137,15 +137,6 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
                     placeholder="Enter your email address"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="email-preview">Message Preview</Label>
-                  <Textarea
-                    id="email-preview"
-                    value="Your home maintenance tasks are due soon. Log in to your dashboard to view details and mark tasks as complete."
-                    disabled
-                    className="resize-none h-20 text-sm"
-                  />
-                </div>
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -201,15 +192,6 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   placeholder="Enter your phone number"
                   disabled
-                />
-              </div>
-              <div>
-                <Label htmlFor="sms-preview" className="text-muted-foreground">Message Preview</Label>
-                <Textarea
-                  id="sms-preview"
-                  value="Home maintenance reminder: Tasks are due soon. Check your dashboard for details."
-                  disabled
-                  className="resize-none h-20 text-sm"
                 />
               </div>
               <Button 
