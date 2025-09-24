@@ -336,7 +336,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                       </Button>
                     </div>
 
-                    <div className="overflow-y-auto space-y-2 pb-3 flex-1 max-h-[50vh] md:max-h-[calc(85vh-280px)]" onClick={() => setSwipedTaskId(null)}>
+                    <div className="overflow-y-auto space-y-2 pb-3 flex-1 min-h-0" onClick={() => setSwipedTaskId(null)}>
                       {loading ? (
                         <div className="text-center py-8">Loading tasks...</div>
                       ) : getFilteredTasks().length === 0 ? (
@@ -427,14 +427,14 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     </div>
                   </TabsContent>
 
-                   <TabsContent value="history" className="overflow-hidden mt-0 flex-1 flex flex-col">
-                     <div className="overflow-y-auto px-3 md:px-6 flex-1 max-h-[50vh] md:max-h-[calc(85vh-200px)]">
+                   <TabsContent value="history" className="overflow-hidden mt-0 flex-1 flex flex-col min-h-0">
+                     <div className="overflow-y-auto flex-1 min-h-0">
                        <MaintenanceHistoryTab selectedHomeId={selectedHomeId} />
                      </div>
                    </TabsContent>
 
-                   <TabsContent value="notifications" className="overflow-hidden mt-0 flex-1 flex flex-col">
-                     <div className="overflow-y-auto px-3 md:px-6 flex-1 max-h-[50vh] md:max-h-[calc(85vh-200px)]">
+                   <TabsContent value="notifications" className="overflow-hidden mt-0 flex-1 flex flex-col min-h-0">
+                     <div className="overflow-y-auto flex-1 min-h-0">
                        <MaintenanceNotifications selectedHomeId={selectedHomeId} />
                      </div>
                    </TabsContent>
