@@ -304,8 +304,8 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
             {selectedHomeId && (
               <div className="flex flex-col flex-1 min-h-0">
                 <Tabs defaultValue="tasks" className="flex flex-col flex-1 h-full">
-                  <div className="px-3 md:px-6 py-3 bg-background border-b shrink-0">
-                    <TabsList className="grid grid-cols-3 w-full h-9">
+                  <div className="px-3 md:px-6 py-4 bg-background border-b shrink-0">
+                    <TabsList className="grid grid-cols-3 w-full">
                       <TabsTrigger value="tasks" className="text-xs md:text-sm">Active</TabsTrigger>
                       <TabsTrigger value="history" className="text-xs md:text-sm">History</TabsTrigger>
                       <TabsTrigger value="notifications" className="text-xs md:text-sm">Alerts</TabsTrigger>
