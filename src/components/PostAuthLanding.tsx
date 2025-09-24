@@ -27,6 +27,9 @@ export const PostAuthLanding = () => {
   const [showProjectPlanning, setShowProjectPlanning] = useState(false);
   const [showCodePermits, setShowCodePermits] = useState(false);
   const [showContractorFinder, setShowContractorFinder] = useState(false);
+  
+  // Debug the showProjectPlanning state
+  console.log('🔍 PostAuthLanding render - showProjectPlanning:', showProjectPlanning);
   const [stats, setStats] = useState([{
     label: "Active Projects", 
     value: "0",
@@ -110,7 +113,11 @@ export const PostAuthLanding = () => {
   }, {
     icon: Calculator,
     title: "Rapid Assessment",
-    action: () => setShowProjectPlanning(true),
+    action: () => {
+      console.log('📊 Rapid Assessment clicked - setting showProjectPlanning to true');
+      setShowProjectPlanning(true);
+      console.log('📊 After setState call');
+    },
     color: "bg-blue-600",
     textColor: "text-white"
   }, {
