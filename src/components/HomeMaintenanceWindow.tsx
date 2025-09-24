@@ -428,13 +428,13 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                   </TabsContent>
 
                    <TabsContent value="history" className="overflow-hidden mt-0 flex-1 flex flex-col">
-                     <div className="overflow-y-auto px-3 md:px-6 py-3 flex-1 max-h-[50vh] md:max-h-[calc(85vh-200px)]">
+                     <div className="overflow-y-auto px-3 md:px-6 flex-1 max-h-[50vh] md:max-h-[calc(85vh-200px)]">
                        <MaintenanceHistoryTab selectedHomeId={selectedHomeId} />
                      </div>
                    </TabsContent>
 
                    <TabsContent value="notifications" className="overflow-hidden mt-0 flex-1 flex flex-col">
-                     <div className="overflow-y-auto px-3 md:px-6 py-3 flex-1 max-h-[50vh] md:max-h-[calc(85vh-200px)]">
+                     <div className="overflow-y-auto px-3 md:px-6 flex-1 max-h-[50vh] md:max-h-[calc(85vh-200px)]">
                        <MaintenanceNotifications selectedHomeId={selectedHomeId} />
                      </div>
                    </TabsContent>
