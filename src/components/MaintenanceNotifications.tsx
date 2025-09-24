@@ -5,6 +5,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { Mail, MessageSquare, Bell, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -89,66 +91,85 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
 
   return (
     <div className="flex-1 flex flex-col h-full">
-      {/* Header - matching Active tab spacing */}
-      <div className="py-3 shrink-0">
+      {/* Header with Save Button */}
+      <div className="py-3 shrink-0 flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-lg font-semibold">
           <Bell className="h-5 w-5" />
           Notification Settings
         </h3>
+        <Button onClick={saveNotificationSettings} disabled={saving}>
+          {saving ? "Saving..." : "Save Settings"}
+        </Button>
       </div>
       
       {/* Content - matching Active tab content area */}
       <div className="flex-1 overflow-y-auto">
-        <div className="space-y-2 pb-3">
-        {/* Save Button */}
-        <div className="flex justify-start pb-4">
-          <Button onClick={saveNotificationSettings} disabled={saving}>
-            {saving ? "Saving..." : "Save Settings"}
-          </Button>
-        </div>
+        <div className="space-y-6 pb-3">
+        
+        {/* Email and SMS Settings - Responsive Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* Email Settings */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="email-enabled"
+                checked={emailEnabled}
+                onCheckedChange={(checked) => setEmailEnabled(checked === true)}
+                className="sm:h-5 sm:w-5 h-3 w-3"
+              />
+              <Label htmlFor="email-enabled" className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Enable Email Notifications
+              </Label>
+              <Badge variant="secondary">Available</Badge>
+            </div>
+            
+            {emailEnabled && (
+              <div className="ml-6 space-y-3">
+                <div className="max-w-xs">
+                  <Label htmlFor="email-address">Email Address</Label>
+                  <Input
+                    id="email-address"
+                    type="email"
+                    value={emailAddress}
+                    onChange={(e) => setEmailAddress(e.target.value)}
+                    placeholder="Enter your email address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email-preview">Message Preview</Label>
+                  <Textarea
+                    id="email-preview"
+                    value="Your home maintenance tasks are due soon. Log in to your dashboard to view details and mark tasks as complete."
+                    disabled
+                    className="resize-none h-20 text-sm"
+                  />
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={testEmailNotification}
+                  disabled={!emailAddress}
+                >
+                  Send Test Email
+                </Button>
+              </div>
+            )}
+          </div>
 
-        {/* Email Settings */}
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="email-enabled"
-              checked={emailEnabled}
-              onCheckedChange={(checked) => setEmailEnabled(checked === true)}
-              className="sm:h-5 sm:w-5 h-3 w-3"
-            />
-            <Label htmlFor="email-enabled" className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              Enable Email Notifications
-            </Label>
-            <Badge variant="secondary">Available</Badge>
+          {/* Divider - Visible on desktop only */}
+          <div className="hidden lg:flex justify-center">
+            <Separator orientation="vertical" className="h-full" />
           </div>
           
-          {emailEnabled && (
-            <div className="ml-6 space-y-3">
-              <div className="max-w-xs">
-                <Label htmlFor="email-address">Email Address</Label>
-                <Input
-                  id="email-address"
-                  type="email"
-                  value={emailAddress}
-                  onChange={(e) => setEmailAddress(e.target.value)}
-                  placeholder="Enter your email address"
-                />
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={testEmailNotification}
-                disabled={!emailAddress}
-              >
-                Send Test Email
-              </Button>
-            </div>
-          )}
-        </div>
+          {/* Mobile divider */}
+          <div className="lg:hidden">
+            <Separator />
+          </div>
 
-        {/* SMS Settings */}
-        <div className="space-y-4">
+          {/* SMS Settings */}
+          <div className="space-y-4 lg:col-start-2 lg:row-start-1">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="sms-enabled"
@@ -161,18 +182,18 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
                   }
                 }}
                 className="sm:h-5 sm:w-5 h-3 w-3"
+                disabled
               />
-              <Label htmlFor="sms-enabled" className="flex items-center gap-2">
+              <Label htmlFor="sms-enabled" className="flex items-center gap-2 text-muted-foreground">
                 <MessageSquare className="h-4 w-4" />
                 Enable SMS Notifications
               </Label>
               <Badge variant="outline">Coming Soon</Badge>
             </div>
-          
-          {smsEnabled && (
+            
             <div className="ml-6 space-y-3">
-              <div>
-                <Label htmlFor="phone-number">Phone Number</Label>
+              <div className="max-w-xs">
+                <Label htmlFor="phone-number" className="text-muted-foreground">Phone Number</Label>
                 <Input
                   id="phone-number"
                   type="tel"
@@ -182,12 +203,28 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
                   disabled
                 />
               </div>
+              <div>
+                <Label htmlFor="sms-preview" className="text-muted-foreground">Message Preview</Label>
+                <Textarea
+                  id="sms-preview"
+                  value="Home maintenance reminder: Tasks are due soon. Check your dashboard for details."
+                  disabled
+                  className="resize-none h-20 text-sm"
+                />
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                disabled
+              >
+                Send Test SMS
+              </Button>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <AlertCircle className="h-4 w-4" />
                 SMS notifications are not yet available
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Notification Timing */}
