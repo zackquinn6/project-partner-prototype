@@ -10,7 +10,6 @@ import { DataPrivacyManager } from './DataPrivacyManager';
 import { FeatureRoadmapWindow } from './FeatureRoadmapWindow';
 import { AppDocumentationWindow } from './AppDocumentationWindow';
 import { ToolsMaterialsWindow } from './ToolsMaterialsWindow';
-import { ToolsMaterialsLibraryView } from './ToolsMaterialsLibraryView';
 
 interface NavigationProps {
   currentView: 'home' | 'admin' | 'user' | 'editWorkflow';
@@ -31,7 +30,6 @@ export default function Navigation({
   const [isRoadmapOpen, setIsRoadmapOpen] = useState(false);
   const [isDocumentationOpen, setIsDocumentationOpen] = useState(false);
   const [isToolsLibraryOpen, setIsToolsLibraryOpen] = useState(false);
-  const [isToolsLibraryGridOpen, setIsToolsLibraryGridOpen] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   
   // Add error boundary for useProject hook
@@ -60,12 +58,6 @@ export default function Navigation({
       setIsToolsLibraryOpen(true);
     };
 
-    const handleToolsLibraryGridEvent = (event: Event) => {
-      console.log('Opening tools library grid view');
-      event.stopPropagation();  
-      setIsToolsLibraryGridOpen(true);
-    };
-
     const handleNavigateToProjectsEvent = (event: Event) => {
       console.log('handleNavigateToProjectsEvent triggered');
       event.stopPropagation();
@@ -74,12 +66,10 @@ export default function Navigation({
     };
 
     window.addEventListener('show-tools-materials', handleToolsLibraryEvent);
-    window.addEventListener('show-tools-library-grid', handleToolsLibraryGridEvent);
     window.addEventListener('navigate-to-projects', handleNavigateToProjectsEvent);
     
     return () => {
       window.removeEventListener('show-tools-materials', handleToolsLibraryEvent);
-      window.removeEventListener('show-tools-library-grid', handleToolsLibraryGridEvent);
       window.removeEventListener('navigate-to-projects', handleNavigateToProjectsEvent);
     };
   }, [onViewChange, onProjectsView]);
@@ -251,11 +241,6 @@ export default function Navigation({
       <ToolsMaterialsWindow 
         open={isToolsLibraryOpen}
         onOpenChange={setIsToolsLibraryOpen}
-      />
-
-      <ToolsMaterialsLibraryView 
-        open={isToolsLibraryGridOpen}
-        onOpenChange={setIsToolsLibraryGridOpen}
       />
     </>
   );

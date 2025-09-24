@@ -27,6 +27,7 @@ import { AIRepairWindow } from '@/components/AIRepairWindow';
 import { HomeManager } from '@/components/HomeManager';
 import { HomeMaintenanceWindow } from '@/components/HomeMaintenanceWindow';
 import { UserToolsMaterialsWindow } from '@/components/UserToolsMaterialsWindow';
+import { ToolsMaterialsLibraryView } from '@/components/ToolsMaterialsLibraryView';
 import ProfileManager from '@/components/ProfileManager';
 import { HelpPopup } from '@/components/HelpPopup';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -62,6 +63,7 @@ const Index = () => {
   const [isContractorFinderOpen, setIsContractorFinderOpen] = useState(false);
   const [isHelpPopupOpen, setIsHelpPopupOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isToolsLibraryGridOpen, setIsToolsLibraryGridOpen] = useState(false);
 
   // Removed debug logging - no longer tracking duplicate modals
 
@@ -173,6 +175,12 @@ const Index = () => {
       setIsHelpPopupOpen(true);
     };
 
+    const handleToolsLibraryGridEvent = (event: Event) => {
+      console.log('🔧 Opening Tools Library Grid');
+      event.stopPropagation();
+      setIsToolsLibraryGridOpen(true);
+    };
+
     // Add event listeners
     window.addEventListener('show-home-manager', handleHomeManagerEvent);
     window.addEventListener('show-home-maintenance', handleHomeMaintenanceEvent);
@@ -180,11 +188,12 @@ const Index = () => {
     window.addEventListener('show-community-posts', handleCommunityPostsEvent);
     window.addEventListener('show-tool-rentals', handleToolRentalsEvent);
     window.addEventListener('show-rapid-assessment', handleRapidAssessmentEvent);
-      window.removeEventListener('show-user-tools-materials', handleUserToolsMaterialsEvent);
+    window.addEventListener('show-user-tools-materials', handleUserToolsMaterialsEvent);
     window.addEventListener('show-tools-materials-editor', handleToolsMaterialsEditorEvent);
     window.addEventListener('show-ai-repair', handleAIRepairEvent);
     window.addEventListener('show-contractor-finder', handleContractorFinderEvent);
     window.addEventListener('show-help-popup', handleHelpPopupEvent);
+    window.addEventListener('show-tools-library-grid', handleToolsLibraryGridEvent);
 
     return () => {
       window.removeEventListener('show-home-manager', handleHomeManagerEvent);
@@ -193,11 +202,12 @@ const Index = () => {
       window.removeEventListener('show-community-posts', handleCommunityPostsEvent);
       window.removeEventListener('show-tool-rentals', handleToolRentalsEvent);
       window.removeEventListener('show-rapid-assessment', handleRapidAssessmentEvent);
-      window.addEventListener('show-user-tools-materials', handleUserToolsMaterialsEvent);
+      window.removeEventListener('show-user-tools-materials', handleUserToolsMaterialsEvent);
       window.removeEventListener('show-tools-materials-editor', handleToolsMaterialsEditorEvent);
       window.removeEventListener('show-ai-repair', handleAIRepairEvent);
       window.removeEventListener('show-contractor-finder', handleContractorFinderEvent);
       window.removeEventListener('show-help-popup', handleHelpPopupEvent);
+      window.removeEventListener('show-tools-library-grid', handleToolsLibraryGridEvent);
     };
   }, []);
 
@@ -509,6 +519,11 @@ const Index = () => {
       <KeyCharacteristicsExplainer
         open={showKCExplainer}
         onOpenChange={setShowKCExplainer}
+      />
+
+      <ToolsMaterialsLibraryView 
+        open={isToolsLibraryGridOpen}
+        onOpenChange={setIsToolsLibraryGridOpen}
       />
     </div>
   );
