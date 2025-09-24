@@ -88,7 +88,7 @@ export function MaintenanceNotifications({ selectedHomeId }: MaintenanceNotifica
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
+    <div className="flex-1 flex flex-col h-full">
       {/* Header - matching Active tab spacing */}
       <div className="py-3 shrink-0">
         <h3 className="flex items-center gap-2 text-lg font-semibold">

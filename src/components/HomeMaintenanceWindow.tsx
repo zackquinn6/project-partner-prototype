@@ -256,7 +256,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
   };
   return <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-full h-[100vh] md:max-w-6xl md:h-[85vh] overflow-hidden border-none md:border flex flex-col p-0">
+        <DialogContent className="w-full h-[100vh] md:max-w-6xl md:h-[85vh] overflow-hidden border-none md:border flex flex-col p-0 gap-0">
           <DialogHeader className="p-3 md:p-6 pb-2 md:pb-4 border-b shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex items-center justify-between">
               <DialogTitle className="flex items-center gap-2 text-base md:text-xl font-semibold">
@@ -312,7 +312,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     </TabsList>
                   </div>
 
-                   <TabsContent value="tasks" className="!mt-0 flex-1 flex flex-col min-h-0 px-3 md:px-6">
+                   <TabsContent value="tasks" className="flex-1 flex flex-col h-full px-3 md:px-6">
                      {/* Category Filter */}
                      <div className="flex items-center gap-2 py-3 shrink-0">
                       <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -427,11 +427,11 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     </div>
                   </TabsContent>
 
-                   <TabsContent value="history" className="!mt-0 flex-1 flex flex-col min-h-0 px-3 md:px-6">
+                   <TabsContent value="history" className="flex-1 flex flex-col h-full px-3 md:px-6">
                      <MaintenanceHistoryTab selectedHomeId={selectedHomeId} />
                    </TabsContent>
 
-                   <TabsContent value="notifications" className="!mt-0 flex-1 flex flex-col min-h-0 px-3 md:px-6">
+                   <TabsContent value="notifications" className="flex-1 flex flex-col h-full px-3 md:px-6">
                      <MaintenanceNotifications selectedHomeId={selectedHomeId} />
                    </TabsContent>
                 </Tabs>
