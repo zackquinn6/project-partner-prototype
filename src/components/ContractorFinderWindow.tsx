@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/ResponsiveDialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -152,11 +153,10 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
                   </div>
                 </div>
               </div>
-            </CardContent>
-            </Card>
-            </div>
-          </div>
-        </div>
+             </CardContent>
+             </Card>
+             </div>
+           </div>
       </ResponsiveDialog>
       
       <FeedbackDialog 
