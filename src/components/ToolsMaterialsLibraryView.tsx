@@ -327,13 +327,13 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
           {/* Library Grid */}
           <div className="flex-1 space-y-4 min-w-0 overflow-hidden">
             <div className="flex items-center gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <div className="relative flex-1 p-1">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 z-10" />
                 <Input
                   placeholder="Search your library..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-11"
                 />
               </div>
               <Button 
