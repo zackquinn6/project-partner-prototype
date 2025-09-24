@@ -61,14 +61,14 @@ export function ResponsiveDialog({
         } : undefined}
       >
         {(title || description) && (
-          <div className="mb-2">
+          <div>
             {title && (
-              <DialogTitle className="text-lg md:text-xl font-bold mb-0">
+              <DialogTitle className="text-lg md:text-xl font-bold mb-0 pb-0">
                 {title}
               </DialogTitle>
             )}
             {description && (
-              <DialogDescription className="text-sm md:text-base mb-0">
+              <DialogDescription className="text-sm md:text-base mb-0 pb-0">
                 {description}
               </DialogDescription>
             )}
