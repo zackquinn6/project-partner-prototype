@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ResponsiveDialog } from '@/components/ResponsiveDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -178,14 +179,12 @@ Signed on: ${new Date(agreement.agreement.signedAt).toLocaleString()}
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Scroll className="w-5 h-5" />
-              Project Agreements
-            </DialogTitle>
-          </DialogHeader>
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        size="content-large"
+        title="Project Agreements"
+      >
 
           <div className="space-y-4">
             {/* Search */}
@@ -268,14 +267,13 @@ Signed on: ${new Date(agreement.agreement.signedAt).toLocaleString()}
                           </Button>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+                     </CardContent>
+                   </Card>
+                 ))}
+               </div>
+             )}
+           </div>
+      </ResponsiveDialog>
 
       {/* Agreement Detail Modal */}
       {selectedAgreement && (

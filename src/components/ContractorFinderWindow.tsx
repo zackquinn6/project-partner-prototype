@@ -17,18 +17,14 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full h-full sm:max-w-4xl sm:max-h-[90vh] p-0 overflow-hidden border-none sm:border">
-        <div className="flex flex-col h-full">
-          <DialogHeader className="p-4 sm:p-6 border-b flex-shrink-0">
-            <DialogTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Contractor Finder
-            </DialogTitle>
-          </DialogHeader>
-          
-          {/* Beta Banner */}
-          <div className="bg-gradient-to-r from-orange-100 to-yellow-100 border-b border-orange-200 p-3 flex-shrink-0">
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        size="content-large"
+        title="Find Local Contractors"
+      >
+        {/* Beta Banner */}
+        <div className="bg-gradient-to-r from-orange-100 to-yellow-100 border-b border-orange-200 p-3 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Badge className="bg-orange-500 text-white">BETA</Badge>
@@ -161,13 +157,12 @@ export function ContractorFinderWindow({ open, onOpenChange }: ContractorFinderW
             </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
-    
-    <FeedbackDialog 
-      open={showFeedback}
-      onOpenChange={setShowFeedback}
-    />
+      </ResponsiveDialog>
+      
+      <FeedbackDialog 
+        open={showFeedback}
+        onOpenChange={setShowFeedback}
+      />
     </>
   );
 }

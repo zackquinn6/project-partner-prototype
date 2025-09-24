@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ResponsiveDialog } from '@/components/ResponsiveDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,47 +18,36 @@ export const ToolRentalsWindow = ({ isOpen, onClose }: ToolRentalsWindowProps) =
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full h-full sm:max-w-6xl sm:max-h-[90vh] overflow-hidden border-none sm:border p-0 sm:p-6">
-        <DialogHeader className="p-4 sm:p-0 border-b sm:border-b-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <DialogTitle className="flex items-center gap-2">
-                <Wrench className="h-6 w-6 text-primary" />
-                Tool Access & Rentals
-              </DialogTitle>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => window.dispatchEvent(new CustomEvent('show-tools-library-grid'))}
-                className="text-xs px-3 py-1 h-7"
-              >
-                <Wrench className="h-3 w-3 mr-1" />
-                My Tool Library
-              </Button>
-            </div>
-            <Button 
-               variant="ghost" 
-               onClick={onClose}
-               className="sm:hidden text-xs px-2 py-1 h-6"
-             >
-               Close
-             </Button>
-          </div>
-        </DialogHeader>
-        
-        <div className="p-4 sm:p-0">
+    <ResponsiveDialog
+      open={isOpen}
+      onOpenChange={onClose}
+      size="content-large"
+      title="Tool Access & Rentals"
+    >
+      <div className="flex items-center justify-between mb-6">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => window.dispatchEvent(new CustomEvent('show-tools-library-grid'))}
+          className="text-xs px-3 py-1 h-7"
+        >
+          <Wrench className="h-3 w-3 mr-1" />
+          My Tool Library
+        </Button>
+      </div>
+      
+      <div className="flex-1 min-h-0">
           <Tabs defaultValue="finder" className="w-full h-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="finder">Tool Access Finder</TabsTrigger>
             <TabsTrigger value="toolio">Toolio (Boston, MA)</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="finder" className="mt-6 max-h-[70vh] overflow-y-auto">
+          <TabsContent value="finder" className="mt-6 flex-1 overflow-y-auto">
             <ToolRentalFinder />
           </TabsContent>
           
-          <TabsContent value="toolio" className="mt-6 max-h-[70vh] overflow-y-auto">
+          <TabsContent value="toolio" className="mt-6 flex-1 overflow-y-auto">
             <div className="space-y-6">
               {/* Hero Section with Toolio Theme */}
               <Card className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
@@ -167,7 +157,6 @@ export const ToolRentalsWindow = ({ isOpen, onClose }: ToolRentalsWindowProps) =
           </TabsContent>
           </Tabs>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveDialog>
   );
 };

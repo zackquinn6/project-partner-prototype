@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/ResponsiveDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { UserToolsEditor } from "./UserToolsEditor";
@@ -34,13 +35,12 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
   }, [onOpenChange]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full sm:max-w-6xl sm:max-h-[80vh] overflow-hidden border-none sm:border p-0 sm:p-6">
-        <DialogHeader className="p-4 sm:p-0 border-b sm:border-none">
-          <DialogTitle className="text-sm sm:text-base">
-            {currentMode === 'add-tools' ? 'Add to Library' : 'My Tools Library'}
-          </DialogTitle>
-        </DialogHeader>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="content-large"
+      title={currentMode === 'add-tools' ? 'Add to Library' : 'My Tools Library'}
+    >
         
         <div className="flex flex-col min-h-[60vh] p-4 sm:p-0">
           <Tabs defaultValue="tools" className="w-full">
@@ -65,7 +65,6 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
             </TabsContent>
           </Tabs>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveDialog>
   );
 }
