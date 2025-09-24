@@ -314,31 +314,32 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     </TabsList>
                   </div>
 
-                   <TabsContent value="tasks" className="flex-1 flex flex-col h-full">
-                      {/* Category Filter */}
-                      <div className="flex items-center gap-2 py-3 shrink-0 px-3 md:px-6">
-                      <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                        <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
-                          <SelectValue placeholder="Filter by category" />
-                        </SelectTrigger>
-                        <SelectContent className="z-[100]">
-                          <SelectItem value="all">All Categories ({tasks.length})</SelectItem>
-                          {categories.map(category => {
-                        const count = tasks.filter(task => task.category === category).length;
-                        return count > 0 ? <SelectItem key={category} value={category}>
-                                {categoryLabels[category]} ({count})
-                              </SelectItem> : null;
-                      })}
-                        </SelectContent>
-                      </Select>
-                      
-                      <Button onClick={() => setShowAddTask(true)} disabled={!selectedHomeId} className="w-8 h-8 p-0 shrink-0" title="Add Task">
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
+                   <TabsContent value="tasks" className="min-h-0">
+                      <div className="flex flex-col h-full">
+                        {/* Category Filter */}
+                        <div className="flex items-center gap-2 py-3 shrink-0 px-3 md:px-6">
+                          <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                            <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
+                              <SelectValue placeholder="Filter by category" />
+                            </SelectTrigger>
+                            <SelectContent className="z-[100]">
+                              <SelectItem value="all">All Categories ({tasks.length})</SelectItem>
+                              {categories.map(category => {
+                            const count = tasks.filter(task => task.category === category).length;
+                            return count > 0 ? <SelectItem key={category} value={category}>
+                                    {categoryLabels[category]} ({count})
+                                  </SelectItem> : null;
+                          })}
+                            </SelectContent>
+                          </Select>
+                          
+                          <Button onClick={() => setShowAddTask(true)} disabled={!selectedHomeId} className="w-8 h-8 p-0 shrink-0" title="Add Task">
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
 
-                    <div className="flex-1 overflow-y-auto space-y-2 pb-3 px-3 md:px-6" onClick={() => setSwipedTaskId(null)}>
+                        <div className="flex-1 overflow-y-auto space-y-2 pb-3 px-3 md:px-6 min-h-0" onClick={() => setSwipedTaskId(null)}>
                       {loading ? (
                         <div className="text-center py-8">Loading tasks...</div>
                       ) : getFilteredTasks().length === 0 ? (
@@ -426,46 +427,51 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                           );
                         })
                       )}
-                    </div>
-                  </TabsContent>
+                        </div>
+                      </div>
+                    </TabsContent>
 
-                   <TabsContent value="history" className="flex-1 flex flex-col h-full p-0 m-0">
-                      {/* Category Filter */}
-                      <div className="flex items-center gap-2 py-3 shrink-0 px-3 md:px-6">
-                       <Select value={historyCategoryFilter} onValueChange={setHistoryCategoryFilter}>
-                         <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
-                           <SelectValue placeholder="Filter by category" />
-                         </SelectTrigger>
-                         <SelectContent className="z-[100]">
-                           <SelectItem value="all">All Categories</SelectItem>
-                           {categories.map(category => (
-                             <SelectItem key={category} value={category}>
-                               {categoryLabels[category]}
-                             </SelectItem>
-                           ))}
-                         </SelectContent>
-                       </Select>
+                   <TabsContent value="history" className="min-h-0">
+                      <div className="flex flex-col h-full">
+                        {/* Category Filter */}
+                        <div className="flex items-center gap-2 py-3 shrink-0 px-3 md:px-6">
+                         <Select value={historyCategoryFilter} onValueChange={setHistoryCategoryFilter}>
+                           <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
+                             <SelectValue placeholder="Filter by category" />
+                           </SelectTrigger>
+                           <SelectContent className="z-[100]">
+                             <SelectItem value="all">All Categories</SelectItem>
+                             {categories.map(category => (
+                               <SelectItem key={category} value={category}>
+                                 {categoryLabels[category]}
+                               </SelectItem>
+                             ))}
+                           </SelectContent>
+                         </Select>
 
-                       <Select value={sortBy} onValueChange={setSortBy}>
-                         <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
-                           <SelectValue placeholder="Sort by" />
-                         </SelectTrigger>
-                         <SelectContent className="z-[100]">
-                           <SelectItem value="date-desc">Date (Newest First)</SelectItem>
-                           <SelectItem value="date-asc">Date (Oldest First)</SelectItem>
-                           <SelectItem value="category">Category</SelectItem>
-                           <SelectItem value="title">Task Name</SelectItem>
-                         </SelectContent>
-                       </Select>
-                     </div>
+                         <Select value={sortBy} onValueChange={setSortBy}>
+                           <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
+                             <SelectValue placeholder="Sort by" />
+                           </SelectTrigger>
+                           <SelectContent className="z-[100]">
+                             <SelectItem value="date-desc">Date (Newest First)</SelectItem>
+                             <SelectItem value="date-asc">Date (Oldest First)</SelectItem>
+                             <SelectItem value="category">Category</SelectItem>
+                             <SelectItem value="title">Task Name</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       </div>
 
-                     <div className="flex-1 overflow-y-auto space-y-2 pb-3 px-3 md:px-6">
-                       <MaintenanceHistoryTab selectedHomeId={selectedHomeId} sortBy={sortBy} categoryFilter={historyCategoryFilter} />
-                     </div>
+                       <div className="flex-1 overflow-y-auto space-y-2 pb-3 px-3 md:px-6 min-h-0">
+                         <MaintenanceHistoryTab selectedHomeId={selectedHomeId} sortBy={sortBy} categoryFilter={historyCategoryFilter} />
+                       </div>
+                      </div>
                    </TabsContent>
 
-                   <TabsContent value="notifications" className="flex-1 flex flex-col h-full px-3 md:px-6">
-                     <MaintenanceNotifications selectedHomeId={selectedHomeId} />
+                   <TabsContent value="notifications" className="min-h-0">
+                     <div className="flex-1 overflow-y-auto px-3 md:px-6 min-h-0">
+                       <MaintenanceNotifications selectedHomeId={selectedHomeId} />
+                     </div>
                    </TabsContent>
                 </Tabs>
               </div>

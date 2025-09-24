@@ -144,7 +144,7 @@ export const MaintenanceHistoryTab: React.FC<MaintenanceHistoryTabProps> = ({ se
   }
 
   return (
-    <>
+    <div className="space-y-2">
       {filteredCompletions.map(completion => (
         <Card key={completion.id} className="hover:shadow-sm transition-shadow mx-1">
           <CardContent className="p-3 sm:p-4">
@@ -179,6 +179,6 @@ export const MaintenanceHistoryTab: React.FC<MaintenanceHistoryTabProps> = ({ se
           </CardContent>
         </Card>
       ))}
-    </>
+    </div>
   );
 };
