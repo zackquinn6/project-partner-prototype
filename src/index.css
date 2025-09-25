@@ -303,17 +303,24 @@ All colors MUST be HSL.
     overscroll-behavior: none;
   }
 
-  /* Override Radix scroll lock to allow dialog scrolling */
-  body[data-scroll-locked] .enhanced-scroll {
+  /* Force scroll capability in all dialog content even when body scroll is locked */
+  body[data-scroll-locked] .enhanced-scroll,
+  body[data-scroll-locked] [data-radix-dialog-content] .enhanced-scroll,
+  body[data-scroll-locked] [role="dialog"] .enhanced-scroll,
+  body[data-scroll-locked] [role="tabpanel"] {
     overflow-y: auto !important;
     touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    scroll-behavior: auto !important;
+    pointer-events: auto !important;
   }
 
-  /* Ensure touchpad scrolling works in dialogs */
-  body[data-scroll-locked] [role="dialog"] .enhanced-scroll {
+  /* Ensure tab content specifically can scroll */
+  body[data-scroll-locked] [role="tabpanel"].enhanced-scroll {
+    max-height: calc(90vh - 120px) !important;
     overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
+    touch-action: pan-y !important;
   }
     
     .text-responsive {
