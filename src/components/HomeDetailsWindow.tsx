@@ -438,16 +438,81 @@ export const HomeDetailsWindow: React.FC<HomeDetailsWindowProps> = ({
               </CardContent>
             </Card>
 
-            {/* Photos Card - placeholder for simplified example */}
+            {/* Photos Card */}
             <Card>
               <CardHeader>
-                <CardTitle>Photos</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Photos</CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.multiple = true;
+                      input.accept = 'image/*';
+                      input.onchange = (e) => {
+                        const target = e.target as HTMLInputElement;
+                        if (target.files) {
+                          handlePhotoUpload(target.files);
+                        }
+                      };
+                      input.click();
+                    }}
+                    disabled={uploading}
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    {uploading ? 'Uploading...' : 'Add Photos'}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <Camera className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Photo management functionality</p>
-                </div>
+                {home.photos && home.photos.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    {home.photos.map((photo, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={photo}
+                          alt={`Home photo ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => handlePhotoDelete(photo)}
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Camera className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground mb-4">No photos added yet</p>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.multiple = true;
+                        input.accept = 'image/*';
+                        input.onchange = (e) => {
+                          const target = e.target as HTMLInputElement;
+                          if (target.files) {
+                            handlePhotoUpload(target.files);
+                          }
+                        };
+                        input.click();
+                      }}
+                      disabled={uploading}
+                    >
+                      <Camera className="w-4 h-4 mr-2" />
+                      {uploading ? 'Uploading...' : 'Add First Photo'}
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
