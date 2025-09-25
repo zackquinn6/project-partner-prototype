@@ -33,7 +33,16 @@ Planning,Project Setup,Create Timeline,Establish project milestones,Start Date*E
 Preparation,Site Prep,Clear Area,Remove debris and obstacles,Area Size*Debris Type,Clean Work Area,Area ready for work,safety,Shovel,For moving debris,Trash Bags,For debris collection
 Preparation,Site Prep,Mark Utilities,Identify underground utilities,,Utility Markings,All utilities clearly marked,safety,Spray Paint,For marking locations,,,
 Execution,Installation,Measure Space,Take accurate measurements,Length*Width*Height,Measurements,Precise dimensions recorded,performance-durability,Tape Measure,25ft measuring tape,,,
-Execution,Installation,Cut Materials,Cut materials to size,Cut Length*Angle,Cut Materials,Materials ready for installation,major-aesthetics,Saw,Hand saw for cutting,Wood,Construction lumber`;
+Execution,Installation,Cut Materials,Cut materials to size,Cut Length*Angle,Cut Materials,Materials ready for installation,major-aesthetics,Saw,Hand saw for cutting,Wood,Construction lumber
+
+IMPORTANT FORMAT NOTES:
+- Each row must have data in the first 3 columns: phase, operation, step
+- Phase should be a single name like "Planning" or "Preparation" 
+- Operation should be a single name like "Project Setup" or "Site Prep"
+- Step should be a single name like "Define Requirements" or "Clear Area"
+- Do NOT put multiple comma-separated values in a single field
+- Multiple inputs should be separated by asterisks (*) in the inputs column only
+- Empty cells should be left blank, not filled with commas`;
 
   const parseCsvLine = (line: string): string[] => {
     const values: string[] = [];
@@ -402,6 +411,16 @@ Execution,Installation,Cut Materials,Cut materials to size,Cut Length*Angle,Cut 
           </CardHeader>
           <CardContent>
             <div className="space-y-3 text-sm">
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <strong className="text-yellow-800">⚠️ Common CSV Issues:</strong>
+                <ul className="mt-2 text-yellow-700 space-y-1">
+                  <li>• Each field must be in its own column - don't put multiple values separated by commas in one field</li>
+                  <li>• Phase should be a single name like "Planning" or "Execution"</li>
+                  <li>• Operation should be a single name like "Site Prep" or "Installation"</li>
+                  <li>• Step should be a single name like "Clear Area" or "Cut Materials"</li>
+                  <li>• Only use asterisks (*) to separate multiple inputs in the inputs column</li>
+                </ul>
+              </div>
               <div>
                 <strong>Required Columns:</strong> phase, operation, step
               </div>
