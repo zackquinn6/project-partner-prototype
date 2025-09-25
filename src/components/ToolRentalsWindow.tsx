@@ -37,17 +37,17 @@ export const ToolRentalsWindow = ({ isOpen, onClose }: ToolRentalsWindowProps) =
       </div>
       
       <div className="flex-1 min-h-0">
-          <Tabs defaultValue="finder" className="w-full h-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <Tabs defaultValue="finder" className="w-full h-full flex flex-col">
+          <TabsList className="grid w-full grid-cols-2 flex-shrink-0">
             <TabsTrigger value="finder">Tool Access Finder</TabsTrigger>
             <TabsTrigger value="toolio">Toolio (Boston, MA)</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="finder" className="mt-6 flex-1 overflow-y-auto">
+          <TabsContent value="finder" className="mt-6 flex-1 min-h-0 enhanced-scroll">
             <ToolRentalFinder />
           </TabsContent>
           
-          <TabsContent value="toolio" className="mt-6 flex-1 overflow-y-auto">
+          <TabsContent value="toolio" className="mt-6 flex-1 min-h-0 enhanced-scroll">
             <div className="space-y-6">
               {/* Hero Section with Toolio Theme */}
               <Card className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
