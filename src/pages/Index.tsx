@@ -30,6 +30,7 @@ import { UserToolsMaterialsWindow } from '@/components/UserToolsMaterialsWindow'
 import { ToolsMaterialsLibraryView } from '@/components/ToolsMaterialsLibraryView';
 import ProfileManager from '@/components/ProfileManager';
 import { HelpPopup } from '@/components/HelpPopup';
+import { ExpertHelpWindow } from '@/components/ExpertHelpWindow';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { KeyCharacteristicsExplainer } from '@/components/KeyCharacteristicsExplainer';
 import { Button } from '@/components/ui/button';
@@ -62,6 +63,7 @@ const Index = () => {
   const [isAIRepairOpen, setIsAIRepairOpen] = useState(false);
   const [isContractorFinderOpen, setIsContractorFinderOpen] = useState(false);
   const [isHelpPopupOpen, setIsHelpPopupOpen] = useState(false);
+  const [isExpertHelpOpen, setIsExpertHelpOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isToolsLibraryGridOpen, setIsToolsLibraryGridOpen] = useState(false);
 
@@ -508,6 +510,11 @@ const Index = () => {
       <HelpPopup 
         isOpen={isHelpPopupOpen}
         onClose={() => setIsHelpPopupOpen(false)}
+      />
+      
+      <ExpertHelpWindow 
+        open={isExpertHelpOpen}
+        onOpenChange={setIsExpertHelpOpen}
       />
 
       <ProfileManager 

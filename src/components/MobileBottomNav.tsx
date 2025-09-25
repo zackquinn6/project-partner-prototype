@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Folder, User, HelpCircle, Plus } from 'lucide-react';
+import { Home, Folder, User, HelpCircle, Plus, Headphones } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProject } from '@/contexts/ProjectContext';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MobileBottomNavProps {
   currentView: string;
-  onViewChange: (view: 'home' | 'projects' | 'profile' | 'help') => void;
+  onViewChange: (view: 'home' | 'projects' | 'profile' | 'help' | 'expert') => void;
   onQuickAction?: () => void;
 }
 
@@ -23,7 +23,7 @@ export function MobileBottomNav({ currentView, onViewChange, onQuickAction }: Mo
 
   if (!isMobile || !user) return null;
 
-  const handleTabClick = (tab: 'home' | 'projects' | 'profile' | 'help') => {
+  const handleTabClick = (tab: 'home' | 'projects' | 'profile' | 'help' | 'expert') => {
     setActiveTab(tab);
     onViewChange(tab);
   };
@@ -55,6 +55,13 @@ export function MobileBottomNav({ currentView, onViewChange, onQuickAction }: Mo
       onClick: () => handleTabClick('profile')
     },
     {
+      id: 'expert',
+      icon: Headphones,
+      label: 'Expert Help',
+      onClick: () => handleTabClick('expert'),
+      isExpert: true
+    },
+    {
       id: 'help',
       icon: HelpCircle, 
       label: 'Help',
@@ -65,11 +72,12 @@ export function MobileBottomNav({ currentView, onViewChange, onQuickAction }: Mo
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
       <div className="bg-card/95 backdrop-blur-sm border-t border-border shadow-elegant">
-        <div className="grid grid-cols-5 h-16">
+        <div className="grid grid-cols-6 h-16">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             const isSpecialActive = item.isSpecial && (currentProjectRun || activeTab === 'projects');
+            const isExpertButton = item.isExpert;
             
             return (
               <Button
@@ -79,9 +87,11 @@ export function MobileBottomNav({ currentView, onViewChange, onQuickAction }: Mo
                   h-full rounded-none flex flex-col items-center justify-center gap-1 px-1 py-2 transition-fast
                   ${item.isSpecial 
                     ? 'bg-primary/10 text-primary hover:bg-primary/20' 
-                    : isActive 
-                      ? 'text-primary bg-primary/5' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    : isExpertButton
+                      ? 'bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-700 hover:from-emerald-100 hover:to-emerald-200 border-emerald-200'
+                      : isActive 
+                        ? 'text-primary bg-primary/5' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                   }
                 `}
                 onClick={item.onClick}
@@ -89,12 +99,26 @@ export function MobileBottomNav({ currentView, onViewChange, onQuickAction }: Mo
                 <Icon 
                   className={`
                     h-5 w-5 transition-fast
-                    ${item.isSpecial ? 'text-primary' : isActive ? 'text-primary' : ''}
+                    ${item.isSpecial 
+                      ? 'text-primary' 
+                      : isExpertButton 
+                        ? 'text-emerald-600' 
+                        : isActive 
+                          ? 'text-primary' 
+                          : ''
+                    }
                   `} 
                 />
                 <span className={`
                   text-xs font-medium leading-none transition-fast
-                  ${item.isSpecial ? 'text-primary' : isActive ? 'text-primary' : ''}
+                  ${item.isSpecial 
+                    ? 'text-primary' 
+                    : isExpertButton 
+                      ? 'text-emerald-700' 
+                      : isActive 
+                        ? 'text-primary' 
+                        : ''
+                  }
                 `}>
                   {item.label}
                 </span>

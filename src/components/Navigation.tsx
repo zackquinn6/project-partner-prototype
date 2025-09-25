@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Home, FolderOpen, ChevronDown, Settings, LogOut, User, Users, TrendingUp, Shield, Lock, HelpCircle, BookOpen, MessageCircle } from "lucide-react";
+import { Home, FolderOpen, ChevronDown, Settings, LogOut, User, Users, TrendingUp, Shield, Lock, HelpCircle, BookOpen, MessageCircle, Headphones } from "lucide-react";
 import { useProject } from '@/contexts/ProjectContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -11,6 +11,7 @@ import { DataPrivacyManager } from './DataPrivacyManager';
 import { FeatureRoadmapWindow } from './FeatureRoadmapWindow';
 import { AppDocumentationWindow } from './AppDocumentationWindow';
 import { ToolsMaterialsWindow } from './ToolsMaterialsWindow';
+import { ExpertHelpWindow } from './ExpertHelpWindow';
 
 interface NavigationProps {
   currentView: 'home' | 'admin' | 'user' | 'editWorkflow';
@@ -31,6 +32,7 @@ export default function Navigation({
   const [isRoadmapOpen, setIsRoadmapOpen] = useState(false);
   const [isDocumentationOpen, setIsDocumentationOpen] = useState(false);
   const [isToolsLibraryOpen, setIsToolsLibraryOpen] = useState(false);
+  const [isExpertHelpOpen, setIsExpertHelpOpen] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   
   // Add error boundary for useProject hook
@@ -176,6 +178,16 @@ export default function Navigation({
           </div>
 
           <div className="flex items-center space-x-2">
+            {/* Get Expert Help Button - Prominent CTA */}
+            <Button 
+              onClick={() => setIsExpertHelpOpen(true)}
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              size="sm"
+            >
+              <Headphones className="h-4 w-4 mr-2" />
+              Get Expert Help
+            </Button>
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
@@ -253,6 +265,11 @@ export default function Navigation({
       <ToolsMaterialsWindow 
         open={isToolsLibraryOpen}
         onOpenChange={setIsToolsLibraryOpen}
+      />
+      
+      <ExpertHelpWindow 
+        open={isExpertHelpOpen}
+        onOpenChange={setIsExpertHelpOpen}
       />
     </>
   );
