@@ -9,7 +9,7 @@ import { HomeRiskManager } from '@/components/HomeRiskManager';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FullScreenDialog } from '@/components/FullScreenDialog';
+import { ScrollableDialog } from '@/components/ScrollableDialog';
 import { Settings, BarChart3, Shield, Wrench, Lock, Brain, TrendingUp, Users, Cog, Scroll, MapPin, FileText, AlertTriangle, RefreshCw } from 'lucide-react';
 import { StructureManager } from './StructureManager';
 import { AdminRoadmapManager } from './AdminRoadmapManager';
@@ -214,13 +214,13 @@ export const AdminView: React.FC = () => {
           </Card>
         </div>
 
-        <FullScreenDialog 
+        <ScrollableDialog 
           open={enhancedProjectManagementOpen} 
           onOpenChange={setEnhancedProjectManagementOpen}
           title="Project Management & Revision Control"
         >
           <UnifiedProjectManagement />
-        </FullScreenDialog>
+        </ScrollableDialog>
 
         <ProjectAnalyticsWindow 
           open={analyticsOpen} 
