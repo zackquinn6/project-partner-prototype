@@ -82,8 +82,8 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in process improvement analysis:', error);
     return new Response(JSON.stringify({ 
-      error: error.message || 'Failed to analyze workflow',
-      details: error.toString()
+      error: error instanceof Error ? error.message : 'Failed to analyze workflow',
+      details: error instanceof Error ? error.stack : String(error)
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

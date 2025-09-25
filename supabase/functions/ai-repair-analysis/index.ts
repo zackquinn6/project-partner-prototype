@@ -149,7 +149,7 @@ Please analyze these home repair photos. ${description ? `Additional context: ${
     console.error('Error in ai-repair-analysis function:', error);
     return new Response(JSON.stringify({ 
       error: 'Analysis failed', 
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error occurred'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -49,16 +49,6 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
     return <div>No project selected</div>;
   }
 
-  // Debug logging to see what data we have
-  console.log('ProjectOverviewStep - currentProjectRun:', {
-    diyLengthChallenges: currentProjectRun.diyLengthChallenges,
-    name: currentProjectRun.name
-  });
-  console.log('ProjectOverviewStep - currentProject:', {
-    diyLengthChallenges: currentProject?.diyLengthChallenges,
-    name: currentProject?.name
-  });
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -92,13 +82,6 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
             <p className="mt-1 text-muted-foreground">
               {currentProjectRun?.diyLengthChallenges || currentProject?.diyLengthChallenges || 'None specified'}
             </p>
-            {/* Debug info - remove after testing */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="text-xs text-gray-500 mt-1">
-                Debug: ProjectRun DIY: {currentProjectRun?.diyLengthChallenges ? 'Yes' : 'No'} | 
-                Project DIY: {currentProject?.diyLengthChallenges ? 'Yes' : 'No'}
-              </div>
-            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t">
