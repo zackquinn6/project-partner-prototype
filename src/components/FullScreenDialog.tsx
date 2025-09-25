@@ -33,7 +33,7 @@ export function FullScreenDialog({
             "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%]",
             "w-[90vw] max-w-[90vw] h-[90vh] max-h-[90vh]",
             "bg-background border rounded-lg shadow-lg",
-            "flex flex-col overflow-hidden",
+            "flex flex-col",
             className
           )}
         >
@@ -75,7 +75,7 @@ export function FullScreenDialog({
           )}
           
           <div 
-            className="flex-1 min-h-0 mobile-scroll p-4 md:p-6"
+            className="flex-1 min-h-0 overflow-y-auto enhanced-scroll p-4 md:p-6"
           >
             {children}
           </div>

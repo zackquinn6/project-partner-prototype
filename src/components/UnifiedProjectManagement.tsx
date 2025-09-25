@@ -348,9 +348,9 @@ export function UnifiedProjectManagement() {
 
   return (
     <>
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
+      <div className="space-y-6 h-full flex flex-col min-h-0">
+        <Card className="flex-1 flex flex-col min-h-0">
+          <CardHeader className="flex-shrink-0">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Settings className="w-5 h-5" />
@@ -362,7 +362,7 @@ export function UnifiedProjectManagement() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 flex flex-col min-h-0 enhanced-scroll">
             {/* Project Selector */}
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1">
