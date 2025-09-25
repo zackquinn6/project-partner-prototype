@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useEffect } from "react"
 import { Dialog, DialogPortal, DialogOverlay, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { X } from "lucide-react"
@@ -24,11 +25,27 @@ export function ScrollableDialog({
 }: ScrollableDialogProps) {
   const { isMobile } = useResponsive();
 
-  // Use modal behavior for proper background blur while maintaining scrollability
+  // Custom scroll handling for modal dialogs
+  useEffect(() => {
+    if (open) {
+      // Prevent background scroll while keeping dialog scrollable
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [open]);
+
+  // Use non-modal behavior for scrolling with custom blur overlay
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogPortal>
-        <DialogOverlay className="bg-black/60 backdrop-blur-md fixed inset-0 z-50" />
+        <DialogOverlay 
+          className="bg-black/60 backdrop-blur-md fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+          onClick={() => onOpenChange(false)}
+        />
         <div
           className={cn(
             "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%]",
@@ -78,7 +95,7 @@ export function ScrollableDialog({
           )}
           
           {/* Scrollable content area */}
-          <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6">
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6 overscroll-contain">
             {children}
           </div>
         </div>
