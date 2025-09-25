@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FullScreenDialog } from '@/components/FullScreenDialog';
+import { ScrollableDialog } from '@/components/ScrollableDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -281,7 +281,7 @@ export function AdminGuideWindow({ open, onOpenChange }: AdminGuideWindowProps) 
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
-    <FullScreenDialog 
+    <ScrollableDialog 
       open={open} 
       onOpenChange={onOpenChange}
       title="Administrator Guide & Documentation"
@@ -549,6 +549,6 @@ export function AdminGuideWindow({ open, onOpenChange }: AdminGuideWindowProps) 
           </div>
         </Tabs>
       </div>
-    </FullScreenDialog>
+    </ScrollableDialog>
   );
 }

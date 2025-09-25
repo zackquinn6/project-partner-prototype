@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Edit, Trash2, Plus, Check, X, ChevronRight, ChevronDown, Package, Wrench, FileOutput, Import, GripVertical, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { FullScreenDialog } from "@/components/FullScreenDialog";
+import { ScrollableDialog } from "@/components/ScrollableDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 
@@ -795,13 +795,13 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
 
   if (!currentProject) {
     return (
-      <FullScreenDialog 
+      <ScrollableDialog 
         open={open} 
         onOpenChange={onOpenChange}
         title="Project Management"
       >
         {renderProjectSelector()}
-      </FullScreenDialog>
+      </ScrollableDialog>
     );
   }
 
@@ -866,12 +866,12 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
   };
 
   return (
-    <FullScreenDialog 
+    <ScrollableDialog 
       open={open} 
       onOpenChange={onOpenChange}
       title="Project Management"
     >
       {renderView()}
-    </FullScreenDialog>
+    </ScrollableDialog>
   );
 };

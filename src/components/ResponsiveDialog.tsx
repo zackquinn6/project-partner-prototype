@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { FullScreenDialog } from "@/components/FullScreenDialog"
+import { ScrollableDialog } from "@/components/ScrollableDialog"
 import { cn } from "@/lib/utils"
 import { responsiveDialogClasses } from "@/utils/responsive"
 
@@ -23,10 +23,10 @@ export function ResponsiveDialog({
   children, 
   className 
 }: ResponsiveDialogProps) {
-  // Use FullScreenDialog for content-large to avoid override conflicts
+  // Use ScrollableDialog for content-large for proper scrolling and blur
   if (size === 'content-large') {
     return (
-      <FullScreenDialog
+      <ScrollableDialog
         open={open}
         onOpenChange={onOpenChange}
         title={title}
@@ -34,7 +34,7 @@ export function ResponsiveDialog({
         className={className}
       >
         {children}
-      </FullScreenDialog>
+      </ScrollableDialog>
     );
   }
 

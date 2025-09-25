@@ -24,9 +24,9 @@ export function ScrollableDialog({
 }: ScrollableDialogProps) {
   const { isMobile } = useResponsive();
 
-  // Use non-modal behavior to avoid scroll locking issues
+  // Use modal behavior for proper background blur while maintaining scrollability
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
       <DialogPortal>
         <DialogOverlay className="bg-black/60 backdrop-blur-md fixed inset-0 z-50" />
         <div
