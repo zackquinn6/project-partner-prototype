@@ -65,8 +65,50 @@ Execution,Installation,Cut Materials,Cut materials to size,Cut Length*Angle,Cut 
     return values;
   };
 
+  const preprocessCsvData = (csvText: string): string => {
+    const lines = csvText.trim().split('\n');
+    if (lines.length < 2) return csvText;
+    
+    // Get the header line to count expected columns
+    const headerLine = lines[0];
+    const expectedColumns = parseCsvLine(headerLine).length;
+    
+    const processedLines = lines.map((line, index) => {
+      if (index === 0) return line; // Keep header as is
+      
+      const values = parseCsvLine(line);
+      
+      // If we have fewer values than expected columns, pad with empty strings
+      while (values.length < expectedColumns) {
+        values.push('');
+      }
+      
+      // If we have more values than expected, this might be malformed data
+      // Try to detect if the first field contains multiple comma-separated values
+      if (values.length > expectedColumns && values[0].includes(',')) {
+        // This suggests the first field is malformed - try to clean it
+        const firstField = values[0].split(',')[0].trim();
+        values[0] = firstField;
+        values.length = expectedColumns; // Truncate to expected length
+      }
+      
+      // Rebuild the CSV line
+      return values.map(value => {
+        // If value contains commas or quotes, wrap in quotes
+        if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+          return `"${value.replace(/"/g, '""')}"`;
+        }
+        return value;
+      }).join(',');
+    });
+    
+    return processedLines.join('\n');
+  };
+
   const parseCSV = (csvText: string): ParsedProjectContent => {
-    const lines = csvText.trim().split('\n').filter(line => line.trim()); // Filter out empty lines
+    // Preprocess the CSV to handle malformed data
+    const processedCsv = preprocessCsvData(csvText);
+    const lines = processedCsv.trim().split('\n').filter(line => line.trim()); // Filter out empty lines
     if (lines.length < 2) return { phases: [], errors: ['CSV must have at least a header and one data row'] };
 
     const headers = parseCsvLine(lines[0]).map(h => h.trim().toLowerCase());
@@ -124,13 +166,19 @@ Execution,Installation,Cut Materials,Cut materials to size,Cut Length*Angle,Cut 
         continue;
       }
 
+      // Enhanced validation for malformed data
       if (!rowData.phase || !rowData.operation || !rowData.step) {
         const missingFields = [];
         if (!rowData.phase) missingFields.push('phase');
         if (!rowData.operation) missingFields.push('operation');
         if (!rowData.step) missingFields.push('step');
         
-        errors.push(`Row ${i + 1}: Missing required fields (${missingFields.join(', ')}). Found: phase="${rowData.phase}", operation="${rowData.operation}", step="${rowData.step}"`);
+        // Check if the phase field contains what looks like multiple fields
+        if (rowData.phase && rowData.phase.includes(',')) {
+          errors.push(`Row ${i + 1}: Phase field appears to contain multiple comma-separated values: "${rowData.phase}". This suggests the CSV format is incorrect. Please ensure each field is properly separated into its own column.`);
+        } else {
+          errors.push(`Row ${i + 1}: Missing required fields (${missingFields.join(', ')}). Found: phase="${rowData.phase}", operation="${rowData.operation}", step="${rowData.step}"`);
+        }
         continue;
       }
 
