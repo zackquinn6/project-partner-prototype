@@ -53,30 +53,30 @@ export const ProjectAgreementStep: React.FC<ProjectAgreementStepProps> = ({
   }, [user]);
 
   const agreementText = `
-PROJECT PARTNER AGREEMENT
+SERVICE TERMS
 
-This agreement is entered into between the Project Partner and the project participant for the completion of the selected DIY project.
+These service terms are entered into between the Service Provider and the project participant for the completion of the selected DIY project.
 
 TERMS AND CONDITIONS:
 
 1. PROJECT SCOPE
-The Project Partner provides step-by-step guidance, workflows, and support materials for DIY projects. The participant agrees to follow the provided instructions and safety guidelines.
+The Service Provider provides step-by-step guidance, workflows, and support materials for DIY projects. The participant agrees to follow the provided instructions and safety guidelines.
 
 2. RESPONSIBILITIES
-- Project Partner: Provide accurate instructions, safety guidelines, and support materials
+- Service Provider: Provide accurate instructions, safety guidelines, and support materials
 - Participant: Follow instructions carefully, use appropriate safety equipment, and complete steps as directed
 
 3. SAFETY AND LIABILITY
 - Participant assumes full responsibility for their safety and the safety of others
 - Participant must use appropriate safety equipment and follow all safety guidelines
-- Project Partner is not liable for injuries or damages resulting from project execution
+- Service Provider is not liable for injuries or damages resulting from project execution
 
 4. PROJECT COMPLETION
 - Participant commits to complete the project according to the provided timeline
 - Progress tracking and accountability measures will be implemented as agreed
 
 5. SUCCESS GUARANTEE
-- Project Partner guarantees success when instructions are followed correctly
+- Service Provider guarantees success when instructions are followed correctly
 - Custom or manually added phases are not covered by this guarantee
 - Participant must report issues promptly for support
 
@@ -156,7 +156,7 @@ Date: ${new Date().toLocaleDateString()}
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          Project Partner Agreement
+          Service Terms
           {isCompleted && <CheckCircle className="w-6 h-6 text-green-500" />}
         </h2>
         <Badge variant={isCompleted ? "default" : "secondary"}>
@@ -168,10 +168,10 @@ Date: ${new Date().toLocaleDateString()}
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            Project Agreement Terms
+            Service Terms
           </CardTitle>
           <CardDescription>
-            Please review and sign the project partner agreement to proceed
+            Please review and sign the service terms to proceed
           </CardDescription>
         </CardHeader>
         <CardContent>

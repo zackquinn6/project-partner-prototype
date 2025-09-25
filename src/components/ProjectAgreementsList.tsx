@@ -139,7 +139,7 @@ export const ProjectAgreementsList: React.FC = () => {
   const downloadAgreement = (agreement: ProjectAgreement) => {
     if (!agreement.agreement) return;
 
-    const content = `Project Partner Agreement
+    const content = `Service Terms
     
 Project: ${agreement.name}
 Signed by: ${agreement.agreement.signerName}

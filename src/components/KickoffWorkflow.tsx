@@ -37,8 +37,8 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
     },
     {
       id: 'kickoff-step-4', 
-      title: 'Project Partner Agreement',
-      description: 'Review and sign the project agreement'
+      title: 'Service Terms',
+      description: 'Review and sign the service terms'
     }
   ];
 

@@ -49,16 +49,16 @@ export const createKickoffPhase = (): Phase => {
     },
     {
       id: 'kickoff-step-4',
-      step: 'Project Partner Agreement',
-      description: 'Review and sign the project partner agreement',
+      step: 'Service Terms',
+      description: 'Review and sign the service terms',
       contentType: 'text' as const,
-      content: 'Please review the project partner agreement terms and provide your digital signature to proceed.',
+      content: 'Please review the service terms and provide your digital signature to proceed.',
       materials: [],
       tools: [],
       outputs: [{
         id: 'agreement-output',
         name: 'Signed Agreement',
-        description: 'Project partner agreement signed and documented',
+        description: 'Service terms signed and documented',
         type: 'none' as const
       }]
     }
