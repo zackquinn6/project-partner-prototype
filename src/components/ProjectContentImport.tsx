@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Phase, Operation, WorkflowStep, Output, Material, Tool, StepInput } from '@/interfaces/Project';
+import * as XLSX from 'xlsx';
 
 interface ProjectContentImportProps {
   open: boolean;
@@ -354,12 +355,39 @@ IMPORTANT FORMAT NOTES:
     const file = event.target.files?.[0];
     if (file) {
       setFileInput(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        setCsvData(text);
-      };
-      reader.readAsText(file);
+      
+      // Check if it's an Excel file and handle it with xlsx library
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target?.result as ArrayBuffer);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            
+            // Convert to CSV format for consistent processing
+            const csvText = XLSX.utils.sheet_to_csv(worksheet);
+            console.log('Excel converted to CSV (first 500 chars):', csvText.substring(0, 500));
+            setCsvData(csvText);
+            toast.success('Excel file loaded successfully');
+          } catch (error) {
+            console.error('Error reading Excel file:', error);
+            toast.error('Error reading Excel file. Please check the file format.');
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        // Handle CSV files
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const text = e.target?.result as string;
+          console.log('Raw CSV content (first 500 chars):', text.substring(0, 500));
+          setCsvData(text);
+          toast.success('CSV file loaded successfully');
+        };
+        reader.readAsText(file);
+      }
     }
   };
 
@@ -429,7 +457,7 @@ IMPORTANT FORMAT NOTES:
           
           <TabsContent value="upload" className="space-y-4">
             <div>
-              <h3 className="text-sm font-medium mb-2">Upload CSV File</h3>
+              <h3 className="text-sm font-medium mb-2">Upload CSV or Excel File</h3>
               <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
                 <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                 <input
@@ -449,6 +477,10 @@ IMPORTANT FORMAT NOTES:
                     Selected: {fileInput.name}
                   </p>
                 )}
+                <div className="mt-3 text-xs text-muted-foreground">
+                  <p>✅ Excel files (.xlsx, .xls) are automatically converted</p>
+                  <p>✅ CSV files are processed directly</p>
+                </div>
               </div>
             </div>
           </TabsContent>
