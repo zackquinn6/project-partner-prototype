@@ -80,7 +80,15 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
           <div>
             <Label>DIY Challenges</Label>
             <p className="mt-1 text-muted-foreground">
-              {currentProjectRun?.diyLengthChallenges || currentProject?.diyLengthChallenges || 'None specified'}
+              {(() => {
+                console.log('🏗️ DIY Challenges Debug:', {
+                  currentProjectRun: currentProjectRun,
+                  diyLengthChallenges: currentProjectRun?.diyLengthChallenges,
+                  currentProject: currentProject,
+                  projectDiyLengthChallenges: currentProject?.diyLengthChallenges
+                });
+                return currentProjectRun?.diyLengthChallenges || currentProject?.diyLengthChallenges || 'None specified';
+              })()}
             </p>
           </div>
 
