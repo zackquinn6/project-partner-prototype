@@ -180,7 +180,10 @@ export default function Navigation({
           <div className="flex items-center space-x-2">
             {/* Get Expert Help Button - Prominent CTA */}
             <Button 
-              onClick={() => setIsExpertHelpOpen(true)}
+              onClick={() => {
+                console.log('Expert Help button clicked');
+                setIsExpertHelpOpen(true);
+              }}
               className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
               size="sm"
             >
