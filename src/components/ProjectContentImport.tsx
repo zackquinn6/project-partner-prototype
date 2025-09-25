@@ -41,7 +41,8 @@ IMPORTANT FORMAT NOTES:
 - Operation should be a single name like "Project Setup" or "Site Prep"
 - Step should be a single name like "Define Requirements" or "Clear Area"
 - Do NOT put multiple comma-separated values in a single field
-- Multiple inputs should be separated by asterisks (*) in the inputs column only
+- Multiple inputs can be separated by asterisks (*) OR HTML line breaks (<br/>)
+- Input formats supported: "Input1*Input2" or "\\* Input1<br/>\\* Input2" (Excel export format)
 - Empty cells should be left blank, not filled with commas`;
 
   const parseCsvLine = (line: string): string[] => {
@@ -234,9 +235,27 @@ IMPORTANT FORMAT NOTES:
 
       // Parse and add inputs if provided
       if (rowData.inputs && rowData.inputs.trim()) {
-        const inputNames = rowData.inputs.split('*').map((name: string) => name.trim()).filter(Boolean);
+        // Handle different input formats:
+        // 1. HTML line breaks with escaped asterisks: \* Input 1<br/>\* Input 2
+        // 2. Simple asterisk separation: Input 1*Input 2
+        let inputText = rowData.inputs.trim();
+        
+        // Replace HTML line breaks with asterisks for consistent parsing
+        inputText = inputText.replace(/<br\s*\/?>/gi, '*');
+        
+        // Remove leading/trailing asterisks and clean up escaped asterisks
+        inputText = inputText.replace(/^[\*\\]+\s*/, '').replace(/[\*\\]+\s*$/, '');
+        
+        // Split by asterisks and clean each input
+        const inputNames = inputText.split(/[\*\\]+/).map((name: string) => {
+          return name.trim().replace(/^[\*\\]+\s*/, '').replace(/[\*\\]+\s*$/, '');
+        }).filter(Boolean);
+        
+        console.log(`Row ${i + 1} - Raw inputs:`, rowData.inputs);
+        console.log(`Row ${i + 1} - Parsed inputs:`, inputNames);
+        
         inputNames.forEach((inputName: string) => {
-          if (!step!.inputs?.some(input => input.name === inputName)) {
+          if (inputName && !step!.inputs?.some(input => input.name === inputName)) {
             const input: StepInput = {
               id: `input-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
               name: inputName,
