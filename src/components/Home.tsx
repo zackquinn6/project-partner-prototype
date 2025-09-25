@@ -355,7 +355,7 @@ export default function Home({
             
             {/* Key Characteristics Section */}
             <div className="bg-gradient-subtle p-6 rounded-lg max-w-4xl mx-auto mb-12">
-              <h3 className="text-xl font-semibold text-foreground mb-3">🔑 Key Characteristics: Engineered Processes, Personalized</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">🔑 Engineered Processes, Personalized</h3>
               
               <Button variant="outline" size="sm" onClick={() => setIsKCExplainerOpen(true)} className="text-primary border-primary hover:bg-primary/10">
                 Learn More About Key Characteristics
