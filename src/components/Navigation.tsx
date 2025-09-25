@@ -184,8 +184,9 @@ export default function Navigation({
               className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
               size="sm"
             >
-              <Headphones className="h-4 w-4 mr-2" />
-              Get Expert Help
+              <Headphones className="h-4 w-4 mr-0 sm:mr-2" />
+              <span className="hidden sm:inline">Get Expert Help</span>
+              <span className="sm:hidden">Help</span>
             </Button>
             
             <DropdownMenu>
