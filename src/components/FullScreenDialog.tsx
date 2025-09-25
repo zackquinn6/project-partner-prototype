@@ -25,7 +25,7 @@ export function FullScreenDialog({
   const { isMobile } = useResponsive();
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogPortal>
         <DialogOverlay className="bg-black/50 backdrop-blur-sm fixed inset-0 z-50" />
         <div

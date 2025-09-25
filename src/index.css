@@ -302,6 +302,12 @@ All colors MUST be HSL.
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
   }
+
+  /* Force override Radix scroll lock when needed */
+  body[data-scroll-locked] .enhanced-scroll {
+    overflow-y: auto !important;
+    touch-action: pan-y !important;
+  }
     
     .text-responsive {
       @apply text-base md:text-lg;
@@ -363,11 +369,14 @@ All colors MUST be HSL.
   }
 
   .enhanced-scroll {
-    overflow-y: auto;
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
     scroll-behavior: auto;
     touch-action: pan-y;
+    /* Force scroll capability */
+    max-height: 100%;
+    position: relative;
     /* Cross-browser touchpad/wheel support */
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--border)) transparent;
