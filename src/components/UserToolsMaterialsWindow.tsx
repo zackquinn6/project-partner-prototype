@@ -44,9 +44,9 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
         
         <div className="flex flex-col min-h-[60vh] p-4 sm:p-0">
           <Tabs defaultValue="tools" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="tools">My Tools</TabsTrigger>
-              <TabsTrigger value="materials">My Materials</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-4 h-12">
+              <TabsTrigger value="tools" className="text-sm px-3 py-2">My Tools</TabsTrigger>
+              <TabsTrigger value="materials" className="text-sm px-3 py-2">My Materials</TabsTrigger>
             </TabsList>
             
             <TabsContent value="tools">

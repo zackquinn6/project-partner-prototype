@@ -371,9 +371,9 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
             </div>
 
             <Tabs defaultValue="tools" className="flex-1">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="tools">Tools ({userTools.length})</TabsTrigger>
-                <TabsTrigger value="materials">Materials ({userMaterials.length})</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 h-12">
+                <TabsTrigger value="tools" className="text-sm px-2 py-2">Tools ({userTools.length})</TabsTrigger>
+                <TabsTrigger value="materials" className="text-sm px-2 py-2">Materials ({userMaterials.length})</TabsTrigger>
               </TabsList>
               
               <TabsContent value="tools" className="space-y-4 mt-4 max-h-[50vh] overflow-y-auto">
