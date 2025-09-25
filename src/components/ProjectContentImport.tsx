@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, FileText, AlertCircle, CheckCircle, Download } from 'lucide-react';
+import { Upload, FileText, AlertCircle, CheckCircle, Download, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -26,6 +26,19 @@ export function ProjectContentImport({ open, onOpenChange, onImport }: ProjectCo
   const [parsedContent, setParsedContent] = useState<ParsedProjectContent>({ phases: [], errors: [] });
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+
+  const resetImportState = () => {
+    setCsvData('');
+    setFileInput(null);
+    setParsedContent({ phases: [], errors: [] });
+    setLoading(false);
+    setShowPreview(false);
+    // Reset file input
+    const fileInputElement = document.getElementById('file-upload') as HTMLInputElement;
+    if (fileInputElement) {
+      fileInputElement.value = '';
+    }
+  };
 
   const sampleCSV = `phase,operation,step,step_description,inputs,output_name,output_description,output_type,tool_name,tool_description,material_name,material_description
 Planning,Project Setup,Define Requirements,Gather all project requirements,Budget Amount*Project Type*Timeline Preference,Requirements Document,Complete project requirements,none,Pen,Writing instrument,Paper,Note-taking paper
@@ -83,36 +96,56 @@ IMPORTANT FORMAT NOTES:
     const headerLine = lines[0];
     const expectedColumns = parseCsvLine(headerLine).length;
     
+    console.log('Expected columns:', expectedColumns);
+    console.log('Headers:', parseCsvLine(headerLine));
+    
     const processedLines = lines.map((line, index) => {
       if (index === 0) return line; // Keep header as is
       
       const values = parseCsvLine(line);
+      console.log(`Line ${index + 1} original values (${values.length}):`, values);
       
       // If we have fewer values than expected columns, pad with empty strings
       while (values.length < expectedColumns) {
         values.push('');
       }
       
-      // If we have more values than expected, this might be malformed data
-      // Try to detect if the first field contains multiple comma-separated values
-      if (values.length > expectedColumns && values[0].includes(',')) {
-        // This suggests the first field is malformed - try to clean it
-        const firstField = values[0].split(',')[0].trim();
-        values[0] = firstField;
-        values.length = expectedColumns; // Truncate to expected length
+      // If the first value looks like it contains multiple fields (multiple commas)
+      // and we have fewer parsed values than expected, this suggests malformed CSV
+      if (values.length < expectedColumns && values[0] && values[0].includes(',')) {
+        // Try to split the first field and redistribute
+        const firstFieldParts = values[0].split(',');
+        
+        // Replace the first value with just the first part
+        values[0] = firstFieldParts[0].trim();
+        
+        // Try to fill in other empty values with remaining parts
+        for (let i = 1; i < Math.min(firstFieldParts.length, expectedColumns); i++) {
+          if (i < values.length && !values[i]) {
+            values[i] = firstFieldParts[i].trim();
+          }
+        }
+        
+        console.log(`Line ${index + 1} after redistribution:`, values.slice(0, expectedColumns));
       }
       
-      // Rebuild the CSV line
+      // Ensure we don't exceed expected columns
+      values.length = expectedColumns;
+      
+      // Rebuild the CSV line with proper quoting
       return values.map(value => {
-        // If value contains commas or quotes, wrap in quotes
-        if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-          return `"${value.replace(/"/g, '""')}"`;
+        const cleanValue = (value || '').toString().trim();
+        // If value contains commas, quotes, or newlines, wrap in quotes
+        if (cleanValue.includes(',') || cleanValue.includes('"') || cleanValue.includes('\n')) {
+          return `"${cleanValue.replace(/"/g, '""')}"`;
         }
-        return value;
+        return cleanValue;
       }).join(',');
     });
     
-    return processedLines.join('\n');
+    const result = processedLines.join('\n');
+    console.log('Preprocessed CSV sample:', result.split('\n').slice(0, 5).join('\n'));
+    return result;
   };
 
   const parseCSV = (csvText: string): ParsedProjectContent => {
@@ -380,7 +413,13 @@ IMPORTANT FORMAT NOTES:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Import Project Content</DialogTitle>
+          <DialogTitle className="flex items-center justify-between">
+            Import Project Content
+            <Button variant="outline" size="sm" onClick={resetImportState}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+          </DialogTitle>
         </DialogHeader>
         
         <Tabs defaultValue="upload" className="w-full">
