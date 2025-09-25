@@ -370,21 +370,23 @@ export function ToolsLibrary() {
       </div>
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Edit Tool</DialogTitle>
           </DialogHeader>
-          {editingTool && (
-            <LibraryItemForm
-              type="tools"
-              item={editingTool}
-              onSave={handleSave}
-              onCancel={() => {
-                setShowEditDialog(false);
-                setEditingTool(null);
-              }}
-            />
-          )}
+          <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+            {editingTool && (
+              <LibraryItemForm
+                type="tools"
+                item={editingTool}
+                onSave={handleSave}
+                onCancel={() => {
+                  setShowEditDialog(false);
+                  setEditingTool(null);
+                }}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
