@@ -17,8 +17,6 @@ import { Edit, Trash2, Plus, Check, X, ChevronRight, ChevronDown, Package, Wrenc
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ResponsiveDialog } from "@/components/ResponsiveDialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 
