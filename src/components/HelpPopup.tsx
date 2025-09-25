@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent } from './ui/card';
 import { 
   Video, 
   Calendar, 
@@ -29,7 +29,7 @@ export const HelpPopup: React.FC<HelpPopupProps> = ({ isOpen, onClose }) => {
     },
     {
       icon: Calendar,
-      title: "Flexible Scheduling",
+      title: "Flexible Scheduling", 
       description: "Book appointments that fit your schedule"
     },
     {
@@ -104,19 +104,19 @@ export const HelpPopup: React.FC<HelpPopupProps> = ({ isOpen, onClose }) => {
 
           {/* Benefits */}
           <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
                 <Star className="w-5 h-5 text-primary" />
                 What You'll Get
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                  <span className="text-sm">{benefit}</span>
-                </div>
-              ))}
+              </h3>
+              <div className="space-y-2">
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                    <span className="text-sm">{benefit}</span>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
 
@@ -133,21 +133,22 @@ export const HelpPopup: React.FC<HelpPopupProps> = ({ isOpen, onClose }) => {
                 </div>
               </div>
               
-              <Button 
-                asChild 
-                size="lg"
-                className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white shadow-lg hover:shadow-xl transition-all duration-200"
+              <a 
+                href="https://app.acuityscheduling.com/schedule.php?owner=36845722" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block w-full"
               >
-                <a 
-                  href="https://app.acuityscheduling.com/schedule.php?owner=36845722" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2"
+                <Button 
+                  size="lg"
+                  className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white shadow-lg hover:shadow-xl transition-all duration-200"
                 >
-                  Schedule Your Consultation
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-              </Button>
+                  <span className="flex items-center justify-center gap-2">
+                    Schedule Your Consultation
+                    <ArrowRight className="w-4 h-4" />
+                  </span>
+                </Button>
+              </a>
               
               <p className="text-xs text-muted-foreground mt-3">
                 No commitment required • Cancel anytime • Secure payment
