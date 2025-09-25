@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, X, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -817,7 +818,8 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <ScrollArea className="h-[400px]">
+            <div className="space-y-3 pr-4">
                 {variations.map(variation => (
                 <div key={variation.id} className="flex items-start justify-between p-3 border rounded-lg">
                   <div className="flex flex-1 space-x-3">
@@ -886,7 +888,8 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
                 No variations created yet. Click "Create Variation" to get started.
               </div>
             )}
-          </div>
+            </div>
+          </ScrollArea>
         </CardContent>
       </Card>
 
