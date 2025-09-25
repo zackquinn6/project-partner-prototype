@@ -282,10 +282,10 @@ export function ToolsLibrary() {
             {sortedTools.map((tool) => (
               <TableRow 
                 key={tool.id} 
-                className="cursor-pointer hover:bg-muted/50" 
+                className="cursor-pointer hover:bg-muted/50 h-16" 
                 onClick={() => setViewingVariations(tool)}
               >
-                <TableCell>
+                <TableCell className="py-2">
                   {tool.photo_url ? (
                     <img
                       src={tool.photo_url}
@@ -298,15 +298,17 @@ export function ToolsLibrary() {
                     </div>
                   )}
                 </TableCell>
-                <TableCell className="font-medium capitalize">{tool.item}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {tool.description || '-'}
+                <TableCell className="font-medium capitalize py-2">{tool.item}</TableCell>
+                <TableCell className="text-sm text-muted-foreground py-2 max-w-xs">
+                  <div className="truncate" title={tool.description || '-'}>
+                    {tool.description || '-'}
+                  </div>
                 </TableCell>
-                <TableCell className="text-sm">
+                <TableCell className="text-sm py-2 max-w-xs">
                   {tool.variations && tool.variations.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1 max-h-8 overflow-hidden">
                       {tool.variations.slice(0, 2).map((variation) => (
-                        <Badge key={variation.id} variant="secondary" className="text-xs">
+                        <Badge key={variation.id} variant="secondary" className="text-xs whitespace-nowrap">
                           {variation.name}
                         </Badge>
                       ))}
