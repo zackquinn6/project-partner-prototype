@@ -36,8 +36,7 @@ export const ExpertHelpWindow: React.FC<ExpertHelpWindowProps> = ({ isOpen, onCl
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <div className="space-y-2">
-              <div className="text-2xl font-bold text-primary">$49</div>
-              <div className="text-sm text-muted-foreground">per 30-60 min session</div>
+              <div className="text-sm text-muted-foreground">40min planning and 20min mid-project calls to enable success</div>
             </div>
             
             <a 
@@ -58,7 +57,7 @@ export const ExpertHelpWindow: React.FC<ExpertHelpWindowProps> = ({ isOpen, onCl
             </a>
             
             <p className="text-xs text-muted-foreground">
-              Secure scheduling • Expert guidance • Satisfaction guaranteed
+              Expert guidance • Satisfaction guaranteed
             </p>
           </CardContent>
         </Card>
