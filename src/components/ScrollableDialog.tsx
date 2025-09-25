@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useEffect } from "react"
-import { Dialog, DialogPortal, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogPortal, DialogOverlay, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -25,87 +25,91 @@ export function ScrollableDialog({
 }: ScrollableDialogProps) {
   const { isMobile } = useResponsive();
 
-  // Custom scroll handling for modal dialogs
+  // Enable scrolling within modal by preventing pointer events on overlay for wheel events
   useEffect(() => {
     if (open) {
-      // Prevent background scroll while keeping dialog scrollable
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
+      const handleWheel = (e: WheelEvent) => {
+        const target = e.target as Element;
+        const dialogContent = document.querySelector('[data-dialog-content]');
+        
+        // If the wheel event is within dialog content, allow it
+        if (dialogContent && dialogContent.contains(target)) {
+          e.stopPropagation();
+        }
+      };
+
+      document.addEventListener('wheel', handleWheel, { capture: true });
       
       return () => {
-        document.body.style.overflow = originalOverflow;
+        document.removeEventListener('wheel', handleWheel, { capture: true });
       };
     }
   }, [open]);
 
-  // Use non-modal behavior for scrolling with custom blur overlay
+  // Use modal behavior for proper background blur
   return (
-    <>
-      {/* Custom blur overlay when dialog is open */}
-      {open && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-40"
-          onClick={() => onOpenChange(false)}
-        />
-      )}
-      
-      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-        <DialogPortal>
-          <div
-            className={cn(
-              "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%]",
-              "w-[90vw] max-w-[90vw] h-[90vh] max-h-[90vh]",
-              "bg-background border rounded-lg shadow-lg",
-              "flex flex-col",
-              className
-            )}
-          >
-            {/* Header with title and close button */}
-            {(title || description) && (
-              <div className="px-4 md:px-6 py-4 border-b flex items-center justify-between flex-shrink-0">
-                <div className="flex-1 min-w-0">
-                  {title && (
-                    <DialogTitle className="text-lg md:text-xl font-bold truncate">
-                      {title}
-                    </DialogTitle>
-                  )}
-                  {description && (
-                    <DialogDescription className="text-sm md:text-base mt-1">
-                      {description}
-                    </DialogDescription>
-                  )}
-                </div>
-                
-                {/* Close button */}
-                {isMobile ? (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => onOpenChange(false)}
-                    className="ml-4 flex-shrink-0"
-                  >
-                    Close
-                  </Button>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onOpenChange(false)}
-                    className="h-8 w-8 p-0 ml-4 flex-shrink-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
+      <DialogPortal>
+        <DialogOverlay className="bg-black/60 backdrop-blur-md fixed inset-0 z-50" />
+        <div
+          data-dialog-content
+          className={cn(
+            "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%]",
+            "w-[90vw] max-w-[90vw] h-[90vh] max-h-[90vh]",
+            "bg-background border rounded-lg shadow-lg",
+            "flex flex-col",
+            className
+          )}
+          style={{ pointerEvents: 'auto' }}
+        >
+          {/* Header with title and close button */}
+          {(title || description) && (
+            <div className="px-4 md:px-6 py-4 border-b flex items-center justify-between flex-shrink-0">
+              <div className="flex-1 min-w-0">
+                {title && (
+                  <DialogTitle className="text-lg md:text-xl font-bold truncate">
+                    {title}
+                  </DialogTitle>
+                )}
+                {description && (
+                  <DialogDescription className="text-sm md:text-base mt-1">
+                    {description}
+                  </DialogDescription>
                 )}
               </div>
-            )}
-            
-            {/* Scrollable content area */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6 overscroll-contain">
-              {children}
+              
+              {/* Close button */}
+              {isMobile ? (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => onOpenChange(false)}
+                  className="ml-4 flex-shrink-0"
+                >
+                  Close
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onOpenChange(false)}
+                  className="h-8 w-8 p-0 ml-4 flex-shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
             </div>
+          )}
+          
+          {/* Scrollable content area */}
+          <div 
+            className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6"
+            style={{ overscrollBehavior: 'contain' }}
+          >
+            {children}
           </div>
-        </DialogPortal>
-      </Dialog>
-    </>
+        </div>
+      </DialogPortal>
+    </Dialog>
   );
 }
