@@ -372,7 +372,9 @@ export function UnifiedProjectManagement() {
                     <SelectValue placeholder="Choose a project to manage..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {projects.map((project) => (
+                    {projects
+                      .filter(project => project.id !== '00000000-0000-0000-0000-000000000000') // Hide manual log template
+                      .map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         <span>{project.name}</span>
                       </SelectItem>
