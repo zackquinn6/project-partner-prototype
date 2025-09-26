@@ -1233,7 +1233,7 @@ export default function UserView({
               {currentStep && (
                 (currentStep.step?.toLowerCase().includes('project') && (currentStep.step?.toLowerCase().includes('plan') || currentStep.step?.toLowerCase().includes('scope'))) ||
                 (currentStep.step?.toLowerCase().includes('finalize') && currentStep.step?.toLowerCase().includes('plan')) ||
-                (currentStep.step?.toLowerCase().includes('scheduling'))
+                (currentStep.step?.toLowerCase() === 'project scheduling')
               ) && (
                 <div className="mt-6 pt-6 border-t border-border">
                   <div className="flex gap-3 justify-center">
