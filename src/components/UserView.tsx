@@ -120,9 +120,18 @@ export default function UserView({
 
   // Add event listeners for Re-plan window actions
   useEffect(() => {
-    const handleOpenProjectScheduler = () => setProjectSchedulerOpen(true);
-    const handleOpenOrderingWindow = () => setOrderingWindowOpen(true);
-    const handleOpenProjectCustomizer = () => setProjectCustomizerOpen(true);
+    const handleOpenProjectScheduler = () => {
+      console.log('🎯 UserView: Opening Project Scheduler');
+      setProjectSchedulerOpen(true);
+    };
+    const handleOpenOrderingWindow = () => {
+      console.log('🎯 UserView: Opening Ordering Window');
+      setOrderingWindowOpen(true);
+    };
+    const handleOpenProjectCustomizer = () => {
+      console.log('🎯 UserView: Opening Project Customizer');
+      setProjectCustomizerOpen(true);
+    };
 
     window.addEventListener('openProjectScheduler', handleOpenProjectScheduler);
     window.addEventListener('openOrderingWindow', handleOpenOrderingWindow);
