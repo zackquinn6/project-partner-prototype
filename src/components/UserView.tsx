@@ -32,7 +32,7 @@ import { ToolsMaterialsSection } from './ToolsMaterialsSection';
 import ProfileManager from './ProfileManager';
 import { DecisionRollupWindow } from './DecisionRollupWindow';
 import { KeyCharacteristicsWindow } from './KeyCharacteristicsWindow';
-import { ProjectCustomizer } from './ProjectCustomizer';
+import { ProjectCustomizer } from './ProjectCustomizer/ProjectCustomizer';
 import { ProjectScheduler } from './ProjectScheduler';
 import { isKickoffPhaseComplete, addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 interface UserViewProps {
@@ -1699,11 +1699,9 @@ export default function UserView({
           open={projectCustomizerOpen}
           onOpenChange={setProjectCustomizerOpen}
           currentProjectRun={currentProjectRun}
-          activeProject={activeProject as Project}
-          mode={decisionRollupMode}
-          onUpdateProjectRun={(updatedProjectRun) => {
-            updateProjectRun(updatedProjectRun);
-          }}
+          mode={currentStep?.step.includes('Project Work Scope') ? 'initial-plan' : 
+                currentStep?.step.includes('Finalize Project Plan') ? 'final-plan' : 
+                decisionRollupMode === 'unplanned-work' ? 'unplanned-work' : 'replan'}
         />
       )}
 
