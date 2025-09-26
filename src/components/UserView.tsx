@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Info, ShoppingCart, Plus, Award, Eye, EyeOff, HelpCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Info, ShoppingCart, Plus, Award, Eye, EyeOff, HelpCircle, Calendar as CalendarIcon } from "lucide-react";
 import { getStepIndicator } from './FlowTypeLegend';
 import { WorkflowSidebar } from './WorkflowSidebar';
 import {
@@ -33,6 +33,7 @@ import ProfileManager from './ProfileManager';
 import { DecisionRollupWindow } from './DecisionRollupWindow';
 import { KeyCharacteristicsWindow } from './KeyCharacteristicsWindow';
 import { ProjectCustomizer } from './ProjectCustomizer';
+import { ProjectScheduler } from './ProjectScheduler';
 import { isKickoffPhaseComplete, addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 interface UserViewProps {
   resetToListing?: boolean;
@@ -112,6 +113,7 @@ export default function UserView({
   const [decisionRollupMode, setDecisionRollupMode] = useState<'initial-plan' | 'final-plan' | 'unplanned-work'>('initial-plan');
   const [keyCharacteristicsOpen, setKeyCharacteristicsOpen] = useState(false);
   const [projectCustomizerOpen, setProjectCustomizerOpen] = useState(false);
+  const [projectSchedulerOpen, setProjectSchedulerOpen] = useState(false);
 
   // Check if kickoff phase is complete for project runs - MOVED UP to fix TypeScript error
   const isKickoffComplete = currentProjectRun ? isKickoffPhaseComplete(currentProjectRun.completedSteps) : true;
@@ -1202,6 +1204,18 @@ export default function UserView({
                       </Button>
                     )}
 
+                    {/* Show Project Scheduler button for Planning and Scope steps */}
+                    {(currentStep.step?.toLowerCase().includes('project') && (currentStep.step?.toLowerCase().includes('plan') || currentStep.step?.toLowerCase().includes('scope'))) && (
+                      <Button 
+                        onClick={() => setProjectSchedulerOpen(true)}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <CalendarIcon className="w-4 h-4" />
+                        Project Scheduler
+                      </Button>
+                    )}
+
                   </div>
                 </div>
               )}
@@ -1613,6 +1627,16 @@ export default function UserView({
           onUpdateProjectRun={(updatedProjectRun) => {
             updateProjectRun(updatedProjectRun);
           }}
+        />
+      )}
+
+      {/* Project Scheduler */}
+      {projectSchedulerOpen && currentProjectRun && (
+        <ProjectScheduler
+          open={projectSchedulerOpen}
+          onOpenChange={setProjectSchedulerOpen}
+          project={activeProject as Project}
+          projectRun={currentProjectRun}
         />
       )}
 
