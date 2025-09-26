@@ -28,7 +28,7 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-7xl h-[90vh] p-0">
+      <DialogContent className="max-w-7xl h-[90vh] p-0 z-[60]">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>Project Customizer</DialogTitle>
           <DialogDescription>
