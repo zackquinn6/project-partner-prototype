@@ -587,7 +587,7 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
         {/* Footer */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-3 p-4 border-t bg-muted/20">
           <div className="text-xs text-muted-foreground">
-            {selectedScenario} scenario • {teamMembers.length} member{teamMembers.length !== 1 ? 's' : ''}
+            {planningMode} mode • {teamMembers.length} member{teamMembers.length !== 1 ? 's' : ''} • Risk: {riskTolerance}
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)} className="h-8">
@@ -595,7 +595,7 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
             </Button>
             <Button 
               onClick={saveSchedule} 
-              disabled={scheduledSessions.length === 0}
+              disabled={!schedulingResult}
               className="h-8"
             >
               <Save className="w-3 h-3 mr-1" />
