@@ -5,6 +5,7 @@ export interface Material {
   description: string;
   category: 'Hardware' | 'Software' | 'Consumable' | 'Other';
   alternates: string[];
+  unit?: string;
 }
 
 export interface Tool {
