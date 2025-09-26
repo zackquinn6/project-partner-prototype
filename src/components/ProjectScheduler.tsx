@@ -7,10 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   Calendar as CalendarIcon, 
   Clock, 
@@ -28,9 +29,10 @@ import {
   Brain,
   FileText,
   Mail,
-  Printer
+  Printer,
+  Info
 } from 'lucide-react';
-import { format, addDays, parseISO, addHours } from 'date-fns';
+import { format, addDays, parseISO, addHours, isSameDay } from 'date-fns';
 import { Project } from '@/interfaces/Project';
 import { ProjectRun } from '@/interfaces/ProjectRun';
 import { useProject } from '@/contexts/ProjectContext';
@@ -137,6 +139,10 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
 
   // Calendar popup state
   const [calendarOpen, setCalendarOpen] = useState<string | null>(null);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [tempAvailability, setTempAvailability] = useState<{
+    [date: string]: { start: string; end: string; available: boolean }[];
+  }>({});
 
   // Convert project to scheduling tasks and calculate totals
   const { schedulingTasks, projectTotals } = useMemo(() => {
@@ -284,6 +290,79 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
         description: remediation.description
       });
     }
+  };
+
+  // Open calendar for team member
+  const openCalendar = (memberId: string) => {
+    const member = teamMembers.find(m => m.id === memberId);
+    if (member) {
+      // Load existing availability dates
+      const existingDates = Object.keys(member.availability).map(dateStr => new Date(dateStr));
+      setSelectedDates(existingDates);
+      setTempAvailability(member.availability);
+      setCalendarOpen(memberId);
+    }
+  };
+
+  // Handle date selection in calendar
+  const handleDateSelect = (dates: Date[] | undefined) => {
+    if (!dates) {
+      setSelectedDates([]);
+      setTempAvailability({});
+      return;
+    }
+    
+    setSelectedDates(dates);
+    
+    // Update temp availability for new dates
+    const newTempAvailability = { ...tempAvailability };
+    
+    // Remove dates that are no longer selected
+    Object.keys(tempAvailability).forEach(dateStr => {
+      const dateExists = dates.some(d => format(d, 'yyyy-MM-dd') === dateStr);
+      if (!dateExists) {
+        delete newTempAvailability[dateStr];
+      }
+    });
+    
+    // Add new dates with default availability
+    dates.forEach(date => {
+      const dateStr = format(date, 'yyyy-MM-dd');
+      if (!newTempAvailability[dateStr]) {
+        newTempAvailability[dateStr] = [{
+          start: '09:00',
+          end: '17:00',
+          available: true
+        }];
+      }
+    });
+    
+    setTempAvailability(newTempAvailability);
+  };
+
+  // Save calendar changes
+  const saveCalendarChanges = () => {
+    if (!calendarOpen) return;
+    
+    updateTeamMember(calendarOpen, {
+      availability: tempAvailability
+    });
+    
+    toast({
+      title: "Availability updated",
+      description: `Updated availability for ${selectedDates.length} dates`
+    });
+    
+    setCalendarOpen(null);
+    setSelectedDates([]);
+    setTempAvailability({});
+  };
+
+  // Cancel calendar changes
+  const cancelCalendarChanges = () => {
+    setCalendarOpen(null);
+    setSelectedDates([]);
+    setTempAvailability({});
   };
 
   // Save schedule to project run
@@ -661,11 +740,11 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => setCalendarOpen(member.id)}
+                            onClick={() => openCalendar(member.id)}
                             className="h-8"
                           >
                             <CalendarIcon className="w-3 h-3 mr-1" />
-                            Calendar
+                            Calendar ({Object.keys(member.availability).length})
                           </Button>
                           {teamMembers.length > 1 && (
                             <Button 
@@ -739,37 +818,107 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
         </ScrollArea>
       </DialogContent>
       
-      {/* Calendar Dialog for Team Member Availability */}
+      {/* Enhanced Calendar Dialog for Team Member Availability */}
       {calendarOpen && (
-        <Dialog open={!!calendarOpen} onOpenChange={() => setCalendarOpen(null)}>
-          <DialogContent className="max-w-[500px]">
-            <div className="space-y-4">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold">
-                  {teamMembers.find(m => m.id === calendarOpen)?.name} - Availability Calendar
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Select dates to set specific availability
-                </p>
+        <Dialog open={!!calendarOpen} onOpenChange={cancelCalendarChanges}>
+          <DialogContent className="max-w-[90vw] md:max-w-[600px] max-h-[90vh] p-0">
+            <DialogHeader className="p-6 pb-0">
+              <DialogTitle className="flex items-center gap-2">
+                <CalendarIcon className="w-5 h-5 text-primary" />
+                {teamMembers.find(m => m.id === calendarOpen)?.name} - Availability Calendar
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground mt-2">
+                Select dates to set custom availability. Selected dates will override default working hours.
+              </p>
+            </DialogHeader>
+            
+            <ScrollArea className="flex-1 px-6">
+              <div className="space-y-6 pb-6">
+                {/* Calendar Section */}
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row gap-4 items-start">
+                    <div className="flex-1">
+                      <div className="bg-background border rounded-lg p-4">
+                        <CalendarComponent
+                          mode="multiple"
+                          selected={selectedDates}
+                          onSelect={handleDateSelect}
+                          className="w-full pointer-events-auto"
+                          classNames={{
+                            day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                            day_today: "bg-accent text-accent-foreground",
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Selected Dates Info - Mobile Responsive */}
+                    <div className="w-full sm:w-80 space-y-3">
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-primary" />
+                          Selected Dates ({selectedDates.length})
+                        </h4>
+                        {selectedDates.length > 0 ? (
+                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                            {selectedDates.slice(0, 5).map(date => (
+                              <div key={date.toISOString()} className="text-xs bg-background p-2 rounded border">
+                                <div className="font-medium">{format(date, 'MMM dd, yyyy')}</div>
+                                <div className="text-muted-foreground">
+                                  {tempAvailability[format(date, 'yyyy-MM-dd')]?.[0] ? 
+                                    `${tempAvailability[format(date, 'yyyy-MM-dd')][0].start} - ${tempAvailability[format(date, 'yyyy-MM-dd')][0].end}` :
+                                    '09:00 - 17:00'
+                                  }
+                                </div>
+                              </div>
+                            ))}
+                            {selectedDates.length > 5 && (
+                              <div className="text-xs text-muted-foreground text-center">
+                                +{selectedDates.length - 5} more dates
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">No dates selected</p>
+                        )}
+                      </div>
+                      
+                      {/* Default Hours Info */}
+                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        <h4 className="font-medium text-sm text-blue-700 mb-1">Default Hours</h4>
+                        <p className="text-xs text-blue-600">
+                          {teamMembers.find(m => m.id === calendarOpen)?.workingHours.start} - {teamMembers.find(m => m.id === calendarOpen)?.workingHours.end}
+                        </p>
+                        <p className="text-xs text-blue-500 mt-1">
+                          Used for unselected dates
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Instructions */}
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription className="text-sm">
+                    <strong>How to use:</strong> Click dates to toggle custom availability. 
+                    Selected dates will use custom time slots, while unselected dates use default working hours.
+                  </AlertDescription>
+                </Alert>
               </div>
-              
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <CalendarComponent
-                  mode="multiple"
-                  className="rounded-md border bg-background pointer-events-auto"
-                />
-              </div>
-              
+            </ScrollArea>
+            
+            {/* Action Buttons */}
+            <div className="flex justify-between items-center p-6 pt-0 border-t">
               <div className="text-xs text-muted-foreground">
-                <p><strong>Note:</strong> This calendar allows day-by-day updates to override default working hours.</p>
-                <p>Selected dates will use custom availability settings.</p>
+                {selectedDates.length} custom availability dates
               </div>
-              
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setCalendarOpen(null)}>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={cancelCalendarChanges} size="sm">
                   Cancel
                 </Button>
-                <Button onClick={() => setCalendarOpen(null)}>
+                <Button onClick={saveCalendarChanges} size="sm">
+                  <Save className="w-4 h-4 mr-2" />
                   Save Changes
                 </Button>
               </div>
