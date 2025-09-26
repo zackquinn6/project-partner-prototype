@@ -66,12 +66,26 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
   };
 
   const handleOpenProjectRun = (projectRun: ProjectRun) => {
-    console.log("🎯 ProjectListing: Opening project run:", projectRun.id, "Current project run:", currentProjectRun?.id);
-    setCurrentProjectRun(projectRun);
-    // Clear any navigation state to ensure clean transition
-    window.history.replaceState({}, document.title, window.location.pathname);
-    // The UserView will automatically switch to workflow mode via useEffect when currentProjectRun changes
-    console.log("🎯 ProjectListing: Project run set, triggering workflow switch");
+    console.log("🎯🎯🎯 HANDLE OPEN PROJECT RUN - START");
+    console.log("🎯 Opening project run:", projectRun.id);
+    console.log("🎯 Current project run before:", currentProjectRun?.id);
+    console.log("🎯 setCurrentProjectRun function:", typeof setCurrentProjectRun);
+    
+    try {
+      setCurrentProjectRun(projectRun);
+      console.log("🎯 setCurrentProjectRun called successfully");
+      
+      // Clear any navigation state to ensure clean transition
+      window.history.replaceState({}, document.title, window.location.pathname);
+      console.log("🎯 History state cleared");
+      
+      // The UserView will automatically switch to workflow mode via useEffect when currentProjectRun changes
+      console.log("🎯 Waiting for useEffect to trigger workflow switch...");
+    } catch (error) {
+      console.error("🎯 Error in handleOpenProjectRun:", error);
+    }
+    
+    console.log("🎯🎯🎯 HANDLE OPEN PROJECT RUN - END");
   };
 
   const handleDeleteProjectRun = (projectRunId: string) => {
@@ -200,10 +214,18 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                         {projectRun.status !== 'complete' && !projectRun.isManualEntry && (
                           <Button 
                             size="sm" 
-                            onClick={() => {
-                              console.log("🔥 Continue button clicked for project run:", projectRun.id);
-                              console.log("🔥 Current project run before click:", currentProjectRun?.id);
-                              handleOpenProjectRun(projectRun);
+                            onClick={(e) => {
+                              console.log("🔥🔥🔥 CONTINUE BUTTON CLICKED - START");
+                              console.log("🔥 Event:", e);
+                              console.log("🔥 Project run ID:", projectRun.id);
+                              console.log("🔥 Current project run before:", currentProjectRun?.id);
+                              try {
+                                handleOpenProjectRun(projectRun);
+                                console.log("🔥 handleOpenProjectRun completed");
+                              } catch (error) {
+                                console.error("🔥 Error in handleOpenProjectRun:", error);
+                              }
+                              console.log("🔥🔥🔥 CONTINUE BUTTON CLICKED - END");
                             }}
                             className="flex-1"
                           >
