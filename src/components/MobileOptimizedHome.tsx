@@ -71,7 +71,7 @@ export function MobileOptimizedHome() {
       title: 'Expert Help',
       subtitle: 'Get assistance',
       color: 'bg-emerald-600',
-      action: () => window.dispatchEvent(new CustomEvent('show-help-popup'))
+      action: () => window.dispatchEvent(new CustomEvent('show-expert-help'))
     }
   ];
 
