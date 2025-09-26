@@ -120,7 +120,12 @@ export function MobileProjectListing({ onProjectSelect, onNewProject, onClose }:
               <Button
                 variant="default"
                 size="sm"
-                onClick={trackClick('Continue Current Project', () => onProjectSelect(currentProjectRun))}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('🎯 Continue Current Project clicked');
+                  onProjectSelect(currentProjectRun);
+                }}
                 className="ml-3"
               >
                 Continue

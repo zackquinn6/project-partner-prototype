@@ -286,7 +286,24 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function ActionButton({ status, progress, onSelect }: { status: string; progress: number; onSelect: () => void }) {
-  const { trackClick } = useButtonTracker();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const handleClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isLoading) return;
+    
+    console.log(`🎯 ActionButton clicked: ${status}`);
+    setIsLoading(true);
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 50)); // Small delay for visual feedback
+      onSelect();
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   if (status === 'completed') {
     return (
@@ -294,9 +311,10 @@ function ActionButton({ status, progress, onSelect }: { status: string; progress
         variant="outline" 
         size="sm" 
         className="text-xs px-3 py-1 h-7"
-        onClick={trackClick('View Project', onSelect)}
+        onClick={handleClick}
+        disabled={isLoading}
       >
-        View
+        {isLoading ? '...' : 'View'}
       </Button>
     );
   }
@@ -307,9 +325,10 @@ function ActionButton({ status, progress, onSelect }: { status: string; progress
         variant="default" 
         size="sm" 
         className="text-xs px-3 py-1 h-7"
-        onClick={trackClick('Continue Project', onSelect)}
+        onClick={handleClick}
+        disabled={isLoading}
       >
-        Continue
+        {isLoading ? '...' : 'Continue'}
       </Button>
     );
   }
@@ -319,9 +338,10 @@ function ActionButton({ status, progress, onSelect }: { status: string; progress
       variant="outline" 
       size="sm" 
       className="text-xs px-3 py-1 h-7"
-      onClick={trackClick('Start Project', onSelect)}
+      onClick={handleClick}
+      disabled={isLoading}
     >
-      Start
+      {isLoading ? '...' : 'Start'}
     </Button>
   );
 }

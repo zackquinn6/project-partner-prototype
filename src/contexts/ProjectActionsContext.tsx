@@ -42,17 +42,13 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
   const { isAdmin } = useUserRole();
   const { refetchProjects, refetchProjectRuns, updateProjectsCache, updateProjectRunsCache, projects, projectRuns } = useProjectData();
   
-  const [currentProject, setCurrentProject] = useOptimizedState<Project | null>(null);
-  const [currentProjectRun, setCurrentProjectRunState] = useOptimizedState<ProjectRun | null>(null, { debounceMs: 100 });
+  const [currentProject, setCurrentProject] = useState<Project | null>(null);
+  const [currentProjectRun, setCurrentProjectRun] = useState<ProjectRun | null>(null);
 
   // Refs to track update state and implement debouncing
   const updateInProgressRef = useRef(false);
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastUpdateRef = useRef<string>('');
-
-  const setCurrentProjectRun = useCallback((projectRun: ProjectRun | null) => {
-    setCurrentProjectRunState(projectRun);
-  }, [setCurrentProjectRunState]);
 
   const addProject = useCallback(async (projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user || !isAdmin) {
