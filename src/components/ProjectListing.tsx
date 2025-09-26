@@ -66,30 +66,16 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
   };
 
   const handleOpenProjectRun = (projectRun: ProjectRun) => {
-    console.log("🎯🎯🎯 HANDLE OPEN PROJECT RUN - START");
-    console.log("🎯 Opening project run:", projectRun.id);
-    console.log("🎯 Current project run before:", currentProjectRun?.id);
-    console.log("🎯 setCurrentProjectRun function:", typeof setCurrentProjectRun);
+    console.log("🎯 Opening project run:", projectRun.name);
     
-    try {
-      setCurrentProjectRun(projectRun);
-      console.log("🎯 setCurrentProjectRun called successfully");
-      
-      // Clear any navigation state to ensure clean transition
-      window.history.replaceState({}, document.title, window.location.pathname);
-      console.log("🎯 History state cleared");
-      
-      // Use setTimeout to ensure state update happens first
-      setTimeout(() => {
-        console.log("🎯 Triggering workflow switch after state update");
-        onProjectSelect?.('workflow' as any);
-      }, 0);
-      
-    } catch (error) {
-      console.error("🎯 Error in handleOpenProjectRun:", error);
-    }
+    // Set the project run immediately - no async delays
+    setCurrentProjectRun(projectRun);
     
-    console.log("🎯🎯🎯 HANDLE OPEN PROJECT RUN - END");
+    // Clear any conflicting navigation state
+    window.history.replaceState({}, document.title, window.location.pathname);
+    
+    // Signal parent that we want to switch to workflow
+    onProjectSelect?.('workflow' as any);
   };
 
   const handleDeleteProjectRun = (projectRunId: string) => {

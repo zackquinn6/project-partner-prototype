@@ -298,74 +298,58 @@ export default function UserView({
     }
   }, [projectRunId, projectRuns, setCurrentProjectRun]);
 
-  // Reset to listing view when projects view is requested - PRIORITY OVERRIDE
+  // CONSOLIDATED VIEW MODE LOGIC - Single source of truth for view mode decisions
   useEffect(() => {
-    console.log('🔄 UserView: resetToListing useEffect triggered:', { 
+    console.log('🔄 UserView: Consolidated view mode logic triggered:', { 
       resetToListing, 
-      currentProjectRun: !!currentProjectRun,
+      forceListingMode,
       showProfile,
+      currentProjectRun: !!currentProjectRun,
+      projectRunId,
       viewMode
     });
-    
-    // Don't reset to listing if we're transitioning to workflow mode with a current project run
-    if (resetToListing && !showProfile && !(currentProjectRun && viewMode === 'workflow')) {
-      console.log("🔄 UserView: Resetting to listing mode due to resetToListing prop");
-      setViewMode('listing');
-      setShowProfileManager(false); // Ensure profile manager is closed when switching to listing
-      // DON'T clear project run - this was causing the Continue button issue
-    } else if (showProfile) {
-      console.log("🔄 UserView: Profile mode requested - keeping current view");
-      // Don't switch to workflow if profile should be shown
-      setViewMode('listing');
-    } else if (resetToListing && currentProjectRun && viewMode === 'workflow') {
-      console.log("🔄 UserView: Ignoring resetToListing because we're in workflow mode with project run");
-    }
-  }, [resetToListing, showProfile, currentProjectRun, viewMode]);
 
-  // Auto-switch to workflow view when a project run is selected from Continue button
-  // Simplified useEffect for currentProjectRun changes
-  useEffect(() => {
-    console.log("🔄 UserView: Project run changed:", currentProjectRun?.id);
-    
-    if (currentProjectRun && !forceListingMode && !showProfile) {
-      console.log("🔄 UserView: Switching to workflow mode");
+    // Priority 1: Profile mode - always show listing with profile
+    if (showProfile) {
+      console.log("🔄 UserView: Profile mode requested - staying in listing");
+      setViewMode('listing');
+      return;
+    }
+
+    // Priority 2: Force listing mode - override everything except profile
+    if (forceListingMode) {
+      console.log("🔄 UserView: Force listing mode active");
+      setViewMode('listing');
+      return;
+    }
+
+    // Priority 3: Reset to listing - but NOT if we have an active project run (Continue button case)
+    if (resetToListing && !currentProjectRun) {
+      console.log("🔄 UserView: Reset to listing (no active project run)");
+      setViewMode('listing');
+      setShowProfileManager(false);
+      return;
+    }
+
+    // Priority 4: Project run selected - switch to workflow (Continue button case)
+    if (currentProjectRun && !resetToListing) {
+      console.log("🔄 UserView: Project run active, switching to workflow mode");
       setViewMode('workflow');
       onProjectSelected?.();
-    }
-  }, [currentProjectRun, forceListingMode, showProfile, onProjectSelected]);
-
-  // Handle resetToListing with proper conditions - but allow override for continue button
-  useEffect(() => {
-    console.log("🔄 UserView: resetToListing effect:", { resetToListing, viewMode, hasProjectRun: !!currentProjectRun });
-    
-    // Don't reset if we're already in workflow mode with a project run - this means continue was pressed
-    if (resetToListing && viewMode === 'workflow' && currentProjectRun) {
-      console.log("🔄 UserView: Ignoring resetToListing - staying in workflow with active project");
       return;
     }
-    
-    // Only reset to listing if we don't have an active project run or if we're not in workflow mode
-    if (resetToListing && (!currentProjectRun || viewMode !== 'workflow')) {
-      console.log("🔄 UserView: Reset to listing requested - switching to listing");
-      setViewMode('listing');
-    }
-  }, [resetToListing, currentProjectRun, viewMode]);
 
-  // Auto-switch to workflow view when a project or project run is selected (but respect resetToListing and forceListingMode)
-  useEffect(() => {
-    // CRITICAL: DON'T auto-switch if we're being told to reset to listing OR if we're in force listing mode
-    // OR if user is already in listing mode (respect user choice) OR if profile should be shown
-    if (resetToListing || forceListingMode || viewMode === 'listing' || showProfile) {
-      console.log("🚫 UserView: Blocking auto-switch - resetToListing:", resetToListing, "forceListingMode:", forceListingMode, "viewMode:", viewMode, "showProfile:", showProfile);
-      return;
-    }
-    
-    // Only auto-switch if explicitly navigating to a project via projectRunId or direct selection
-    if (projectRunId && (currentProject || currentProjectRun)) {
-      console.log("🔄 UserView: Auto-switching to workflow mode for projectRunId:", projectRunId);
+    // Priority 5: Project run ID provided via URL/navigation
+    if (projectRunId && currentProjectRun) {
+      console.log("🔄 UserView: ProjectRunId navigation, switching to workflow");
       setViewMode('workflow');
+      return;
     }
-  }, [currentProject, currentProjectRun, resetToListing, forceListingMode, projectRunId, viewMode, showProfile]);
+
+    // Default: Keep current view if no specific conditions are met
+    console.log("🔄 UserView: No conditions met, keeping current view:", viewMode);
+    
+  }, [resetToListing, forceListingMode, showProfile, currentProjectRun, projectRunId, viewMode, onProjectSelected]);
   
   const currentStep = allSteps[currentStepIndex];
   const progress = allSteps.length > 0 ? completedSteps.size / allSteps.length * 100 : 0;

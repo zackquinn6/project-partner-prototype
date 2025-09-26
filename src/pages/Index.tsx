@@ -349,9 +349,9 @@ const Index = () => {
   }
 
   const handleProjectSelected = () => {
-    console.log('🎯 Index: Project selected from dropdown - clearing force listing mode');
+    console.log('🎯 Index: Project selected from dropdown - clearing reset flags');
     setForceListingMode(false);
-    setResetUserView(false); // Also clear reset flag when project is selected
+    setResetUserView(false);
   };
 
   // Mobile navigation handlers
@@ -429,7 +429,7 @@ const Index = () => {
           return (
             <div className="h-screen flex flex-col">
               <UserView 
-                resetToListing={resetUserView} 
+                resetToListing={resetUserView && !currentProjectRun} 
                 forceListingMode={forceListingMode}
                 onProjectSelected={() => {
                   setForceListingMode(false);
@@ -473,7 +473,7 @@ const Index = () => {
           currentView: currentView
         });
         return <UserView 
-          resetToListing={resetUserView} 
+          resetToListing={resetUserView && !currentProjectRun} 
           forceListingMode={forceListingMode}
           onProjectSelected={() => {
             console.log('🎯 Index: onProjectSelected called - clearing all reset flags');
