@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Calendar as CalendarIcon, 
   Clock, 
@@ -20,7 +21,11 @@ import {
   Trash2,
   Save,
   X,
-  Target
+  Target,
+  AlertTriangle,
+  TrendingUp,
+  Brain,
+  Calendar
 } from 'lucide-react';
 import { format, addDays, parseISO, addHours } from 'date-fns';
 import { Project } from '@/interfaces/Project';
@@ -28,6 +33,16 @@ import { ProjectRun } from '@/interfaces/ProjectRun';
 import { useProject } from '@/contexts/ProjectContext';
 import { useToast } from '@/hooks/use-toast';
 import { useResponsive } from '@/hooks/useResponsive';
+import { schedulingEngine } from '@/utils/schedulingEngine';
+import { 
+  SchedulingInputs, 
+  SchedulingResult, 
+  Task, 
+  Worker, 
+  PlanningMode, 
+  RiskTolerance,
+  RemediationSuggestion 
+} from '@/interfaces/Scheduling';
 
 interface ProjectSchedulerProps {
   open: boolean;
@@ -36,33 +51,10 @@ interface ProjectSchedulerProps {
   projectRun: ProjectRun;
 }
 
-interface ScenarioEstimate {
-  name: string;
-  multiplier: number;
-  description: string;
-  color: string;
-}
-
-interface TeamMember {
-  id: string;
-  name: string;
-  skillLevel: 'novice' | 'intermediate' | 'expert';
+interface TeamMember extends Worker {
   hoursAvailable: number;
   startDate?: Date;
   endDate?: Date;
-}
-
-interface ScheduledSession {
-  id: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  phaseId?: string;
-  operationId?: string;
-  teamMemberIds: string[];
-  sessionType: 'work' | 'planning' | 'review';
-  estimatedHours: number;
-  notes?: string;
 }
 
 interface WorkingHours {
@@ -73,10 +65,10 @@ interface WorkingHours {
   afterHoursOnly: boolean;
 }
 
-const scenarios: ScenarioEstimate[] = [
-  { name: 'Best Case', multiplier: 0.8, description: 'Everything goes smoothly', color: 'text-green-600' },
-  { name: 'Typical', multiplier: 1.0, description: 'Standard timeline with normal delays', color: 'text-blue-600' },
-  { name: 'Worst Case', multiplier: 1.5, description: 'Includes potential setbacks', color: 'text-red-600' }
+const planningModes: { mode: PlanningMode; name: string; description: string }[] = [
+  { mode: 'quick', name: 'Quick', description: 'Phases and milestones only' },
+  { mode: 'balanced', name: 'Balanced', description: 'Task-level with basic constraints' },
+  { mode: 'detailed', name: 'Detailed', description: 'Time-of-day slots with full optimization' }
 ];
 
 export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
@@ -89,11 +81,25 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
   const { toast } = useToast();
   const { isMobile } = useResponsive();
   
-  const [selectedScenario, setSelectedScenario] = useState<string>('Typical');
+  // Enhanced scheduling state
+  const [planningMode, setPlanningMode] = useState<PlanningMode>('balanced');
+  const [riskTolerance, setRiskTolerance] = useState<RiskTolerance>('moderate');
+  const [schedulingResult, setSchedulingResult] = useState<SchedulingResult | null>(null);
+  const [isComputing, setIsComputing] = useState(false);
+  const [targetDate, setTargetDate] = useState<string>(
+    format(addDays(new Date(), 30), 'yyyy-MM-dd')
+  );
   
   // Team management
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
-    { id: '1', name: 'You', skillLevel: 'intermediate', hoursAvailable: 4 }
+    { 
+      id: '1', 
+      name: 'You', 
+      type: 'owner',
+      skillLevel: 'intermediate', 
+      hoursAvailable: 4,
+      availability: []
+    }
   ]);
   
   // Working hours
@@ -104,65 +110,42 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
     weekendsOnly: false,
     afterHoursOnly: false
   });
-  
-  // Quick presets
-  const [quickPreset, setQuickPreset] = useState<string>('');
-  
-  // Sessions
-  const [scheduledSessions, setScheduledSessions] = useState<ScheduledSession[]>([]);
 
-  // Calculate time estimates with scenarios
-  const timeEstimates = useMemo(() => {
+  // Convert project to scheduling tasks
+  const schedulingTasks = useMemo(() => {
+    const tasks: Task[] = [];
     const projectSize = parseFloat(projectRun?.projectSize || '1') || 1;
     const scalingFactor = projectRun?.scalingFactor || 1;
     const skillMultiplier = projectRun?.skillLevelMultiplier || 1;
 
-    return scenarios.map(scenario => {
-      let totalWorkTime = 0;
-      let totalLagTime = 0;
-      const phases: any[] = [];
+    project.phases.forEach(phase => {
+      phase.operations.forEach(operation => {
+        operation.steps.forEach((step, index) => {
+          const baseWorkTime = step.timeEstimation?.variableTime?.medium || 1;
+          const adjustedWorkTime = baseWorkTime * projectSize * scalingFactor * skillMultiplier;
+          
+          const dependencies: string[] = [];
+          if (index > 0) {
+            // Depend on previous step in same operation
+            dependencies.push(`${operation.id}-step-${index - 1}`);
+          }
 
-      project.phases.forEach(phase => {
-        let phaseWorkTime = 0;
-        let phaseLagTime = 0;
-        let stepCount = 0;
-
-        phase.operations.forEach(operation => {
-          operation.steps.forEach(step => {
-            stepCount++;
-            const baseWorkTime = step.timeEstimation?.variableTime?.medium || 1;
-            const baseLagTime = step.timeEstimation?.lagTime?.medium || 0;
-
-            const adjustedWorkTime = baseWorkTime * projectSize * scalingFactor * skillMultiplier * scenario.multiplier;
-            const adjustedLagTime = baseLagTime * projectSize * scalingFactor * scenario.multiplier;
-
-            phaseWorkTime += adjustedWorkTime;
-            phaseLagTime += adjustedLagTime;
+          tasks.push({
+            id: `${operation.id}-step-${index}`,
+            title: step.step,
+            estimatedHours: adjustedWorkTime,
+            minContiguousHours: Math.min(adjustedWorkTime, 2), // Assume 2-hour minimum blocks
+            dependencies,
+            tags: [], // Default empty tags since WorkflowStep doesn't have tags
+            confidence: 0.7, // Default confidence since WorkflowStep doesn't have confidence
+            phaseId: phase.id,
+            operationId: operation.id
           });
         });
-
-        phases.push({
-          phaseId: phase.id,
-          phaseName: phase.name,
-          workTime: phaseWorkTime,
-          lagTime: phaseLagTime,
-          stepCount
-        });
-
-        totalWorkTime += phaseWorkTime;
-        totalLagTime += phaseLagTime;
       });
-
-      return {
-        scenario: scenario.name,
-        totalWorkTime,
-        totalLagTime,
-        totalTime: totalWorkTime + totalLagTime,
-        phases,
-        color: scenario.color,
-        description: scenario.description
-      };
     });
+
+    return tasks;
   }, [project, projectRun]);
 
   // Handle weekends only toggle
@@ -186,112 +169,105 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
     }));
   };
 
-  // Calculate target completion date
-  const targetCompletionDate = useMemo(() => {
-    const estimate = timeEstimates.find(e => e.scenario === selectedScenario);
-    if (!estimate) return null;
+  // Generate schedule with advanced algorithm
+  const computeAdvancedSchedule = async () => {
+    setIsComputing(true);
     
-    const workDays = Math.ceil(estimate.totalWorkTime / 8); // Assume 8 hours per work day
-    const startDate = projectRun.startDate ? new Date(projectRun.startDate) : new Date();
-    
-    // Add business days
-    let completionDate = new Date(startDate);
-    let daysAdded = 0;
-    
-    while (daysAdded < workDays) {
-      completionDate = addDays(completionDate, 1);
-      // Skip weekends unless working weekends only
-      if (workingHours.weekendsOnly) {
-        if (completionDate.getDay() === 0 || completionDate.getDay() === 6) {
-          daysAdded++;
-        }
-      } else {
-        if (completionDate.getDay() !== 0 && completionDate.getDay() !== 6) {
-          daysAdded++;
-        }
-      }
+    try {
+      // Prepare scheduling inputs
+      const schedulingInputs: SchedulingInputs = {
+        targetCompletionDate: new Date(targetDate),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        tasks: schedulingTasks,
+        workers: teamMembers.map(tm => ({
+          ...tm,
+          availability: [{
+            start: new Date(),
+            end: addDays(new Date(), 90),
+            workerId: tm.id,
+            isAvailable: true
+          }]
+        })),
+        siteConstraints: {
+          allowedWorkHours: {
+            weekdays: { start: workingHours.start, end: workingHours.end },
+            weekends: { start: workingHours.start, end: workingHours.end }
+          },
+          weekendsOnly: workingHours.weekendsOnly,
+          allowNightWork: workingHours.afterHoursOnly,
+          noiseCurfew: '22:00'
+        },
+        blackoutDates: [],
+        riskTolerance,
+        preferHelpers: teamMembers.some(tm => tm.type === 'helper'),
+        mode: planningMode
+      };
+
+      // Compute schedule
+      const result = schedulingEngine.computeSchedule(schedulingInputs);
+      setSchedulingResult(result);
+      
+      toast({
+        title: "Schedule computed",
+        description: `Generated ${planningMode} schedule with ${result.scheduledTasks.length} tasks.`
+      });
+    } catch (error) {
+      toast({
+        title: "Scheduling failed",
+        description: "Failed to compute schedule. Please check your inputs.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsComputing(false);
     }
-    
-    return completionDate;
-  }, [timeEstimates, selectedScenario, projectRun.startDate, workingHours.weekendsOnly]);
+  };
 
   // Add team member
   const addTeamMember = () => {
     const newMember: TeamMember = {
       id: Date.now().toString(),
       name: 'New Team Member',
+      type: 'helper',
       skillLevel: 'intermediate',
-      hoursAvailable: 4
+      hoursAvailable: 4,
+      availability: [],
+      costPerHour: 25
     };
     setTeamMembers([...teamMembers, newMember]);
   };
 
-  // Generate automatic schedule
-  const generateSchedule = () => {
-    const estimate = timeEstimates.find(e => e.scenario === selectedScenario);
-    if (!estimate) return;
-
-    const sessions: ScheduledSession[] = [];
-    let currentDate = new Date();
-    
-    // Find next available working day
-    while (!workingHours.daysOfWeek.includes(currentDate.getDay())) {
-      currentDate = addDays(currentDate, 1);
+  // Apply remediation suggestion
+  const applyRemediation = async (remediation: RemediationSuggestion) => {
+    if (remediation.preview) {
+      setSchedulingResult(remediation.preview);
+      toast({
+        title: "Remediation applied",
+        description: remediation.description
+      });
     }
-
-    estimate.phases.forEach(phase => {
-      let remainingHours = phase.workTime;
-      
-      while (remainingHours > 0) {
-        const dailyCapacity = teamMembers.reduce((sum, member) => sum + member.hoursAvailable, 0);
-        const sessionHours = Math.min(remainingHours, dailyCapacity);
-        
-        sessions.push({
-          id: `session-${sessions.length}`,
-          date: format(currentDate, 'yyyy-MM-dd'),
-          startTime: workingHours.start,
-          endTime: format(addHours(parseISO(`2000-01-01T${workingHours.start}`), sessionHours), 'HH:mm'),
-          phaseId: phase.phaseId,
-          teamMemberIds: teamMembers.map(m => m.id),
-          sessionType: 'work',
-          estimatedHours: sessionHours,
-          notes: `${phase.phaseName} - ${Math.ceil(remainingHours)}h remaining`
-        });
-
-        remainingHours -= sessionHours;
-        
-        // Move to next working day
-        do {
-          currentDate = addDays(currentDate, 1);
-        } while (!workingHours.daysOfWeek.includes(currentDate.getDay()));
-      }
-    });
-
-    setScheduledSessions(sessions);
-    toast({
-      title: "Schedule generated",
-      description: `Created ${sessions.length} work sessions for ${selectedScenario.toLowerCase()} scenario.`
-    });
   };
 
   // Save schedule to project run
   const saveSchedule = async () => {
+    if (!schedulingResult) return;
+    
     try {
       const updatedProjectRun = {
         ...projectRun,
         calendar_integration: {
-          scheduledDays: scheduledSessions.reduce((acc, session) => {
-            if (!acc[session.date]) {
-              acc[session.date] = {
-                date: session.date,
+          scheduledDays: schedulingResult.scheduledTasks.reduce((acc, task) => {
+            const dateKey = format(task.startTime, 'yyyy-MM-dd');
+            if (!acc[dateKey]) {
+              acc[dateKey] = {
+                date: dateKey,
                 timeSlots: []
               };
             }
-            acc[session.date].timeSlots.push({
-              startTime: session.startTime,
-              endTime: session.endTime,
-              phaseId: session.phaseId,
-              operationId: session.operationId
+            acc[dateKey].timeSlots.push({
+              startTime: format(task.startTime, 'HH:mm'),
+              endTime: format(task.endTime, 'HH:mm'),
+              phaseId: schedulingTasks.find(t => t.id === task.taskId)?.phaseId,
+              operationId: schedulingTasks.find(t => t.id === task.taskId)?.operationId
             });
             return acc;
           }, {} as Record<string, any>),
@@ -304,10 +280,11 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
       };
 
       await updateProjectRun(updatedProjectRun);
+      schedulingEngine.commitSchedule(schedulingResult);
       
       toast({
         title: "Schedule saved",
-        description: "Your project schedule has been saved successfully."
+        description: "Your optimized schedule has been saved successfully."
       });
       
       onOpenChange(false);
@@ -350,71 +327,73 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-6">
             {/* Target Completion Date */}
-            {targetCompletionDate && (
-              <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/20">
-                      <Target className="w-4 h-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Target Completion Date</p>
-                      <p className="text-lg font-semibold text-primary">
-                        {format(targetCompletionDate, 'EEEE, MMMM d, yyyy')}
-                      </p>
-                    </div>
+            <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/20">
+                    <Target className="w-4 h-4 text-primary" />
                   </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Target Completion Date</p>
+                    <Input
+                      type="date"
+                      value={targetDate}
+                      onChange={(e) => setTargetDate(e.target.value)}
+                      className="mt-1 h-8"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Planning Mode & Risk Tolerance */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-primary" />
+                    <CardTitle className="text-sm">Planning Mode</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <Select value={planningMode} onValueChange={(value) => setPlanningMode(value as PlanningMode)}>
+                    <SelectTrigger className="h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {planningModes.map((mode) => (
+                        <SelectItem key={mode.mode} value={mode.mode}>
+                          <div>
+                            <div className="font-medium">{mode.name}</div>
+                            <div className="text-xs text-muted-foreground">{mode.description}</div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </CardContent>
               </Card>
-            )}
 
-            {/* Time Estimates Section */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 mb-3">
-                <Clock className="w-4 h-4 text-primary" />
-                <h3 className="text-base font-semibold">Time Estimates & Scenarios</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {timeEstimates.map((estimate) => (
-                  <Card 
-                    key={estimate.scenario} 
-                    className={`cursor-pointer transition-all hover:shadow-md ${
-                      selectedScenario === estimate.scenario 
-                        ? 'ring-2 ring-primary bg-primary/5' 
-                        : 'hover:bg-muted/50'
-                    }`} 
-                    onClick={() => setSelectedScenario(estimate.scenario)}
-                  >
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className={`text-sm font-medium ${estimate.color}`}>
-                          {estimate.scenario}
-                        </CardTitle>
-                        {selectedScenario === estimate.scenario && (
-                          <CheckCircle className="w-4 h-4 text-primary" />
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">{estimate.description}</p>
-                    </CardHeader>
-                    <CardContent className="space-y-2 pt-0">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs">Work:</span>
-                        <Badge variant="secondary" className="text-xs h-5">{formatTime(estimate.totalWorkTime)}</Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs">Wait:</span>
-                        <Badge variant="outline" className="text-xs h-5">{formatTime(estimate.totalLagTime)}</Badge>
-                      </div>
-                      <Separator />
-                      <div className="flex justify-between items-center font-medium">
-                        <span className="text-xs">Total:</span>
-                        <Badge className="bg-primary text-xs h-5">{formatTime(estimate.totalTime)}</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-primary" />
+                    <CardTitle className="text-sm">Risk Tolerance</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <Select value={riskTolerance} onValueChange={(value) => setRiskTolerance(value as RiskTolerance)}>
+                    <SelectTrigger className="h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="conservative">Conservative (Extra buffers)</SelectItem>
+                      <SelectItem value="moderate">Moderate (Standard buffers)</SelectItem>
+                      <SelectItem value="aggressive">Aggressive (Minimal buffers)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Working Hours Section */}
@@ -569,31 +548,32 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
                   <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
                     <div className="flex-1">
                       <p className="text-xs text-muted-foreground mb-1">
-                        Selected scenario: <strong>{selectedScenario}</strong>
+                        Planning mode: <strong>{planningMode}</strong>
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {scheduledSessions.length > 0 
-                          ? `${scheduledSessions.length} sessions scheduled`
+                        {schedulingResult 
+                          ? `${schedulingResult.scheduledTasks.length} tasks scheduled`
                           : 'No schedule generated yet'
                         }
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      {scheduledSessions.length > 0 && (
+                      {schedulingResult && (
                         <Button 
                           variant="outline" 
-                          onClick={() => setScheduledSessions([])}
+                          onClick={() => setSchedulingResult(null)}
                           className="h-8"
                         >
                           Clear
                         </Button>
                       )}
                       <Button 
-                        onClick={generateSchedule} 
+                        onClick={computeAdvancedSchedule} 
                         className="h-8"
+                        disabled={isComputing || teamMembers.length === 0}
                       >
                         <Zap className="w-3 h-3 mr-1" />
-                        Generate
+                        {isComputing ? 'Computing...' : 'Generate'}
                       </Button>
                     </div>
                   </div>
@@ -601,40 +581,6 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
               </Card>
             </div>
 
-            {/* Schedule Preview */}
-            {scheduledSessions.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="text-base font-semibold">Schedule Preview</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-                  {scheduledSessions.slice(0, 10).map((session) => (
-                    <Card key={session.id} className="border border-border">
-                      <CardContent className="p-3">
-                        <div className="flex justify-between items-start mb-2">
-                          <Badge variant="outline" className="text-xs h-5">{format(parseISO(session.date + 'T00:00:00'), 'MMM d')}</Badge>
-                          <Badge className="bg-primary/10 text-primary text-xs h-5">
-                            {session.startTime} - {session.endTime}
-                          </Badge>
-                        </div>
-                        <p className="text-xs font-medium">{session.notes}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {session.estimatedHours}h session
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  {scheduledSessions.length > 10 && (
-                    <Card className="border-dashed">
-                      <CardContent className="p-3 text-center">
-                        <p className="text-xs text-muted-foreground">
-                          +{scheduledSessions.length - 10} more sessions
-                        </p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </ScrollArea>
 
