@@ -290,6 +290,16 @@ export default function UserView({
     }
   }, [resetToListing, showProfile]);
 
+  // Auto-switch to workflow view when a project run is selected from Continue button
+  useEffect(() => {
+    // Only auto-switch if we have a project run and we're not being forced to stay in listing mode
+    if (currentProjectRun && !resetToListing && !forceListingMode && !showProfile && viewMode !== 'workflow') {
+      console.log("🔄 UserView: Auto-switching to workflow mode for selected project run:", currentProjectRun.id);
+      setViewMode('workflow');
+      onProjectSelected?.();
+    }
+  }, [currentProjectRun, resetToListing, forceListingMode, showProfile, viewMode, onProjectSelected]);
+
   // Auto-switch to workflow view when a project or project run is selected (but respect resetToListing and forceListingMode)
   useEffect(() => {
     // CRITICAL: DON'T auto-switch if we're being told to reset to listing OR if we're in force listing mode
@@ -865,10 +875,9 @@ export default function UserView({
               setViewMode('listing');
               return;
             }
+            // Legacy support for 'workflow' string - now handled by useEffect above
             if (project === 'workflow') {
-              console.log("Switching to workflow mode from Continue button");
-              setViewMode('workflow'); 
-              onProjectSelected?.();
+              console.log("Received workflow signal - useEffect will handle the switch");
               return;
             }
             setViewMode('workflow');

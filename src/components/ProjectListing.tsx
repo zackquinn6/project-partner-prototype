@@ -70,8 +70,7 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
     setCurrentProjectRun(projectRun);
     // Clear any navigation state to ensure clean transition
     window.history.replaceState({}, document.title, window.location.pathname);
-    // Signal to parent that we want to switch to workflow mode for this project run
-    onProjectSelect?.('workflow' as any);
+    // The UserView will automatically switch to workflow mode via useEffect when currentProjectRun changes
   };
 
   const handleDeleteProjectRun = (projectRunId: string) => {
