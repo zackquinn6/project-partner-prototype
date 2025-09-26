@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
-import { Output } from '@/interfaces/Project';
+import { Output, Project } from '@/interfaces/Project';
 import ProjectListing from './ProjectListing';
 import { OutputDetailPopup } from './OutputDetailPopup';
 import { AccountabilityMessagePopup } from './AccountabilityMessagePopup';
@@ -32,7 +32,7 @@ import { ToolsMaterialsSection } from './ToolsMaterialsSection';
 import ProfileManager from './ProfileManager';
 import { DecisionRollupWindow } from './DecisionRollupWindow';
 import { KeyCharacteristicsWindow } from './KeyCharacteristicsWindow';
-import { DecisionTreeFlowchart } from './DecisionTreeFlowchart';
+import { ProjectCustomizer } from './ProjectCustomizer';
 import { isKickoffPhaseComplete, addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 interface UserViewProps {
   resetToListing?: boolean;
@@ -111,7 +111,7 @@ export default function UserView({
   const [decisionRollupOpen, setDecisionRollupOpen] = useState(false);
   const [decisionRollupMode, setDecisionRollupMode] = useState<'initial-plan' | 'final-plan' | 'unplanned-work'>('initial-plan');
   const [keyCharacteristicsOpen, setKeyCharacteristicsOpen] = useState(false);
-  const [decisionTreeOpen, setDecisionTreeOpen] = useState(false);
+  const [projectCustomizerOpen, setProjectCustomizerOpen] = useState(false);
 
   // Check if kickoff phase is complete for project runs - MOVED UP to fix TypeScript error
   const isKickoffComplete = currentProjectRun ? isKickoffPhaseComplete(currentProjectRun.completedSteps) : true;
@@ -1182,34 +1182,24 @@ export default function UserView({
               
               {/* Decision Buttons for Planning Steps */}
               {currentStep && (
-                (currentStep.step?.toLowerCase().includes('project') && currentStep.step?.toLowerCase().includes('plan')) ||
+                (currentStep.step?.toLowerCase().includes('project') && (currentStep.step?.toLowerCase().includes('plan') || currentStep.step?.toLowerCase().includes('scope'))) ||
                 (currentStep.step?.toLowerCase().includes('finalize') && currentStep.step?.toLowerCase().includes('plan'))
               ) && (
                 <div className="mt-6 pt-6 border-t border-border">
                   <div className="flex gap-3 justify-center">
-                    {/* Show Review Decisions button for Project Planning */}
-                    {(currentStep.step?.toLowerCase().includes('project') && currentStep.step?.toLowerCase().includes('plan')) && (
-                      <>
-                        <Button 
-                          onClick={() => {
-                            setDecisionRollupMode('initial-plan');
-                            setDecisionRollupOpen(true);
-                          }}
-                          variant="outline"
-                          className="flex items-center gap-2"
-                        >
-                          <HelpCircle className="w-4 h-4" />
-                          Review Decisions
-                        </Button>
-                        <Button 
-                          onClick={() => setDecisionTreeOpen(true)}
-                          variant="outline"
-                          className="flex items-center gap-2"
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                          Decision Tree
-                        </Button>
-                      </>
+                    {/* Show Project Customizer button for Project Planning and Scope steps */}
+                    {(currentStep.step?.toLowerCase().includes('project') && (currentStep.step?.toLowerCase().includes('plan') || currentStep.step?.toLowerCase().includes('scope'))) && (
+                      <Button 
+                        onClick={() => {
+                          setDecisionRollupMode('initial-plan');
+                          setProjectCustomizerOpen(true);
+                        }}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <HelpCircle className="w-4 h-4" />
+                        Project Customizer
+                      </Button>
                     )}
 
                   </div>
@@ -1612,33 +1602,18 @@ export default function UserView({
         />
       )}
 
-      {/* Decision Tree Flowchart */}
-      {decisionTreeOpen && currentProjectRun && (
-        <Dialog open={decisionTreeOpen} onOpenChange={setDecisionTreeOpen}>
-          <DialogContent className="max-w-7xl h-[90vh] p-0">
-            <DialogHeader className="p-6 pb-0">
-              <DialogTitle>Project Decision Tree</DialogTitle>
-              <DialogDescription>
-                Customize your workflow by defining decision points and alternate paths
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex-1 overflow-hidden">
-              <DecisionTreeFlowchart
-                phases={activeProject.phases || []}
-                onBack={() => setDecisionTreeOpen(false)}
-                onUpdatePhases={(updatedPhases) => {
-                  if (currentProjectRun) {
-                    updateProjectRun({
-                      ...currentProjectRun,
-                      phases: updatedPhases,
-                      updatedAt: new Date()
-                    });
-                  }
-                }}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
+      {/* Project Customizer */}
+      {projectCustomizerOpen && currentProjectRun && (
+        <ProjectCustomizer
+          open={projectCustomizerOpen}
+          onOpenChange={setProjectCustomizerOpen}
+          currentProjectRun={currentProjectRun}
+          activeProject={activeProject as Project}
+          mode={decisionRollupMode}
+          onUpdateProjectRun={(updatedProjectRun) => {
+            updateProjectRun(updatedProjectRun);
+          }}
+        />
       )}
 
       {/* Completion Certificate */}
