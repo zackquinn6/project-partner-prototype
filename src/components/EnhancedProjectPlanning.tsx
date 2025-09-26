@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProjectSizingQuestionnaire } from './ProjectSizingQuestionnaire';
 import { ProjectTimeEstimator } from './ProjectTimeEstimator';
 import { ProjectCalendarPlanning } from './ProjectCalendarPlanning';
+import { DecisionTreeFlowchart } from './DecisionTreeFlowchart';
 import { useProject } from '@/contexts/ProjectContext';
 import { Calculator, Clock, CalendarIcon, CheckCircle } from 'lucide-react';
 
@@ -19,10 +20,11 @@ export const EnhancedProjectPlanning: React.FC<EnhancedProjectPlanningProps> = (
   onComplete,
   isCompleted
 }) => {
-  const { currentProject, currentProjectRun } = useProject();
+  const { currentProject, currentProjectRun, updateProjectRun } = useProject();
   const [sizingComplete, setSizingComplete] = useState(false);
   const [calendarPlanningComplete, setCalendarPlanningComplete] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState<'low' | 'medium' | 'high'>('medium');
+  const [showDecisionTreeView, setShowDecisionTreeView] = useState(false);
   
   // Check if all planning steps are complete and call onComplete
   useEffect(() => {
@@ -72,6 +74,17 @@ export const EnhancedProjectPlanning: React.FC<EnhancedProjectPlanningProps> = (
             </TabsList>
             
             <TabsContent value="sizing" className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Project Work Scope</h3>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDecisionTreeView(true)}
+                  className="flex items-center gap-2"
+                >
+                  🔀 Decision Tree
+                </Button>
+              </div>
+              
               <ProjectSizingQuestionnaire
                 onComplete={() => setSizingComplete(true)}
                 isCompleted={sizingComplete || isCompleted}
@@ -130,6 +143,23 @@ export const EnhancedProjectPlanning: React.FC<EnhancedProjectPlanningProps> = (
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Decision Tree Modal */}
+      {showDecisionTreeView && currentProject && currentProjectRun && (
+        <div className="fixed inset-0 z-50 bg-background">
+          <DecisionTreeFlowchart
+            phases={currentProjectRun.phases}
+            onBack={() => setShowDecisionTreeView(false)}
+            onUpdatePhases={async (updatedPhases) => {
+              await updateProjectRun({
+                ...currentProjectRun,
+                phases: updatedPhases,
+                updatedAt: new Date()
+              });
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
