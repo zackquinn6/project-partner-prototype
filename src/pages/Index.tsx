@@ -233,12 +233,17 @@ const Index = () => {
     };
   }, []);
 
-  // Listen for clear reset flags event
+  // Listen for clear reset flags event and sync with Index
   useEffect(() => {
     const handleClearResetFlags = () => {
       console.log('🔄 Index: Clearing reset flags');
       setResetUserView(false);
       setForceListingMode(false);
+      
+      // Broadcast to MobileProjectListing
+      window.dispatchEvent(new CustomEvent('update-reset-flags', {
+        detail: { resetUserView: false, forceListingMode: false }
+      }));
     };
 
     window.addEventListener('clear-reset-flags', handleClearResetFlags);

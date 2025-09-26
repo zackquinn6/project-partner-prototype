@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,21 @@ export function MobileProjectListing({ onProjectSelect, onNewProject, onClose }:
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'name' | 'progress'>('recent');
+
+  // Get access to reset functions from parent Index component
+  const [resetUserView, setResetUserView] = useState(false);
+  const [forceListingMode, setForceListingMode] = useState(false);
+
+  // Listen for reset flag updates from Index
+  useEffect(() => {
+    const handleResetFlags = (event: CustomEvent) => {
+      setResetUserView(event.detail.resetUserView || false);
+      setForceListingMode(event.detail.forceListingMode || false);
+    };
+
+    window.addEventListener('update-reset-flags', handleResetFlags as EventListener);
+    return () => window.removeEventListener('update-reset-flags', handleResetFlags as EventListener);
+  }, []);
 
   // Filter and sort project runs
   const filteredProjectRuns = useMemo(() => {
@@ -123,9 +138,16 @@ export function MobileProjectListing({ onProjectSelect, onNewProject, onClose }:
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('🎯 Continue Current Project clicked');
-                  // Clear resetToListing immediately when continuing a project
+                  console.log('🎯 Continue Current Project clicked - force clearing all reset flags');
+                  
+                  // Immediately clear reset flags
+                  setResetUserView(false);
+                  setForceListingMode(false);
+                  
+                  // Also dispatch the clear event
                   window.dispatchEvent(new CustomEvent('clear-reset-flags'));
+                  
+                  // Select the project
                   onProjectSelect(currentProjectRun);
                 }}
                 className="ml-3"

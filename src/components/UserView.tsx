@@ -323,16 +323,20 @@ export default function UserView({
     }
   }, [currentProjectRun, forceListingMode, showProfile, onProjectSelected]);
 
-  // Handle resetToListing with proper conditions
+  // Handle resetToListing with proper conditions - but allow override for continue button
   useEffect(() => {
     console.log("🔄 UserView: resetToListing effect:", { resetToListing, viewMode, hasProjectRun: !!currentProjectRun });
+    
+    // Don't reset if we're already in workflow mode with a project run - this means continue was pressed
+    if (resetToListing && viewMode === 'workflow' && currentProjectRun) {
+      console.log("🔄 UserView: Ignoring resetToListing - staying in workflow with active project");
+      return;
+    }
     
     // Only reset to listing if we don't have an active project run or if we're not in workflow mode
     if (resetToListing && (!currentProjectRun || viewMode !== 'workflow')) {
       console.log("🔄 UserView: Reset to listing requested - switching to listing");
       setViewMode('listing');
-    } else if (resetToListing && currentProjectRun && viewMode === 'workflow') {
-      console.log("🔄 UserView: Ignoring resetToListing - staying in workflow with active project");
     }
   }, [resetToListing, currentProjectRun, viewMode]);
 
