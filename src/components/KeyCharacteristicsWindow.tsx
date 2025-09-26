@@ -78,7 +78,7 @@ export function KeyCharacteristicsWindow({ open, onOpenChange, operations }: Key
     <>
       {/* Main KC Window */}
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[95vw] max-w-6xl h-[85vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-[90vw] lg:max-w-6xl max-h-[90vh] overflow-y-auto flex flex-col">
           <DialogHeader className="flex-shrink-0">
             <div className="flex items-center justify-between gap-4">
               <DialogTitle className="text-lg sm:text-xl font-bold">Key Characteristics (KC's)</DialogTitle>
@@ -142,7 +142,7 @@ export function KeyCharacteristicsWindow({ open, onOpenChange, operations }: Key
           </div>
 
           {/* 2-Column Tabular View */}
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="flex-1 min-h-0 pb-4">
             {criticalOutputs.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <p>No critical characteristics found for this operation.</p>
@@ -245,7 +245,7 @@ export function KeyCharacteristicsWindow({ open, onOpenChange, operations }: Key
 
       {/* Output Details Popup */}
       <Dialog open={!!selectedOutput} onOpenChange={() => setSelectedOutput(null)}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-[90vw] lg:max-w-3xl max-h-[90vh] overflow-y-auto">
           {selectedOutput && (
             <>
               <DialogHeader>
