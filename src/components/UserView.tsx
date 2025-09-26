@@ -1252,7 +1252,16 @@ export default function UserView({
                     )}
 
                     {/* Show Project Scheduler button only for Project Scheduling step */}
-                    {currentStep.step?.toLowerCase().includes('scheduling') && (
+                    {(() => {
+                      const showScheduler = currentStep.step?.toLowerCase().includes('scheduling');
+                      console.log("🗓️ Project Scheduler button check:", {
+                        stepName: currentStep.step,
+                        stepNameLower: currentStep.step?.toLowerCase(),
+                        includesScheduling: showScheduler,
+                        shouldShow: showScheduler
+                      });
+                      return showScheduler;
+                    })() && (
                       <Button 
                         onClick={() => setProjectSchedulerOpen(true)}
                         variant="outline"
