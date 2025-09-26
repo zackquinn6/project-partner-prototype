@@ -306,7 +306,7 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
       open={open} 
       onOpenChange={onOpenChange}
       title="Manage Your Homes"
-      size="content-large"
+      size="xlarge"
     >
 
         {!showForm ? <div className="space-y-6 p-6">
@@ -361,12 +361,24 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
                             </CardTitle>
                           </div>
                         </div>
-                        <div className="flex gap-0.5 flex-shrink-0 ml-2" onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(home)} className="h-8 w-8 p-0 sm:w-auto sm:px-2">
+                        <div className="flex flex-col sm:flex-row gap-1 sm:gap-0.5 flex-shrink-0 ml-2" onClick={(e) => e.stopPropagation()}>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleEdit(home)} 
+                            className="h-8 w-8 sm:w-auto sm:px-2 touch-target"
+                            title="Edit Home"
+                          >
                             <span className="hidden sm:inline text-xs">Edit</span>
-                            <span className="sm:hidden text-xs">E</span>
+                            <span className="sm:hidden text-xs">✏️</span>
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(home.id)} className="h-8 w-8 p-0">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleDelete(home.id)} 
+                            className="h-8 w-8 touch-target text-destructive hover:text-destructive hover:bg-destructive/10"
+                            title="Delete Home"
+                          >
                             <Trash2 className="w-3 h-3" />
                           </Button>
                         </div>
