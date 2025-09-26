@@ -58,7 +58,6 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
   open,
   onOpenChange
 }) => {
-  console.log('🏠 HomeMaintenanceWindow render - debugging spacing issues');
   const {
     user
   } = useAuth();
@@ -328,7 +327,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                         </div>
 
                         <div className="flex-1 overflow-y-auto space-y-2 pb-3 px-3 md:px-6 min-h-0" 
-                             style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}>
+                             style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
                       {loading ? (
                         <div className="text-center py-8">Loading tasks...</div>
                       ) : getFilteredTasks().length === 0 ? (
@@ -365,10 +364,8 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                                 onTouchMove={handleTouchMove}
                                 onTouchEnd={() => handleTouchEnd(task.id)}
                                 onClick={(e) => {
-                                  // Only dismiss swipe on direct click, not during scroll gestures
-                                  if (!touchStart || Math.abs(touchStart - (touchEnd || touchStart)) < 10) {
-                                    setSwipedTaskId(null);
-                                  }
+                                  e.stopPropagation();
+                                  setSwipedTaskId(null);
                                 }}
                               >
                                 <div className="flex items-center justify-between gap-3">

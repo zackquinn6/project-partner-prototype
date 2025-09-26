@@ -239,6 +239,7 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
         onOpenChange={onOpenChange}
         title={getModeTitle()}
         description={getModeDescription()}
+        className="w-[90vw] max-w-[90vw] h-[90vh] max-h-[90vh]"
       >
         <div className="flex flex-col flex-1 overflow-hidden min-h-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full">
