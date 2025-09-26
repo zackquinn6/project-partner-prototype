@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ResponsiveDialog } from "@/components/ResponsiveDialog";
+import { ScrollableDialog } from "@/components/ScrollableDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -97,20 +96,11 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
   const projectRollup = React.useMemo(() => {
     const activeProject = project || projectRun;
     if (!activeProject) {
-      console.log('OrderingWindow: No project or projectRun provided');
       return { materials: [], tools: [] };
     }
     
     // Get processed phases including standard phases for complete tool/material list
     const processedPhases = addStandardPhasesToProjectRun(activeProject.phases || []);
-    
-    console.log('OrderingWindow: Project structure with processed phases:', {
-      originalPhasesLength: activeProject.phases?.length || 0,
-      processedPhasesLength: processedPhases.length,
-      phaseNames: processedPhases.map(p => p.name),
-      isProjectRun: !!projectRun,
-      isProject: !!project
-    });
     
     // For materials: count total quantity needed (sum across all steps)
     const materialsMap = new Map<string, any>();
@@ -118,56 +108,25 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
     const toolsMap = new Map<string, any>();
     
     processedPhases.forEach((phase, phaseIndex) => {
-      console.log(`OrderingWindow: Processing phase ${phaseIndex}:`, {
-        phaseName: phase.name,
-        hasOperations: !!phase.operations,
-        operationsLength: phase.operations?.length
-      });
-      
       if (!phase.operations || !Array.isArray(phase.operations)) {
-        console.log(`OrderingWindow: Phase ${phaseIndex} has no valid operations`);
         return;
       }
       
       phase.operations.forEach((operation, opIndex) => {
-        console.log(`OrderingWindow: Processing operation ${opIndex}:`, {
-          operationName: operation.name,
-          hasSteps: !!operation.steps,
-          stepsLength: operation.steps?.length
-        });
-        
         if (!operation.steps || !Array.isArray(operation.steps)) {
-          console.log(`OrderingWindow: Operation ${opIndex} has no valid steps`);
           return;
         }
         
         operation.steps.forEach((step, stepIndex) => {
-          console.log(`OrderingWindow: Processing step ${stepIndex}:`, {
-            stepName: step.step,
-            hasMaterials: !!step.materials,
-            materialsLength: step.materials?.length,
-            hasTools: !!step.tools,
-            toolsLength: step.tools?.length,
-            stepData: {
-              materials: step.materials,
-              tools: step.tools
-            }
-          });
-          
           // Process materials - add quantities (materials are consumed per step)
           if (step.materials && Array.isArray(step.materials) && step.materials.length > 0) {
-            console.log(`OrderingWindow: Found ${step.materials.length} materials in step:`, step.materials);
             step.materials.forEach((material, materialIndex) => {
-              console.log(`OrderingWindow: Processing material ${materialIndex}:`, material);
               const key = material.id || material.name || `material-${materialIndex}-${Date.now()}`;
               if (materialsMap.has(key)) {
-                // Material already exists, increment quantity
                 const existing = materialsMap.get(key);
                 existing.totalQuantity = (existing.totalQuantity || 1) + 1;
                 existing.usedInSteps.push(step.step);
-                console.log(`OrderingWindow: Updated existing material:`, existing);
               } else {
-                // New material
                 const newMaterial = {
                   id: material.id || key,
                   name: material.name,
@@ -178,27 +137,21 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                   usedInSteps: [step.step]
                 };
                 materialsMap.set(key, newMaterial);
-                console.log(`OrderingWindow: Added new material:`, newMaterial);
               }
             });
           }
 
           // Process tools - track max quantity needed in any single step (tools are reused)
           if (step.tools && Array.isArray(step.tools) && step.tools.length > 0) {
-            console.log(`OrderingWindow: Found ${step.tools.length} tools in step:`, step.tools);
             step.tools.forEach((tool, toolIndex) => {
-              console.log(`OrderingWindow: Processing tool ${toolIndex}:`, tool);
               const key = tool.id || tool.name || `tool-${toolIndex}-${Date.now()}`;
               const toolQuantity = 1; // Default quantity per step
               
               if (toolsMap.has(key)) {
-                // Tool already exists, update max quantity if needed
                 const existing = toolsMap.get(key);
                 existing.maxQuantity = Math.max(existing.maxQuantity || 1, toolQuantity);
                 existing.usedInSteps.push(step.step);
-                console.log(`OrderingWindow: Updated existing tool:`, existing);
               } else {
-                // New tool
                 const newTool = {
                   id: tool.id || key,
                   name: tool.name,
@@ -209,7 +162,6 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                   usedInSteps: [step.step]
                 };
                 toolsMap.set(key, newTool);
-                console.log(`OrderingWindow: Added new tool:`, newTool);
               }
             });
           }
@@ -217,31 +169,10 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
       });
     });
     
-    const result = {
+    return {
       materials: Array.from(materialsMap.values()),
       tools: Array.from(toolsMap.values())
     };
-    
-    console.log('OrderingWindow: Final rollup result:', {
-      materialsCount: result.materials.length,
-      toolsCount: result.tools.length,
-      materials: result.materials,
-      tools: result.tools,
-      sampleMaterials: result.materials.slice(0, 3).map(m => ({ 
-        name: m.name, 
-        id: m.id, 
-        totalQuantity: m.totalQuantity,
-        usedInSteps: m.usedInSteps?.length 
-      })),
-      sampleTools: result.tools.slice(0, 3).map(t => ({ 
-        name: t.name, 
-        id: t.id, 
-        maxQuantity: t.maxQuantity,
-        usedInSteps: t.usedInSteps?.length 
-      }))
-    });
-    
-    return result;
   }, [project, projectRun]);
 
   const uniqueTools = projectRollup.tools;
@@ -283,65 +214,36 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
     });
   };
 
-  // Render shopping checklist content
-  const renderShoppingChecklist = () => (
-    <ScrollArea className="h-full">
-      <div className="space-y-4">
-        {uniqueMaterials.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>No materials to order for this project</p>
-          </div>
-        ) : (
-          uniqueMaterials.map((material, index) => (
-            <div key={`${material.id}-${index}`} className="border rounded-lg p-3 hover:bg-muted/50 transition-colors">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={orderedMaterials.has(material.id)}
-                      onChange={() => handleMaterialToggle(material.id)}
-                      className="rounded"
-                    />
-                    <h4 className="font-medium text-sm truncate">{material.name}</h4>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                    {material.description}
-                  </p>
-                  {material.totalQuantity && (
-                    <Badge variant="secondary" className="text-xs mt-2">
-                      Qty: {material.totalQuantity}
-                    </Badge>
-                  )}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.open(currentUrl, '_blank')}
-                  className="ml-2 flex-shrink-0"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                </Button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </ScrollArea>
-  );
+  // Handle case where no tools or materials exist
+  if (uniqueTools.length === 0 && uniqueMaterials.length === 0) {
+    return (
+      <ScrollableDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        title="No Items to Order"
+        className="w-[90vw] max-w-md"
+      >
+        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+          <ShoppingCart className="w-16 h-16 mx-auto mb-4 opacity-50" />
+          <h3 className="text-lg font-medium mb-2">No Items to Order</h3>
+          <p className="text-sm text-center">This project doesn't have any tools or materials defined.</p>
+        </div>
+      </ScrollableDialog>
+    );
+  }
 
   if (fullScreenMode) {
     return (
-      <ResponsiveDialog
+      <ScrollableDialog
         open={open}
         onOpenChange={onOpenChange}
-        size="content-large"
+        title="Shopping Checklist"
+        className="w-[90vw] max-w-7xl"
       >
-          <div className="h-[90vh] flex flex-col">
-            <div className="p-4 border-b flex items-center justify-between bg-muted/30">
+        <div className="flex flex-col flex-1 overflow-hidden min-h-0">
+          <div className="px-3 md:px-6 py-3 shrink-0 bg-background border-b">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-semibold">Shopping Checklist</h2>
                 <Badge variant="secondary">{uniqueTools.length + uniqueMaterials.length} items total</Badge>
               </div>
               <div className="flex items-center gap-2">
@@ -356,393 +258,354 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                 </Button>
               </div>
             </div>
-            
-            <div className="flex-1 p-4 overflow-auto">
-              <div className="h-full">
-                <Tabs defaultValue="materials" className="w-full h-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="materials">Materials ({uniqueMaterials.length})</TabsTrigger>
-                    <TabsTrigger value="tools">Tools ({uniqueTools.length})</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="materials" className="h-full mt-4">
-                    {renderShoppingChecklist()}
-                  </TabsContent>
-                  
-                  <TabsContent value="tools" className="h-full mt-4">
-                    <ScrollArea className="h-full">
-                      <div className="space-y-4">
-                        {uniqueTools.length === 0 ? (
-                          <div className="text-center py-8 text-muted-foreground">
-                            <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                            <p>No tools to order for this project</p>
-                          </div>
-                        ) : (
-                          uniqueTools.map((tool, index) => (
-                            <div key={`${tool.id}-${index}`} className="border rounded-lg p-3 hover:bg-muted/50 transition-colors">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <input
-                                      type="checkbox"
-                                      checked={orderedTools.has(tool.id)}
-                                      onChange={() => handleToolToggle(tool.id)}
-                                      className="rounded"
-                                    />
-                                    <h4 className="font-medium text-sm truncate">{tool.name}</h4>
-                                    {userProfile?.owned_tools?.some((ownedTool: any) => ownedTool.tool === tool.name || ownedTool.name === tool.name) && (
-                                      <Badge variant="secondary" className="text-xs">Already Owned</Badge>
-                                    )}
-                                  </div>
-                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                    {tool.description}
-                                  </p>
-                                  {tool.maxQuantity && (
-                                    <Badge variant="secondary" className="text-xs mt-2">
-                                      Qty: {tool.maxQuantity}
-                                    </Badge>
-                                  )}
-                                </div>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => window.open(currentUrl, '_blank')}
-                                  className="ml-2 flex-shrink-0"
-                                >
-                                  <ExternalLink className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </ScrollArea>
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </div>
           </div>
-      </ResponsiveDialog>
+          
+          <div className="flex flex-col flex-1 min-h-0">
+            <Tabs defaultValue="materials" className="flex flex-col flex-1 h-full">
+              <div className="px-3 md:px-6 py-3 bg-background border-b shrink-0">
+                <TabsList className="grid w-full grid-cols-2 h-12">
+                  <TabsTrigger value="materials" className="text-xs md:text-sm px-2 py-3">Materials ({uniqueMaterials.length})</TabsTrigger>
+                  <TabsTrigger value="tools" className="text-xs md:text-sm px-2 py-3">Tools ({uniqueTools.length})</TabsTrigger>
+                </TabsList>
+              </div>
+              
+              <TabsContent value="materials" className="flex-1 overflow-y-auto px-3 md:px-6 min-h-0">
+                <div className="space-y-2 py-3">
+                  {uniqueMaterials.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No materials to order for this project</p>
+                    </div>
+                  ) : (
+                    uniqueMaterials.map((material, index) => (
+                      <div key={`${material.id}-${index}`} className="border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={orderedMaterials.has(material.id)}
+                                onChange={() => handleMaterialToggle(material.id)}
+                                className="rounded"
+                              />
+                              <h4 className="font-medium text-sm truncate">{material.name}</h4>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                              {material.description}
+                            </p>
+                            {material.totalQuantity && (
+                              <Badge variant="secondary" className="text-xs mt-2">
+                                Qty: {material.totalQuantity}
+                              </Badge>
+                            )}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(currentUrl, '_blank')}
+                            className="ml-2 flex-shrink-0"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="tools" className="flex-1 overflow-y-auto px-3 md:px-6 min-h-0">
+                <div className="space-y-2 py-3">
+                  {uniqueTools.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No tools to order for this project</p>
+                    </div>
+                  ) : (
+                    uniqueTools.map((tool, index) => (
+                      <div key={`${tool.id}-${index}`} className="border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={orderedTools.has(tool.id)}
+                                onChange={() => handleToolToggle(tool.id)}
+                                className="rounded"
+                              />
+                              <h4 className="font-medium text-sm truncate">{tool.name}</h4>
+                              {userProfile?.owned_tools?.some((ownedTool: any) => ownedTool.tool === tool.name || ownedTool.name === tool.name) && (
+                                <Badge variant="secondary" className="text-xs">Already Owned</Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                              {tool.description}
+                            </p>
+                            {tool.maxQuantity && (
+                              <Badge variant="secondary" className="text-xs mt-2">
+                                Qty: {tool.maxQuantity}
+                              </Badge>
+                            )}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(currentUrl, '_blank')}
+                            className="ml-2 flex-shrink-0"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Footer with Complete Button */}
+          <div className="p-3 md:p-4 border-t bg-muted/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shrink-0">
+            <div className="text-xs md:text-sm text-muted-foreground">
+              Progress: {orderedTools.size + orderedMaterials.size}/{uniqueTools.length + uniqueMaterials.length} items checked
+            </div>
+            
+            {onOrderingComplete && (
+              <Button
+                onClick={onOrderingComplete}
+                disabled={orderedTools.size + orderedMaterials.size < uniqueTools.length + uniqueMaterials.length}
+                className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
+                size="sm"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                Complete Shopping
+              </Button>
+            )}
+          </div>
+        </div>
+      </ScrollableDialog>
     );
   }
 
-  const allItemsOrdered = uniqueTools.every(tool => orderedTools.has(tool.id)) &&
-                          uniqueMaterials.every(material => orderedMaterials.has(material.id));
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-full max-h-full w-screen h-screen overflow-hidden p-0 m-0 rounded-none border-0">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5" />
-            Tool & Material Ordering
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="flex h-[calc(100vh-120px)]">
-          {/* Main Browser Area */}
-          <div className="flex-1 flex flex-col border-r">
-            {/* Navigation Bar */}
-            <div className="p-4 border-b bg-muted/30">
-              <div className="flex items-center gap-2 mb-4">
+    <ScrollableDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Shopping & Ordering"
+      className="w-[90vw] max-w-7xl"
+    >
+      <div className="flex flex-col flex-1 overflow-hidden min-h-0">
+        {/* Mobile/Desktop responsive layout */}
+        <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+          {/* Browser Section */}
+          <div className={`${checklistVisible ? 'lg:flex-1' : 'w-full'} flex flex-col ${checklistVisible ? 'hidden lg:flex' : 'flex'}`}>
+            {/* Shopping Site Navigation */}
+            <div className="p-3 md:p-4 border-b bg-muted/30 shrink-0">
+              {/* Shopping Sites */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {SHOPPING_SITES.map((site) => (
+                  <Button
+                    key={site.name}
+                    onClick={() => setCurrentUrl(site.url)}
+                    size="sm"
+                    className={`text-xs ${site.color} text-white`}
+                  >
+                    {site.name}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Custom URL Input */}
+              <div className="flex gap-2 mb-3">
+                <Input
+                  type="url"
+                  placeholder="Enter custom website URL..."
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  onKeyPress={handleUrlKeyPress}
+                  className="text-sm"
+                />
+                <Button onClick={handleNavigateToUrl} size="sm" variant="outline">
+                  <Globe className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {/* Toggle Checklist and Fullscreen */}
+              <div className="flex justify-between items-center">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setChecklistVisible(!checklistVisible)}
-                  className="h-8 px-2 flex items-center gap-1"
+                  className="flex items-center gap-1 lg:hidden"
                 >
-                  {checklistVisible ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                  {checklistVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {checklistVisible ? 'Hide' : 'Show'} Checklist
                 </Button>
                 
-                <div className="flex-1" />
-                
-                {allItemsOrdered && onOrderingComplete && (
-                  <Button
-                    onClick={onOrderingComplete}
-                    className="h-8 px-3 bg-green-600 hover:bg-green-700 text-sm"
-                    size="sm"
-                  >
-                    <Check className="w-3 h-3 mr-1" />
-                    Complete
-                  </Button>
-                )}
-              </div>
-              
-              {/* Shopping Site Buttons */}
-              <div className="flex gap-2 flex-wrap mb-4">
-                {SHOPPING_SITES.map((site) => (
-                  <div key={site.name} className="flex gap-1">
-                    <Button
-                      onClick={() => setCurrentUrl(site.url)}
-                      className={`${site.color} text-white flex items-center gap-2 h-8 px-3 text-sm`}
-                      size="sm"
-                    >
-                      {site.name}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.open(site.url, '_blank')}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Custom URL Input */}
-              <div className="flex gap-2 items-center">
-                <Globe className="w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Enter any website URL (e.g., homedepot.com)"
-                  value={urlInput}
-                  onChange={(e) => setUrlInput(e.target.value)}
-                  onKeyPress={handleUrlKeyPress}
-                  className="flex-1"
-                />
                 <Button
-                  onClick={handleNavigateToUrl}
                   variant="outline"
                   size="sm"
-                  disabled={!urlInput.trim()}
+                  onClick={() => setFullScreenMode(true)}
+                  className="flex items-center gap-1"
                 >
-                  Go
+                  <Maximize className="w-4 h-4" />
+                  Checklist Only
                 </Button>
               </div>
             </div>
-            
+
             {/* Browser iframe */}
-            <div className="flex-1 bg-white flex flex-col">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="p-2 bg-muted/50 border-b text-xs text-muted-foreground cursor-help">
-                      ℹ️ Some websites may not load due to security restrictions
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs">
-                    <p>Some websites may not load in embedded view due to security restrictions. 
-                    Click the external link buttons to open sites in new tabs if needed.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <div className="flex-1 relative">
-                <iframe
-                  src={currentUrl}
-                  className="w-full h-full border-0"
-                  title="Shopping Browser"
-                  onError={() => {
-                    // Handle iframe loading errors
-                    console.warn('Iframe failed to load:', currentUrl);
-                  }}
-                />
-              </div>
+            <div className="flex-1 p-3 md:p-4">
+              <iframe
+                src={currentUrl}
+                className="w-full h-full border rounded-lg"
+                title="Shopping Website"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              />
             </div>
           </div>
 
-          {/* Checklist Sidebar */}
+          {/* Checklist Section */}
           {checklistVisible && (
-            <div className="w-80 flex flex-col bg-background border-l">
-              <div className="p-2 border-b flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-lg">Shopping Checklist</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Check off items as you order them
-                  </p>
+            <div className="w-full lg:w-96 flex flex-col lg:border-l border-t lg:border-t-0 bg-background">
+              <div className="p-3 md:p-4 border-b bg-muted/30 shrink-0">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold text-sm md:text-base">Shopping Checklist</h3>
+                  <Badge variant="secondary" className="text-xs">{uniqueTools.length + uniqueMaterials.length} items</Badge>
                 </div>
-                <div className="flex gap-1">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setChecklistVisible(false);
-                            setFullScreenMode(true);
-                          }}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Maximize className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Full Screen Mode</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setChecklistVisible(false)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <EyeOff className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Hide checklist</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  
-                  {allItemsOrdered && onOrderingComplete && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            onClick={onOrderingComplete}
-                            size="sm"
-                            className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700"
-                          >
-                            <Check className="w-4 h-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Complete ordering</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
+                
+                <div className="text-xs md:text-sm text-muted-foreground">
+                  <div>Tools: {orderedTools.size}/{uniqueTools.length}</div>
+                  <div>Materials: {orderedMaterials.size}/{uniqueMaterials.length}</div>
                 </div>
               </div>
-              
-              <ScrollArea className="flex-1">
-                <div className="p-4 space-y-6">
-                  {/* Tools Section */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg flex items-center justify-between">
-                        Tools
-                        <Badge variant="secondary">
-                          {orderedTools.size}/{uniqueTools.length}
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                      <CardContent className="space-y-3">
-                        {uniqueTools.length > 0 ? uniqueTools.map((tool) => {
-                          const isOrdered = orderedTools.has(tool.id);
-                          
-                          return (
-                            <div key={tool.id} className="flex items-start gap-3">
-                              <Checkbox
-                                checked={isOrdered}
-                                onCheckedChange={() => handleToolToggle(tool.id)}
-                                className="mt-1"
-                              />
+
+              <div className="flex flex-col flex-1 min-h-0">
+                <Tabs defaultValue="materials" className="flex flex-col flex-1 h-full">
+                  <div className="px-3 md:px-4 py-2 shrink-0">
+                    <TabsList className="grid w-full grid-cols-2 h-10">
+                      <TabsTrigger value="materials" className="text-xs md:text-sm">Materials</TabsTrigger>
+                      <TabsTrigger value="tools" className="text-xs md:text-sm">Tools</TabsTrigger>
+                    </TabsList>
+                  </div>
+                  
+                  <TabsContent value="materials" className="flex-1 overflow-y-auto px-3 md:px-4 min-h-0">
+                    <div className="space-y-2 py-2">
+                      {uniqueMaterials.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                          <p className="text-sm">No materials to order for this project</p>
+                        </div>
+                      ) : (
+                        uniqueMaterials.map((material, index) => (
+                          <div key={`${material.id}-${index}`} className="border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                            <div className="flex items-start justify-between">
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <p className="font-medium text-sm">{tool.name}</p>
-                                  {tool.maxQuantity > 1 && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      Qty: {tool.maxQuantity}
-                                    </Badge>
-                                  )}
-                                  {(userProfile?.owned_tools || []).some((ownedTool: any) => 
-                                    ownedTool.tool === tool.name || ownedTool.name === tool.name
-                                  ) && (
-                                    <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                                      Owned
-                                    </Badge>
-                                  )}
-                                  {tool.required && (
-                                    <Badge variant="destructive" className="text-xs">
-                                      Required
-                                    </Badge>
-                                  )}
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={orderedMaterials.has(material.id)}
+                                    onChange={() => handleMaterialToggle(material.id)}
+                                    className="rounded"
+                                  />
+                                  <h4 className="font-medium text-sm truncate">{material.name}</h4>
                                 </div>
-                                {tool.description && (
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    {tool.description}
-                                  </p>
-                                )}
-                                {tool.usedInSteps && tool.usedInSteps.length > 0 && (
-                                  <p className="text-xs text-blue-600 mt-1">
-                                    Used in: {tool.usedInSteps.slice(0, 2).join(', ')}
-                                    {tool.usedInSteps.length > 2 && ` +${tool.usedInSteps.length - 2} more`}
-                                  </p>
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                  {material.description}
+                                </p>
+                                {material.totalQuantity && (
+                                  <Badge variant="secondary" className="text-xs mt-2">
+                                    Qty: {material.totalQuantity}
+                                  </Badge>
                                 )}
                               </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => window.open(currentUrl, '_blank')}
+                                className="ml-2 flex-shrink-0 w-8 h-8 p-0"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </Button>
                             </div>
-                          );
-                        }) : (
-                          <div className="text-center py-4 text-muted-foreground">
-                            <p className="text-sm">No tools defined for this project</p>
-                            <p className="text-xs mt-1">You can still use the shopping sites to browse for tools</p>
                           </div>
-                        )}
-                      </CardContent>
-                  </Card>
-
-                  <Separator />
-
-                  {/* Materials Section */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg flex items-center justify-between">
-                        Materials
-                        <Badge variant="secondary">
-                          {orderedMaterials.size}/{uniqueMaterials.length}
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                     <CardContent className="space-y-3">
-                       {uniqueMaterials.length > 0 ? uniqueMaterials.map((material) => {
-                         const isOrdered = orderedMaterials.has(material.id);
-                         
-                         return (
-                           <div key={material.id} className="flex items-start gap-3">
-                             <Checkbox
-                               checked={isOrdered}
-                               onCheckedChange={() => handleMaterialToggle(material.id)}
-                               className="mt-1"
-                             />
-                             <div className="flex-1 min-w-0">
-                               <div className="flex items-center gap-2 flex-wrap">
-                                 <p className="font-medium text-sm">{material.name}</p>
-                                 {material.totalQuantity > 1 && (
-                                   <Badge variant="secondary" className="text-xs">
-                                     Total Qty: {material.totalQuantity}
-                                   </Badge>
-                                 )}
-                                 {material.required && (
-                                   <Badge variant="destructive" className="text-xs">
-                                     Required
-                                   </Badge>
-                                 )}
-                               </div>
-                               {material.description && (
-                                 <p className="text-xs text-muted-foreground mt-1">
-                                   {material.description}
-                                 </p>
-                               )}
-                               {material.usedInSteps && material.usedInSteps.length > 0 && (
-                                 <p className="text-xs text-purple-600 mt-1">
-                                   Used in: {material.usedInSteps.slice(0, 2).join(', ')}
-                                   {material.usedInSteps.length > 2 && ` +${material.usedInSteps.length - 2} more`}
-                                 </p>
-                               )}
-                             </div>
-                           </div>
-                         );
-                       }) : (
-                         <div className="text-center py-4 text-muted-foreground">
-                           <p className="text-sm">No materials defined for this project</p>
-                           <p className="text-xs mt-1">You can still use the shopping sites to browse for materials</p>
-                         </div>
-                       )}
-                     </CardContent>
-                  </Card>
-                </div>
-              </ScrollArea>
+                        ))
+                      )}
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="tools" className="flex-1 overflow-y-auto px-3 md:px-4 min-h-0">
+                    <div className="space-y-2 py-2">
+                      {uniqueTools.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                          <p className="text-sm">No tools to order for this project</p>
+                        </div>
+                      ) : (
+                        uniqueTools.map((tool, index) => (
+                          <div key={`${tool.id}-${index}`} className="border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={orderedTools.has(tool.id)}
+                                    onChange={() => handleToolToggle(tool.id)}
+                                    className="rounded"
+                                  />
+                                  <h4 className="font-medium text-sm truncate">{tool.name}</h4>
+                                  {userProfile?.owned_tools?.some((ownedTool: any) => ownedTool.tool === tool.name || ownedTool.name === tool.name) && (
+                                    <Badge variant="secondary" className="text-xs">Already Owned</Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                  {tool.description}
+                                </p>
+                                {tool.maxQuantity && (
+                                  <Badge variant="secondary" className="text-xs mt-2">
+                                    Qty: {tool.maxQuantity}
+                                  </Badge>
+                                )}
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => window.open(currentUrl, '_blank')}
+                                className="ml-2 flex-shrink-0 w-8 h-8 p-0"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+
+        {/* Footer with Complete Button */}
+        <div className="p-3 md:p-4 border-t bg-muted/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shrink-0">
+          <div className="text-xs md:text-sm text-muted-foreground">
+            Progress: {orderedTools.size + orderedMaterials.size}/{uniqueTools.length + uniqueMaterials.length} items checked
+          </div>
+          
+          {onOrderingComplete && (
+            <Button
+              onClick={onOrderingComplete}
+              disabled={orderedTools.size + orderedMaterials.size < uniqueTools.length + uniqueMaterials.length}
+              className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
+              size="sm"
+            >
+              <Check className="w-4 h-4 mr-2" />
+              Complete Shopping
+            </Button>
+          )}
+        </div>
+      </div>
+    </ScrollableDialog>
   );
 }
