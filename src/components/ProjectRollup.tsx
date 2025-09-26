@@ -12,7 +12,7 @@ interface ItemUsage {
   name: string;
   description: string;
   category: string;
-  required: boolean;
+  alternates: string[];
   locations: {
     phase: string;
     operation: string;
@@ -71,8 +71,8 @@ const RollupSection: React.FC<RollupSectionProps> = ({
   items,
   type
 }) => {
-  const requiredItems = items.filter(item => item.required);
-  const optionalItems = items.filter(item => !item.required);
+  const itemsWithAlternates = items.filter(item => item.alternates && item.alternates.length > 0);
+  const itemsWithoutAlternates = items.filter(item => !item.alternates || item.alternates.length === 0);
   const getCategoryColor = (category: string) => {
     const colors = {
       'Hardware': 'bg-blue-100 text-blue-800',
@@ -89,7 +89,7 @@ const RollupSection: React.FC<RollupSectionProps> = ({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-lg flex items-center gap-2">
-              {item.required ? <CheckCircle className="w-5 h-5 text-green-600" /> : <AlertTriangle className="w-5 h-5 text-yellow-600" />}
+              {item.alternates && item.alternates.length > 0 ? <CheckCircle className="w-5 h-5 text-green-600" /> : <AlertTriangle className="w-5 h-5 text-yellow-600" />}
               {item.name}
             </CardTitle>
             <CardDescription className="mt-1">{item.description}</CardDescription>
@@ -98,8 +98,8 @@ const RollupSection: React.FC<RollupSectionProps> = ({
             <Badge className={getCategoryColor(item.category)} variant="secondary">
               {item.category}
             </Badge>
-            <Badge variant={item.required ? "default" : "outline"}>
-              {item.required ? "Required" : "Optional"}
+            <Badge variant={item.alternates && item.alternates.length > 0 ? "default" : "outline"}>
+              {item.alternates && item.alternates.length > 0 ? `+${item.alternates.length} alternatives` : "No alternatives"}
             </Badge>
           </div>
         </div>
@@ -204,7 +204,7 @@ function extractToolsAndMaterials(project: Project): {
               name: material.name,
               description: material.description,
               category: material.category,
-              required: material.required,
+              alternates: material.alternates || [],
               locations: []
             });
           }
@@ -227,7 +227,7 @@ function extractToolsAndMaterials(project: Project): {
               name: tool.name,
               description: tool.description,
               category: tool.category,
-              required: tool.required,
+              alternates: tool.alternates || [],
               locations: []
             });
           }
@@ -245,13 +245,17 @@ function extractToolsAndMaterials(project: Project): {
   });
   return {
     materials: Array.from(materialsMap.values()).sort((a, b) => {
-      // Sort by required first, then by name
-      if (a.required !== b.required) return a.required ? -1 : 1;
+      // Sort by alternatives count first, then by name
+      const aHasAlts = a.alternates && a.alternates.length > 0;
+      const bHasAlts = b.alternates && b.alternates.length > 0;
+      if (aHasAlts !== bHasAlts) return aHasAlts ? -1 : 1;
       return a.name.localeCompare(b.name);
     }),
     tools: Array.from(toolsMap.values()).sort((a, b) => {
-      // Sort by required first, then by name
-      if (a.required !== b.required) return a.required ? -1 : 1;
+      // Sort by alternatives count first, then by name
+      const aHasAlts = a.alternates && a.alternates.length > 0;
+      const bHasAlts = b.alternates && b.alternates.length > 0;
+      if (aHasAlts !== bHasAlts) return aHasAlts ? -1 : 1;
       return a.name.localeCompare(b.name);
     })
   };

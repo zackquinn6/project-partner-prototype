@@ -177,30 +177,30 @@ export default function UserView({
         let materials = step.materials || [];
         let tools = step.tools || [];
         
-        // Add sample data to specific steps for testing
-        if (step.step?.includes('Measure') || step.id === 'measure-room') {
-          materials = [
-            { id: 'tape-measure', name: 'Measuring Tape', description: '25ft measuring tape', category: 'Hardware', required: true },
-            { id: 'notepad', name: 'Notepad & Pencil', description: 'For recording measurements', category: 'Other', required: true }
-          ];
-          tools = [
-            { id: 'laser-level', name: 'Laser Level', description: 'For checking floor levelness', category: 'Hardware', required: false }
-          ];
-        } else if (step.step?.includes('Calculate') || step.step?.includes('Material')) {
-          materials = [
-            { id: 'tiles', name: 'Floor Tiles', description: 'Ceramic or porcelain tiles', category: 'Consumable', required: true },
-            { id: 'grout', name: 'Tile Grout', description: 'Sanded grout for floor tiles', category: 'Consumable', required: true },
-            { id: 'adhesive', name: 'Tile Adhesive', description: 'Floor tile adhesive', category: 'Consumable', required: true }
-          ];
-        } else if (step.step?.includes('Surface') || step.step?.includes('Prep')) {
-          materials = [
-            { id: 'primer', name: 'Floor Primer', description: 'Concrete floor primer', category: 'Consumable', required: true }
-          ];
-          tools = [
-            { id: 'floor-scraper', name: 'Floor Scraper', description: 'For removing old flooring', category: 'Hand Tool', required: true },
-            { id: 'shop-vac', name: 'Shop Vacuum', description: 'For cleaning debris', category: 'Power Tool', required: true }
-          ];
-        }
+          // Add sample data to specific steps for testing
+          if (step.step?.includes('Measure') || step.id === 'measure-room') {
+            materials = [
+              { id: 'tape-measure', name: 'Measuring Tape', description: '25ft measuring tape', category: 'Hardware', alternates: ['Laser measure', 'Ruler'] },
+              { id: 'notepad', name: 'Notepad & Pencil', description: 'For recording measurements', category: 'Other', alternates: ['Phone app', 'Digital notepad'] }
+            ];
+            tools = [
+              { id: 'laser-level', name: 'Laser Level', description: 'For checking floor levelness', category: 'Hardware', alternates: ['Traditional bubble level', 'Water level'] }
+            ];
+          } else if (step.step?.includes('Calculate') || step.step?.includes('Material')) {
+            materials = [
+              { id: 'tiles', name: 'Floor Tiles', description: 'Ceramic or porcelain tiles', category: 'Consumable', alternates: ['Luxury vinyl', 'Natural stone'] },
+              { id: 'grout', name: 'Tile Grout', description: 'Sanded grout for floor tiles', category: 'Consumable', alternates: ['Unsanded grout', 'Epoxy grout'] },
+              { id: 'adhesive', name: 'Tile Adhesive', description: 'Floor tile adhesive', category: 'Consumable', alternates: ['Mortar mix', 'Premium adhesive'] }
+            ];
+          } else if (step.step?.includes('Surface') || step.step?.includes('Prep')) {
+            materials = [
+              { id: 'primer', name: 'Floor Primer', description: 'Concrete floor primer', category: 'Consumable', alternates: ['Self-priming sealer', 'Bonding agent'] }
+            ];
+            tools = [
+              { id: 'floor-scraper', name: 'Floor Scraper', description: 'For removing old flooring', category: 'Hand Tool', alternates: ['Putty knife', 'Chisel'] },
+              { id: 'shop-vac', name: 'Shop Vacuum', description: 'For cleaning debris', category: 'Power Tool', alternates: ['Regular vacuum', 'Broom and dustpan'] }
+            ];
+          }
         
         return {
           ...step,

@@ -185,11 +185,11 @@ export const createFallbackTileProject = (): Project => {
           }
         ],
         materials: [
-          { id: 'cleaning-supplies', name: 'Floor Cleaning Supplies', description: 'Degreaser, scraper, vacuum', category: 'Consumable' as const, required: true }
+          { id: 'cleaning-supplies', name: 'Floor Cleaning Supplies', description: 'Degreaser, scraper, vacuum', category: 'Consumable' as const, alternates: ['All-purpose cleaner', 'TSP cleaner'] }
         ],
         tools: [
-          { id: 'putty-knife', name: 'Putty Knife', description: 'For scraping and removing debris', category: 'Hand Tool' as const, required: true },
-          { id: 'vacuum', name: 'Shop Vacuum', description: 'For thorough cleaning', category: 'Power Tool' as const, required: true }
+          { id: 'putty-knife', name: 'Putty Knife', description: 'For scraping and removing debris', category: 'Hand Tool' as const, alternates: ['Scraper', 'Paint scraper'] },
+          { id: 'vacuum', name: 'Shop Vacuum', description: 'For thorough cleaning', category: 'Power Tool' as const, alternates: ['Regular vacuum', 'Broom'] }
         ],
         outputs: [{
           id: 'clean-subfloor-output',
@@ -218,13 +218,13 @@ export const createFallbackTileProject = (): Project => {
           }
         ],
         materials: [
-          { id: 'underlayment', name: 'Floor Underlayment', description: 'Cement backer board', category: 'Hardware' as const, required: true },
-          { id: 'backer-screws', name: 'Backer Board Screws', description: '1-1/4" cement board screws', category: 'Hardware' as const, required: true },
-          { id: 'mesh-tape', name: 'Alkali-Resistant Mesh Tape', description: 'For sealing joints', category: 'Consumable' as const, required: true }
+          { id: 'underlayment', name: 'Floor Underlayment', description: 'Cement backer board', category: 'Hardware' as const, alternates: ['Plywood subfloor', 'Fiber cement board'] },
+          { id: 'backer-screws', name: 'Backer Board Screws', description: '1-1/4" cement board screws', category: 'Hardware' as const, alternates: ['Deck screws', 'Construction screws'] },
+          { id: 'mesh-tape', name: 'Alkali-Resistant Mesh Tape', description: 'For sealing joints', category: 'Consumable' as const, alternates: ['Fiberglass tape', 'Paper tape'] }
         ],
         tools: [
-          { id: 'drill', name: 'Power Drill', description: 'For installing screws', category: 'Power Tool' as const, required: true },
-          { id: 'utility-knife', name: 'Utility Knife', description: 'For cutting backer board', category: 'Hand Tool' as const, required: true }
+          { id: 'drill', name: 'Power Drill', description: 'For installing screws', category: 'Power Tool' as const, alternates: ['Impact driver', 'Cordless drill'] },
+          { id: 'utility-knife', name: 'Utility Knife', description: 'For cutting backer board', category: 'Hand Tool' as const, alternates: ['Box cutter', 'Razor knife'] }
         ],
         outputs: [{
           id: 'underlayment-output',
@@ -262,9 +262,9 @@ export const createFallbackTileProject = (): Project => {
         ],
         materials: [],
         tools: [
-          { id: 'chalk-line', name: 'Chalk Line', description: 'For marking layout lines', category: 'Hand Tool' as const, required: true },
-          { id: 'measuring-tape', name: 'Measuring Tape', description: '25ft minimum', category: 'Hand Tool' as const, required: true },
-          { id: 'square', name: 'Carpenter\'s Square', description: 'For checking right angles', category: 'Hand Tool' as const, required: true }
+          { id: 'chalk-line', name: 'Chalk Line', description: 'For marking layout lines', category: 'Hand Tool' as const, alternates: ['Straight edge', 'Laser line'] },
+          { id: 'measuring-tape', name: 'Measuring Tape', description: '25ft minimum', category: 'Hand Tool' as const, alternates: ['Laser measure', 'Ruler'] },
+          { id: 'square', name: 'Carpenter\'s Square', description: 'For checking right angles', category: 'Hand Tool' as const, alternates: ['Speed square', 'T-square'] }
         ],
         outputs: [{
           id: 'center-lines-output',
@@ -299,10 +299,10 @@ export const createFallbackTileProject = (): Project => {
           }
         ],
         materials: [
-          { id: 'sample-tiles', name: 'Sample Tiles', description: 'Several tiles for layout planning', category: 'Consumable' as const, required: true }
+          { id: 'sample-tiles', name: 'Sample Tiles', description: 'Several tiles for layout planning', category: 'Consumable' as const, alternates: ['Full tiles for testing', 'Tile samples'] }
         ],
         tools: [
-          { id: 'tile-spacers', name: 'Tile Spacers', description: 'Various sizes for testing', category: 'Hardware' as const, required: true }
+          { id: 'tile-spacers', name: 'Tile Spacers', description: 'Various sizes for testing', category: 'Hardware' as const, alternates: ['Cardboard spacers', 'Coins for spacing'] }
         ],
         outputs: [{
           id: 'dry-layout-output',
@@ -347,11 +347,11 @@ export const createFallbackTileProject = (): Project => {
           }
         ],
         materials: [
-          { id: 'tile-adhesive', name: 'Tile Adhesive/Mortar', description: 'Premium grade mortar', category: 'Consumable' as const, required: true }
+          { id: 'tile-adhesive', name: 'Tile Adhesive/Mortar', description: 'Premium grade mortar', category: 'Consumable' as const, alternates: ['Modified mortar', 'Rapid-set adhesive'] }
         ],
         tools: [
-          { id: 'mixing-paddle', name: 'Mixing Paddle & Drill', description: 'For consistent mixing', category: 'Power Tool' as const, required: true },
-          { id: 'mixing-bucket', name: 'Mixing Bucket', description: 'Clean 5-gallon bucket', category: 'Hardware' as const, required: true }
+          { id: 'mixing-paddle', name: 'Mixing Paddle & Drill', description: 'For consistent mixing', category: 'Power Tool' as const, alternates: ['Hand mixing tool', 'Whisk attachment'] },
+          { id: 'mixing-bucket', name: 'Mixing Bucket', description: 'Clean 5-gallon bucket', category: 'Hardware' as const, alternates: ['Large mixing bowl', 'Mortar tub'] }
         ],
         outputs: [{
           id: 'mixed-adhesive-output',
@@ -387,7 +387,7 @@ export const createFallbackTileProject = (): Project => {
         ],
         materials: [],
         tools: [
-          { id: 'notched-trowel', name: 'Notched Trowel', description: '1/4" x 3/8" notched trowel', category: 'Hand Tool' as const, required: true }
+          { id: 'notched-trowel', name: 'Notched Trowel', description: '1/4" x 3/8" notched trowel', category: 'Hand Tool' as const, alternates: ['Square notch trowel', 'V-notch trowel'] }
         ],
         outputs: [{
           id: 'applied-adhesive-output',
@@ -431,8 +431,8 @@ export const createFallbackTileProject = (): Project => {
         ],
         materials: [],
         tools: [
-          { id: 'tile-cutter', name: 'Wet Tile Saw', description: 'For cutting tiles to size', category: 'Power Tool' as const, required: true },
-          { id: 'tile-nippers', name: 'Tile Nippers', description: 'For curved and small cuts', category: 'Hand Tool' as const, required: false }
+          { id: 'tile-cutter', name: 'Wet Tile Saw', description: 'For cutting tiles to size', category: 'Power Tool' as const, alternates: ['Manual tile cutter', 'Angle grinder'] },
+          { id: 'tile-nippers', name: 'Tile Nippers', description: 'For curved and small cuts', category: 'Hand Tool' as const, alternates: ['Dremel tool', 'Score and snap'] }
         ],
         outputs: [{
           id: 'cut-tiles-output',
@@ -473,12 +473,12 @@ export const createFallbackTileProject = (): Project => {
           }
         ],
         materials: [
-          { id: 'floor-tiles', name: 'Floor Tiles', description: 'Main installation tiles', category: 'Consumable' as const, required: true }
+          { id: 'floor-tiles', name: 'Floor Tiles', description: 'Main installation tiles', category: 'Consumable' as const, alternates: ['Ceramic tiles', 'Porcelain tiles', 'Natural stone'] }
         ],
         tools: [
-          { id: 'tile-spacers', name: 'Tile Spacers', description: 'For consistent gaps', category: 'Hardware' as const, required: true },
-          { id: 'rubber-mallet', name: 'Rubber Mallet', description: 'For setting tiles level', category: 'Hand Tool' as const, required: true },
-          { id: 'level-4ft', name: '4-Foot Level', description: 'For checking tile plane', category: 'Hand Tool' as const, required: true }
+          { id: 'tile-spacers', name: 'Tile Spacers', description: 'For consistent gaps', category: 'Hardware' as const, alternates: ['Cardboard spacers', 'Coins'] },
+          { id: 'rubber-mallet', name: 'Rubber Mallet', description: 'For setting tiles level', category: 'Hand Tool' as const, alternates: ['Dead blow hammer', 'Tapping block'] },
+          { id: 'level-4ft', name: '4-Foot Level', description: 'For checking tile plane', category: 'Hand Tool' as const, alternates: ['2-foot level', 'Laser level'] }
         ],
         outputs: [{
           id: 'set-tiles-output',
@@ -514,8 +514,8 @@ export const createFallbackTileProject = (): Project => {
         ],
         materials: [],
         tools: [
-          { id: 'rubber-mallet', name: 'Rubber Mallet', description: 'For final leveling', category: 'Hand Tool' as const, required: true },
-          { id: 'putty-knife', name: 'Putty Knife', description: 'For cleaning joints', category: 'Hand Tool' as const, required: true }
+          { id: 'rubber-mallet', name: 'Rubber Mallet', description: 'For final leveling', category: 'Hand Tool' as const, alternates: ['Dead blow hammer', 'Tapping block'] },
+          { id: 'putty-knife', name: 'Putty Knife', description: 'For cleaning joints', category: 'Hand Tool' as const, alternates: ['Scraper', 'Margin trowel'] }
         ],
         outputs: [{
           id: 'leveled-tiles-output',
@@ -560,10 +560,10 @@ export const createFallbackTileProject = (): Project => {
           }
         ],
         materials: [
-          { id: 'tile-grout', name: 'Sanded Grout', description: 'For joints 1/8" and larger', category: 'Consumable' as const, required: true }
+          { id: 'tile-grout', name: 'Sanded Grout', description: 'For joints 1/8" and larger', category: 'Consumable' as const, alternates: ['Unsanded grout', 'Epoxy grout'] }
         ],
         tools: [
-          { id: 'mixing-paddle', name: 'Mixing Paddle', description: 'For grout mixing', category: 'Power Tool' as const, required: true }
+          { id: 'mixing-paddle', name: 'Mixing Paddle', description: 'For grout mixing', category: 'Power Tool' as const, alternates: ['Hand mixing tool', 'Whisk attachment'] }
         ],
         outputs: [{
           id: 'grout-ready-output',
@@ -593,7 +593,7 @@ export const createFallbackTileProject = (): Project => {
         ],
         materials: [],
         tools: [
-          { id: 'rubber-float', name: 'Rubber Grout Float', description: 'For applying grout', category: 'Hand Tool' as const, required: true }
+          { id: 'rubber-float', name: 'Rubber Grout Float', description: 'For applying grout', category: 'Hand Tool' as const, alternates: ['Foam float', 'Hard rubber float'] }
         ],
         outputs: [{
           id: 'grout-applied-output',
@@ -629,7 +629,7 @@ export const createFallbackTileProject = (): Project => {
         ],
         materials: [],
         tools: [
-          { id: 'sponges', name: 'Grout Sponges', description: 'Large pore sponges for cleanup', category: 'Hardware' as const, required: true }
+          { id: 'sponges', name: 'Grout Sponges', description: 'Large pore sponges for cleanup', category: 'Hardware' as const, alternates: ['Microfiber cloths', 'Clean rags'] }
         ],
         outputs: [{
           id: 'finished-grout-output',
@@ -666,10 +666,10 @@ export const createFallbackTileProject = (): Project => {
           }
         ],
         materials: [
-          { id: 'grout-sealer', name: 'Grout Sealer', description: 'Penetrating sealer', category: 'Consumable' as const, required: true }
+          { id: 'grout-sealer', name: 'Grout Sealer', description: 'Penetrating sealer', category: 'Consumable' as const, alternates: ['Silicone sealer', 'Acrylic sealer'] }
         ],
         tools: [
-          { id: 'sealer-brush', name: 'Small Brush or Applicator', description: 'For precise sealer application', category: 'Hand Tool' as const, required: true }
+          { id: 'sealer-brush', name: 'Small Brush or Applicator', description: 'For precise sealer application', category: 'Hand Tool' as const, alternates: ['Foam brush', 'Applicator bottle'] }
         ],
         outputs: [{
           id: 'sealed-grout-output',
@@ -698,10 +698,10 @@ export const createFallbackTileProject = (): Project => {
           }
         ],
         materials: [
-          { id: 'transition-strips', name: 'Transition Strips', description: 'Metal or wood transitions', category: 'Hardware' as const, required: false }
+          { id: 'transition-strips', name: 'Transition Strips', description: 'Metal or wood transitions', category: 'Hardware' as const, alternates: ['T-molding', 'Reducer strips'] }
         ],
         tools: [
-          { id: 'drill', name: 'Power Drill', description: 'For securing transitions', category: 'Power Tool' as const, required: true }
+          { id: 'drill', name: 'Power Drill', description: 'For securing transitions', category: 'Power Tool' as const, alternates: ['Impact driver', 'Screwdriver'] }
         ],
         outputs: [{
           id: 'transitions-output',

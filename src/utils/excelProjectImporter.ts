@@ -149,7 +149,7 @@ function convertExcelDataToProject(excelRows: ExcelProjectRow[], projectId: stri
         name: row.material_name,
         description: row.material_description || row.material_name,
         category: 'Hardware',
-        required: true
+        alternates: []
       });
     }
     
@@ -161,7 +161,7 @@ function convertExcelDataToProject(excelRows: ExcelProjectRow[], projectId: stri
         name: row.tool_name,
         description: row.tool_description || row.tool_name,
         category: 'Power Tool',
-        required: true
+        alternates: []
       });
     }
     

@@ -12,7 +12,7 @@ interface StepMaterial {
   name: string;
   description?: string;
   category?: string;
-  required?: boolean;
+  alternates?: string[];
   quantity?: number;
   purpose?: string;
 }
@@ -56,7 +56,7 @@ export function CompactMaterialsTable({ materials, onMaterialsChange, onAddMater
                 <TableHead className="text-xs py-2">Material</TableHead>
                 <TableHead className="text-xs py-2 w-16">Qty</TableHead>
                 <TableHead className="text-xs py-2">Purpose</TableHead>
-                <TableHead className="text-xs py-2 w-20">Required</TableHead>
+                <TableHead className="text-xs py-2 w-32">Alternates</TableHead>
                 <TableHead className="text-xs py-2 w-16"></TableHead>
               </TableRow>
             </TableHeader>
@@ -95,10 +95,12 @@ export function CompactMaterialsTable({ materials, onMaterialsChange, onAddMater
                       className="text-xs h-6"
                     />
                   </TableCell>
-                  <TableCell className="py-2 text-center">
-                    <Checkbox
-                      checked={material.required || false}
-                      onCheckedChange={(checked) => handleMaterialChange(index, 'required', checked)}
+                  <TableCell className="py-2">
+                    <Input
+                      value={material.alternates?.join(', ') || ''}
+                      onChange={(e) => handleMaterialChange(index, 'alternates', e.target.value.split(',').map(alt => alt.trim()).filter(alt => alt))}
+                      placeholder="Alt options..."
+                      className="text-xs h-6"
                     />
                   </TableCell>
                   <TableCell className="py-2 text-center">

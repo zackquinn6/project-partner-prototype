@@ -65,7 +65,7 @@ export function extractProjectToolsAndMaterials(projectRun: ProjectRun) {
                 name: material.name,
                 description: material.description || '',
                 category: material.category || 'Other',
-                required: material.required !== false,
+                alternates: material.alternates || [],
                 totalQuantity: 1,
               };
               materialsMap.set(key, newMaterial);
@@ -88,7 +88,7 @@ export function extractProjectToolsAndMaterials(projectRun: ProjectRun) {
                 name: tool.name,
                 description: tool.description || '',
                 category: tool.category || 'Other',
-                required: tool.required !== false,
+                alternates: tool.alternates || [],
                 maxQuantity: toolQuantity,
               };
               toolsMap.set(key, newTool);

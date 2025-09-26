@@ -323,7 +323,7 @@ IMPORTANT FORMAT NOTES:
           name: rowData.tool_name,
           description: rowData.tool_description || '',
           category: 'Other' as const,
-          required: true
+          alternates: []
         };
         
         // Allow multiple tools with same name from different rows
@@ -337,7 +337,7 @@ IMPORTANT FORMAT NOTES:
           name: rowData.material_name,
           description: rowData.material_description || '',
           category: 'Other' as const,
-          required: true
+          alternates: []
         };
         
         // Allow multiple materials with same name from different rows

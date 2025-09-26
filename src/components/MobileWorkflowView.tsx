@@ -248,9 +248,9 @@ export function MobileWorkflowView({
                                   {material.description}
                                 </p>
                               )}
-                              {material.required && (
-                                <Badge variant="destructive" className="text-xs mt-1">Required</Badge>
-                              )}
+              {material.alternates && material.alternates.length > 0 && (
+                <Badge variant="outline" className="text-xs mt-1">+{material.alternates.length} alternatives</Badge>
+              )}
                             </div>
                           </div>
                         );
@@ -313,9 +313,9 @@ export function MobileWorkflowView({
                                   {tool.description}
                                 </p>
                               )}
-                              {tool.required && (
-                                <Badge variant="destructive" className="text-xs mt-1">Required</Badge>
-                              )}
+              {tool.alternates && tool.alternates.length > 0 && (
+                <Badge variant="outline" className="text-xs mt-1">+{tool.alternates.length} alternatives</Badge>
+              )}
                             </div>
                           </div>
                         );

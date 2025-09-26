@@ -792,7 +792,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2">
                                       <div className="font-medium">{tool.name}</div>
-                                      {tool.required && <Badge variant="destructive" className="text-xs">Required</Badge>}
+                                      {tool.alternates && tool.alternates.length > 0 && <Badge variant="outline" className="text-xs">+{tool.alternates.length} alt</Badge>}
                                     </div>
                                     {tool.category && <Badge variant="outline" className="text-xs mt-1">{tool.category}</Badge>}
                                     {tool.description && <div className="text-sm text-muted-foreground mt-1">{tool.description}</div>}

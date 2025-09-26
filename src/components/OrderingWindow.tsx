@@ -137,25 +137,25 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
           // Add sample data to specific steps for testing - same logic as UserView
           if (step.step?.includes('Measure') || step.id === 'measure-room') {
             materials = [
-              { id: 'tape-measure', name: 'Measuring Tape', description: '25ft measuring tape', category: 'Hardware', required: true },
-              { id: 'notepad', name: 'Notepad & Pencil', description: 'For recording measurements', category: 'Other', required: true }
+              { id: 'tape-measure', name: 'Measuring Tape', description: '25ft measuring tape', category: 'Hardware', alternates: ['Laser measure', 'Ruler'] },
+              { id: 'notepad', name: 'Notepad & Pencil', description: 'For recording measurements', category: 'Other', alternates: ['Phone app', 'Digital notepad'] }
             ];
             tools = [
-              { id: 'laser-level', name: 'Laser Level', description: 'For checking floor levelness', category: 'Hardware', required: false }
+              { id: 'laser-level', name: 'Laser Level', description: 'For checking floor levelness', category: 'Hardware', alternates: ['Traditional bubble level', 'Water level'] }
             ];
           } else if (step.step?.includes('Calculate') || step.step?.includes('Material')) {
             materials = [
-              { id: 'tiles', name: 'Floor Tiles', description: 'Ceramic or porcelain tiles', category: 'Consumable', required: true },
-              { id: 'grout', name: 'Tile Grout', description: 'Sanded grout for floor tiles', category: 'Consumable', required: true },
-              { id: 'adhesive', name: 'Tile Adhesive', description: 'Floor tile adhesive', category: 'Consumable', required: true }
+              { id: 'tiles', name: 'Floor Tiles', description: 'Ceramic or porcelain tiles', category: 'Consumable', alternates: ['Luxury vinyl', 'Natural stone'] },
+              { id: 'grout', name: 'Tile Grout', description: 'Sanded grout for floor tiles', category: 'Consumable', alternates: ['Unsanded grout', 'Epoxy grout'] },
+              { id: 'adhesive', name: 'Tile Adhesive', description: 'Floor tile adhesive', category: 'Consumable', alternates: ['Mortar mix', 'Premium adhesive'] }
             ];
           } else if (step.step?.includes('Surface') || step.step?.includes('Prep')) {
             materials = [
-              { id: 'primer', name: 'Floor Primer', description: 'Concrete floor primer', category: 'Consumable', required: true }
+              { id: 'primer', name: 'Floor Primer', description: 'Concrete floor primer', category: 'Consumable', alternates: ['Self-priming sealer', 'Bonding agent'] }
             ];
             tools = [
-              { id: 'floor-scraper', name: 'Floor Scraper', description: 'For removing old flooring', category: 'Hand Tool', required: true },
-              { id: 'shop-vac', name: 'Shop Vacuum', description: 'For cleaning debris', category: 'Power Tool', required: true }
+              { id: 'floor-scraper', name: 'Floor Scraper', description: 'For removing old flooring', category: 'Hand Tool', alternates: ['Putty knife', 'Chisel'] },
+              { id: 'shop-vac', name: 'Shop Vacuum', description: 'For cleaning debris', category: 'Power Tool', alternates: ['Regular vacuum', 'Broom and dustpan'] }
             ];
           }
           
@@ -182,7 +182,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                   name: material.name,
                   description: material.description || '',
                   category: material.category || 'Other',
-                  required: material.required !== false,
+                  alternates: material.alternates || [],
                   totalQuantity: 1,
                   usedInSteps: [step.step]
                 };
@@ -207,7 +207,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                   name: tool.name,
                   description: tool.description || '',
                   category: tool.category || 'Other',
-                  required: tool.required !== false,
+                  alternates: tool.alternates || [],
                   maxQuantity: toolQuantity,
                   usedInSteps: [step.step]
                 };
@@ -576,10 +576,10 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                   <span className="font-medium">Category:</span>
                   <p className="text-muted-foreground">{selectedItem?.category || 'N/A'}</p>
                 </div>
-                <div>
-                  <span className="font-medium">Required:</span>
-                  <p className="text-muted-foreground">{selectedItem?.required ? 'Yes' : 'No'}</p>
-                </div>
+              <div>
+                <span className="font-medium">Alternates:</span>
+                <p className="text-muted-foreground">{selectedItem?.alternates?.length > 0 ? selectedItem.alternates.join(', ') : 'None'}</p>
+              </div>
                 {selectedItem?.totalQuantity && (
                   <div>
                     <span className="font-medium">Total Quantity:</span>
@@ -955,10 +955,10 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                 <span className="font-medium">Category:</span>
                 <p className="text-muted-foreground">{selectedItem?.category || 'N/A'}</p>
               </div>
-              <div>
-                <span className="font-medium">Required:</span>
-                <p className="text-muted-foreground">{selectedItem?.required ? 'Yes' : 'No'}</p>
-              </div>
+            <div>
+              <span className="font-medium">Alternates:</span>
+              <p className="text-muted-foreground">{selectedItem?.alternates?.length > 0 ? selectedItem.alternates.join(', ') : 'None'}</p>
+            </div>
               {selectedItem?.totalQuantity && (
                 <div>
                   <span className="font-medium">Total Quantity:</span>

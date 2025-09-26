@@ -4,7 +4,7 @@ export interface Material {
   name: string;
   description: string;
   category: 'Hardware' | 'Software' | 'Consumable' | 'Other';
-  required: boolean;
+  alternates: string[];
 }
 
 export interface Tool {
@@ -12,7 +12,7 @@ export interface Tool {
   name: string;
   description: string;
   category: 'Hardware' | 'Software' | 'Hand Tool' | 'Power Tool' | 'Other';
-  required: boolean;
+  alternates: string[];
 }
 
 // New library interfaces matching database schema

@@ -720,7 +720,7 @@ export default function EditWorkflowView({
         name: item.item,
         description: item.description || '',
         category: 'Hand Tool',
-        required: false,
+        alternates: [],
         quantity: item.quantity
       }));
       updateEditingStep('tools', [...(editingStep?.tools || []), ...newTools]);
@@ -732,7 +732,7 @@ export default function EditWorkflowView({
         name: item.item,
         description: item.description || '',
         category: 'Consumable',
-        required: false,
+        alternates: [],
         quantity: item.quantity
       }));
       updateEditingStep('materials', [...(editingStep?.materials || []), ...newMaterials]);
