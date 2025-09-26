@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { 
   Calendar as CalendarIcon, 
   Clock, 
@@ -24,8 +25,7 @@ import {
   Target,
   AlertTriangle,
   TrendingUp,
-  Brain,
-  Calendar
+  Brain
 } from 'lucide-react';
 import { format, addDays, parseISO, addHours } from 'date-fns';
 import { Project } from '@/interfaces/Project';
@@ -51,18 +51,33 @@ interface ProjectSchedulerProps {
   projectRun: ProjectRun;
 }
 
-interface TeamMember extends Worker {
-  hoursAvailable: number;
-  startDate?: Date;
-  endDate?: Date;
+interface TeamMember {
+  id: string;
+  name: string;
+  type: 'owner' | 'helper';
+  skillLevel: 'novice' | 'intermediate' | 'expert';
+  maxTotalHours: number;
+  weekendsOnly: boolean;
+  weekdaysAfterFivePm: boolean;
+  workingHours: {
+    start: string;
+    end: string;
+  };
+  availability: {
+    [date: string]: {
+      start: string;
+      end: string;
+      available: boolean;
+    }[];
+  };
+  costPerHour?: number;
 }
 
-interface WorkingHours {
-  start: string;
-  end: string;
-  daysOfWeek: number[];
-  weekendsOnly: boolean;
-  afterHoursOnly: boolean;
+interface GlobalSettings {
+  quietHours: {
+    start: string;
+    end: string;
+  };
 }
 
 const planningModes: { mode: PlanningMode; name: string; description: string }[] = [
@@ -97,23 +112,36 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
       name: 'You', 
       type: 'owner',
       skillLevel: 'intermediate', 
-      hoursAvailable: 4,
-      availability: []
+      maxTotalHours: 120,
+      weekendsOnly: false,
+      weekdaysAfterFivePm: false,
+      workingHours: {
+        start: '09:00',
+        end: '17:00'
+      },
+      availability: {},
+      costPerHour: 0
     }
   ]);
   
-  // Working hours
-  const [workingHours, setWorkingHours] = useState<WorkingHours>({
-    start: '09:00',
-    end: '17:00',
-    daysOfWeek: [1, 2, 3, 4, 5], // Monday-Friday
-    weekendsOnly: false,
-    afterHoursOnly: false
+  // Global settings
+  const [globalSettings, setGlobalSettings] = useState<GlobalSettings>({
+    quietHours: {
+      start: '21:00',
+      end: '07:00'
+    }
   });
 
-  // Convert project to scheduling tasks
-  const schedulingTasks = useMemo(() => {
+  // Calendar popup state
+  const [calendarOpen, setCalendarOpen] = useState<string | null>(null);
+
+  // Convert project to scheduling tasks and calculate totals
+  const { schedulingTasks, projectTotals } = useMemo(() => {
     const tasks: Task[] = [];
+    let lowTotal = 0;
+    let mediumTotal = 0;
+    let highTotal = 0;
+    
     const projectSize = parseFloat(projectRun?.projectSize || '1') || 1;
     const scalingFactor = projectRun?.scalingFactor || 1;
     const skillMultiplier = projectRun?.skillLevelMultiplier || 1;
@@ -121,23 +149,31 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
     project.phases.forEach(phase => {
       phase.operations.forEach(operation => {
         operation.steps.forEach((step, index) => {
-          const baseWorkTime = step.timeEstimation?.variableTime?.medium || 1;
-          const adjustedWorkTime = baseWorkTime * projectSize * scalingFactor * skillMultiplier;
+          const baseTimeLow = step.timeEstimation?.variableTime?.low || 1;
+          const baseTimeMed = step.timeEstimation?.variableTime?.medium || 1;
+          const baseTimeHigh = step.timeEstimation?.variableTime?.high || 1;
+          
+          const adjustedLow = baseTimeLow * projectSize * scalingFactor * skillMultiplier;
+          const adjustedMed = baseTimeMed * projectSize * scalingFactor * skillMultiplier;
+          const adjustedHigh = baseTimeHigh * projectSize * scalingFactor * skillMultiplier;
+          
+          lowTotal += adjustedLow;
+          mediumTotal += adjustedMed;
+          highTotal += adjustedHigh;
           
           const dependencies: string[] = [];
           if (index > 0) {
-            // Depend on previous step in same operation
             dependencies.push(`${operation.id}-step-${index - 1}`);
           }
 
           tasks.push({
             id: `${operation.id}-step-${index}`,
             title: step.step,
-            estimatedHours: adjustedWorkTime,
-            minContiguousHours: Math.min(adjustedWorkTime, 2), // Assume 2-hour minimum blocks
+            estimatedHours: adjustedMed,
+            minContiguousHours: Math.min(adjustedMed, 2),
             dependencies,
-            tags: [], // Default empty tags since WorkflowStep doesn't have tags
-            confidence: 0.7, // Default confidence since WorkflowStep doesn't have confidence
+            tags: [],
+            confidence: 0.7,
             phaseId: phase.id,
             operationId: operation.id
           });
@@ -145,28 +181,22 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
       });
     });
 
-    return tasks;
+    return { 
+      schedulingTasks: tasks, 
+      projectTotals: { low: lowTotal, medium: mediumTotal, high: highTotal }
+    };
   }, [project, projectRun]);
 
-  // Handle weekends only toggle
-  const handleWeekendsOnly = (checked: boolean) => {
-    setWorkingHours(prev => ({
-      ...prev,
-      weekendsOnly: checked,
-      daysOfWeek: checked ? [0, 6] : [1, 2, 3, 4, 5],
-      afterHoursOnly: checked ? false : prev.afterHoursOnly
-    }));
+  // Update team member
+  const updateTeamMember = (id: string, updates: Partial<TeamMember>) => {
+    setTeamMembers(prev => prev.map(member => 
+      member.id === id ? { ...member, ...updates } : member
+    ));
   };
 
-  // Handle after hours only toggle
-  const handleAfterHoursOnly = (checked: boolean) => {
-    setWorkingHours(prev => ({
-      ...prev,
-      afterHoursOnly: checked,
-      start: checked ? '17:00' : '09:00',
-      end: checked ? '22:00' : '17:00',
-      weekendsOnly: checked ? false : prev.weekendsOnly
-    }));
+  // Remove team member
+  const removeTeamMember = (id: string) => {
+    setTeamMembers(prev => prev.filter(member => member.id !== id));
   };
 
   // Generate schedule with advanced algorithm
@@ -190,12 +220,12 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
         })),
         siteConstraints: {
           allowedWorkHours: {
-            weekdays: { start: workingHours.start, end: workingHours.end },
-            weekends: { start: workingHours.start, end: workingHours.end }
+            weekdays: { start: '07:00', end: '21:00' },
+            weekends: { start: '07:00', end: '21:00' }
           },
-          weekendsOnly: workingHours.weekendsOnly,
-          allowNightWork: workingHours.afterHoursOnly,
-          noiseCurfew: '22:00'
+          weekendsOnly: false,
+          allowNightWork: false,
+          noiseCurfew: globalSettings.quietHours.start
         },
         blackoutDates: [],
         riskTolerance,
@@ -229,8 +259,14 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
       name: 'New Team Member',
       type: 'helper',
       skillLevel: 'intermediate',
-      hoursAvailable: 4,
-      availability: [],
+      maxTotalHours: 80,
+      weekendsOnly: false,
+      weekdaysAfterFivePm: false,
+      workingHours: {
+        start: '09:00',
+        end: '17:00'
+      },
+      availability: {},
       costPerHour: 25
     };
     setTeamMembers([...teamMembers, newMember]);
@@ -272,9 +308,9 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
             return acc;
           }, {} as Record<string, any>),
           preferences: {
-            preferredStartTime: workingHours.start,
-            maxHoursPerDay: teamMembers.reduce((sum, member) => sum + member.hoursAvailable, 0),
-            preferredDays: workingHours.daysOfWeek
+            preferredStartTime: '09:00',
+            maxHoursPerDay: 8,
+            preferredDays: [1, 2, 3, 4, 5, 6, 0]
           }
         }
       };
@@ -396,134 +432,204 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
               </Card>
             </div>
 
-            {/* Working Hours Section */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 mb-3">
-                <Settings className="w-4 h-4 text-primary" />
-                <h3 className="text-base font-semibold">Working Hours & Availability</h3>
-              </div>
-              
+            {/* Global Settings & Project Totals */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card>
-                <CardContent className="p-4 space-y-4">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="weekends-only"
-                        checked={workingHours.weekendsOnly}
-                        onCheckedChange={handleWeekendsOnly}
-                      />
-                      <Label htmlFor="weekends-only" className="text-sm font-medium">
-                        Weekends Only
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="after-hours"
-                        checked={workingHours.afterHoursOnly}
-                        onCheckedChange={handleAfterHoursOnly}
-                      />
-                      <Label htmlFor="after-hours" className="text-sm font-medium">
-                        After 5pm Only
-                      </Label>
-                    </div>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-primary" />
+                    <CardTitle className="text-sm">Quiet Hours (Global)</CardTitle>
                   </div>
-
+                </CardHeader>
+                <CardContent className="pt-0">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <Label className="text-xs font-medium">Start Time</Label>
+                      <Label className="text-xs font-medium">From</Label>
                       <Input 
                         type="time" 
-                        value={workingHours.start}
-                        onChange={(e) => setWorkingHours({...workingHours, start: e.target.value})}
+                        value={globalSettings.quietHours.start}
+                        onChange={(e) => setGlobalSettings(prev => ({
+                          ...prev,
+                          quietHours: { ...prev.quietHours, start: e.target.value }
+                        }))}
                         className="h-8 text-sm"
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs font-medium">End Time</Label>
+                      <Label className="text-xs font-medium">To</Label>
                       <Input 
                         type="time" 
-                        value={workingHours.end}
-                        onChange={(e) => setWorkingHours({...workingHours, end: e.target.value})}
+                        value={globalSettings.quietHours.end}
+                        onChange={(e) => setGlobalSettings(prev => ({
+                          ...prev,
+                          quietHours: { ...prev.quietHours, end: e.target.value }
+                        }))}
                         className="h-8 text-sm"
                       />
                     </div>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    No work allowed during quiet hours
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-primary" />
+                    <CardTitle className="text-sm">Project Time Estimates</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-green-600 font-medium">Low:</span>
+                      <span className="font-mono">{formatTime(projectTotals.low)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-yellow-600 font-medium">Medium:</span>
+                      <span className="font-mono">{formatTime(projectTotals.medium)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-red-600 font-medium">High:</span>
+                      <span className="font-mono">{formatTime(projectTotals.high)}</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Raw project time (before scheduling)
+                  </p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Team Section */}
+            {/* Team Members & Working Hours */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-primary" />
-                  <h3 className="text-base font-semibold">Team Members</h3>
+                  <h3 className="text-base font-semibold">Team Members & Availability</h3>
                 </div>
                 <Button onClick={addTeamMember} size="sm" className="h-8">
                   <Plus className="w-3 h-3 mr-1" />
-                  Add
+                  Add Member
                 </Button>
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {teamMembers.map((member, index) => (
                   <Card key={member.id} className="border border-border">
-                    <CardContent className="p-3">
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                        <div className="space-y-1">
-                          <Label className="text-xs font-medium">Name</Label>
-                          <Input 
-                            value={member.name}
-                            onChange={(e) => {
-                              const updated = [...teamMembers];
-                              updated[index].name = e.target.value;
-                              setTeamMembers(updated);
-                            }}
-                            className="h-8 text-sm"
-                          />
+                    <CardContent className="p-4">
+                      <div className="space-y-4">
+                        {/* Basic Info */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div className="space-y-1">
+                            <Label className="text-xs font-medium">Name</Label>
+                            <Input 
+                              value={member.name}
+                              onChange={(e) => updateTeamMember(member.id, { name: e.target.value })}
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs font-medium">Skill Level</Label>
+                            <Select 
+                              value={member.skillLevel}
+                              onValueChange={(value: any) => updateTeamMember(member.id, { skillLevel: value })}
+                            >
+                              <SelectTrigger className="h-8 text-sm">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="novice">Novice</SelectItem>
+                                <SelectItem value="intermediate">Intermediate</SelectItem>
+                                <SelectItem value="expert">Expert</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs font-medium">Max Total Hours (Project)</Label>
+                            <Input 
+                              type="number"
+                              min="1"
+                              value={member.maxTotalHours}
+                              onChange={(e) => updateTeamMember(member.id, { 
+                                maxTotalHours: parseInt(e.target.value) || 1 
+                              })}
+                              className="h-8 text-sm"
+                            />
+                          </div>
                         </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs font-medium">Skill Level</Label>
-                          <Select 
-                            value={member.skillLevel}
-                            onValueChange={(value: any) => {
-                              const updated = [...teamMembers];
-                              updated[index].skillLevel = value;
-                              setTeamMembers(updated);
-                            }}
+
+                        {/* Working Hours */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <Label className="text-xs font-medium">Start Time</Label>
+                            <Input 
+                              type="time" 
+                              value={member.workingHours.start}
+                              onChange={(e) => updateTeamMember(member.id, {
+                                workingHours: { ...member.workingHours, start: e.target.value }
+                              })}
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs font-medium">End Time</Label>
+                            <Input 
+                              type="time" 
+                              value={member.workingHours.end}
+                              onChange={(e) => updateTeamMember(member.id, {
+                                workingHours: { ...member.workingHours, end: e.target.value }
+                              })}
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Availability Options */}
+                        <div className="flex flex-wrap gap-4 items-center">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`weekends-only-${member.id}`}
+                              checked={member.weekendsOnly}
+                              onCheckedChange={(checked) => updateTeamMember(member.id, { 
+                                weekendsOnly: checked as boolean,
+                                weekdaysAfterFivePm: false
+                              })}
+                            />
+                            <Label htmlFor={`weekends-only-${member.id}`} className="text-sm font-medium">
+                              Weekends Only
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`weekdays-after-5-${member.id}`}
+                              checked={member.weekdaysAfterFivePm}
+                              onCheckedChange={(checked) => updateTeamMember(member.id, { 
+                                weekdaysAfterFivePm: checked as boolean,
+                                weekendsOnly: false
+                              })}
+                            />
+                            <Label htmlFor={`weekdays-after-5-${member.id}`} className="text-sm font-medium">
+                              Weekdays After 5pm
+                            </Label>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setCalendarOpen(member.id)}
+                            className="h-8"
                           >
-                            <SelectTrigger className="h-8 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="novice">Novice</SelectItem>
-                              <SelectItem value="intermediate">Intermediate</SelectItem>
-                              <SelectItem value="expert">Expert</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs font-medium">Hours/Day</Label>
-                          <Input 
-                            type="number"
-                            min="1"
-                            max="12"
-                            value={member.hoursAvailable}
-                            onChange={(e) => {
-                              const updated = [...teamMembers];
-                              updated[index].hoursAvailable = parseInt(e.target.value) || 1;
-                              setTeamMembers(updated);
-                            }}
-                            className="h-8 text-sm"
-                          />
-                        </div>
-                        <div className="flex items-end">
+                            <CalendarIcon className="w-3 h-3 mr-1" />
+                            Calendar
+                          </Button>
                           {teamMembers.length > 1 && (
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => setTeamMembers(teamMembers.filter((_, i) => i !== index))}
-                              className="h-8 w-8 p-0"
+                              onClick={() => removeTeamMember(member.id)}
+                              className="h-8"
                             >
                               <Trash2 className="w-3 h-3" />
                             </Button>
@@ -604,6 +710,45 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
           </div>
         </div>
       </DialogContent>
+      
+      {/* Calendar Dialog for Team Member Availability */}
+      {calendarOpen && (
+        <Dialog open={!!calendarOpen} onOpenChange={() => setCalendarOpen(null)}>
+          <DialogContent className="max-w-[500px]">
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold">
+                  {teamMembers.find(m => m.id === calendarOpen)?.name} - Availability Calendar
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Select dates to set specific availability
+                </p>
+              </div>
+              
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <CalendarComponent
+                  mode="multiple"
+                  className="rounded-md border bg-background pointer-events-auto"
+                />
+              </div>
+              
+              <div className="text-xs text-muted-foreground">
+                <p><strong>Note:</strong> This calendar allows day-by-day updates to override default working hours.</p>
+                <p>Selected dates will use custom availability settings.</p>
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setCalendarOpen(null)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => setCalendarOpen(null)}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </Dialog>
   );
 };
