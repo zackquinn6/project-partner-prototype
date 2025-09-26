@@ -119,12 +119,13 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
         }
         
         operation.steps.forEach((step, stepIndex) => {
-          // Only include materials/tools from incomplete steps
+          // Include materials/tools from ALL steps for the shopping cart
+          // The ordering step should show everything needed, not just incomplete steps
           const stepId = step.id || `step-${phaseIndex}-${opIndex}-${stepIndex}`;
           const isStepComplete = completedSteps?.has(stepId) || false;
           
-          // Process materials - add quantities (materials are consumed per step)
-          if (!isStepComplete && step.materials && Array.isArray(step.materials) && step.materials.length > 0) {
+          // Process materials - include from all steps (completed or not) since we need to buy everything
+          if (step.materials && Array.isArray(step.materials) && step.materials.length > 0) {
             step.materials.forEach((material, materialIndex) => {
               const key = material.id || material.name || `material-${materialIndex}-${Date.now()}`;
               if (materialsMap.has(key)) {
@@ -146,8 +147,8 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
             });
           }
 
-          // Process tools - track max quantity needed in any single step (tools are reused)
-          if (!isStepComplete && step.tools && Array.isArray(step.tools) && step.tools.length > 0) {
+          // Process tools - include from all steps (completed or not) since we need to buy everything
+          if (step.tools && Array.isArray(step.tools) && step.tools.length > 0) {
             step.tools.forEach((tool, toolIndex) => {
               const key = tool.id || tool.name || `tool-${toolIndex}-${Date.now()}`;
               const toolQuantity = 1; // Default quantity per step
