@@ -57,16 +57,6 @@ export default function Home({
     if (projectRuns) {
       const active = projectRuns.filter(run => (run.progress || 0) < 100).length;
       const completed = projectRuns.filter(run => (run.progress || 0) >= 100).length;
-      console.log('🔍 Debug - Home stats calculation:', {
-        totalProjectRuns: projectRuns.length,
-        activeProjects: active,
-        completedProjects: completed,
-        projectRunsData: projectRuns.map(run => ({
-          id: run.id,
-          progress: run.progress,
-          status: run.status
-        }))
-      });
       setStats({
         activeProjects: active,
         completedProjects: completed
