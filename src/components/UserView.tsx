@@ -932,17 +932,14 @@ export default function UserView({
     projectRunsIds: projectRuns.map(pr => pr.id)
   });
   
-  // Fix My Projects navigation - delegate to Index component for mobile
+  // Fix My Projects navigation - mobile is handled by Index component
   if (resetToListing) {
     console.log("🔄 My Projects clicked - showing project listing");
     
-    // For mobile, delegate back to Index component which already handles mobile project listing
+    // For mobile, the flow is handled entirely by Index component
+    // No need to render anything here
     if (isMobile) {
-      console.log("🔄 Mobile: Delegating projects view back to Index component");
-      // Clear the reset flag and navigate to projects view
-      onProjectSelected?.();
-      // Dispatch event to switch to projects view
-      window.dispatchEvent(new CustomEvent('navigate-to-projects'));
+      console.log("🔄 Mobile: Projects navigation handled by Index component");
       return null;
     }
     

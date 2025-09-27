@@ -276,7 +276,19 @@ const Index = () => {
     const handleProjectsNavigationMobile = () => {
       if (!isMobile) return; // Only handle on mobile
       console.log('📱 Index: Mobile "My Projects" clicked');
-      handleProjectsView();
+      
+      // Check if user has a current project - if so, go directly to it
+      if (currentProjectRun) {
+        console.log('📱 Index: User has current project, going directly to workflow:', currentProjectRun.name);
+        setMobileView('workflow');
+        setCurrentView('user');
+        // Clear reset flags since we're going to workflow
+        setResetUserView(false);
+        setForceListingMode(false);
+      } else {
+        console.log('📱 Index: No current project, showing projects listing');
+        handleProjectsView();
+      }
     };
 
     const handleProfileNavigation = () => {
@@ -324,7 +336,7 @@ const Index = () => {
       // Clean up mobile-specific listeners
       window.removeEventListener('show-kc-explainer', handleShowKCExplainer);
     };
-  }, [isMobile, navigate]);
+  }, [isMobile, navigate, currentProjectRun]);
 
   // Define functions BEFORE they are used in useEffect
   const handleProjectsView = () => {
@@ -441,6 +453,7 @@ const Index = () => {
                 resetToListing={resetUserView && !currentProjectRun} 
                 forceListingMode={forceListingMode}
                 onProjectSelected={() => {
+                  console.log('🎯 Index: Mobile workflow - onProjectSelected called');
                   setForceListingMode(false);
                   setResetUserView(false);
                   setMobileView('workflow');
