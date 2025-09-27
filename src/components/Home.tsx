@@ -319,10 +319,6 @@ export default function Home({
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button variant="secondary" size="lg" className="px-6 md:px-8 text-base md:text-lg bg-accent text-accent-foreground hover:bg-accent-light border-0 shadow-accent" onClick={() => navigate('/auth?mode=signup')}>
-                  <Star className="mr-2 h-4 w-4" />
-                  Start Your Free Account
-                </Button>
               </div>
             </div>
             
@@ -451,12 +447,6 @@ export default function Home({
             Join thousands of homeowners who've discovered the power of having everything they need in one place.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="secondary" size="lg" className="px-8 py-4 text-lg font-semibold bg-primary-foreground text-primary hover:bg-primary-foreground/90 border-0 shadow-elegant" asChild>
-              <Link to="/auth?mode=signup">
-                Start Your Free Account
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
             <Button variant="secondary" size="lg" className="px-8 py-4 text-lg font-semibold bg-accent text-accent-foreground hover:bg-accent-light border-0 shadow-accent" onClick={() => navigate('/projects')}>
               Explore Project Templates
             </Button>
