@@ -238,7 +238,7 @@ export default function Auth() {
                     </div>
                   )}
                 </div>
-                <Button type="submit" className="w-full mb-6" disabled={isLoading}>
+                <Button type="submit" className="w-full mb-8" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign In
                 </Button>
@@ -302,7 +302,7 @@ export default function Auth() {
                     </div>
                   )}
                 </div>
-                <Button type="submit" className="w-full mb-6" disabled={isLoading}>
+                <Button type="submit" className="w-full mb-8" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign Up
                 </Button>

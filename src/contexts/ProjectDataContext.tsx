@@ -146,7 +146,9 @@ export const ProjectDataProvider: React.FC<ProjectDataProviderProps> = ({ childr
     cacheKey: 'projects'
   });
 
-  // Fetch project runs data with proper error handling
+  // Fetch project runs data with proper error handling - only when not in guest mode
+  const shouldFetchProjectRuns = !isGuest && !!user;
+  
   const {
     data: projectRuns,
     loading: projectRunsLoading,
@@ -156,18 +158,18 @@ export const ProjectDataProvider: React.FC<ProjectDataProviderProps> = ({ childr
   } = useDataFetch<ProjectRun>({
     table: 'project_runs',
     select: '*',
-    filters: user ? [{ column: 'user_id', value: user.id }] : [],
+    filters: shouldFetchProjectRuns ? [{ column: 'user_id', value: user.id }] : [],
     orderBy: { column: 'created_at', ascending: false },
     transform: transformProjectRuns,
-    dependencies: [user?.id],
-    cacheKey: user ? `project_runs_${user.id}` : undefined
+    dependencies: [user?.id, shouldFetchProjectRuns],
+    cacheKey: shouldFetchProjectRuns ? `project_runs_${user.id}` : undefined
   });
 
   const value = {
     projects,
-    projectRuns: isGuest ? guestData.projectRuns : (user ? projectRuns : []),
-    loading: projectsLoading || projectRunsLoading,
-    error: projectsError || projectRunsError,
+    projectRuns: isGuest ? guestData.projectRuns : (shouldFetchProjectRuns ? projectRuns : []),
+    loading: projectsLoading || (shouldFetchProjectRuns ? projectRunsLoading : false),
+    error: projectsError || (shouldFetchProjectRuns ? projectRunsError : null),
     refetchProjects,
     refetchProjectRuns,
     updateProjectsCache,
