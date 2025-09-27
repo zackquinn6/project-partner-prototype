@@ -271,8 +271,8 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     <SelectTrigger className="w-full sm:w-[280px] h-9">
                       <SelectValue placeholder="Select a home" />
                     </SelectTrigger>
-                     <SelectContent className="z-[100]">
-                       {homes.map(home => <SelectItem key={home.id} value={home.id}>
+                     <SelectContent className="z-[200] bg-popover border border-border shadow-md">
+                       {homes.map(home => <SelectItem key={home.id} value={home.id} className="cursor-pointer">
                            {home.name} {home.address && `- ${home.address}`}
                          </SelectItem>)}
                      </SelectContent>
