@@ -185,34 +185,34 @@ export default function Navigation({
           </div>
 
           <div className="flex items-center space-x-2">
-            {/* Get Expert Help Button - Prominent CTA */}
+            {/* Get Expert Help Button - Always visible */}
             <Button 
               onClick={() => {
                 console.log('Expert Help button clicked');
                 setIsExpertHelpOpen(true);
               }}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-              size={isMobile ? "default" : "sm"}
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 shrink-0"
+              size="sm"
             >
-              <Headphones className={isMobile ? "h-5 w-5 mr-0 sm:mr-2" : "h-4 w-4 mr-0 sm:mr-2"} />
+              <Headphones className="h-4 w-4 mr-0 sm:mr-2" />
               <span className="hidden sm:inline">Get Expert Help</span>
-              <span className="sm:hidden">{isMobile ? "" : "Help"}</span>
             </Button>
             
+            {/* Settings Dropdown - Always visible */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  size={isMobile ? "default" : "sm"}
-                  className={isMobile ? "h-10 w-10 p-0" : ""}
+                  size="sm"
+                  className="h-9 w-9 p-0 shrink-0"
                 >
-                  <Settings className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
+                  <Settings className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 align="end" 
-                className="z-[100] bg-background/95 backdrop-blur-sm border shadow-lg min-w-[200px]"
-                sideOffset={8}
+                className="z-[200] bg-background border shadow-xl min-w-[200px]"
+                sideOffset={5}
               >
                 <DropdownMenuItem onClick={() => window.dispatchEvent(new CustomEvent('open-profile-manager'))}>
                   <User className="h-4 w-4 mr-2" />
@@ -235,20 +235,21 @@ export default function Navigation({
               </DropdownMenuContent>
             </DropdownMenu>
             
+            {/* Help Dropdown - Always visible */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  size={isMobile ? "default" : "sm"}
-                  className={isMobile ? "h-10 w-10 p-0" : ""}
+                  size="sm"
+                  className="h-9 w-9 p-0 shrink-0"
                 >
-                  <HelpCircle className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
+                  <HelpCircle className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 align="end" 
-                className="z-[100] bg-background/95 backdrop-blur-sm border shadow-lg min-w-[200px]"
-                sideOffset={8}
+                className="z-[200] bg-background border shadow-xl min-w-[200px]"
+                sideOffset={5}
               >
                 <DropdownMenuItem onClick={() => setShowFeedback(true)}>
                   <MessageCircle className="h-4 w-4 mr-2" />
