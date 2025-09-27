@@ -18,6 +18,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useProject } from '@/contexts/ProjectContext';
 import { Output, Project } from '@/interfaces/Project';
 import ProjectListing from './ProjectListing';
+import { MobileProjectListing } from './MobileProjectListing';
 import { OutputDetailPopup } from './OutputDetailPopup';
 import { AccountabilityMessagePopup } from './AccountabilityMessagePopup';
 import { PhaseRatingPopup } from './PhaseRatingPopup';
@@ -34,6 +35,7 @@ import { DecisionRollupWindow } from './DecisionRollupWindow';
 import { KeyCharacteristicsWindow } from './KeyCharacteristicsWindow';
 import { ProjectCustomizer } from './ProjectCustomizer/ProjectCustomizer';
 import { ProjectScheduler } from './ProjectScheduler';
+import { useResponsive } from '@/hooks/useResponsive';
 import { isKickoffPhaseComplete, addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 import { markOrderingStepIncompleteIfNeeded, extractProjectToolsAndMaterials } from '@/utils/shoppingUtils';
 interface UserViewProps {
@@ -50,6 +52,7 @@ export default function UserView({
   projectRunId,
   showProfile
 }: UserViewProps) {
+  const { isMobile } = useResponsive();
   const {
     currentProject,
     currentProjectRun,
@@ -929,31 +932,55 @@ export default function UserView({
     projectRunsIds: projectRuns.map(pr => pr.id)
   });
   
-  // Fix My Projects navigation - STOP auto-switching when resetToListing is true
+  // Fix My Projects navigation - use mobile component on mobile devices
   if (resetToListing) {
     console.log("🔄 My Projects clicked - showing project listing");
     
     return (
       <div className="min-h-screen">
-        <ProjectListing 
-          onProjectSelect={project => {
-            console.log("🎯 Project selected from My Projects:", project, {currentProjectRun: !!currentProjectRun});
-            if (project === null) {
-              setViewMode('listing');
-              return;
-            }
-            // Legacy support for 'workflow' string - now handled by useEffect above
-            if (project === 'workflow') {
-              console.log("🎯 Received workflow signal - FORCING WORKFLOW MODE NOW!");
+        {isMobile ? (
+          <MobileProjectListing 
+            onProjectSelect={(project) => {
+              console.log("🎯 Mobile Project selected from My Projects:", project, {currentProjectRun: !!currentProjectRun});
+              if (project === null) {
+                setViewMode('listing');
+                return;
+              }
+              // For mobile, directly navigate to workflow when project is selected
+              console.log("🎯 Mobile: Setting workflow mode for project selection");
               setViewMode('workflow');
               onProjectSelected?.();
-              return;
-            }
-            console.log("🎯 Setting workflow mode for project selection");
-            setViewMode('workflow');
-            onProjectSelected?.();
-          }}
-        />
+            }}
+            onNewProject={() => {
+              console.log("🎯 Mobile: New project requested from listing");
+              window.location.href = '/projects';
+            }}
+            onClose={() => {
+              console.log("🎯 Mobile: Closing project listing");
+              setViewMode('workflow');
+            }}
+          />
+        ) : (
+          <ProjectListing 
+            onProjectSelect={project => {
+              console.log("🎯 Desktop Project selected from My Projects:", project, {currentProjectRun: !!currentProjectRun});
+              if (project === null) {
+                setViewMode('listing');
+                return;
+              }
+              // Legacy support for 'workflow' string - now handled by useEffect above
+              if (project === 'workflow') {
+                console.log("🎯 Received workflow signal - FORCING WORKFLOW MODE NOW!");
+                setViewMode('workflow');
+                onProjectSelected?.();
+                return;
+              }
+              console.log("🎯 Desktop: Setting workflow mode for project selection");
+              setViewMode('workflow');
+              onProjectSelected?.();
+            }}
+          />
+        )}
       </div>
     );
   }
