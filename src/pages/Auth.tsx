@@ -192,118 +192,134 @@ export default function Auth() {
             replace: true
           });
         }} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="signin" className="h-12 text-base font-medium">Sign In</TabsTrigger>
-              <TabsTrigger value="signup" className="h-12 text-base font-medium">Sign Up</TabsTrigger>
-            </TabsList>
-            
-            <div className="mt-6">
-              <TabsContent value="signin" className="mt-0">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input 
-                    id="signin-email" 
-                    type="email" 
-                    placeholder="your@email.com" 
-                    value={email} 
-                    onChange={e => setEmail(e.target.value)} 
-                    required 
-                    className={validationErrors.email ? "border-destructive" : ""}
-                  />
-                  {validationErrors.email && (
-                    <div className="flex items-center text-sm text-destructive">
-                      <AlertCircle className="h-4 w-4 mr-1" />
-                      {validationErrors.email}
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input 
-                    id="signin-password" 
-                    type="password" 
-                    value={password} 
-                    onChange={e => setPassword(e.target.value)} 
-                    required 
-                    className={validationErrors.password ? "border-destructive" : ""}
-                  />
-                  {validationErrors.password && (
-                    <div className="flex items-center text-sm text-destructive">
-                      <AlertCircle className="h-4 w-4 mr-1" />
-                      {validationErrors.password}
-                    </div>
-                  )}
-                </div>
-                <Button type="submit" className="w-full mb-8" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <div className="pb-4">
+              <TabsList className="grid w-full grid-cols-2 h-14 p-1 bg-muted rounded-lg">
+                <TabsTrigger 
+                  value="signin" 
+                  className="h-12 text-base font-medium py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
                   Sign In
-                </Button>
-              </form>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="signup" 
+                  className="h-12 text-base font-medium py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
+                  Sign Up
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <div className="pt-4">
+              <TabsContent value="signin" className="mt-0 space-y-0">
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email</Label>
+                    <Input 
+                      id="signin-email" 
+                      type="email" 
+                      placeholder="your@email.com" 
+                      value={email} 
+                      onChange={e => setEmail(e.target.value)} 
+                      required 
+                      className={validationErrors.email ? "border-destructive" : ""}
+                    />
+                    {validationErrors.email && (
+                      <div className="flex items-center text-sm text-destructive">
+                        <AlertCircle className="h-4 w-4 mr-1" />
+                        {validationErrors.email}
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Password</Label>
+                    <Input 
+                      id="signin-password" 
+                      type="password" 
+                      value={password} 
+                      onChange={e => setPassword(e.target.value)} 
+                      required 
+                      className={validationErrors.password ? "border-destructive" : ""}
+                    />
+                    {validationErrors.password && (
+                      <div className="flex items-center text-sm text-destructive">
+                        <AlertCircle className="h-4 w-4 mr-1" />
+                        {validationErrors.password}
+                      </div>
+                    )}
+                  </div>
+                  <div className="pt-4">
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Sign In
+                    </Button>
+                  </div>
+                </form>
               </TabsContent>
               
-              <TabsContent value="signup" className="mt-0">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input 
-                    id="signup-email" 
-                    type="email" 
-                    placeholder="your@email.com" 
-                    value={email} 
-                    onChange={e => setEmail(e.target.value)} 
-                    required 
-                    className={validationErrors.email ? "border-destructive" : ""}
-                  />
-                  {validationErrors.email && (
-                    <div className="flex items-center text-sm text-destructive">
-                      <AlertCircle className="h-4 w-4 mr-1" />
-                      {validationErrors.email}
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input 
-                    id="signup-password" 
-                    type="password" 
-                    value={password} 
-                    onChange={e => setPassword(e.target.value)} 
-                    required 
-                    className={validationErrors.password ? "border-destructive" : ""}
-                  />
-                  {validationErrors.password && (
-                    <div className="flex items-center text-sm text-destructive">
-                      <AlertCircle className="h-4 w-4 mr-1" />
-                      {validationErrors.password}
-                    </div>
-                  )}
-                  <div className="text-xs text-muted-foreground">
-                    Password must contain at least 8 characters with uppercase, lowercase, and numbers
+              <TabsContent value="signup" className="mt-0 space-y-0">
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input 
+                      id="signup-email" 
+                      type="email" 
+                      placeholder="your@email.com" 
+                      value={email} 
+                      onChange={e => setEmail(e.target.value)} 
+                      required 
+                      className={validationErrors.email ? "border-destructive" : ""}
+                    />
+                    {validationErrors.email && (
+                      <div className="flex items-center text-sm text-destructive">
+                        <AlertCircle className="h-4 w-4 mr-1" />
+                        {validationErrors.email}
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
-                  <Input 
-                    id="confirm-password" 
-                    type="password" 
-                    value={confirmPassword} 
-                    onChange={e => setConfirmPassword(e.target.value)} 
-                    required 
-                    className={validationErrors.confirmPassword ? "border-destructive" : ""}
-                  />
-                  {validationErrors.confirmPassword && (
-                    <div className="flex items-center text-sm text-destructive">
-                      <AlertCircle className="h-4 w-4 mr-1" />
-                      {validationErrors.confirmPassword}
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input 
+                      id="signup-password" 
+                      type="password" 
+                      value={password} 
+                      onChange={e => setPassword(e.target.value)} 
+                      required 
+                      className={validationErrors.password ? "border-destructive" : ""}
+                    />
+                    {validationErrors.password && (
+                      <div className="flex items-center text-sm text-destructive">
+                        <AlertCircle className="h-4 w-4 mr-1" />
+                        {validationErrors.password}
+                      </div>
+                    )}
+                    <div className="text-xs text-muted-foreground">
+                      Password must contain at least 8 characters with uppercase, lowercase, and numbers
                     </div>
-                  )}
-                </div>
-                <Button type="submit" className="w-full mb-8" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign Up
-                </Button>
-              </form>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Confirm Password</Label>
+                    <Input 
+                      id="confirm-password" 
+                      type="password" 
+                      value={confirmPassword} 
+                      onChange={e => setConfirmPassword(e.target.value)} 
+                      required 
+                      className={validationErrors.confirmPassword ? "border-destructive" : ""}
+                    />
+                    {validationErrors.confirmPassword && (
+                      <div className="flex items-center text-sm text-destructive">
+                        <AlertCircle className="h-4 w-4 mr-1" />
+                        {validationErrors.confirmPassword}
+                      </div>
+                    )}
+                  </div>
+                  <div className="pt-4">
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Sign Up
+                    </Button>
+                  </div>
+                </form>
               </TabsContent>
             </div>
           </Tabs>
