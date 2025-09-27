@@ -33,20 +33,20 @@ export function MobileDIYDropdown({
   };
 
   return (
-    <div className="fixed top-4 right-4 z-40 md:hidden">
+    <div className="fixed top-4 right-4 z-50 md:hidden">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button 
             variant="outline"
             size="sm"
-            className="h-10 px-3 bg-card/95 backdrop-blur-sm border-border shadow-elegant hover:bg-accent"
+            className="h-10 px-3 bg-background border-border shadow-lg hover:bg-accent text-foreground"
           >
             <span className="text-sm font-medium">DIY</span>
             <ChevronDown className="ml-1 h-4 w-4" />
           </Button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-48 p-2 bg-card/95 backdrop-blur-sm border-border shadow-elegant"
+          className="w-48 p-2 bg-background border-border shadow-lg z-50"
           align="end"
           sideOffset={8}
         >
