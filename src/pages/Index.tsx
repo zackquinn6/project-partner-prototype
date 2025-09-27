@@ -398,16 +398,28 @@ const Index = () => {
   };
 
   const handleMobileProjectSelect = (project: any) => {
-    console.log('📱 Index: Mobile project selected:', project);
+    console.log('🎯 CONTINUE CLICKED - Index: Mobile project selected:', project);
+    console.log('🎯 CONTINUE CLICKED - Current mobileView before:', mobileView);
+    console.log('🎯 CONTINUE CLICKED - resetUserView:', resetUserView);
+    console.log('🎯 CONTINUE CLICKED - forceListingMode:', forceListingMode);
+    
     if ('progress' in project) {
-      console.log('📱 Index: Setting project run:', project.name);
+      console.log('🎯 CONTINUE CLICKED - Setting project run:', project.name);
       setCurrentProjectRun(project);
       setMobileView('workflow');
+      // Clear any listing flags
+      setResetUserView(false);
+      setForceListingMode(false);
     } else {
-      console.log('📱 Index: Setting project template:', project.name);
+      console.log('🎯 CONTINUE CLICKED - Setting project template:', project.name);
       setCurrentProject(project);
       setMobileView('workflow');
+      // Clear any listing flags
+      setResetUserView(false);
+      setForceListingMode(false);
     }
+    
+    console.log('🎯 CONTINUE CLICKED - New mobileView set to: workflow');
   };
 
   const handleMobileQuickAction = () => {
@@ -432,6 +444,7 @@ const Index = () => {
       
       switch (mobileView) {
         case 'projects':
+          console.log('🔍 RENDERING Index MobileProjectListing - mobileView is projects');
           return (
             <div className="h-screen flex flex-col">
               <MobileProjectListing

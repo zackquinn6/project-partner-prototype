@@ -934,12 +934,13 @@ export default function UserView({
   
   // Fix My Projects navigation - mobile is handled by Index component
   if (resetToListing) {
-    console.log("🔄 My Projects clicked - showing project listing");
+    console.log("🚨 SECOND WINDOW ALERT - UserView resetToListing triggered!");
+    console.log("🚨 resetToListing:", resetToListing, "isMobile:", isMobile);
     
     // For mobile, the flow is handled entirely by Index component
     // No need to render anything here
     if (isMobile) {
-      console.log("🔄 Mobile: Projects navigation handled by Index component");
+      console.log("🚨 Mobile: Projects navigation blocked in UserView - Index should handle this");
       return null;
     }
     
