@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle, Circle, Clock, Menu, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle, Circle, Clock, Menu, Eye, EyeOff, HelpCircle, Calendar as CalendarIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -193,7 +193,6 @@ export function MobileWorkflowView({
                     <Button 
                       onClick={() => {
                         console.log('Opening ordering window for mobile step:', currentStep.step);
-                        // This would need to be passed down as a prop or use a global state
                         window.dispatchEvent(new CustomEvent('open-ordering-window'));
                       }}
                       variant="outline"
@@ -201,7 +200,7 @@ export function MobileWorkflowView({
                       size="sm"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
                       Shopping List
                     </Button>
@@ -223,6 +222,44 @@ export function MobileWorkflowView({
                           <p key={index}>{line}</p>
                         ))}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Special action buttons for specific steps */}
+                  {((currentStep.step?.toLowerCase().includes('project') && (currentStep.step?.toLowerCase().includes('plan') || currentStep.step?.toLowerCase().includes('scope'))) ||
+                    currentStep.step?.toLowerCase().includes('scheduling')) && (
+                    <div className="flex flex-col gap-3 pt-4">
+                      {/* Project Customizer button for Project Planning and Scope steps */}
+                      {(currentStep.step?.toLowerCase().includes('project') && (currentStep.step?.toLowerCase().includes('plan') || currentStep.step?.toLowerCase().includes('scope'))) && (
+                        <Button 
+                          onClick={() => {
+                            console.log('Opening project customizer for mobile step:', currentStep.step);
+                            window.dispatchEvent(new CustomEvent('openProjectCustomizer'));
+                          }}
+                          variant="outline"
+                          className="flex items-center gap-2"
+                          size="sm"
+                        >
+                          <HelpCircle className="w-4 h-4" />
+                          Project Customizer
+                        </Button>
+                      )}
+
+                      {/* Project Scheduler button for scheduling step */}
+                      {currentStep.step?.toLowerCase().includes('scheduling') && (
+                        <Button 
+                          onClick={() => {
+                            console.log('Opening project scheduler for mobile step:', currentStep.step);
+                            window.dispatchEvent(new CustomEvent('openProjectScheduler'));
+                          }}
+                          variant="outline"
+                          className="flex items-center gap-2"
+                          size="sm"
+                        >
+                          <CalendarIcon className="w-4 h-4" />
+                          Project Scheduler
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
