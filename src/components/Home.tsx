@@ -18,9 +18,13 @@ interface HomeProps {
 }
 const coreFeatures = [{
   icon: Target,
-  title: "Personalized Project Management",
-  description: "DIY + Home Profile and Project Templates for 100+ Home Improvement Projects = First-time Success.",
-  features: ["Home profile tracking & maintenance scheduler", "100+ proven project templates", "Personalized recommendations based on your skills & tools", "Step-by-step guidance from planning to completion"]
+  title: "Build Smarter. Build Your Way.",
+  description: "At Toolio, we believe two truths about DIY:",
+  features: [
+    "🔨 Your project is not a snowflake. The hard lessons have already been solved—why waste weekends reinventing plans or repeating mistakes? We bring those lessons straight to you.",
+    "✨ You are a maker's mark. Every builder leaves a distinct imprint. Your pace, your tools, your support system—they're yours alone. Toolio learns how you work and adapts over time, so every project feels like it was designed for you.",
+    "👉 Proven playbooks. Personalized delivery. That's DIY Done Smarter."
+  ]
 }, {
   icon: Star,
   title: "Virtual Expert Platform",
@@ -305,7 +309,6 @@ export default function Home({
               
               
               <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4">DIY Done Smarter</h1>
-              <h2 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-foreground mb-6">Everything You Need in One Place</h2>
               
               <p className="text-lg sm:text-xl md:text-2xl text-primary-foreground/90 mb-8 leading-relaxed">The Go-to App for DIY Home Improvement</p>
               
