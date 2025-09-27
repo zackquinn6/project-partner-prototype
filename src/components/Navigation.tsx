@@ -194,11 +194,19 @@ export default function Navigation({
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Settings className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size={isMobile ? "default" : "sm"}
+                  className={isMobile ? "h-10 w-10" : ""}
+                >
+                  <Settings className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent 
+                align="end" 
+                className="z-50 bg-background border shadow-lg"
+                sideOffset={8}
+              >
                 <DropdownMenuItem onClick={() => window.dispatchEvent(new CustomEvent('open-profile-manager'))}>
                   <User className="h-4 w-4 mr-2" />
                   Profile
@@ -222,11 +230,19 @@ export default function Navigation({
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <HelpCircle className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size={isMobile ? "default" : "sm"}
+                  className={isMobile ? "h-10 w-10" : ""}
+                >
+                  <HelpCircle className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent 
+                align="end" 
+                className="z-50 bg-background border shadow-lg"
+                sideOffset={8}
+              >
                 <DropdownMenuItem onClick={() => setShowFeedback(true)}>
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Send Feedback
