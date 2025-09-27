@@ -25,16 +25,6 @@ const coreFeatures = [{
     "✨ You are a maker's mark. Every builder leaves a distinct imprint. Your pace, your tools, your support system—they're yours alone. Toolio learns how you work and adapts over time, so every project feels like it was designed for you.",
     "👉 Proven playbooks. Personalized delivery. That's DIY Done Smarter."
   ]
-}, {
-  icon: Star,
-  title: "Virtual Expert Platform",
-  description: "While our online resources cover a lot - nothing replaces human face-to-face consults with an expert. The ultimate personalization is not AI, it's Human.",
-  features: ["One-on-one video consultations with DIY experts", "Real-time problem solving and guidance", "Project-specific expert recommendations", "Human expertise when you need it most"]
-}, {
-  icon: Hammer,
-  title: "Tool Rental Platform",
-  description: "If you're in Boston, MA - a fast, accurate, seamless tool rental process through Toolio Rentals. For all other areas, a tool rental search that helps find the best local options.",
-  features: ["Boston: Direct rental through Toolio Rentals", "Nationwide: Smart tool rental finder", "Project-based tool recommendations", "Never buy tools you'll only use once"]
 }];
 export default function Home({
   onViewChange
