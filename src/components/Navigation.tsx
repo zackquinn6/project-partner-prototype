@@ -211,7 +211,7 @@ export default function Navigation({
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 align="end" 
-                className="z-[200] bg-background border shadow-xl min-w-[200px]"
+                className="z-[9999] !bg-white dark:!bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl min-w-[200px] !opacity-100"
                 sideOffset={5}
               >
                 <DropdownMenuItem onClick={() => window.dispatchEvent(new CustomEvent('open-profile-manager'))}>
@@ -248,7 +248,7 @@ export default function Navigation({
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 align="end" 
-                className="z-[200] bg-background border shadow-xl min-w-[200px]"
+                className="z-[9999] !bg-white dark:!bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl min-w-[200px] !opacity-100"
                 sideOffset={5}
               >
                 <DropdownMenuItem onClick={() => setShowFeedback(true)}>
