@@ -55,9 +55,6 @@ export function useDataFetch<T = any>({
   const fetchData = useCallback(async (useCache = true) => {
     // Skip fetch if disabled
     if (!enabled) {
-      setData([]);
-      setLoading(false);
-      setError(null);
       return;
     }
 
@@ -139,7 +136,7 @@ export function useDataFetch<T = any>({
     } finally {
       setLoading(false);
     }
-  }, [table, select, filters, orderBy, cacheKey, transform, fetchParams, data.length, loading, enabled]);
+  }, [table, select, JSON.stringify(filters), JSON.stringify(orderBy), cacheKey, transform, enabled]);
 
   const refetch = useCallback(() => fetchData(false), [fetchData]);
 
@@ -153,18 +150,14 @@ export function useDataFetch<T = any>({
   useEffect(() => {
     if (enabled) {
       fetchData();
-    } else {
-      // Clean up when disabled
-      setData([]);
-      setLoading(false);
-      setError(null);
     }
+    
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
     };
-  }, [fetchData, enabled, ...dependencies]);
+  }, [enabled, table, select, JSON.stringify(filters), JSON.stringify(orderBy), cacheKey, ...dependencies]);
 
   return { data, loading, error, refetch, mutate };
 }
