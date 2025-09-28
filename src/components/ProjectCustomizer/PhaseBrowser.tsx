@@ -123,9 +123,9 @@ export const PhaseBrowser: React.FC<PhaseBrowserProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={isMobile 
         ? "w-full h-full max-w-full max-h-full rounded-none border-0 p-0 [&>button]:hidden" 
-        : "max-w-4xl h-[80vh] p-0 [&>button]:hidden"
+        : "w-full h-full max-w-[90vw] max-h-[90vh] p-0 [&>button]:hidden"
       }>
-        <DialogHeader className={`${isMobile ? 'p-4 pb-3' : 'p-6 pb-4'}`}>
+        <DialogHeader className={`${isMobile ? 'p-4 pb-3' : 'p-6 pb-4'} border-b flex-shrink-0`}>
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <DialogTitle className={`flex items-center gap-2 ${isMobile ? 'text-base' : ''}`}>
@@ -142,9 +142,9 @@ export const PhaseBrowser: React.FC<PhaseBrowserProps> = ({
           </div>
         </DialogHeader>
 
-        <div className={`flex-1 flex flex-col ${isMobile ? 'px-4' : 'px-6'}`}>
+        <div className={`flex-1 flex flex-col min-h-0 ${isMobile ? 'px-4' : 'px-6'}`}>
           {/* Search and Filter Controls */}
-          <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-3 mb-4`}>
+          <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-3 mb-4 flex-shrink-0`}>
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -171,7 +171,7 @@ export const PhaseBrowser: React.FC<PhaseBrowserProps> = ({
           </div>
 
           {/* Phase List */}
-          <ScrollArea className="flex-1 mb-4">
+          <ScrollArea className="flex-1 mb-4 min-h-0">
             {filteredPhases.length === 0 ? (
               <Card>
                 <CardContent className={`text-center ${isMobile ? 'py-6' : 'py-8'}`}>
@@ -240,7 +240,7 @@ export const PhaseBrowser: React.FC<PhaseBrowserProps> = ({
           </ScrollArea>
 
           {/* Action Bar */}
-          <div className={`border-t ${isMobile ? 'pt-3 pb-4' : 'pt-4 pb-6'}`}>
+          <div className={`border-t ${isMobile ? 'pt-3 pb-4' : 'pt-4 pb-6'} flex-shrink-0`}>
             <div className={`flex ${isMobile ? 'flex-col' : 'items-center justify-between'} gap-3`}>
               <div className={`text-sm text-muted-foreground ${isMobile ? 'text-center' : ''}`}>
                 {selectedPhases.length > 0 
