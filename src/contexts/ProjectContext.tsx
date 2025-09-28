@@ -42,7 +42,43 @@ interface ProjectProviderProps {
 
 // Lightweight wrapper that combines the new split contexts for backwards compatibility
 export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
-  const { projects, projectRuns, loading, refetchProjects, refetchProjectRuns } = useProjectData();
+  console.log('ProjectProvider: Starting initialization...');
+  
+  // Add error boundaries and safe initialization
+  let projectData, projectActions;
+  
+  try {
+    projectData = useProjectData();
+    console.log('ProjectProvider: useProjectData successful', !!projectData);
+  } catch (error) {
+    console.error('ProjectProvider: useProjectData failed', error);
+    return <div>Error loading project data</div>;
+  }
+  
+  try {
+    projectActions = useProjectActions();
+    console.log('ProjectProvider: useProjectActions successful', !!projectActions);
+  } catch (error) {
+    console.error('ProjectProvider: useProjectActions failed', error);
+    return <div>Error loading project actions</div>;
+  }
+  
+  const { isAdmin } = useUserRole();
+
+  // Safety checks to prevent context initialization issues
+  if (!projectData || !projectActions) {
+    console.log('ProjectProvider: Waiting for contexts to initialize...', { projectData: !!projectData, projectActions: !!projectActions });
+    return <div>Loading...</div>;
+  }
+
+  const {
+    projects,
+    projectRuns,
+    loading,
+    refetchProjects,
+    refetchProjectRuns
+  } = projectData;
+
   const {
     currentProject,
     currentProjectRun,
@@ -55,9 +91,9 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     updateProjectRun,
     deleteProject,
     deleteProjectRun
-  } = useProjectActions();
-  
-  const { isAdmin } = useUserRole();
+  } = projectActions;
+
+  console.log('ProjectProvider: Successfully initialized with data');
 
   const value = {
     projects,
