@@ -66,12 +66,12 @@ export function ResponsiveDialog({
           sizeClasses[size],
           // Remove default padding for content-full to avoid spacing issues
           size === 'content-full' ? 'p-0' : paddingClasses[size],
-          "overflow-hidden gap-0", // Remove the default gap-4 that creates spacing
+          "overflow-hidden flex flex-col", // Use flex instead of grid to control spacing precisely
           className
         )}
       >
         {(title || description) && (
-          <DialogHeader className={`${size === 'content-full' ? 'px-4 pt-4 pb-0 space-y-1' : 'pb-2 space-y-1'}`}>
+          <DialogHeader className={`${size === 'content-full' ? 'px-4 pt-4 pb-0' : 'pb-2'} flex flex-col space-y-1 text-center sm:text-left`}>
             {title && (
               <DialogTitle className="text-lg md:text-xl font-bold">
                 {title}
