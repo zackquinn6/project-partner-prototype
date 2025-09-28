@@ -89,39 +89,8 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
     });
   };
 
-  // Initialize all phases and operations as expanded
-  useEffect(() => {
-    if (displayPhases.length > 0) {
-      const allPhaseIds = new Set(displayPhases.map(p => p.id));
-      const allOperationIds = new Set(
-        displayPhases.flatMap(p => p.operations.map(op => op.id))
-      );
-      
-      if (expandedPhases.size === 0) {
-        setExpandedPhases(allPhaseIds);
-      }
-      if (expandedOperations.size === 0) {
-        setExpandedOperations(allOperationIds);
-      }
-    }
-  }, [displayPhases.length, expandedPhases.size, expandedOperations.size]);
-
-  // Initialize all phases and operations as expanded
-  React.useEffect(() => {
-    if (displayPhases.length > 0) {
-      const allPhaseIds = new Set(displayPhases.map(p => p.id));
-      const allOperationIds = new Set(
-        displayPhases.flatMap(p => p.operations.map(op => op.id))
-      );
-      
-      if (expandedPhases.size === 0) {
-        setExpandedPhases(allPhaseIds);
-      }
-      if (expandedOperations.size === 0) {
-        setExpandedOperations(allOperationIds);
-      }
-    }
-  }, [displayPhases.length]);
+  // Initialize all phases and operations as collapsed by default
+  // No useEffect needed - they start collapsed with empty Sets
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination || !currentProject) return;
