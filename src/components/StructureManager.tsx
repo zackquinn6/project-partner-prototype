@@ -59,10 +59,81 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
   } | null>(null);
   const [showIncorporationDialog, setShowIncorporationDialog] = useState(false);
   const [clipboard, setClipboard] = useState<ClipboardData | null>(null);
+  const [oneTimeCorrectionApplied, setOneTimeCorrectionApplied] = useState(false);
 
   // Collapsible state
   const [expandedPhases, setExpandedPhases] = useState<Set<string>>(new Set());
   const [expandedOperations, setExpandedOperations] = useState<Set<string>>(new Set());
+  // One-time correction for phase ordering and duplicate IDs
+  useEffect(() => {
+    if (!currentProject || oneTimeCorrectionApplied) return;
+    
+    let needsCorrection = false;
+    const phases = currentProject.phases;
+    
+    // Check for duplicate IDs
+    const seenIds = new Set<string>();
+    const duplicateIds = phases.filter(phase => {
+      if (seenIds.has(phase.id)) return true;
+      seenIds.add(phase.id);
+      return false;
+    });
+    
+    if (duplicateIds.length > 0) {
+      console.log('🔧 One-time correction: Found duplicate phase IDs:', duplicateIds.map(p => p.id));
+      needsCorrection = true;
+    }
+    
+    // Check phase ordering
+    const standardPhases = phases.filter(p => ['Kickoff', 'Planning', 'Ordering', 'Close Project'].includes(p.name) && !p.isLinked);
+    const kickoff = standardPhases.find(p => p.name === 'Kickoff');
+    const planning = standardPhases.find(p => p.name === 'Planning'); 
+    const ordering = standardPhases.find(p => p.name === 'Ordering');
+    const closeProject = standardPhases.find(p => p.name === 'Close Project');
+    
+    const kickoffIndex = kickoff ? phases.findIndex(p => p.id === kickoff.id) : -1;
+    const planningIndex = planning ? phases.findIndex(p => p.id === planning.id) : -1;
+    const orderingIndex = ordering ? phases.findIndex(p => p.id === ordering.id) : -1;
+    const closeProjectIndex = closeProject ? phases.findIndex(p => p.id === closeProject.id) : -1;
+    
+    if ((kickoffIndex > planningIndex && planningIndex !== -1) || 
+        (planningIndex > orderingIndex && orderingIndex !== -1) ||
+        (closeProjectIndex !== -1 && closeProjectIndex !== phases.length - 1)) {
+      console.log('🔧 One-time correction: Found phases out of order');
+      needsCorrection = true;
+    }
+    
+    if (needsCorrection) {
+      console.log('🔧 Applying one-time correction to phase structure...');
+      
+      // Fix duplicate IDs by regenerating them
+      const correctedPhases = phases.map((phase, index) => {
+        const duplicateCount = phases.slice(0, index).filter(p => p.id === phase.id).length;
+        if (duplicateCount > 0) {
+          return {
+            ...phase,
+            id: `${phase.id}-corrected-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+          };
+        }
+        return phase;
+      });
+      
+      // Apply standard phase ordering
+      const orderedPhases = enforceStandardPhaseOrdering(correctedPhases);
+      
+      const updatedProject = {
+        ...currentProject,
+        phases: orderedPhases,
+        updatedAt: new Date()
+      };
+      
+      updateProject(updatedProject);
+      toast.success('Phase structure corrected - standard phases are now properly ordered');
+    }
+    
+    setOneTimeCorrectionApplied(true);
+  }, [currentProject, oneTimeCorrectionApplied, updateProject]);
+  
   if (!currentProject) {
     return <div>No project selected</div>;
   }
