@@ -120,132 +120,137 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden p-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            <TabsList className="w-fit">
-              <TabsTrigger value="operations" className="flex items-center gap-2">
-                <TableIcon className="w-4 h-4" />
-                Operations Configuration
-              </TabsTrigger>
-              <TabsTrigger value="map" className="flex items-center gap-2">
-                <GitBranch className="w-4 h-4" />
-                Visual Map (Coming Soon)
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="operations" className="flex-1 overflow-hidden">
-              <div className="h-full flex flex-col gap-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    <Select value={selectedTreeId || ''} onValueChange={setSelectedTreeId}>
-                      <SelectTrigger className="w-64">
-                        <SelectValue placeholder="Select decision tree" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {decisionTrees.map(tree => (
-                          <SelectItem key={tree.id} value={tree.id}>
-                            {tree.name} (v{tree.version})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <Button 
-                    onClick={() => setShowCreateOperation(true)}
-                    disabled={!selectedTreeId}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Operation
-                  </Button>
+          <div className="h-full flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <TableIcon className="w-5 h-5" />
+                  <h3 className="text-lg font-semibold">Operations Configuration</h3>
                 </div>
+                <Select value={selectedTreeId || ''} onValueChange={setSelectedTreeId}>
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select decision tree" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {decisionTrees.map(tree => (
+                      <SelectItem key={tree.id} value={tree.id}>
+                        {tree.name} (v{tree.version})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Button 
+                onClick={() => setShowCreateOperation(true)}
+                disabled={!selectedTreeId}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Operation
+              </Button>
+            </div>
 
-                <div className="flex-1 overflow-auto">
-                  {getPhaseOperations().map(([phaseName, phaseOps]) => (
-                    <Card key={phaseName} className="mb-4">
-                      <CardHeader>
-                        <CardTitle className="text-lg">{phaseName}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {phaseOps.length === 0 ? (
-                          <p className="text-muted-foreground italic">No operations configured for this phase</p>
-                        ) : (
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Operation</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Dependencies</TableHead>
-                                <TableHead>Parallel Group</TableHead>
-                                <TableHead>Optional</TableHead>
-                                <TableHead>Actions</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {phaseOps.map(operation => (
-                                <TableRow key={operation.id}>
-                                  <TableCell className="font-medium">
-                                    {operation.operation_name}
-                                  </TableCell>
-                                  <TableCell>
-                                    {getOperationTypeBadge(operation.operation_type)}
-                                  </TableCell>
-                                  <TableCell>
-                                    {operation.dependencies?.length ? (
-                                      <Badge variant="outline">{operation.dependencies.length} deps</Badge>
-                                    ) : (
-                                      <span className="text-muted-foreground">None</span>
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    {operation.parallel_group || (
-                                      <span className="text-muted-foreground">None</span>
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Badge variant={operation.is_optional ? 'secondary' : 'outline'}>
-                                      {operation.is_optional ? 'Yes' : 'No'}
-                                    </Badge>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex gap-2">
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => setEditingOperation(operation)}
-                                      >
-                                        <Edit className="w-4 h-4" />
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => deleteOperation(operation.id)}
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </Button>
+            <div className="flex-1 overflow-auto">
+              {getPhaseOperations().map(([phaseName, phaseOps]) => (
+                <Card key={phaseName} className="mb-4">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center justify-between">
+                      <span>{phaseName}</span>
+                      <Badge variant="outline">{phaseOps.length} operations</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {phaseOps.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-muted-foreground italic mb-4">No operations configured for this phase</p>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setShowCreateOperation(true)}
+                          disabled={!selectedTreeId}
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add First Operation
+                        </Button>
+                      </div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[200px]">Operation Name</TableHead>
+                            <TableHead className="w-[120px]">Type</TableHead>
+                            <TableHead className="w-[100px]">Order</TableHead>
+                            <TableHead className="w-[120px]">Dependencies</TableHead>
+                            <TableHead className="w-[120px]">Parallel Group</TableHead>
+                            <TableHead className="w-[80px]">Optional</TableHead>
+                            <TableHead className="w-[120px]">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {phaseOps.map(operation => (
+                            <TableRow key={operation.id}>
+                              <TableCell className="font-medium">
+                                <div>
+                                  <div>{operation.operation_name}</div>
+                                  {operation.notes && (
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                      {operation.notes}
                                     </div>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="map" className="flex-1">
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <GitBranch className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold mb-2">Visual Map View</h3>
-                  <p className="text-muted-foreground">Coming soon - Visual workflow mapping interface</p>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {getOperationTypeBadge(operation.operation_type)}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline">{operation.display_order}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                {operation.dependencies?.length ? (
+                                  <Badge variant="outline">{operation.dependencies.length} deps</Badge>
+                                ) : (
+                                  <span className="text-muted-foreground text-sm">None</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {operation.parallel_group ? (
+                                  <Badge variant="secondary">{operation.parallel_group}</Badge>
+                                ) : (
+                                  <span className="text-muted-foreground text-sm">None</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={operation.is_optional ? 'secondary' : 'outline'}>
+                                  {operation.is_optional ? 'Yes' : 'No'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => setEditingOperation(operation)}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => deleteOperation(operation.id)}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Create/Edit Operation Dialog */}
