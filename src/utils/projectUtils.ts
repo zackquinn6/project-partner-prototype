@@ -145,16 +145,37 @@ export const createPlanningPhase = (): Phase => {
     }]
   };
 
-  const projectSchedulingOperation: Operation = {
-    id: 'project-scheduling-operation',
-    name: 'Project Schedule',
-    description: 'Create project timeline and schedule phases',
+  const projectCustomizerOperation: Operation = {
+    id: 'project-customizer-operation',
+    name: 'Project Customizer',
+    description: 'Customize project workflow and phases',
     steps: [{
       id: 'planning-step-2',
-      step: 'Project Scheduling',
+      step: 'Project Customizer',
+      description: 'Customize your project workflow, phases, and decision points',
+      contentType: 'text' as const,
+      content: 'Use the Project Customizer to review and modify your project phases, customize the workflow, and set up decision points based on your specific needs.',
+      materials: [],
+      tools: [],
+      outputs: [{
+        id: 'customizer-output',
+        name: 'Project Customized',
+        description: 'Project workflow and phases customized',
+        type: 'none' as const
+      }]
+    }]
+  };
+
+  const projectSchedulingOperation: Operation = {
+    id: 'project-scheduling-operation',
+    name: 'Project Scheduler',
+    description: 'Create project timeline and schedule phases',
+    steps: [{
+      id: 'planning-step-3',
+      step: 'Project Scheduler',
       description: 'Create project timeline and schedule phases',
       contentType: 'text' as const,
-      content: 'Plan your project timeline by scheduling phases, setting realistic deadlines, and coordinating with your calendar.',
+      content: 'Use the Project Scheduler to plan your project timeline, set realistic deadlines, coordinate with your calendar, and establish a practical work schedule.',
       materials: [],
       tools: [],
       outputs: [{
@@ -170,43 +191,60 @@ export const createPlanningPhase = (): Phase => {
     id: 'planning-phase',
     name: 'Planning',
     description: 'Comprehensive project planning and preparation',
-    operations: [initialPlanningOperation, measurementOperation, finalPlanningOperation, projectSchedulingOperation]
+    operations: [initialPlanningOperation, measurementOperation, finalPlanningOperation, projectCustomizerOperation, projectSchedulingOperation]
   };
 
   return planningPhase;
 };
 
 export const createOrderingPhase = (): Phase => {
-  const orderingSteps: WorkflowStep[] = [
-    {
+  const shoppingChecklistOperation: Operation = {
+    id: 'shopping-checklist-operation',
+    name: 'Shopping Checklist',
+    description: 'Review and prepare shopping checklist',
+    steps: [{
       id: 'ordering-step-1',
+      step: 'Shopping Checklist',
+      description: 'Review and prepare complete shopping checklist for tools and materials',
+      contentType: 'text' as const,
+      content: 'Use the Shopping Checklist to review all required tools and materials, compare prices, and prepare for your shopping trip or online orders.',
+      materials: [],
+      tools: [],
+      outputs: [{
+        id: 'checklist-output',
+        name: 'Shopping Checklist Prepared',
+        description: 'Complete shopping checklist prepared and reviewed',
+        type: 'none' as const
+      }]
+    }]
+  };
+
+  const orderingOperation: Operation = {
+    id: 'ordering-operation',
+    name: 'Tool & Material Ordering',
+    description: 'Order all project tools and materials',
+    steps: [{
+      id: 'ordering-step-2',
       step: 'Tool & Material Ordering',
       description: 'Order all required tools and materials for your project using the integrated shopping browser',
       contentType: 'text' as const,
       content: 'Use our integrated shopping browser to purchase all required tools and materials for your project. Our system will help you find the best prices and ensure you get everything you need.',
-      materials: [], // No materials needed for ordering step
-      tools: [], // No tools needed for ordering step
+      materials: [],
+      tools: [],
       outputs: [{
         id: 'ordering-output',
         name: 'All Items Ordered',
         description: 'All required tools and materials have been ordered',
         type: 'none' as const
       }]
-    }
-  ];
-
-  const orderingOperation: Operation = {
-    id: 'ordering-operation',
-    name: 'Tool & Material Ordering',
-    description: 'Order all project tools and materials',
-    steps: orderingSteps
+    }]
   };
 
   const orderingPhase: Phase = {
     id: 'ordering-phase',
     name: 'Ordering',
     description: 'Order all required tools and materials for the project',
-    operations: [orderingOperation]
+    operations: [shoppingChecklistOperation, orderingOperation]
   };
 
   return orderingPhase;
@@ -314,7 +352,34 @@ export const createCloseProjectPhase = (): Phase => {
   return closeProjectPhase;
 };
 
+// NEW: Function to ensure standard phases for new project creation only
+export const ensureStandardPhasesForNewProject = (phases: Phase[]): Phase[] => {
+  const standardPhases = [
+    createKickoffPhase(),
+    createPlanningPhase(),
+    createOrderingPhase()
+  ];
+  
+  // Add user's custom phases after ordering, before close project
+  const customPhases = [...phases];
+  
+  // Close project always goes at the end
+  const allPhases = [...standardPhases, ...customPhases, createCloseProjectPhase()];
+  
+  return allPhases;
+};
+
+// NEW: Function to check if project has all standard phases
+export const hasAllStandardPhases = (phases: Phase[]): boolean => {
+  const requiredPhases = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
+  const phaseNames = phases.map(phase => phase.name);
+  return requiredPhases.every(name => phaseNames.includes(name));
+};
+
+// DEPRECATED: Use ensureStandardPhasesForNewProject for new projects, direct phase access for display
 export const addStandardPhasesToProjectRun = (phases: Phase[]): Phase[] => {
+  console.warn('addStandardPhasesToProjectRun is deprecated. Standard phases should be saved in the database, not added dynamically.');
+  
   let processedPhases = [...phases];
   
   // Check if kickoff phase already exists

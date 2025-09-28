@@ -43,8 +43,8 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
     return <div>No project selected</div>;
   }
 
-  // Get processed phases including standard phases (kickoff, planning, ordering)
-  const displayPhases = addStandardPhasesToProjectRun(currentProject.phases || []);
+  // Get phases directly from project - no dynamic addition needed
+  const displayPhases = currentProject?.phases || [];
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination || !currentProject) return;
@@ -74,36 +74,44 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
     } else if (type === 'operations') {
       const phaseId = source.droppableId.split('-')[1];
       const phase = displayPhases.find(p => p.id === phaseId);
-      const isStandardPhase = displayPhases.indexOf(phase!) < 3;
+      const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
+      const isStandardPhase = standardPhaseNames.includes(phase?.name || '');
       
-      if (!isStandardPhase) {
-        const phaseIndex = updatedProject.phases.findIndex(p => p.id === phaseId);
-        if (phaseIndex !== -1) {
-          const operations = Array.from(updatedProject.phases[phaseIndex].operations);
-          const [removed] = operations.splice(source.index, 1);
-          operations.splice(destination.index, 0, removed);
-          updatedProject.phases[phaseIndex].operations = operations;
-          updateProject(updatedProject);
-          toast.success('Operation reordered successfully');
-        }
+      if (isStandardPhase) {
+        toast.error('Cannot reorder operations in standard phases');
+        return;
+      }
+      
+      const phaseIndex = currentProject.phases.findIndex(p => p.id === phaseId);
+      if (phaseIndex !== -1) {
+        const operations = Array.from(currentProject.phases[phaseIndex].operations);
+        const [removed] = operations.splice(source.index, 1);
+        operations.splice(destination.index, 0, removed);
+        updatedProject.phases[phaseIndex].operations = operations;
+        updateProject(updatedProject);
+        toast.success('Operation reordered successfully');
       }
     } else if (type === 'steps') {
       const [phaseId, operationId] = source.droppableId.split('-').slice(1);
       const phase = displayPhases.find(p => p.id === phaseId);
-      const isStandardPhase = displayPhases.indexOf(phase!) < 3;
+      const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
+      const isStandardPhase = standardPhaseNames.includes(phase?.name || '');
       
-      if (!isStandardPhase) {
-        const phaseIndex = updatedProject.phases.findIndex(p => p.id === phaseId);
-        if (phaseIndex !== -1) {
-          const operationIndex = updatedProject.phases[phaseIndex].operations.findIndex(o => o.id === operationId);
-          if (operationIndex !== -1) {
-            const steps = Array.from(updatedProject.phases[phaseIndex].operations[operationIndex].steps);
-            const [removed] = steps.splice(source.index, 1);
-            steps.splice(destination.index, 0, removed);
-            updatedProject.phases[phaseIndex].operations[operationIndex].steps = steps;
-            updateProject(updatedProject);
-            toast.success('Step reordered successfully');
-          }
+      if (isStandardPhase) {
+        toast.error('Cannot reorder steps in standard phases');
+        return;
+      }
+      
+      const phaseIndex = currentProject.phases.findIndex(p => p.id === phaseId);
+      if (phaseIndex !== -1) {
+        const operationIndex = currentProject.phases[phaseIndex].operations.findIndex(o => o.id === operationId);
+        if (operationIndex !== -1) {
+          const steps = Array.from(currentProject.phases[phaseIndex].operations[operationIndex].steps);
+          const [removed] = steps.splice(source.index, 1);
+          steps.splice(destination.index, 0, removed);
+          updatedProject.phases[phaseIndex].operations[operationIndex].steps = steps;
+          updateProject(updatedProject);
+          toast.success('Step reordered successfully');
         }
       }
     }
@@ -168,12 +176,13 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
   const addOperation = (phaseId: string) => {
     if (!currentProject) return;
     
-    // Check if this is a standard phase (kickoff, planning, ordering)
-    const standardPhaseIds = ['kickoff-phase', 'planning-phase', 'ordering-phase'];
-    const isStandardPhase = standardPhaseIds.includes(phaseId);
+    // Check if this is a standard phase
+    const phase = displayPhases.find(p => p.id === phaseId);
+    const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
+    const isStandardPhase = standardPhaseNames.includes(phase?.name || '');
     
     if (isStandardPhase) {
-      toast.error('Cannot add operations to standard phases. Operations are predefined for kickoff, planning, and ordering phases.');
+      toast.error('Cannot add operations to standard phases. Operations are predefined for standard phases.');
       return;
     }
     
@@ -237,6 +246,16 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
   // Delete operations
   const deletePhase = (phaseId: string) => {
     if (!currentProject) return;
+    
+    // Check if this is a standard phase
+    const phase = displayPhases.find(p => p.id === phaseId);
+    const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
+    const isStandardPhase = standardPhaseNames.includes(phase?.name || '');
+    
+    if (isStandardPhase) {
+      toast.error('Cannot delete standard phases (Kickoff, Planning, Ordering, Close Project)');
+      return;
+    }
     
     const updatedProject = {
       ...currentProject,
@@ -436,27 +455,27 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
             {(provided) => (
               <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
                 {displayPhases.map((phase, phaseIndex) => {
-                  const isStandardPhase = phaseIndex < 3;
-                  const isCloseProjectPhase = phase.name === 'Close Project';
+                  const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
+                  const isStandardPhase = standardPhaseNames.includes(phase.name);
                   const isEditing = editingItem?.type === 'phase' && editingItem.id === phase.id;
                 
                   return (
-                    <Draggable key={phase.id} draggableId={phase.id} index={phaseIndex} isDragDisabled={isStandardPhase || isCloseProjectPhase}>
+                    <Draggable key={phase.id} draggableId={phase.id} index={phaseIndex} isDragDisabled={isStandardPhase}>
                       {(provided, snapshot) => (
-                         <Card 
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          className={`border-2 ${snapshot.isDragging ? 'shadow-lg' : ''} ${isStandardPhase ? 'bg-muted/30' : ''}`}
-                        >
+                          <Card 
+                           ref={provided.innerRef}
+                           {...provided.draggableProps}
+                           className={`border-2 ${snapshot.isDragging ? 'shadow-lg' : ''} ${isStandardPhase ? 'bg-blue-50 border-blue-200' : ''}`}
+                         >
                           <CardHeader>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3 flex-1">
-                                {!isStandardPhase && !isCloseProjectPhase && (
+                                {!isStandardPhase && phase.name !== 'Close Project' && (
                                   <div {...provided.dragHandleProps}>
                                     <GripVertical className="w-5 h-5 text-muted-foreground cursor-grab" />
                                   </div>
                                 )}
-                                {(isStandardPhase || isCloseProjectPhase) && <div className="w-5" />}
+                                {(isStandardPhase || phase.name === 'Close Project') && <div className="w-5" />}
                                 
                                 {isEditing ? (
                                   <div className="flex-1 space-y-2">
@@ -486,7 +505,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                               <div className="flex items-center gap-2">
                                 <Badge variant="outline">{phase.operations.length} operations</Badge>
                                 
-                                {!isStandardPhase && !isCloseProjectPhase && (
+                                {!isStandardPhase && phase.name !== 'Close Project' && (
                                   <>
                                     <Button
                                       size="sm"
@@ -548,7 +567,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                                     const isOperationEditing = editingItem?.type === 'operation' && editingItem.id === operation.id;
                                     
                                     return (
-                                      <Draggable key={operation.id} draggableId={operation.id} index={operationIndex} isDragDisabled={isStandardPhase || isCloseProjectPhase}>
+                                      <Draggable key={operation.id} draggableId={operation.id} index={operationIndex} isDragDisabled={isStandardPhase || phase.name === 'Close Project'}>
                                         {(provided, snapshot) => (
                                           <Card 
                                             ref={provided.innerRef}
@@ -558,7 +577,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                                             <CardHeader className="pb-3">
                                               <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3 flex-1">
-                                                  {!isStandardPhase && !isCloseProjectPhase && (
+                                                  {!isStandardPhase && phase.name !== 'Close Project' && (
                                                     <div {...provided.dragHandleProps}>
                                                       <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
                                                     </div>
@@ -591,7 +610,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                                                 <div className="flex items-center gap-1">
                                                   <Badge variant="outline" className="text-xs">{operation.steps.length} steps</Badge>
                                                   
-                                                  {!isStandardPhase && !isCloseProjectPhase && (
+                                                  {!isStandardPhase && phase.name !== 'Close Project' && (
                                                     <>
                                                       <Button
                                                         size="sm"
@@ -625,7 +644,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                                                           <Button size="sm" variant="ghost" onClick={() => startEdit('operation', operation.id, operation)}>
                                                             <Edit className="w-3 h-3" />
                                                           </Button>
-                                                          {!isCloseProjectPhase && (
+                                                          {phase.name !== 'Close Project' && (
                                                             <Button size="sm" variant="ghost" onClick={() => deleteOperation(phase.id, operation.id)}>
                                                               <Trash2 className="w-3 h-3" />
                                                             </Button>
@@ -662,7 +681,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                                                           key={step.id} 
                                                           draggableId={step.id} 
                                                           index={stepIndex}
-                                                          isDragDisabled={isStandardPhase || isCloseProjectPhase}
+                                                          isDragDisabled={isStandardPhase || phase.name === 'Close Project'}
                                                         >
                                                           {(provided, snapshot) => (
                                                             <Card 
@@ -673,7 +692,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                                                               <CardContent className="p-3">
                                                                 <div className="flex items-center justify-between">
                                                                   <div className="flex items-center gap-2 flex-1">
-                                                                    {!isStandardPhase && !isCloseProjectPhase && (
+                                                                    {!isStandardPhase && phase.name !== 'Close Project' && (
                                                                       <div {...provided.dragHandleProps}>
                                                                         <GripVertical className="w-3 h-3 text-muted-foreground cursor-grab" />
                                                                       </div>
@@ -770,7 +789,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
                                                              </Button>
                                                            )}
                                                            
-                                                           {!isStandardPhase && !isCloseProjectPhase && (
+                                                           {!isStandardPhase && phase.name !== 'Close Project' && (
                                                              <Button size="sm" variant="ghost" onClick={() => deleteStep(phase.id, operation.id, step.id)}>
                                                                <Trash2 className="w-3 h-3" />
                                                              </Button>

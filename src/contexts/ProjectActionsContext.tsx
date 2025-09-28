@@ -7,7 +7,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useProjectData } from './ProjectDataContext';
 import { useGuest } from './GuestContext';
 import { toast } from '@/components/ui/use-toast';
-import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
+import { ensureStandardPhasesForNewProject } from '@/utils/projectUtils';
 import { useOptimizedState } from '@/hooks/useOptimizedState';
 
 interface ProjectActionsContextType {
@@ -105,7 +105,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
     if (!user) return null;
 
     try {
-      const phasesWithKickoff = addStandardPhasesToProjectRun(project.phases);
+      const phasesWithStandard = ensureStandardPhasesForNewProject(project.phases);
       
       const { data, error } = await supabase
         .from('project_runs')
@@ -121,7 +121,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
           custom_project_name: customName,
           completed_steps: JSON.stringify([]),
           progress: 0,
-          phases: JSON.stringify(phasesWithKickoff),
+          phases: JSON.stringify(phasesWithStandard),
           category: project.category,
           effort_level: project.effortLevel,
           skill_level: project.skillLevel,
@@ -166,7 +166,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
     if (!user) return;
 
     try {
-      const phasesWithKickoff = addStandardPhasesToProjectRun(projectRunData.phases);
+      const phasesWithStandard = ensureStandardPhasesForNewProject(projectRunData.phases);
 
       const { data, error } = await supabase
         .from('project_runs')
@@ -188,7 +188,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
           current_step_id: projectRunData.currentStepId,
           completed_steps: JSON.stringify(projectRunData.completedSteps),
           progress: projectRunData.progress,
-          phases: JSON.stringify(phasesWithKickoff),
+          phases: JSON.stringify(phasesWithStandard),
           category: projectRunData.category,
           effort_level: projectRunData.effortLevel,
           skill_level: projectRunData.skillLevel,
@@ -222,7 +222,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
           currentStepId: projectRunData.currentStepId,
           completedSteps: projectRunData.completedSteps,
           progress: projectRunData.progress,
-          phases: phasesWithKickoff,
+          phases: phasesWithStandard,
           category: projectRunData.category,
           effortLevel: projectRunData.effortLevel,
           skillLevel: projectRunData.skillLevel,

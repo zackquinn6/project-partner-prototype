@@ -14,7 +14,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Project, Material, Tool } from "@/interfaces/Project";
 import { supabase } from "@/integrations/supabase/client";
-import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 import { useResponsive } from "@/hooks/useResponsive";
 
 interface OrderingWindowProps {
@@ -134,8 +133,8 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
     }
     
     // Original logic for when no materials are pre-selected
-    // Get processed phases including standard phases for complete tool/material list
-    const processedPhases = addStandardPhasesToProjectRun(activeProject.phases || []);
+    // Get phases directly from project - no dynamic addition needed
+    const processedPhases = activeProject.phases || [];
     
     // For materials: count total quantity needed (sum across all steps)
     const materialsMap = new Map<string, any>();

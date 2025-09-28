@@ -18,7 +18,6 @@ import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollableDialog } from "@/components/ScrollableDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 
 interface EditingState {
   type: 'phase' | 'operation' | 'step' | null;
@@ -74,8 +73,8 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
   const buildTableRows = (): TableRow[] => {
     if (!currentProject || !Array.isArray(currentProject.phases)) return [];
     
-    // Use the imported addStandardPhasesToProjectRun function to show the actual runtime structure
-    const processedPhases = addStandardPhasesToProjectRun(currentProject.phases);
+    // Use the project phases directly - standard phases are saved in the database
+    const processedPhases = currentProject.phases;
     
     console.log('Admin view: Building table rows with processed phases:', {
       originalPhases: currentProject.phases.map(p => p.name),
