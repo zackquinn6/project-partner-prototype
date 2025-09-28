@@ -85,7 +85,7 @@ export function ResponsiveDialog({
           </DialogHeader>
         )}
         
-        <div className={`flex flex-col min-h-0 flex-1 ${size === 'content-full' ? 'pt-4' : ''}`}>
+        <div className={`flex flex-col min-h-0 flex-1`}>
           {children}
         </div>
       </DialogContent>
