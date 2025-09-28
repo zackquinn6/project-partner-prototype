@@ -244,10 +244,10 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
         size={isMobile ? "content-full" : "large"}
       >
         <div className="flex flex-col h-full">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 h-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
             {/* Tab Headers - Fixed positioning */}
-            <div className="shrink-0 border-b bg-background">
-              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} ${isMobile ? 'h-auto' : 'h-12'}`}>
+            <div className="shrink-0 border-b bg-background sticky top-0 z-10 min-h-[60px] flex items-end">
+              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} ${isMobile ? 'h-auto p-1 m-1' : 'h-12 p-1 m-1'}`}>
                 {isMobile ? (
                   // Mobile: Dropdown-style tab selection
                   <div className="space-y-2 p-2">
@@ -286,26 +286,27 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
               </TabsList>
             </div>
 
-            {/* Tab Content - Fixed height with proper scrolling */}
-            <TabsContent value="decisions" className="flex-1 min-h-0 mt-0">
-              <ScrollArea className="h-full">
-                <div className={`${isMobile ? 'p-3' : 'p-4'} space-y-4 pr-3`}>
-                  <WorkflowDecisionEngine
-                    projectRun={currentProjectRun}
-                    onStandardDecision={handleStandardDecision}
-                    onIfNecessaryWork={handleIfNecessaryWork}
-                    customizationState={{
-                      standardDecisions: customizationState.standardDecisions,
-                      ifNecessaryWork: customizationState.ifNecessaryWork
-                    }}
-                  />
-                </div>
-              </ScrollArea>
-            </TabsContent>
+            {/* Tab Content - Consistent height containers */}
+            <div className="flex-1 min-h-0 relative">
+              <TabsContent value="decisions" className="absolute inset-0 data-[state=active]:block data-[state=inactive]:hidden">
+                <ScrollArea className="h-full">
+                  <div className={`${isMobile ? 'p-3' : 'p-4'} space-y-4`}>
+                    <WorkflowDecisionEngine
+                      projectRun={currentProjectRun}
+                      onStandardDecision={handleStandardDecision}
+                      onIfNecessaryWork={handleIfNecessaryWork}
+                      customizationState={{
+                        standardDecisions: customizationState.standardDecisions,
+                        ifNecessaryWork: customizationState.ifNecessaryWork
+                      }}
+                    />
+                  </div>
+                </ScrollArea>
+              </TabsContent>
 
-            <TabsContent value="custom-work" className="flex-1 min-h-0 mt-0">
+              <TabsContent value="custom-work" className="absolute inset-0 data-[state=active]:block data-[state=inactive]:hidden">
               <ScrollArea className="h-full">
-                <div className={`${isMobile ? 'p-3' : 'p-4'} space-y-4 pr-3`}>
+                <div className={`${isMobile ? 'p-3' : 'p-4'} space-y-4`}>
                   {/* Planned Work Section */}
                   <Card>
                     <CardHeader className={isMobile ? 'pb-3' : ''}>
@@ -397,6 +398,7 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
                 </div>
               </ScrollArea>
             </TabsContent>
+            </div>
           </Tabs>
 
           {/* Footer with action buttons - Mobile optimized */}
