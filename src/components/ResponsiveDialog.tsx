@@ -84,7 +84,7 @@ export function ResponsiveDialog({
           </DialogHeader>
         )}
         
-        <div className="flex flex-col min-h-0 flex-1">
+        <div className="flex flex-col min-h-0 flex-1 -mt-2">
           {children}
         </div>
       </DialogContent>
