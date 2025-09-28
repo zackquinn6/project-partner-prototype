@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { MessageCircle, Key, Settings, ChevronDown, AlertTriangle } from "lucide-react";
+import { MessageCircle, Key, Settings, ChevronDown, AlertCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MobileDIYDropdownProps {
@@ -41,7 +41,7 @@ export function MobileDIYDropdown({
             size="sm"
             className="h-10 px-3 hover:bg-accent text-foreground"
           >
-            <AlertTriangle className="h-4 w-4" />
+            <AlertCircle className="h-4 w-4 text-orange-500" />
           </Button>
         </PopoverTrigger>
         <PopoverContent 
