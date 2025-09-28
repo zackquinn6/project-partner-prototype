@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => subscription.unsubscribe();
-  }, [user?.id]);
+  }, []);
 
   const signUp = async (email: string, password: string, guestData?: any) => {
     // Sanitize inputs
