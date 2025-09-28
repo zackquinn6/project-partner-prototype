@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { ScrollArea } from '../ui/scroll-area';
 import { WorkflowDecisionEngine } from './WorkflowDecisionEngine';
-import { CustomWorkManager } from './CustomWorkManager';
+import { SimplifiedCustomWorkManager } from './SimplifiedCustomWorkManager';
 import { PhaseBrowser } from './PhaseBrowser';
 import { ProjectRun } from '../../interfaces/ProjectRun';
 import { Project, Phase } from '../../interfaces/Project';
@@ -442,7 +442,7 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
         currentProjectId={currentProjectRun.templateId}
       />
 
-      <CustomWorkManager
+      <SimplifiedCustomWorkManager
         open={showCustomWorkManager}
         onOpenChange={setShowCustomWorkManager}
         onCreateCustomWork={handleAddCustomUnplannedWork}

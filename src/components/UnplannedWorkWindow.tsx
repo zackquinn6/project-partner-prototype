@@ -182,7 +182,7 @@ export const UnplannedWorkWindow: React.FC<UnplannedWorkWindowProps> = ({
     <ResponsiveDialog
       open={isOpen}
       onOpenChange={onClose}
-      size="xlarge"
+      size="content-full"
       title="Add Unplanned Work"
       description="Add additional phases to handle unexpected work discovered during your project"
     >
