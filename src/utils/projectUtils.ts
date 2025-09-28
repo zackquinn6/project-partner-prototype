@@ -314,6 +314,40 @@ export const createCloseProjectPhase = (): Phase => {
   return closeProjectPhase;
 };
 
+// Function to check if a project already has standard phases
+export const hasStandardPhases = (phases: Phase[]): boolean => {
+  const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
+  const standardPhaseIds = ['kickoff-phase', 'planning-phase', 'ordering-phase', 'close-project-phase'];
+  
+  return standardPhaseNames.some(name => 
+    phases.some(phase => phase.name === name)
+  ) || standardPhaseIds.some(id => 
+    phases.some(phase => phase.id === id)
+  );
+};
+
+// Function to add standard phases only if they don't exist (for new project creation)
+export const ensureStandardPhasesForNewProject = (phases: Phase[]): Phase[] => {
+  // If project already has standard phases, return as-is
+  if (hasStandardPhases(phases)) {
+    return phases;
+  }
+  
+  // Otherwise, add standard phases (this should only happen for new projects)
+  return addStandardPhasesToProjectRun(phases);
+};
+
+// Backward compatibility function for display components that might encounter legacy data
+export const ensureStandardPhasesForDisplay = (phases: Phase[]): Phase[] => {
+  // For display purposes, we should rarely need to add standard phases since they
+  // should already be in the project data. This is just a safety fallback.
+  if (!hasStandardPhases(phases) && phases.length > 0) {
+    console.warn('Warning: Project phases missing standard phases. This might be legacy data.');
+    return addStandardPhasesToProjectRun(phases);
+  }
+  return phases;
+};
+
 export const addStandardPhasesToProjectRun = (phases: Phase[]): Phase[] => {
   let processedPhases = [...phases];
   

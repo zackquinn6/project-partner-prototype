@@ -23,7 +23,6 @@ import { SignatureCapture } from './SignatureCapture';
 import { StepCompletionTracker } from './StepCompletionTracker';
 import { EnhancedProjectPlanning } from './EnhancedProjectPlanning';
 import { toast } from 'sonner';
-import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 
 interface EditableUserViewProps {
   onBackToAdmin: () => void;
@@ -80,7 +79,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
   const [editData, setEditData] = useState<any>({});
 
   // Flatten all steps from all phases and operations for navigation
-  const allSteps = currentProject ? addStandardPhasesToProjectRun(currentProject.phases).flatMap((phase, phaseIndex) =>
+  const allSteps = currentProject ? currentProject.phases.flatMap((phase, phaseIndex) =>
     phase.operations.flatMap((operation, operationIndex) =>
       operation.steps.map((step, stepIndex) => ({
         ...step,
@@ -523,7 +522,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
             </div>
 
             <div className="space-y-4">
-              {currentProject ? addStandardPhasesToProjectRun(currentProject.phases).map((phase) => {
+              {currentProject ? currentProject.phases.map((phase) => {
                 const phaseSteps = getAllStepsInPhase(phase);
                 const completedPhaseSteps = phaseSteps.filter(step => completedSteps.has(step.id));
                 const isPhaseComplete = phaseSteps.length > 0 && completedPhaseSteps.length === phaseSteps.length;

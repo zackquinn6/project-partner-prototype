@@ -9,7 +9,6 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShoppingCart, Package, Wrench, AlertCircle, CheckCircle, X } from 'lucide-react';
 import { Project } from '@/interfaces/Project';
-import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MaterialsSelectionWindowProps {
@@ -57,7 +56,7 @@ export function MaterialsSelectionWindow({
       return { availableMaterials: [], availableTools: [], stepStats: { total: 0, completed: 0, incomplete: 0 } };
     }
 
-    const processedPhases = addStandardPhasesToProjectRun(activeProject.phases || []);
+    const processedPhases = activeProject.phases || [];
     const materialsMap = new Map<string, StepItem>();
     const toolsMap = new Map<string, StepItem>();
     let totalSteps = 0;

@@ -1,5 +1,4 @@
 import { ProjectRun } from '@/interfaces/ProjectRun';
-import { addStandardPhasesToProjectRun } from './projectUtils';
 
 /**
  * Determines if shopping is needed after a project replan by comparing
@@ -36,7 +35,7 @@ export function isShoppingNeededAfterReplan(
  * Extracts all tools and materials needed for a project run
  */
 export function extractProjectToolsAndMaterials(projectRun: ProjectRun) {
-  const processedPhases = addStandardPhasesToProjectRun(projectRun.phases || []);
+   const processedPhases = projectRun.phases || [];
   
   const materialsMap = new Map<string, any>();
   const toolsMap = new Map<string, any>();
@@ -118,7 +117,7 @@ export function markOrderingStepIncompleteIfNeeded(
   
   if (shoppingNeeded) {
     // Find ordering step and mark as incomplete
-    const processedPhases = addStandardPhasesToProjectRun(projectRun.phases || []);
+    const processedPhases = projectRun.phases || [];
     
     processedPhases.forEach((phase, phaseIndex) => {
       if (!phase.operations || !Array.isArray(phase.operations)) {

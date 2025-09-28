@@ -27,7 +27,6 @@ import { CompactOutputsTable } from '@/components/CompactOutputsTable';
 import { CompactTimeEstimation } from '@/components/CompactTimeEstimation';
 import { ArrowLeft, Eye, Edit, Package, Wrench, FileOutput, Plus, X, Settings, Save, ChevronLeft, ChevronRight, FileText, List, Upload, Trash2, Brain } from 'lucide-react';
 import { toast } from 'sonner';
-import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 
 // Extended interfaces for step-level usage
 interface StepMaterial extends Material {
@@ -71,7 +70,7 @@ export default function EditWorkflowView({
   } | null>(null);
 
   // Get processed phases including standard phases
-  const displayPhases = currentProject ? addStandardPhasesToProjectRun(currentProject.phases || []) : [];
+  const displayPhases = currentProject ? currentProject.phases || [] : [];
 
   // Flatten all steps from all phases and operations for navigation
   const allSteps = displayPhases.flatMap(phase => phase.operations.flatMap(operation => operation.steps.map(step => ({

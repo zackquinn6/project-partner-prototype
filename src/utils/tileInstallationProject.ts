@@ -1,5 +1,4 @@
 import { Project, Phase, Operation, WorkflowStep, LibraryTool, LibraryMaterial, Material, Tool, ContentSection } from '@/interfaces/Project';
-import { addStandardPhasesToProjectRun } from './projectUtils';
 import { importExcelToTileProject } from './directExcelImport';
 
 // Tool references for tile installation
@@ -756,7 +755,7 @@ export const createFallbackTileProject = (): Project => {
 
   // Create the complete tile installation project
   const tilePhases = [preparationPhase, installationPhase, finishingPhase];
-  const allPhases = addStandardPhasesToProjectRun(tilePhases);
+  const allPhases = tilePhases;
 
   const tileInstallationProject: Project = {
     id: 'tile-installation-project',

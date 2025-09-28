@@ -19,7 +19,6 @@ import { MultiContentEditor } from './MultiContentEditor';
 import { MultiContentRenderer } from './MultiContentRenderer';
 import { DecisionTreeFlowchart } from './DecisionTreeFlowchart';
 import { DecisionPointEditor } from './DecisionPointEditor';
-import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 
 interface StructureManagerProps {
   onBack: () => void;
@@ -71,8 +70,8 @@ export const StructureManager: React.FC<StructureManagerProps> = ({ onBack }) =>
     });
   };
 
-  // Get processed phases including standard phases (kickoff, planning, ordering)
-  const displayPhases = addStandardPhasesToProjectRun(currentProject.phases || []);
+  // Get processed phases - phases should already include standard phases from project creation
+  const displayPhases = currentProject.phases || [];
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination || !currentProject) return;
