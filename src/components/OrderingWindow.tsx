@@ -315,10 +315,13 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
     <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Shopping Checklist"
+      title=""
       size={isMobile ? "content-full" : "large"}
     >
-      <div className="flex flex-col h-full space-y-2 -mt-4">
+      <div className="flex flex-col h-full space-y-2">
+        {/* Custom Title */}
+        <h2 className="text-lg md:text-xl font-bold mb-2">Shopping Checklist</h2>
+        
         {/* Shopping Sites and Search */}
         <div className="space-y-3 p-3 border rounded-lg bg-muted/30">
           {/* Shopping Sites */}
