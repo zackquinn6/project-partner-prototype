@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Copy, Trash2, Edit, Check, X, GripVertical, FileOutput, Wrench, Package, Clipboard, ClipboardCheck, Save, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Copy, Trash2, Edit, Check, X, GripVertical, FileOutput, Wrench, Package, Clipboard, ClipboardCheck, Save, ChevronDown, ChevronRight, Link, ExternalLink, ArrowLeft, GitBranch } from 'lucide-react';
 import { FlowTypeSelector, getFlowTypeBadge } from './FlowTypeSelector';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -503,10 +503,11 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
             {provided => <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
                 {displayPhases.map((phase, phaseIndex) => {
                 const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
-                const isStandardPhase = standardPhaseNames.includes(phase.name);
+                const isStandardPhase = standardPhaseNames.includes(phase.name) && !phase.isLinked;
+                const isLinkedPhase = phase.isLinked;
                 const isEditing = editingItem?.type === 'phase' && editingItem.id === phase.id;
                 return <Draggable key={phase.id} draggableId={phase.id} index={phaseIndex} isDragDisabled={isStandardPhase}>
-                      {(provided, snapshot) => <Card ref={provided.innerRef} {...provided.draggableProps} className={`border-2 ${snapshot.isDragging ? 'shadow-lg' : ''} ${isStandardPhase ? 'bg-blue-50 border-blue-200' : ''}`}>
+                      {(provided, snapshot) => <Card ref={provided.innerRef} {...provided.draggableProps} className={`border-2 ${snapshot.isDragging ? 'shadow-lg' : ''} ${isStandardPhase ? 'bg-blue-50 border-blue-200' : isLinkedPhase ? 'bg-purple-50 border-purple-200' : ''}`}>
                           <CardHeader className="py-1 px-2">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1 flex-1">
@@ -536,9 +537,20 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                           {expandedPhases.has(phase.id) ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                                         </Button>
                                         {phase.name}
-                                        {isStandardPhase}
+                                        {isStandardPhase && <span className="text-xs text-blue-600 ml-1">(Standard)</span>}
+                                        {isLinkedPhase && (
+                                          <div className="flex items-center gap-1 ml-1">
+                                            <Link className="w-3 h-3 text-purple-600" />
+                                            <span className="text-xs text-purple-600">Linked</span>
+                                          </div>
+                                        )}
                                       </CardTitle>
                                      <p className="text-muted-foreground text-xs">{phase.description}</p>
+                                     {isLinkedPhase && (
+                                       <p className="text-xs text-purple-600">
+                                         From: {phase.sourceProjectName} (Rev {phase.incorporatedRevision})
+                                       </p>
+                                     )}
                                    </div>}
                               </div>
                               

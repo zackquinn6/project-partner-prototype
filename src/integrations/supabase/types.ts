@@ -1335,6 +1335,7 @@ export type Database = {
           is_current_version: boolean | null
           name: string
           parent_project_id: string | null
+          phase_revision_alerts: Json | null
           phases: Json
           plan_end_date: string
           publish_status: string
@@ -1367,6 +1368,7 @@ export type Database = {
           is_current_version?: boolean | null
           name: string
           parent_project_id?: string | null
+          phase_revision_alerts?: Json | null
           phases?: Json
           plan_end_date?: string
           publish_status?: string
@@ -1399,6 +1401,7 @@ export type Database = {
           is_current_version?: boolean | null
           name?: string
           parent_project_id?: string | null
+          phase_revision_alerts?: Json | null
           phases?: Json
           plan_end_date?: string
           publish_status?: string
@@ -1987,6 +1990,14 @@ export type Database = {
         Args: { failure_mode_uuid: string }
         Returns: number
       }
+      check_phase_revision_updates: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          alerts: Json
+          project_id: string
+          project_name: string
+        }[]
+      }
       check_rate_limit: {
         Args: {
           identifier: string
@@ -2188,6 +2199,10 @@ export type Database = {
       start_admin_session: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      update_phase_revision_alert: {
+        Args: { p_action: string; p_phase_id: string; p_project_id: string }
+        Returns: undefined
       }
       upsert_notification_settings: {
         Args: {

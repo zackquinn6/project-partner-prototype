@@ -5,12 +5,13 @@ import { UsersSecurityWindow } from '@/components/UsersSecurityWindow';
 import { ToolsMaterialsWindow } from '@/components/ToolsMaterialsWindow';
 import { KnowledgeIngestionSystem } from '@/components/KnowledgeIngestionSystem';
 import { HomeRiskManager } from '@/components/HomeRiskManager';
+import { AdminActionCenter } from '@/components/AdminActionCenter';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollableDialog } from '@/components/ScrollableDialog';
-import { Settings, BarChart3, Shield, Wrench, Lock, Brain, TrendingUp, Users, Cog, Scroll, MapPin, FileText, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Settings, BarChart3, Shield, Wrench, Lock, Brain, TrendingUp, Users, Cog, Scroll, MapPin, FileText, AlertTriangle, RefreshCw, Bell } from 'lucide-react';
 import { StructureManager } from './StructureManager';
 import { AdminRoadmapManager } from './AdminRoadmapManager';
 import { AdminFeatureRequestManager } from './AdminFeatureRequestManager';
@@ -32,6 +33,7 @@ export const AdminView: React.FC = () => {
   const [featureRequestManagerOpen, setFeatureRequestManagerOpen] = useState(false);
   const [adminGuideOpen, setAdminGuideOpen] = useState(false);
   const [dataRefreshOpen, setDataRefreshOpen] = useState(false);
+  const [actionCenterOpen, setActionCenterOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'admin' | 'structure-manager'>('admin');
 
   if (currentView === 'structure-manager') {
@@ -58,6 +60,23 @@ export const AdminView: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setActionCenterOpen(true)}>
+            <CardHeader className="text-center flex-1">
+              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                <Bell className="w-6 h-6 text-primary" />
+              </div>
+               <CardTitle>Action Center</CardTitle>
+               <CardDescription className="min-h-[3rem] flex items-center justify-center">
+                 Review pending actions and phase revision updates
+               </CardDescription>
+            </CardHeader>
+            <CardContent className="mt-auto">
+               <Button className="w-full" onClick={() => setActionCenterOpen(true)}>
+                 Open Action Center
+               </Button>
+            </CardContent>
+          </Card>
+
           <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setEnhancedProjectManagementOpen(true)}>
             <CardHeader className="text-center flex-1">
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
@@ -288,6 +307,11 @@ export const AdminView: React.FC = () => {
             <AdminDataRefresh />
           </DialogContent>
         </Dialog>
+
+        <AdminActionCenter 
+          open={actionCenterOpen} 
+          onOpenChange={setActionCenterOpen}
+        />
       </div>
     </div>
   );

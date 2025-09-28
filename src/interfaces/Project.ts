@@ -146,6 +146,11 @@ export interface Phase {
   name: string;
   description: string;
   operations: Operation[];
+  // Linked phase properties
+  isLinked?: boolean;
+  sourceProjectId?: string;
+  sourceProjectName?: string;
+  incorporatedRevision?: number;
 }
 
 export interface Project {
