@@ -37,9 +37,9 @@ export function MobileDIYDropdown({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button 
-            variant="outline"
+            variant="ghost"
             size="sm"
-            className="h-10 px-3 bg-background border-border shadow-lg hover:bg-accent text-foreground"
+            className="h-10 px-3 hover:bg-accent text-foreground"
           >
             <AlertTriangle className="h-4 w-4" />
             <ChevronDown className="ml-1 h-4 w-4" />
