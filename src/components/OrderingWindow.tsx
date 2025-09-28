@@ -392,7 +392,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
             </TabsList>
             
             <TabsContent value="materials" className="flex-1">
-              <ScrollArea className="h-[60vh] md:h-[50vh]">
+              <ScrollArea className="h-[40vh] md:h-[35vh]">
                 <div className="space-y-3 pr-3">
                   {activeMaterials.length === 0 && (!showShopped || shoppedMaterialsList.length === 0) ? (
                     <div className="text-center py-8 text-muted-foreground">
@@ -403,7 +403,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                     <>
                       {/* Active Materials */}
                       {activeMaterials.map((material, index) => (
-                        <div key={`active-${material.id}-${index}`} className="border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                        <div key={`active-${material.id}-${index}`} className="border rounded-lg p-1.5 hover:bg-muted/50 transition-colors">
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-3">
@@ -444,7 +444,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                             <h3 className="text-sm font-medium text-muted-foreground">Completed Items</h3>
                           </div>
                           {shoppedMaterialsList.map((material, index) => (
-                            <div key={`shopped-${material.id}-${index}`} className="border rounded-lg p-3 bg-muted/30 opacity-60">
+                            <div key={`shopped-${material.id}-${index}`} className="border rounded-lg p-1.5 bg-muted/30 opacity-60">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-3">
@@ -491,7 +491,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                     <>
                       {/* Active Tools */}
                       {activeTools.map((tool, index) => (
-                        <div key={`active-${tool.id}-${index}`} className="border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                        <div key={`active-${tool.id}-${index}`} className="border rounded-lg p-1.5 hover:bg-muted/50 transition-colors">
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-3">
@@ -538,7 +538,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                             <h3 className="text-sm font-medium text-muted-foreground">Completed Items</h3>
                           </div>
                           {shoppedToolsList.map((tool, index) => (
-                            <div key={`shopped-${tool.id}-${index}`} className="border rounded-lg p-3 bg-muted/30 opacity-60">
+                            <div key={`shopped-${tool.id}-${index}`} className="border rounded-lg p-1.5 bg-muted/30 opacity-60">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-3">
