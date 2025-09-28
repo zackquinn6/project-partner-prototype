@@ -3,10 +3,10 @@ import { ScrollableDialog } from './ScrollableDialog';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { 
-  Video, 
   Calendar, 
   ArrowRight
 } from 'lucide-react';
+import toolioLogo from '@/assets/toolio-logo.png';
 
 interface ExpertHelpWindowProps {
   isOpen: boolean;
@@ -24,9 +24,11 @@ export const ExpertHelpWindow: React.FC<ExpertHelpWindowProps> = ({ isOpen, onCl
     >
       <div className="space-y-6">
         <div className="text-center">
-          <div className="mx-auto w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center mb-4">
-            <Video className="w-6 h-6 text-primary" />
-          </div>
+          <img 
+            src={toolioLogo} 
+            alt="Toolio Logo" 
+            className="mx-auto w-16 h-auto mb-4"
+          />
         </div>
         
         <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-primary/5">
