@@ -360,8 +360,8 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
         </div>
 
         {/* Shopping Checklist Stats with Complete Button */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+        <div className="flex flex-col gap-3 p-4 border rounded-lg bg-muted/30">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Badge variant="secondary" className="text-xs">
                 {uniqueTools.length + uniqueMaterials.length} items
@@ -380,7 +380,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
             </div>
           </div>
           
-          {/* Complete Shopping Button - Centered */}
+          {/* Complete Shopping Button - Centered within stats section */}
           {onOrderingComplete && (
             <div className="flex justify-center">
               <Button
