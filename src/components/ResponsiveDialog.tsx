@@ -70,7 +70,7 @@ export function ResponsiveDialog({
         )}
       >
         {(title || description) && (
-          <DialogHeader>
+          <DialogHeader className="space-y-1 pb-2">
             {title && (
               <DialogTitle className="text-lg md:text-xl font-bold">
                 {title}
