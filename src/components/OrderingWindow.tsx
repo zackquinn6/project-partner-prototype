@@ -359,24 +359,40 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
           </div>
         </div>
 
-        {/* Shopping Checklist Stats */}
-        <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
-          <div className="flex items-center gap-4">
-            <Badge variant="secondary" className="text-xs">
-              {uniqueTools.length + uniqueMaterials.length} items
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              {shoppedToolsList.length + shoppedMaterialsList.length} shopped
-            </Badge>
+        {/* Shopping Checklist Stats with Complete Button */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+            <div className="flex items-center gap-4">
+              <Badge variant="secondary" className="text-xs">
+                {uniqueTools.length + uniqueMaterials.length} items
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                {shoppedToolsList.length + shoppedMaterialsList.length} shopped
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox 
+                id="show-shopped-main"
+                checked={showShopped}
+                onCheckedChange={(checked) => setShowShopped(checked === true)}
+              />
+              <label htmlFor="show-shopped-main" className="text-xs">Show completed</label>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Checkbox 
-              id="show-shopped-main"
-              checked={showShopped}
-              onCheckedChange={(checked) => setShowShopped(checked === true)}
-            />
-            <label htmlFor="show-shopped-main" className="text-xs">Show completed</label>
-          </div>
+          
+          {/* Complete Shopping Button - Centered */}
+          {onOrderingComplete && (
+            <div className="flex justify-center">
+              <Button
+                onClick={onOrderingComplete}
+                disabled={shoppedTools.size + shoppedMaterials.size < uniqueTools.length + uniqueMaterials.length}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                Complete Shopping
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Shopping Items - Mobile Optimized Tabs */}
@@ -580,24 +596,6 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
             </TabsContent>
           </Tabs>
         </div>
-
-        {/* Footer with Complete Button */}
-        {onOrderingComplete && (
-          <div className="p-4 border rounded-lg bg-muted/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="text-sm text-muted-foreground">
-              Progress: {shoppedTools.size + shoppedMaterials.size}/{uniqueTools.length + uniqueMaterials.length} items checked
-            </div>
-            
-            <Button
-              onClick={onOrderingComplete}
-              disabled={shoppedTools.size + shoppedMaterials.size < uniqueTools.length + uniqueMaterials.length}
-              className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
-            >
-              <Check className="w-4 h-4 mr-2" />
-              Complete Shopping
-            </Button>
-          </div>
-        )}
       </div>
       
       {/* Item Details Dialog */}
