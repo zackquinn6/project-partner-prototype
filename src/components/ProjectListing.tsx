@@ -70,6 +70,10 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
   const handleOpenProjectRun = useCallback((projectRun: ProjectRun) => {
     console.log("🎯 Opening project run:", projectRun.name);
     
+    // CRITICAL FIX: Clear reset flags immediately BEFORE setting project run
+    // This prevents UserView useEffect from forcing listing mode
+    window.dispatchEvent(new CustomEvent('clear-reset-flags'));
+    
     // SYNCHRONOUS navigation - no setTimeout delays
     setCurrentProjectRun(projectRun);
     window.history.replaceState({}, document.title, window.location.pathname);

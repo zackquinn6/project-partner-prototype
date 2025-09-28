@@ -326,6 +326,17 @@ export default function UserView({
       viewMode
     });
 
+    // CRITICAL FIX: Don't force listing mode if we have a current project run
+    // This prevents the Continue button from being overridden by reset flags
+    if (currentProjectRun && !showProfile) {
+      console.log('🔄 UserView: Have current project run - forcing workflow mode');
+      if (viewMode !== 'workflow') {
+        setViewMode('workflow');
+        onProjectSelected?.();
+      }
+      return;
+    }
+
     // Determine new view mode based on priority
     let newViewMode: 'listing' | 'workflow' = viewMode;
 
@@ -334,9 +345,6 @@ export default function UserView({
     } else if (resetToListing && !currentProjectRun) {
       newViewMode = 'listing';
       setShowProfileManager(false);
-    } else if (currentProjectRun && !showProfile && !forceListingMode) {
-      newViewMode = 'workflow';
-      onProjectSelected?.();
     } else if (projectRunId && currentProjectRun) {
       newViewMode = 'workflow';
     }
