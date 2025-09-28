@@ -1,4 +1,5 @@
 import { Phase, Operation, WorkflowStep } from '@/interfaces/Project';
+import { enforceStandardPhaseOrdering } from './phaseOrderingUtils';
 
 export const createKickoffPhase = (): Phase => {
   const kickoffSteps: WorkflowStep[] = [
@@ -354,61 +355,29 @@ export const createCloseProjectPhase = (): Phase => {
 
 // Function to ensure standard phases for new project creation only - with deduplication
 export const ensureStandardPhasesForNewProject = (phases: Phase[]): Phase[] => {
-  const result: Phase[] = [];
-  const seenNames = new Set<string>();
-  const phaseNames = phases.map(p => p.name);
-  
-  // Always add Kickoff first if not present
-  if (!phaseNames.includes('Kickoff')) {
-    result.push(createKickoffPhase());
-    seenNames.add('Kickoff');
-  } else {
-    const kickoffPhase = phases.find(p => p.name === 'Kickoff')!;
-    result.push(kickoffPhase);
-    seenNames.add('Kickoff');
+  const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
+  const existingPhaseNames = phases.map(p => p.name);
+  const missingPhases: Phase[] = [];
+
+  // Add missing standard phases
+  if (!existingPhaseNames.includes('Kickoff')) {
+    missingPhases.push(createKickoffPhase());
   }
-  
-  // Add Planning phase if not present
-  if (!phaseNames.includes('Planning')) {
-    result.push(createPlanningPhase());
-    seenNames.add('Planning');
-  } else {
-    const planningPhase = phases.find(p => p.name === 'Planning')!;
-    result.push(planningPhase);
-    seenNames.add('Planning');
+  if (!existingPhaseNames.includes('Planning')) {
+    missingPhases.push(createPlanningPhase());
   }
-  
-  // Add Ordering phase if not present
-  if (!phaseNames.includes('Ordering')) {
-    result.push(createOrderingPhase());
-    seenNames.add('Ordering');
-  } else {
-    const orderingPhase = phases.find(p => p.name === 'Ordering')!;
-    result.push(orderingPhase);
-    seenNames.add('Ordering');
+  if (!existingPhaseNames.includes('Ordering')) {
+    missingPhases.push(createOrderingPhase());
   }
-  
-  // Add any custom phases (excluding standard ones and avoiding duplicates)
-  const standardNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
-  const customPhases = phases.filter(p => !standardNames.includes(p.name) && !seenNames.has(p.name));
-  customPhases.forEach(phase => {
-    if (!seenNames.has(phase.name)) {
-      result.push(phase);
-      seenNames.add(phase.name);
-    }
-  });
-  
-  // Always add Close Project at the end if not present
-  if (!phaseNames.includes('Close Project')) {
-    result.push(createCloseProjectPhase());
-    seenNames.add('Close Project');
-  } else {
-    const closePhase = phases.find(p => p.name === 'Close Project')!;
-    result.push(closePhase);
-    seenNames.add('Close Project');
+  if (!existingPhaseNames.includes('Close Project')) {
+    missingPhases.push(createCloseProjectPhase());
   }
+
+  // Combine existing and missing phases
+  const allPhases = [...phases, ...missingPhases];
   
-  return result;
+  // Enforce standard phase ordering using the utility function
+  return enforceStandardPhaseOrdering(allPhases);
 };
 
 // NEW: Function to check if project has all standard phases

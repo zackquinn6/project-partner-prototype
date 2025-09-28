@@ -21,6 +21,7 @@ import { DecisionTreeFlowchart } from './DecisionTreeFlowchart';
 import { DecisionPointEditor } from './DecisionPointEditor';
 import { PhaseIncorporationDialog } from './PhaseIncorporationDialog';
 import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
+import { enforceStandardPhaseOrdering } from '@/utils/phaseOrderingUtils';
 interface StructureManagerProps {
   onBack: () => void;
 }
@@ -124,31 +125,81 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     if (source.index === destination.index && source.droppableId === destination.droppableId) {
       return;
     }
-    const updatedProject = {
-      ...currentProject
-    };
+
     if (type === 'phases') {
-      // Only allow reordering of non-standard phases (after index 2: kickoff, planning, ordering)
-      const standardPhaseCount = 3;
-      if (source.index >= standardPhaseCount && destination.index >= standardPhaseCount) {
-        const newPhases = Array.from(updatedProject.phases);
-        const sourceIndex = source.index - standardPhaseCount;
-        const destIndex = destination.index - standardPhaseCount;
-        const [removed] = newPhases.splice(sourceIndex, 1);
-        newPhases.splice(destIndex, 0, removed);
-        updatedProject.phases = newPhases;
-        updateProject(updatedProject);
-        toast.success('Phase reordered successfully');
+      // Get phase being moved
+      const sourcePhase = displayPhases[source.index];
+      const destinationPhase = displayPhases[destination.index];
+      
+      const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
+      const isSourceStandard = standardPhaseNames.includes(sourcePhase?.name || '') && !sourcePhase?.isLinked;
+      const isDestinationStandard = standardPhaseNames.includes(destinationPhase?.name || '') && !destinationPhase?.isLinked;
+      
+      // Prevent moving standard phases or moving phases to standard phase positions
+      if (isSourceStandard) {
+        toast.error(`Cannot move standard phase "${sourcePhase.name}". Standard phases must remain in their fixed positions.`);
+        return;
       }
+
+      // Define required positions for standard phases
+      const kickoffIndex = displayPhases.findIndex(p => p.name === 'Kickoff' && !p.isLinked);
+      const planningIndex = displayPhases.findIndex(p => p.name === 'Planning' && !p.isLinked);
+      const orderingIndex = displayPhases.findIndex(p => p.name === 'Ordering' && !p.isLinked);
+      const closeProjectIndex = displayPhases.findIndex(p => p.name === 'Close Project' && !p.isLinked);
+
+      // Prevent moving non-standard phases into standard phase positions
+      const standardPositions = [kickoffIndex, planningIndex, orderingIndex, closeProjectIndex].filter(i => i !== -1);
+      if (standardPositions.includes(destination.index)) {
+        toast.error('Cannot move phases into standard phase positions. Standard phases must remain in order: Kickoff → Planning → Ordering → [Custom Phases] → Close Project');
+        return;
+      }
+
+      // Only allow reordering of non-standard phases
+      const updatedProject = { ...currentProject };
+      const newPhases = Array.from(updatedProject.phases);
+      const [removed] = newPhases.splice(source.index, 1);
+      newPhases.splice(destination.index, 0, removed);
+      
+      // Verify the result maintains standard phase ordering
+      const finalPhases = newPhases;
+      const finalKickoffIndex = finalPhases.findIndex(p => p.name === 'Kickoff' && !p.isLinked);
+      const finalPlanningIndex = finalPhases.findIndex(p => p.name === 'Planning' && !p.isLinked);
+      const finalOrderingIndex = finalPhases.findIndex(p => p.name === 'Ordering' && !p.isLinked);
+      const finalCloseProjectIndex = finalPhases.findIndex(p => p.name === 'Close Project' && !p.isLinked);
+      
+      // Validate ordering
+      if (finalKickoffIndex !== -1 && finalPlanningIndex !== -1 && finalKickoffIndex > finalPlanningIndex) {
+        toast.error('Invalid ordering: Kickoff must come before Planning');
+        return;
+      }
+      if (finalPlanningIndex !== -1 && finalOrderingIndex !== -1 && finalPlanningIndex > finalOrderingIndex) {
+        toast.error('Invalid ordering: Planning must come before Ordering');
+        return;
+      }
+      if (finalCloseProjectIndex !== -1) {
+        const hasPhaseAfterClose = finalPhases.slice(finalCloseProjectIndex + 1).some(p => true);
+        if (hasPhaseAfterClose) {
+          toast.error('Invalid ordering: Close Project must be the last phase');
+          return;
+        }
+      }
+
+      updatedProject.phases = newPhases;
+      updateProject(updatedProject);
+      toast.success('Phase reordered successfully');
+
     } else if (type === 'operations') {
       const phaseId = source.droppableId.split('-')[1];
       const phase = displayPhases.find(p => p.id === phaseId);
       const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
-      const isStandardPhase = standardPhaseNames.includes(phase?.name || '');
+      const isStandardPhase = standardPhaseNames.includes(phase?.name || '') && !phase?.isLinked;
+      
       if (isStandardPhase) {
         toast.error('Cannot reorder operations in standard phases');
         return;
       }
+      
+      const updatedProject = { ...currentProject };
       const phaseIndex = currentProject.phases.findIndex(p => p.id === phaseId);
       if (phaseIndex !== -1) {
         const operations = Array.from(currentProject.phases[phaseIndex].operations);
@@ -162,11 +213,14 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       const [phaseId, operationId] = source.droppableId.split('-').slice(1);
       const phase = displayPhases.find(p => p.id === phaseId);
       const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
-      const isStandardPhase = standardPhaseNames.includes(phase?.name || '');
+      const isStandardPhase = standardPhaseNames.includes(phase?.name || '') && !phase?.isLinked;
+      
       if (isStandardPhase) {
         toast.error('Cannot reorder steps in standard phases');
         return;
       }
+      
+      const updatedProject = { ...currentProject };
       const phaseIndex = currentProject.phases.findIndex(p => p.id === phaseId);
       if (phaseIndex !== -1) {
         const operationIndex = currentProject.phases[phaseIndex].operations.findIndex(o => o.id === operationId);
@@ -244,9 +298,14 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       operations: [],
       isLinked: false
     };
+    
+    // Add new phase and enforce standard phase ordering
+    const phasesWithNew = [...currentProject.phases, newPhase];
+    const orderedPhases = enforceStandardPhaseOrdering(phasesWithNew);
+    
     const updatedProject = {
       ...currentProject,
-      phases: [...currentProject.phases, newPhase],
+      phases: orderedPhases,
       updatedAt: new Date()
     };
     updateProject(updatedProject);
@@ -283,9 +342,13 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
     console.log('🔍 Created linked phase:', linkedPhase);
 
+    // Add linked phase and enforce standard phase ordering
+    const phasesWithLinked = [...currentProject.phases, linkedPhase];
+    const orderedPhases = enforceStandardPhaseOrdering(phasesWithLinked);
+
     const updatedProject = {
       ...currentProject,
-      phases: [...currentProject.phases, linkedPhase],
+      phases: orderedPhases,
       updatedAt: new Date()
     };
 
@@ -563,15 +626,19 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                 const isStandardPhase = standardPhaseNames.includes(phase.name) && !phase.isLinked;
                 const isLinkedPhase = phase.isLinked;
                 const isEditing = editingItem?.type === 'phase' && editingItem.id === phase.id;
-                return <Draggable key={phase.id} draggableId={phase.id} index={phaseIndex} isDragDisabled={isStandardPhase}>
+                
+                // Prevent dragging of standard phases
+                const isDragDisabled = isStandardPhase;
+                
+                return <Draggable key={phase.id} draggableId={phase.id} index={phaseIndex} isDragDisabled={isDragDisabled}>
                       {(provided, snapshot) => <Card ref={provided.innerRef} {...provided.draggableProps} className={`border-2 ${snapshot.isDragging ? 'shadow-lg' : ''} ${isStandardPhase ? 'bg-blue-50 border-blue-200' : isLinkedPhase ? 'bg-purple-50 border-purple-200' : ''}`}>
                           <CardHeader className="py-1 px-2">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1 flex-1">
-                                {!isStandardPhase && phase.name !== 'Close Project' && <div {...provided.dragHandleProps}>
+                                {!isStandardPhase && <div {...provided.dragHandleProps}>
                                     <GripVertical className="w-3 h-3 text-muted-foreground cursor-grab" />
                                   </div>}
-                                {(isStandardPhase || phase.name === 'Close Project') && <div className="w-3" />}
+                                {isStandardPhase && <div className="w-3" />}
                                 
                                 {isEditing ? <div className="flex-1 space-y-1">
                                     <Input value={editingItem.data.name} onChange={e => setEditingItem({
