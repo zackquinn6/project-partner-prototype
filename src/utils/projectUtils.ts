@@ -353,8 +353,10 @@ export const addStandardPhasesToProjectRun = (phases: Phase[]): Phase[] => {
     }
   }
 
-  // Check if close project phase already exists
-  const hasCloseProject = processedPhases.some(phase => phase.name === 'Close Project');
+  // Check if close project phase already exists (by both name and ID to prevent duplicates)
+  const hasCloseProject = processedPhases.some(phase => 
+    phase.name === 'Close Project' || phase.id === 'close-project-phase'
+  );
   if (!hasCloseProject) {
     // Always add close project phase at the end
     processedPhases.push(createCloseProjectPhase());
