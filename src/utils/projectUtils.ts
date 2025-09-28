@@ -314,77 +314,20 @@ export const createCloseProjectPhase = (): Phase => {
   return closeProjectPhase;
 };
 
-// Function to check if a project already has standard phases
-export const hasStandardPhases = (phases: Phase[]): boolean => {
-  const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
-  const standardPhaseIds = ['kickoff-phase', 'planning-phase', 'ordering-phase', 'close-project-phase'];
-  
-  return standardPhaseNames.some(name => 
-    phases.some(phase => phase.name === name)
-  ) || standardPhaseIds.some(id => 
-    phases.some(phase => phase.id === id)
-  );
-};
-
-// Function to add standard phases only if they don't exist (for new project creation)
-export const ensureStandardPhasesForNewProject = (phases: Phase[]): Phase[] => {
-  // If project already has standard phases, return as-is
-  if (hasStandardPhases(phases)) {
-    return phases;
-  }
-  
-  // Otherwise, add standard phases (this should only happen for new projects)
-  return addStandardPhasesToProjectRun(phases);
-};
-
-// Backward compatibility function for display components that might encounter legacy data
-export const ensureStandardPhasesForDisplay = (phases: Phase[]): Phase[] => {
-  // For display purposes, we should rarely need to add standard phases since they
-  // should already be in the project data. This is just a safety fallback.
-  if (!hasStandardPhases(phases) && phases.length > 0) {
-    console.warn('Warning: Project phases missing standard phases. This might be legacy data.');
-    return addStandardPhasesToProjectRun(phases);
-  }
-  return phases;
-};
-
 export const addStandardPhasesToProjectRun = (phases: Phase[]): Phase[] => {
   let processedPhases = [...phases];
   
-  // First, remove any existing duplicates of standard phases to prevent conflicts
-  const standardPhaseIds = ['kickoff-phase', 'planning-phase', 'ordering-phase', 'close-project-phase'];
-  const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
-  
-  // Remove duplicate standard phases, keeping only the first occurrence of each
-  const seenStandardPhases = new Set();
-  processedPhases = processedPhases.filter(phase => {
-    if (standardPhaseIds.includes(phase.id) || standardPhaseNames.includes(phase.name)) {
-      const phaseKey = phase.id || phase.name;
-      if (seenStandardPhases.has(phaseKey)) {
-        return false; // Remove duplicate
-      }
-      seenStandardPhases.add(phaseKey);
-    }
-    return true; // Keep the phase
-  });
-  
   // Check if kickoff phase already exists
-  const hasKickoff = processedPhases.some(phase => 
-    phase.name === 'Kickoff' || phase.id === 'kickoff-phase'
-  );
+  const hasKickoff = processedPhases.some(phase => phase.name === 'Kickoff');
   if (!hasKickoff) {
     processedPhases = [createKickoffPhase(), ...processedPhases];
   }
   
   // Check if planning phase already exists
-  const hasPlanning = processedPhases.some(phase => 
-    phase.name === 'Planning' || phase.id === 'planning-phase'
-  );
+  const hasPlanning = processedPhases.some(phase => phase.name === 'Planning');
   if (!hasPlanning) {
     // Insert planning phase after kickoff
-    const kickoffIndex = processedPhases.findIndex(phase => 
-      phase.name === 'Kickoff' || phase.id === 'kickoff-phase'
-    );
+    const kickoffIndex = processedPhases.findIndex(phase => phase.name === 'Kickoff');
     if (kickoffIndex >= 0) {
       processedPhases.splice(kickoffIndex + 1, 0, createPlanningPhase());
     } else {
@@ -393,21 +336,15 @@ export const addStandardPhasesToProjectRun = (phases: Phase[]): Phase[] => {
   }
   
   // Check if ordering phase already exists
-  const hasOrdering = processedPhases.some(phase => 
-    phase.name === 'Ordering' || phase.id === 'ordering-phase'
-  );
+  const hasOrdering = processedPhases.some(phase => phase.name === 'Ordering');
   if (!hasOrdering) {
     // Insert ordering phase after planning
-    const planningIndex = processedPhases.findIndex(phase => 
-      phase.name === 'Planning' || phase.id === 'planning-phase'
-    );
+    const planningIndex = processedPhases.findIndex(phase => phase.name === 'Planning');
     if (planningIndex >= 0) {
       processedPhases.splice(planningIndex + 1, 0, createOrderingPhase());
     } else {
       // If no planning phase, add after kickoff
-      const kickoffIndex = processedPhases.findIndex(phase => 
-        phase.name === 'Kickoff' || phase.id === 'kickoff-phase'
-      );
+      const kickoffIndex = processedPhases.findIndex(phase => phase.name === 'Kickoff');
       if (kickoffIndex >= 0) {
         processedPhases.splice(kickoffIndex + 1, 0, createOrderingPhase());
       } else {
@@ -416,13 +353,12 @@ export const addStandardPhasesToProjectRun = (phases: Phase[]): Phase[] => {
     }
   }
 
-  // Remove Close Project from current position if it exists
-  processedPhases = processedPhases.filter(phase => 
-    !(phase.name === 'Close Project' || phase.id === 'close-project-phase')
-  );
-
-  // Always add Close Project as the LAST phase
-  processedPhases.push(createCloseProjectPhase());
+  // Check if close project phase already exists
+  const hasCloseProject = processedPhases.some(phase => phase.name === 'Close Project');
+  if (!hasCloseProject) {
+    // Always add close project phase at the end
+    processedPhases.push(createCloseProjectPhase());
+  }
 
   return processedPhases;
 };

@@ -7,7 +7,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useProjectData } from './ProjectDataContext';
 import { useGuest } from './GuestContext';
 import { toast } from '@/components/ui/use-toast';
-import { ensureStandardPhasesForNewProject } from '@/utils/projectUtils';
+import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 import { useOptimizedState } from '@/hooks/useOptimizedState';
 
 interface ProjectActionsContextType {
@@ -105,7 +105,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
     if (!user) return null;
 
     try {
-      const phasesWithKickoff = ensureStandardPhasesForNewProject(project.phases);
+      const phasesWithKickoff = addStandardPhasesToProjectRun(project.phases);
       
       const { data, error } = await supabase
         .from('project_runs')
@@ -166,7 +166,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
     if (!user) return;
 
     try {
-      const phasesWithKickoff = ensureStandardPhasesForNewProject(projectRunData.phases);
+      const phasesWithKickoff = addStandardPhasesToProjectRun(projectRunData.phases);
 
       const { data, error } = await supabase
         .from('project_runs')

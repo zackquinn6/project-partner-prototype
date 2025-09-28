@@ -38,7 +38,7 @@ import { KeyCharacteristicsWindow } from './KeyCharacteristicsWindow';
 import { ProjectCustomizer } from './ProjectCustomizer/ProjectCustomizer';
 import { ProjectScheduler } from './ProjectScheduler';
 import { useResponsive } from '@/hooks/useResponsive';
-import { isKickoffPhaseComplete } from '@/utils/projectUtils';
+import { isKickoffPhaseComplete, addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 import { markOrderingStepIncompleteIfNeeded, extractProjectToolsAndMaterials } from '@/utils/shoppingUtils';
 import { MobileDIYDropdown } from './MobileDIYDropdown';
 interface UserViewProps {
@@ -187,7 +187,7 @@ export default function UserView({
   });
   
   // Flatten all steps with standard phases included
-  const allSteps = activeProject ? activeProject.phases.flatMap(phase => 
+  const allSteps = activeProject ? addStandardPhasesToProjectRun(activeProject.phases).flatMap(phase => 
     phase.operations.flatMap(operation => 
       operation.steps.map(step => {
         // Add sample materials and tools for demonstration (since project templates are empty)
@@ -688,7 +688,7 @@ export default function UserView({
     
     // CRITICAL FIX: Use the step's stored phaseName first as it's most reliable
     if (currentStep.phaseName) {
-       const processedPhases = activeProject.phases;
+      const processedPhases = addStandardPhasesToProjectRun(activeProject.phases);
       const phaseByName = processedPhases.find(phase => phase.name === currentStep.phaseName);
       
       if (phaseByName) {
@@ -703,7 +703,7 @@ export default function UserView({
     }
     
     // FALLBACK: Search through phases to find the step (should not be needed with correct data)
-     const processedPhases = activeProject.phases;
+    const processedPhases = addStandardPhasesToProjectRun(activeProject.phases);
     
     console.log("🔍 getCurrentPhase: Fallback search for step", {
       stepId: currentStep.id,
@@ -901,7 +901,7 @@ export default function UserView({
   };
 
   // Group steps by phase and operation for sidebar navigation - FIXED: Use processed phases with standard phases
-  const processedPhases = activeProject ? activeProject.phases : [];
+  const processedPhases = activeProject ? addStandardPhasesToProjectRun(activeProject.phases) : [];
   const groupedSteps = processedPhases.reduce((acc, phase) => {
     acc[phase.name] = phase.operations.reduce((opAcc, operation) => {
       opAcc[operation.name] = operation.steps;
@@ -1723,7 +1723,7 @@ export default function UserView({
             const updatedProjectRun = { ...currentProjectRun };
             
             // Find and update any "all items shopped for" outputs
-            const processedPhases = updatedProjectRun.phases || [];
+            const processedPhases = addStandardPhasesToProjectRun(updatedProjectRun.phases || []);
             processedPhases.forEach((phase, phaseIndex) => {
               if (phase.operations) {
                 phase.operations.forEach((operation, opIndex) => {
