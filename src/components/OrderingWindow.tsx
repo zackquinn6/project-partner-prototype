@@ -370,28 +370,26 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
             </Badge>
           </div>
           
-          <div className="flex items-center gap-3">
-            {/* Complete Shopping Button - Same row, reduced size */}
-            {onOrderingComplete && (
-              <Button
-                onClick={onOrderingComplete}
-                disabled={shoppedTools.size + shoppedMaterials.size < uniqueTools.length + uniqueMaterials.length}
-                className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 h-auto"
-                size="sm"
-              >
-                <Check className="w-3 h-3 mr-1.5" />
-                Complete Shopping
-              </Button>
-            )}
-            
-            <div className="flex items-center gap-2">
-              <Checkbox 
-                id="show-shopped-main"
-                checked={showShopped}
-                onCheckedChange={(checked) => setShowShopped(checked === true)}
-              />
-              <label htmlFor="show-shopped-main" className="text-xs">Show completed</label>
-            </div>
+          {/* Complete Shopping Button - Centered in window */}
+          {onOrderingComplete && (
+            <Button
+              onClick={onOrderingComplete}
+              disabled={shoppedTools.size + shoppedMaterials.size < uniqueTools.length + uniqueMaterials.length}
+              className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 h-auto"
+              size="sm"
+            >
+              <Check className="w-3 h-3 mr-1.5" />
+              Complete Shopping
+            </Button>
+          )}
+          
+          <div className="flex items-center gap-2">
+            <Checkbox 
+              id="show-shopped-main"
+              checked={showShopped}
+              onCheckedChange={(checked) => setShowShopped(checked === true)}
+            />
+            <label htmlFor="show-shopped-main" className="text-xs">Show completed</label>
           </div>
         </div>
 
