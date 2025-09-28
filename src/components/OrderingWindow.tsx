@@ -392,7 +392,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
             </TabsList>
             
             <TabsContent value="materials" className="flex-1">
-              <ScrollArea className="h-[40vh] md:h-[35vh]">
+              <ScrollArea className="h-[30vh] md:h-[25vh]">
                 <div className="space-y-3 pr-3">
                   {activeMaterials.length === 0 && (!showShopped || shoppedMaterialsList.length === 0) ? (
                     <div className="text-center py-8 text-muted-foreground">
@@ -480,7 +480,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
             </TabsContent>
             
             <TabsContent value="tools" className="flex-1">
-              <ScrollArea className="h-[60vh] md:h-[50vh]">
+              <ScrollArea className="h-[30vh] md:h-[25vh]">
                 <div className="space-y-3 pr-3">
                   {activeTools.length === 0 && (!showShopped || shoppedToolsList.length === 0) ? (
                     <div className="text-center py-8 text-muted-foreground">
