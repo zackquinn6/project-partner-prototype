@@ -273,11 +273,11 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
                 ) : (
                   // Desktop: Traditional tabs
                   <>
-                    <TabsTrigger value="decisions" className="text-xs md:text-sm px-2 py-3">
+                    <TabsTrigger value="decisions" className="text-xs md:text-sm px-2 py-4">
                       <Settings className="w-4 h-4 mr-2" />
                       Workflow Decisions
                     </TabsTrigger>
-                    <TabsTrigger value="custom-work" className="text-xs md:text-sm px-2 py-3">
+                    <TabsTrigger value="custom-work" className="text-xs md:text-sm px-2 py-4">
                       <Plus className="w-4 h-4 mr-2" />
                       Add Custom Work
                     </TabsTrigger>
