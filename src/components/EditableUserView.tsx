@@ -17,6 +17,7 @@ import { OutputDetailPopup } from './OutputDetailPopup';
 import { AccountabilityMessagePopup } from './AccountabilityMessagePopup';
 import { ExpertHelpWindow } from './ExpertHelpWindow';
 import { PhaseCompletionPopup } from './PhaseCompletionPopup';
+import { MaterialsSelectionWindow } from './MaterialsSelectionWindow';
 import { OrderingWindow } from './OrderingWindow';
 import { SignatureCapture } from './SignatureCapture';
 import { StepCompletionTracker } from './StepCompletionTracker';
@@ -967,6 +968,16 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
           />
         </div>
       )}
+
+      {/* Materials Selection Window */}
+      <MaterialsSelectionWindow
+        open={false}
+        onOpenChange={() => {}}
+        project={null}
+        projectRun={currentProjectRun}
+        completedSteps={new Set()}
+        onSelectionComplete={() => {}}
+      />
 
       {/* Ordering Window */}
       <OrderingWindow

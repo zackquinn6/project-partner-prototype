@@ -26,6 +26,7 @@ import { PhaseRatingPopup } from './PhaseRatingPopup';
 import { ExpertHelpWindow } from './ExpertHelpWindow';
 import { PhaseCompletionPopup } from './PhaseCompletionPopup';
 import { OrderingWindow } from './OrderingWindow';
+import { MaterialsSelectionWindow } from './MaterialsSelectionWindow';
 import { KickoffWorkflow } from './KickoffWorkflow';
 import { UnplannedWorkWindow } from './UnplannedWorkWindow';
 import { CompletionCertificate } from './CompletionCertificate';
@@ -120,6 +121,11 @@ export default function UserView({
   const [keyCharacteristicsOpen, setKeyCharacteristicsOpen] = useState(false);
   const [projectCustomizerOpen, setProjectCustomizerOpen] = useState(false);
   const [projectSchedulerOpen, setProjectSchedulerOpen] = useState(false);
+  const [materialsSelectionOpen, setMaterialsSelectionOpen] = useState(false);
+  const [selectedMaterialsForShopping, setSelectedMaterialsForShopping] = useState<{
+    materials: any[];
+    tools: any[];
+  }>({ materials: [], tools: [] });
   const [previousToolsAndMaterials, setPreviousToolsAndMaterials] = useState<{ tools: any[], materials: any[] } | null>(null);
 
   // Check if kickoff phase is complete for project runs - MOVED UP to fix TypeScript error
@@ -131,6 +137,10 @@ export default function UserView({
       console.log('🎯 UserView: Opening Project Scheduler');
       setProjectSchedulerOpen(true);
     };
+    const handleOpenMaterialsSelection = () => {
+      console.log('🎯 UserView: Opening Materials Selection');
+      setMaterialsSelectionOpen(true);
+    };
     const handleOpenOrderingWindow = () => {
       console.log('🎯 UserView: Opening Ordering Window');
       setOrderingWindowOpen(true);
@@ -141,11 +151,13 @@ export default function UserView({
     };
 
     window.addEventListener('openProjectScheduler', handleOpenProjectScheduler);
+    window.addEventListener('openMaterialsSelection', handleOpenMaterialsSelection);
     window.addEventListener('openOrderingWindow', handleOpenOrderingWindow);
     window.addEventListener('openProjectCustomizer', handleOpenProjectCustomizer);
 
     return () => {
       window.removeEventListener('openProjectScheduler', handleOpenProjectScheduler);
+      window.removeEventListener('openMaterialsSelection', handleOpenMaterialsSelection);
       window.removeEventListener('openOrderingWindow', handleOpenOrderingWindow);
       window.removeEventListener('openProjectCustomizer', handleOpenProjectCustomizer);
     };
@@ -842,8 +854,8 @@ export default function UserView({
           <div className="flex justify-center pt-4">
             <Button 
               onClick={() => {
-                console.log('Opening ordering window for step:', step.step);
-                setOrderingWindowOpen(true);
+                console.log('Opening materials selection window for step:', step.step);
+                setMaterialsSelectionOpen(true);
               }}
               variant="outline"
               className="flex items-center gap-2"
@@ -1706,6 +1718,52 @@ export default function UserView({
         onReportIssue={handleReportIssueFromRating}
       />
       
+      {/* Materials Selection Window */}
+      <MaterialsSelectionWindow
+        open={materialsSelectionOpen}
+        onOpenChange={setMaterialsSelectionOpen}
+        project={currentProject}
+        projectRun={currentProjectRun}
+        completedSteps={completedSteps}
+        onSelectionComplete={(selectedItems) => {
+          setSelectedMaterialsForShopping(selectedItems);
+          setMaterialsSelectionOpen(false);
+          
+          // Set "all items shopped for" output to not complete status
+          if (currentProjectRun) {
+            const updatedProjectRun = { ...currentProjectRun };
+            
+            // Find and update any "all items shopped for" outputs
+            const processedPhases = addStandardPhasesToProjectRun(updatedProjectRun.phases || []);
+            processedPhases.forEach((phase, phaseIndex) => {
+              if (phase.operations) {
+                phase.operations.forEach((operation, opIndex) => {
+                  if (operation.steps) {
+                    operation.steps.forEach((step, stepIndex) => {
+                      if (step.outputs) {
+                        step.outputs.forEach((output, outputIndex) => {
+                          if (output.name && output.name.toLowerCase().includes('all items shopped for')) {
+                            const outputKey = `${phaseIndex}-${opIndex}-${stepIndex}-${outputIndex}`;
+                            if (updatedProjectRun.completedSteps?.includes(outputKey)) {
+                              updatedProjectRun.completedSteps = updatedProjectRun.completedSteps.filter(id => id !== outputKey);
+                            }
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+            
+            updateProjectRun(updatedProjectRun);
+          }
+          
+          // Open ordering window with selected items
+          setOrderingWindowOpen(true);
+        }}
+      />
+      
       {/* Ordering Window */}
       <OrderingWindow
         open={orderingWindowOpen}
@@ -1714,6 +1772,7 @@ export default function UserView({
         projectRun={currentProjectRun}
         userOwnedTools={[]}
         completedSteps={completedSteps}
+        selectedMaterials={selectedMaterialsForShopping}
         onOrderingComplete={() => {
           console.log("Ordering window completed for step:", currentStep?.step);
           // Mark the ordering step as complete

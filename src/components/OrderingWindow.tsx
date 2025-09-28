@@ -24,6 +24,10 @@ interface OrderingWindowProps {
   projectRun?: any; // ProjectRun object as fallback
   userOwnedTools: any[];
   completedSteps?: Set<string>;
+  selectedMaterials?: {
+    materials: any[];
+    tools: any[];
+  };
   onOrderingComplete?: () => void;
 }
 
@@ -41,7 +45,7 @@ const SHOPPING_SITES: ShoppingSite[] = [
   { name: "Toolio.us", url: "https://toolio.us", color: "bg-green-600 hover:bg-green-700" },
 ];
 
-export function OrderingWindow({ open, onOpenChange, project, projectRun, userOwnedTools, completedSteps, onOrderingComplete }: OrderingWindowProps) {
+export function OrderingWindow({ open, onOpenChange, project, projectRun, userOwnedTools, completedSteps, selectedMaterials, onOrderingComplete }: OrderingWindowProps) {
   const [urlInput, setUrlInput] = useState<string>("");
   const [orderedTools, setOrderedTools] = useState<Set<string>>(new Set());
   const [orderedMaterials, setOrderedMaterials] = useState<Set<string>>(new Set());
@@ -100,6 +104,36 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
       return { materials: [], tools: [] };
     }
     
+    // If we have selected materials from MaterialsSelectionWindow, use those instead
+    if (selectedMaterials && (selectedMaterials.materials.length > 0 || selectedMaterials.tools.length > 0)) {
+      console.log('🛒 Using selected materials from MaterialsSelectionWindow:', selectedMaterials);
+      
+      // Convert selected items to the format expected by OrderingWindow
+      const materials = selectedMaterials.materials.map((material, index) => ({
+        id: material.id || `selected-material-${index}`,
+        name: material.name,
+        description: material.description || '',
+        category: material.category || 'Other',
+        alternates: material.alternates || [],
+        unit: material.unit || 'pieces',
+        totalQuantity: material.quantity || 1,
+        usedInSteps: [material.stepName || 'Selected Step']
+      }));
+      
+      const tools = selectedMaterials.tools.map((tool, index) => ({
+        id: tool.id || `selected-tool-${index}`,
+        name: tool.name,
+        description: tool.description || '',
+        category: tool.category || 'Other',
+        alternates: tool.alternates || [],
+        maxQuantity: tool.quantity || 1,
+        usedInSteps: [tool.stepName || 'Selected Step']
+      }));
+      
+      return { materials, tools };
+    }
+    
+    // Original logic for when no materials are pre-selected
     // Get processed phases including standard phases for complete tool/material list
     const processedPhases = addStandardPhasesToProjectRun(activeProject.phases || []);
     
@@ -218,7 +252,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
       materials: Array.from(materialsMap.values()),
       tools: Array.from(toolsMap.values())
     };
-  }, [project, projectRun]);
+  }, [project, projectRun, selectedMaterials]);
 
   const uniqueTools = projectRollup.tools;
   const uniqueMaterials = projectRollup.materials;
@@ -320,7 +354,12 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
     >
       <div className="flex flex-col h-full space-y-2">
         {/* Custom Title */}
-        <h2 className="text-lg md:text-xl font-bold mb-2">Shopping Checklist</h2>
+        <h2 className="text-lg md:text-xl font-bold mb-2">
+          {selectedMaterials && (selectedMaterials.materials.length > 0 || selectedMaterials.tools.length > 0) 
+            ? 'Shopping Checklist - New Materials Needed' 
+            : 'Shopping Checklist'
+          }
+        </h2>
         
         {/* Shopping Sites and Search */}
         <div className="space-y-3 p-3 border rounded-lg bg-muted/30">
