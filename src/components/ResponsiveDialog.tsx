@@ -71,7 +71,7 @@ export function ResponsiveDialog({
         )}
       >
         {(title || description) && (
-          <DialogHeader className={`space-y-1 ${size === 'content-full' ? 'px-4 pt-4 pb-2' : 'pb-2'}`}>
+          <DialogHeader className={`space-y-1 ${size === 'content-full' ? 'px-4 pt-4 pb-0' : 'pb-2'}`}>
             {title && (
               <DialogTitle className="text-lg md:text-xl font-bold">
                 {title}
@@ -85,7 +85,7 @@ export function ResponsiveDialog({
           </DialogHeader>
         )}
         
-        <div className={`flex flex-col min-h-0 flex-1 ${size === 'content-full' ? 'px-4 pb-4' : ''}`}>
+        <div className={`flex flex-col min-h-0 flex-1 ${size === 'content-full' ? 'pt-4' : ''}`}>
           {children}
         </div>
       </DialogContent>
