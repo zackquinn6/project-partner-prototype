@@ -66,6 +66,26 @@ const Index = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isToolsLibraryGridOpen, setIsToolsLibraryGridOpen] = useState(false);
 
+  // CRITICAL: All hooks must be at the top - before any conditional logic
+  const handleMobileProjectSelect = useCallback((project: any) => {
+    console.log('🎯 Index: Mobile project selected:', project.name);
+    
+    if ('progress' in project) {
+      // Project run selected - go directly to workflow
+      setCurrentProjectRun(project);
+      setMobileView('workflow');
+      setCurrentView('user');
+      // CRITICAL: Clear reset flags for direct navigation
+      setResetUserView(false);
+      setForceListingMode(false);
+    } else {
+      // Project template selected
+      setCurrentProject(project);
+      setMobileView('workflow');
+      setCurrentView('user');
+    }
+  }, [setCurrentProjectRun, setCurrentProject]);
+
   // Removed debug logging - no longer tracking duplicate modals
 
   // Handle navigation state changes (including view parameter)
@@ -397,25 +417,6 @@ const Index = () => {
         break;
     }
   };
-
-  const handleMobileProjectSelect = useCallback((project: any) => {
-    console.log('🎯 Index: Mobile project selected:', project.name);
-    
-    if ('progress' in project) {
-      // Project run selected - go directly to workflow
-      setCurrentProjectRun(project);
-      setMobileView('workflow');
-      setCurrentView('user');
-      // CRITICAL: Clear reset flags for direct navigation
-      setResetUserView(false);
-      setForceListingMode(false);
-    } else {
-      // Project template selected
-      setCurrentProject(project);
-      setMobileView('workflow');
-      setCurrentView('user');
-    }
-  }, [setCurrentProjectRun, setCurrentProject]);
 
   const handleMobileQuickAction = () => {
     if (currentProjectRun) {
