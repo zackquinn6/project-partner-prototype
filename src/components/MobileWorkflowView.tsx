@@ -98,28 +98,27 @@ export function MobileWorkflowView({
       {/* Header */}
       <div className="flex-shrink-0 bg-card/95 backdrop-blur-sm border-b border-border sticky top-0 z-40">
         <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onBack}
-              className="flex-shrink-0 p-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div className="flex-1 min-w-0">
-              <h1 className="font-semibold text-base text-card-foreground truncate">
-                {projectName}
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Step {currentStepIndex + 1} of {totalSteps}
-              </p>
-            </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            className="flex-shrink-0 p-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          
+          <div className="flex-1 flex flex-col items-center justify-center mx-4 min-w-0">
+            <h1 className="font-semibold text-base text-card-foreground truncate text-center">
+              {projectName}
+            </h1>
+            <p className="text-xs text-muted-foreground text-center">
+              Step {currentStepIndex + 1} of {totalSteps}
+            </p>
           </div>
           
           <Sheet open={isStepListOpen} onOpenChange={setIsStepListOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="sm" className="p-2">
+              <Button variant="ghost" size="sm" className="flex-shrink-0 p-2">
                 <Menu className="h-4 w-4" />
               </Button>
             </SheetTrigger>
