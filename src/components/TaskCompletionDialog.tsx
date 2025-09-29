@@ -192,7 +192,7 @@ export function TaskCompletionDialog({
                   {completedDate ? format(completedDate, "PPP") : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 z-[300]" align="start">
+              <PopoverContent className="w-auto p-0 bg-popover border shadow-lg" align="start" sideOffset={5}>
                 <Calendar
                   mode="single"
                   selected={completedDate}
