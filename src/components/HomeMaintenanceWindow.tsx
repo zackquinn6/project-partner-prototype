@@ -316,10 +316,10 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                 <Tabs defaultValue="tasks" className="flex flex-col h-full">
                   {/* Tab bar - Fixed at top of tabs area */}
                   <div className="px-3 md:px-6 py-3 bg-background border-b shrink-0">
-                    <TabsList className="grid grid-cols-3 w-full h-12">
-                      <TabsTrigger value="tasks" className="text-xs md:text-sm px-2 py-3">Active</TabsTrigger>
-                      <TabsTrigger value="history" className="text-xs md:text-sm px-2 py-3">History</TabsTrigger>
-                      <TabsTrigger value="notifications" className="text-xs md:text-sm px-2 py-3">Alerts</TabsTrigger>
+                    <TabsList className="grid grid-cols-3 w-full h-11 p-1">
+                      <TabsTrigger value="tasks" className="text-xs md:text-sm">Active</TabsTrigger>
+                      <TabsTrigger value="history" className="text-xs md:text-sm">History</TabsTrigger>
+                      <TabsTrigger value="notifications" className="text-xs md:text-sm">Alerts</TabsTrigger>
                     </TabsList>
                   </div>
 
