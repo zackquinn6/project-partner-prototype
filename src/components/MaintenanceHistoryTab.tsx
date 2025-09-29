@@ -144,8 +144,7 @@ export const MaintenanceHistoryTab: React.FC<MaintenanceHistoryTabProps> = ({ se
   }
 
   return (
-    <div className="h-full overflow-y-auto space-y-2 px-3 md:px-6 pb-3" 
-         style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+    <div className="space-y-2">
       {filteredCompletions.map(completion => (
         <Card key={completion.id} className="hover:shadow-sm transition-shadow mx-1">
           <CardContent className="p-3 sm:p-4">

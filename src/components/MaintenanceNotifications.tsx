@@ -87,21 +87,16 @@ export function MaintenanceNotifications({
       variant: "destructive"
     });
   };
-  return <div className="flex-1 flex flex-col h-full">
-      {/* Header with Save Button */}
-      <div className="py-3 shrink-0 flex items-center justify-between">
+  return <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-lg font-semibold">
           <Bell className="h-5 w-5" />
           Notification Settings
         </h3>
-        <Button onClick={saveNotificationSettings} disabled={saving}>
+        <Button onClick={saveNotificationSettings} disabled={saving} size="sm">
           {saving ? "Saving..." : "Save Settings"}
         </Button>
       </div>
-      
-      {/* Content - matching Active tab content area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="space-y-6 pb-3">
         
         {/* Email and SMS Settings - Responsive Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -197,13 +192,11 @@ export function MaintenanceNotifications({
         </div>
 
         {/* Help text */}
-        <div className="bg-muted/30 p-4 rounded-lg mt-4 mb-4">
+        <div className="bg-muted/30 p-4 rounded-lg">
           <p className="text-sm text-muted-foreground">
             <strong>Note:</strong> Notifications will be sent 7 days before each maintenance task is due. 
             You can disable notifications for specific tasks or adjust your preferences above.
           </p>
         </div>
-        </div>
-      </div>
     </div>;
 }

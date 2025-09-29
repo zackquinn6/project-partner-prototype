@@ -264,7 +264,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
       open={open} 
       onOpenChange={onOpenChange}
       size="xlarge"
-      className="[&>button]:md:block [&>button]:hidden [&_.dialog-content]:max-h-[85vh] [&_.dialog-content]:h-[85vh]"
+      className="[&>button]:md:block [&>button]:hidden h-[85vh] max-h-[85vh]"
     >
       <div className="flex flex-col h-full max-h-full overflow-hidden">
         {/* Header with title and close button */}
@@ -476,8 +476,8 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                          </Select>
                        </div>
 
-                       {/* Scrollable history list */}
-                       <div className="flex-1 min-h-0 overflow-y-auto py-3 px-3 md:px-6">
+                       {/* Scrollable history list - matches structure of Active tab */}
+                       <div className="flex-1 min-h-0 overflow-y-auto space-y-2 py-3 px-3 md:px-6">
                          <MaintenanceHistoryTab selectedHomeId={selectedHomeId} sortBy={sortBy} categoryFilter={historyCategoryFilter} />
                        </div>
                       </div>
@@ -485,8 +485,8 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
 
                    <TabsContent value="notifications" className="flex-1 min-h-0 overflow-hidden m-0">
                      <div className="flex flex-col h-full">
-                       {/* Scrollable notifications list */}
-                       <div className="flex-1 min-h-0 overflow-y-auto py-3 px-3 md:px-6">
+                       {/* Scrollable notifications - matches structure of Active tab */}
+                       <div className="flex-1 min-h-0 overflow-y-auto space-y-2 py-3 px-3 md:px-6">
                          <MaintenanceNotifications selectedHomeId={selectedHomeId} />
                        </div>
                      </div>
