@@ -264,9 +264,9 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
       open={open} 
       onOpenChange={onOpenChange}
       size="xlarge"
-      className="[&>button]:md:block [&>button]:hidden"
+      className="[&>button]:md:block [&>button]:hidden [&_.dialog-content]:max-h-[85vh] [&_.dialog-content]:h-[85vh]"
     >
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full max-h-full overflow-hidden">
         {/* Header with title and close button */}
         <div className="px-4 md:px-6 py-4 border-b flex items-center justify-between flex-shrink-0">
           <h2 className="text-lg md:text-xl font-bold">Home Maintenance Tracker</h2>
@@ -310,10 +310,11 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
               </div>
             </div>
 
-            {/* Tabs - Scrollable content */}
+            {/* Tabs - Takes remaining space */}
             {selectedHomeId && (
-              <div className="flex flex-col flex-1 overflow-hidden">
-                <Tabs defaultValue="tasks" className="flex flex-col flex-1 h-full overflow-hidden">
+              <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                <Tabs defaultValue="tasks" className="flex flex-col h-full">
+                  {/* Tab bar - Fixed at top of tabs area */}
                   <div className="px-3 md:px-6 py-3 bg-background border-b shrink-0">
                     <TabsList className="grid grid-cols-3 w-full h-12">
                       <TabsTrigger value="tasks" className="text-xs md:text-sm px-2 py-3">Active</TabsTrigger>
@@ -322,10 +323,10 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                     </TabsList>
                   </div>
 
-                   <TabsContent value="tasks" className="flex-1 overflow-hidden">
+                   <TabsContent value="tasks" className="flex-1 min-h-0 overflow-hidden m-0">
                       <div className="flex flex-col h-full">
                         {/* Category Filter */}
-                        <div className="flex items-center gap-2 py-3 shrink-0 px-3 md:px-6">
+                        <div className="flex items-center gap-2 py-3 shrink-0 px-3 md:px-6 border-b">
                           <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
                           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                             <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
@@ -347,14 +348,8 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                           </Button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto space-y-2 pb-3 px-3 md:px-6" 
-                             style={{ 
-                               touchAction: 'pan-y', 
-                               WebkitOverflowScrolling: 'touch', 
-                               overscrollBehavior: 'contain',
-                               height: 'auto',
-                               maxHeight: '60vh'
-                             }}>
+                        {/* Scrollable task list */}
+                        <div className="flex-1 min-h-0 overflow-y-auto space-y-2 py-3 px-3 md:px-6">
                       {loading ? (
                         <div className="text-center py-8">Loading tasks...</div>
                       ) : getFilteredTasks().length === 0 ? (
@@ -450,15 +445,15 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                       </div>
                     </TabsContent>
 
-                   <TabsContent value="history" className="flex-1 overflow-hidden">
+                   <TabsContent value="history" className="flex-1 min-h-0 overflow-hidden m-0">
                       <div className="flex flex-col h-full">
-                        {/* Category Filter */}
-                        <div className="flex items-center gap-2 py-3 shrink-0 px-3 md:px-6">
+                        {/* Filters - Fixed at top */}
+                        <div className="flex items-center gap-2 py-3 shrink-0 px-3 md:px-6 border-b">
                          <Select value={historyCategoryFilter} onValueChange={setHistoryCategoryFilter}>
                            <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
                              <SelectValue placeholder="Filter by category" />
                            </SelectTrigger>
-                           <SelectContent className="z-[100]">
+                           <SelectContent className="z-[200] bg-popover border">
                              <SelectItem value="all">All Categories</SelectItem>
                              {categories.map(category => (
                                <SelectItem key={category} value={category}>
@@ -472,7 +467,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                            <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
                              <SelectValue placeholder="Sort by" />
                            </SelectTrigger>
-                           <SelectContent className="z-[100]">
+                           <SelectContent className="z-[200] bg-popover border">
                              <SelectItem value="date-desc">Date (Newest First)</SelectItem>
                              <SelectItem value="date-asc">Date (Oldest First)</SelectItem>
                              <SelectItem value="category">Category</SelectItem>
@@ -481,15 +476,19 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                          </Select>
                        </div>
 
-                       <div className="flex-1 overflow-y-auto space-y-2 pb-3 px-3 md:px-6 min-h-0">
+                       {/* Scrollable history list */}
+                       <div className="flex-1 min-h-0 overflow-y-auto py-3 px-3 md:px-6">
                          <MaintenanceHistoryTab selectedHomeId={selectedHomeId} sortBy={sortBy} categoryFilter={historyCategoryFilter} />
                        </div>
                       </div>
                    </TabsContent>
 
-                   <TabsContent value="notifications" className="min-h-0">
-                     <div className="flex-1 overflow-y-auto px-3 md:px-6 min-h-0">
-                       <MaintenanceNotifications selectedHomeId={selectedHomeId} />
+                   <TabsContent value="notifications" className="flex-1 min-h-0 overflow-hidden m-0">
+                     <div className="flex flex-col h-full">
+                       {/* Scrollable notifications list */}
+                       <div className="flex-1 min-h-0 overflow-y-auto py-3 px-3 md:px-6">
+                         <MaintenanceNotifications selectedHomeId={selectedHomeId} />
+                       </div>
                      </div>
                    </TabsContent>
                 </Tabs>
