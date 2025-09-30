@@ -192,13 +192,14 @@ export function TaskCompletionDialog({
                   {completedDate ? format(completedDate, "PPP") : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-popover border shadow-lg" align="start" sideOffset={5}>
+              <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] p-0" align="center" sideOffset={8}>
                 <Calendar
                   mode="single"
                   selected={completedDate}
                   onSelect={(date) => date && setCompletedDate(date)}
                   disabled={(date) => date > new Date() || date < new Date("2000-01-01")}
                   initialFocus
+                  className="rounded-md border shadow-lg"
                 />
               </PopoverContent>
             </Popover>
