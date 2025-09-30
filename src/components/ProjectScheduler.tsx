@@ -579,7 +579,7 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
                         <div>
                           <Label className="text-xs font-medium flex items-center gap-1">
                             <AlertTriangle className="w-3 h-3 text-destructive" />
-                            Drop-Dead Date (Not Later Than)
+                            Latest Date
                           </Label>
                           <Input
                             type="date"
@@ -589,7 +589,7 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
                           />
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          Target is your goal; drop-dead is the absolute latest acceptable date
+                          Target is your goal; latest is the absolute latest acceptable date
                         </p>
                       </div>
                     </div>
