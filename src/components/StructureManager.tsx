@@ -55,6 +55,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     step: WorkflowStep;
   } | null>(null);
   const [showDecisionTreeView, setShowDecisionTreeView] = useState(false);
+  const [showDecisionTreeManager, setShowDecisionTreeManager] = useState(false);
   const [showDecisionEditor, setShowDecisionEditor] = useState<{
     step: WorkflowStep;
   } | null>(null);
@@ -658,9 +659,9 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                   <ClipboardCheck className="w-3 h-3" />
                   {clipboard.type} copied
                 </Badge>}
-                <Button variant="outline" onClick={() => setShowDecisionTreeView(true)} className="flex items-center gap-2">
+                <Button variant="outline" onClick={() => setShowDecisionTreeManager(true)} className="flex items-center gap-2">
                   <GitBranch className="w-4 h-4" />
-                  Decision Tree
+                  Decision Tree Manager
                 </Button>
                 <Button variant="outline" onClick={() => setShowIncorporationDialog(true)} className="flex items-center gap-2">
                   <Link className="w-4 h-4" />
@@ -1039,13 +1040,11 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       />
 
       {/* Decision Tree Manager */}
-      {showDecisionTreeView && (
-        <DecisionTreeManager
-          open={showDecisionTreeView}
-          onOpenChange={setShowDecisionTreeView}
-          currentProject={currentProject}
-        />
-      )}
+      <DecisionTreeManager
+        open={showDecisionTreeManager}
+        onOpenChange={setShowDecisionTreeManager}
+        currentProject={currentProject}
+      />
     </div>
     </div>;
 };
