@@ -178,35 +178,34 @@ export function TaskCompletionDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Completion Date</Label>
+            <Label className="text-sm font-medium">Completion Date</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal h-10",
+                    "w-full justify-start text-left font-normal h-11",
                     !completedDate && "text-muted-foreground"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-                  {completedDate ? format(completedDate, "PPP") : <span>Pick a date</span>}
+                  <span className="truncate">
+                    {completedDate ? format(completedDate, "PPP") : "Pick a date"}
+                  </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent 
-                className="w-auto max-w-[calc(100vw-32px)] p-0" 
+                className="w-auto max-w-[calc(100vw-24px)] p-0" 
                 align="center" 
-                sideOffset={8}
-                side="bottom"
+                sideOffset={4}
               >
-                <div className="bg-card border rounded-md shadow-lg">
-                  <Calendar
-                    mode="single"
-                    selected={completedDate}
-                    onSelect={(date) => date && setCompletedDate(date)}
-                    disabled={(date) => date > new Date() || date < new Date("2000-01-01")}
-                    initialFocus
-                  />
-                </div>
+                <Calendar
+                  mode="single"
+                  selected={completedDate}
+                  onSelect={(date) => date && setCompletedDate(date)}
+                  disabled={(date) => date > new Date() || date < new Date("2000-01-01")}
+                  initialFocus
+                />
               </PopoverContent>
             </Popover>
           </div>
