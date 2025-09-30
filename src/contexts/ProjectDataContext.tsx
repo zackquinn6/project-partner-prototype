@@ -40,11 +40,31 @@ export const ProjectDataProvider: React.FC<ProjectDataProviderProps> = ({ childr
       let phases = [];
       if (project.phases) {
         try {
-          phases = typeof project.phases === 'string' 
-            ? JSON.parse(project.phases) 
-            : project.phases;
+          // Handle double-encoded JSON strings
+          let parsedPhases = project.phases;
+          
+          // If it's a string, parse it once
+          if (typeof parsedPhases === 'string') {
+            parsedPhases = JSON.parse(parsedPhases);
+          }
+          
+          // If after first parse it's still a string, parse again (double-encoded)
+          if (typeof parsedPhases === 'string') {
+            console.warn('Phases were double-encoded for project:', project.name);
+            parsedPhases = JSON.parse(parsedPhases);
+          }
+          
+          phases = parsedPhases;
+          
+          console.log('Transformed project phases:', {
+            projectId: project.id,
+            projectName: project.name,
+            revisionNumber: project.revision_number,
+            phaseCount: Array.isArray(phases) ? phases.length : 0,
+            firstPhaseOps: phases[0] ? phases[0].operations?.length : 0
+          });
         } catch (e) {
-          console.error('Failed to parse phases JSON:', e);
+          console.error('Failed to parse phases JSON for project:', project.name, e);
           phases = [];
         }
       }

@@ -707,6 +707,32 @@ export function UnifiedProjectManagement() {
                           variant="outline"
                           onClick={() => {
                             // Set the current project and navigate to edit workflow
+                            let parsedPhases = [];
+                            try {
+                              // Handle phases - might be string or already parsed
+                              let phases = revision.phases;
+                              if (typeof phases === 'string') {
+                                phases = JSON.parse(phases);
+                              }
+                              // Check for double-encoding
+                              if (typeof phases === 'string') {
+                                console.warn('Phases double-encoded in UnifiedProjectManagement');
+                                phases = JSON.parse(phases);
+                              }
+                              parsedPhases = phases || [];
+                              
+                              console.log('Setting current project for edit:', {
+                                revisionId: revision.id,
+                                revisionNumber: revision.revision_number,
+                                phaseCount: Array.isArray(parsedPhases) ? parsedPhases.length : 0,
+                                firstPhase: parsedPhases[0]?.name,
+                                firstPhaseOps: parsedPhases[0]?.operations?.length
+                              });
+                            } catch (e) {
+                              console.error('Failed to parse phases for revision:', revision.id, e);
+                              parsedPhases = [];
+                            }
+                            
                             setCurrentProject({ 
                               id: revision.id, 
                               name: revision.name,
@@ -717,7 +743,7 @@ export function UnifiedProjectManagement() {
                               planEndDate: new Date(),
                               status: 'not-started' as const,
                               publishStatus: revision.publish_status as 'draft' | 'published' | 'beta-testing',
-                              phases: revision.phases ? (typeof revision.phases === 'string' ? JSON.parse(revision.phases) : revision.phases) : []
+                              phases: parsedPhases
                             });
                             navigate('/', { state: { view: 'editWorkflow' } });
                           }}
