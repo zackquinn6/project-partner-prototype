@@ -303,7 +303,7 @@ export default function Home({
               <p className="text-lg sm:text-xl md:text-2xl text-primary-foreground/90 mb-8 leading-relaxed">The Go-to App for DIY Home Improvement</p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button variant="secondary" size="lg" className="px-6 md:px-8 text-base md:text-lg bg-primary-foreground text-primary hover:bg-primary-foreground/90 border-0 shadow-elegant" asChild>
+                <Button variant="secondary" size="lg" className="px-6 md:px-8 text-base md:text-lg bg-orange-500 text-white hover:bg-orange-600 border-0 shadow-elegant" asChild>
                   <Link to="/projects">
                     {user ? "View Projects" : "Explore Projects"}
                     <ArrowRight className="ml-2 h-4 w-4" />
