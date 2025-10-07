@@ -1808,7 +1808,10 @@ export type Database = {
           description: string | null
           display_order: number
           id: string
+          is_locked: boolean
           name: string
+          position_rule: string
+          position_value: number | null
           updated_at: string | null
         }
         Insert: {
@@ -1816,7 +1819,10 @@ export type Database = {
           description?: string | null
           display_order: number
           id?: string
+          is_locked?: boolean
           name: string
+          position_rule?: string
+          position_value?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -1824,7 +1830,10 @@ export type Database = {
           description?: string | null
           display_order?: number
           id?: string
+          is_locked?: boolean
           name?: string
+          position_rule?: string
+          position_value?: number | null
           updated_at?: string | null
         }
         Relationships: []
