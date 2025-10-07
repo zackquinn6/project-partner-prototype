@@ -67,11 +67,16 @@ export interface Output {
 
 export interface ContentSection {
   id: string;
-  type: 'text' | 'image' | 'video' | 'link';
+  type: 'text' | 'image' | 'video' | 'link' | 'button';
   content: string;
   title?: string;
   width?: 'full' | 'half' | 'third' | 'two-thirds';
   alignment?: 'left' | 'center' | 'right';
+  // Button-specific properties
+  buttonAction?: 'project-customizer' | 'project-scheduler' | 'shopping-checklist' | 'materials-selection';
+  buttonLabel?: string;
+  buttonIcon?: string;
+  buttonVariant?: 'default' | 'outline' | 'secondary';
 }
 
 // Decision point interface for workflow branching
@@ -106,8 +111,8 @@ export interface WorkflowStep {
   id: string;
   step: string;
   description: string;
-  contentType: 'text' | 'video' | 'image' | 'document';
-  content: string;
+  contentType: 'text' | 'video' | 'image' | 'document' | 'multi';
+  content: string | ContentSection[];
   image?: string;
   materials: Material[];
   tools: Tool[];

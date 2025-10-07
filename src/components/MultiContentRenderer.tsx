@@ -1,19 +1,34 @@
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, HelpCircle, Calendar as CalendarIcon, ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ContentSection {
   id?: string;
-  type: 'text' | 'image' | 'video' | 'link';
+  type: 'text' | 'image' | 'video' | 'link' | 'button';
   content: string;
   title?: string;
   width?: 'full' | 'half' | 'third' | 'two-thirds';
   alignment?: 'left' | 'center' | 'right';
+  // Button-specific properties
+  buttonAction?: 'project-customizer' | 'project-scheduler' | 'shopping-checklist' | 'materials-selection';
+  buttonLabel?: string;
+  buttonIcon?: string;
+  buttonVariant?: 'default' | 'outline' | 'secondary';
 }
 
 interface MultiContentRendererProps {
   sections: ContentSection[];
+  onButtonAction?: (action: string) => void;
 }
 
-export function MultiContentRenderer({ sections }: MultiContentRendererProps) {
+export function MultiContentRenderer({ sections, onButtonAction }: MultiContentRendererProps) {
+  const getButtonIcon = (iconName?: string) => {
+    switch (iconName) {
+      case 'HelpCircle': return <HelpCircle className="w-4 h-4" />;
+      case 'Calendar': return <CalendarIcon className="w-4 h-4" />;
+      case 'ShoppingCart': return <ShoppingCart className="w-4 h-4" />;
+      default: return null;
+    }
+  };
   const getWidthClass = (width?: string) => {
     switch (width) {
       case 'half': return 'w-1/2';
@@ -97,6 +112,19 @@ export function MultiContentRenderer({ sections }: MultiContentRendererProps) {
                   <ExternalLink className="w-4 h-4" />
                   {section.title}
                 </a>
+              </div>
+            )}
+
+            {section.type === 'button' && section.buttonAction && section.buttonLabel && (
+              <div className="flex justify-center pt-4">
+                <Button
+                  onClick={() => onButtonAction?.(section.buttonAction!)}
+                  variant={(section.buttonVariant as "default" | "outline" | "secondary") || "outline"}
+                  className="flex items-center gap-2"
+                >
+                  {getButtonIcon(section.buttonIcon)}
+                  {section.buttonLabel}
+                </Button>
               </div>
             )}
           </div>

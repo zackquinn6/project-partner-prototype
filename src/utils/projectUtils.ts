@@ -154,8 +154,23 @@ export const createPlanningPhase = (): Phase => {
       id: 'planning-step-2',
       step: 'Project Customizer',
       description: 'Customize your project workflow, phases, and decision points',
-      contentType: 'text' as const,
-      content: 'Use the Project Customizer to review and modify your project phases, customize the workflow, and set up decision points based on your specific needs.',
+      contentType: 'multi' as const,
+      content: [
+        {
+          id: 'customizer-text',
+          type: 'text',
+          content: 'Use the Project Customizer to review and modify your project phases, customize the workflow, and set up decision points based on your specific needs.'
+        },
+        {
+          id: 'customizer-button',
+          type: 'button',
+          content: '',
+          buttonAction: 'project-customizer',
+          buttonLabel: 'Project Customizer',
+          buttonIcon: 'HelpCircle',
+          buttonVariant: 'outline'
+        }
+      ],
       materials: [],
       tools: [],
       outputs: [{
@@ -175,8 +190,23 @@ export const createPlanningPhase = (): Phase => {
       id: 'planning-step-3',
       step: 'Project Scheduler',
       description: 'Create project timeline and schedule phases',
-      contentType: 'text' as const,
-      content: 'Use the Project Scheduler to plan your project timeline, set realistic deadlines, coordinate with your calendar, and establish a practical work schedule.',
+      contentType: 'multi' as const,
+      content: [
+        {
+          id: 'scheduler-text',
+          type: 'text',
+          content: 'Use the Project Scheduler to plan your project timeline, set realistic deadlines, coordinate with your calendar, and establish a practical work schedule.'
+        },
+        {
+          id: 'scheduler-button',
+          type: 'button',
+          content: '',
+          buttonAction: 'project-scheduler',
+          buttonLabel: 'Project Scheduler',
+          buttonIcon: 'Calendar',
+          buttonVariant: 'outline'
+        }
+      ],
       materials: [],
       tools: [],
       outputs: [{
@@ -207,8 +237,23 @@ export const createOrderingPhase = (): Phase => {
       id: 'ordering-step-1',
       step: 'Shopping Checklist',
       description: 'Review and prepare complete shopping checklist for tools and materials',
-      contentType: 'text' as const,
-      content: 'Use the Shopping Checklist to review all required tools and materials, compare prices, and prepare for your shopping trip or online orders.',
+      contentType: 'multi' as const,
+      content: [
+        {
+          id: 'checklist-text',
+          type: 'text',
+          content: 'Use the Shopping Checklist to review all required tools and materials, compare prices, and prepare for your shopping trip or online orders.'
+        },
+        {
+          id: 'checklist-button',
+          type: 'button',
+          content: '',
+          buttonAction: 'shopping-checklist',
+          buttonLabel: 'Shopping Checklist',
+          buttonIcon: 'ShoppingCart',
+          buttonVariant: 'outline'
+        }
+      ],
       materials: [],
       tools: [],
       outputs: [{

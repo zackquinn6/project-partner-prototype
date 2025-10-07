@@ -9,11 +9,16 @@ import { Plus, Trash2, FileText, Image, Video, ExternalLink } from "lucide-react
 
 interface ContentSection {
   id: string;
-  type: 'text' | 'image' | 'video' | 'link';
+  type: 'text' | 'image' | 'video' | 'link' | 'button';
   content: string;
   title?: string;
   width?: 'full' | 'half' | 'third' | 'two-thirds';
   alignment?: 'left' | 'center' | 'right';
+  // Button-specific properties
+  buttonAction?: 'project-customizer' | 'project-scheduler' | 'shopping-checklist' | 'materials-selection';
+  buttonLabel?: string;
+  buttonIcon?: string;
+  buttonVariant?: 'default' | 'outline' | 'secondary';
 }
 
 interface MultiContentEditorProps {
