@@ -242,6 +242,17 @@ export default function EditWorkflowView({
   };
   const renderContent = (step: typeof currentStep) => {
     if (!step) return null;
+    
+    console.log('🎨 EditWorkflowView renderContent:', {
+      stepId: step.id,
+      stepName: step.step,
+      hasContentSections: !!step.contentSections,
+      contentSectionsLength: step.contentSections?.length,
+      contentSections: step.contentSections,
+      contentType: (step as any).contentType,
+      editMode
+    });
+    
     if (editMode && editingStep) {
       // Parse existing content sections or create default
       let contentSections: ContentSection[] = [];
