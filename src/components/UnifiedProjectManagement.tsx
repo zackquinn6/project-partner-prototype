@@ -456,7 +456,10 @@ export function UnifiedProjectManagement() {
                   </SelectTrigger>
                   <SelectContent>
                     {projects
-                      .filter(project => project.id !== '00000000-0000-0000-0000-000000000000') // Hide manual log template
+                      .filter(project => 
+                        project.id !== '00000000-0000-0000-0000-000000000000' && // Hide manual log template
+                        project.id !== '00000000-0000-0000-0000-000000000001'    // Hide Standard Project Foundation
+                      )
                       .map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         <span>{project.name}</span>
