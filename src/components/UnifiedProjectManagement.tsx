@@ -299,28 +299,23 @@ export function UnifiedProjectManagement() {
 
   const createProject = async () => {
     try {
+      // Use new backend function to create project with standard foundation
       const { data, error } = await supabase
-        .from('projects')
-        .insert([{
-          name: newProject.name,
-          description: newProject.description || '',
-          category: newProject.category || '',
-          effort_level: newProject.effort_level || 'Medium',
-          skill_level: newProject.skill_level || 'Intermediate',
-          estimated_time: newProject.estimated_time || '',
-          scaling_unit: newProject.scaling_unit || '',
-          publish_status: 'draft',
-          phases: [],
-          created_by: (await supabase.auth.getUser()).data.user?.id,
-        }])
-        .select()
-        .single();
+        .rpc('create_project_with_standard_foundation', {
+          p_project_name: newProject.name,
+          p_description: newProject.description || null,
+          p_category: newProject.category || null,
+          p_difficulty: null,
+          p_effort_level: newProject.effort_level || 'Medium',
+          p_estimated_time: newProject.estimated_time || null,
+          p_image: null
+        });
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "New project created!",
+        description: "New project created with standard phases!",
       });
 
       setCreateProjectDialogOpen(false);

@@ -6,6 +6,10 @@ import { ToolsMaterialsWindow } from '@/components/ToolsMaterialsWindow';
 import { KnowledgeIngestionSystem } from '@/components/KnowledgeIngestionSystem';
 import { HomeRiskManager } from '@/components/HomeRiskManager';
 import { AdminActionCenter } from '@/components/AdminActionCenter';
+import EditWorkflowView from '@/components/EditWorkflowView';
+import { useProject } from '@/contexts/ProjectContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +25,8 @@ import { PFMEAManagement } from './PFMEAManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const AdminView: React.FC = () => {
+  const { setCurrentProject } = useProject();
+  const { toast } = useToast();
   const [enhancedProjectManagementOpen, setEnhancedProjectManagementOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [usersSecurityOpen, setUsersSecurityOpen] = useState(false);
@@ -34,10 +40,53 @@ export const AdminView: React.FC = () => {
   const [adminGuideOpen, setAdminGuideOpen] = useState(false);
   const [dataRefreshOpen, setDataRefreshOpen] = useState(false);
   const [actionCenterOpen, setActionCenterOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'admin' | 'structure-manager'>('admin');
+  const [standardProjectOpen, setStandardProjectOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<'admin' | 'structure-manager' | 'edit-standard'>('admin');
+
+  const handleEditStandardProject = async () => {
+    try {
+      // Fetch standard project using RPC to avoid type issues
+      const { data: standardData, error: rpcError } = await supabase
+        .rpc('get_standard_project_template');
+      
+      if (rpcError) throw rpcError;
+      if (!standardData || standardData.length === 0) throw new Error('Standard Project not found');
+      
+      const projectData = standardData[0];
+      const parsedPhases = Array.isArray(projectData.phases) ? projectData.phases : 
+        (typeof projectData.phases === 'string' ? JSON.parse(projectData.phases) : []);
+        
+      setCurrentProject({
+        id: projectData.project_id,
+        name: projectData.project_name,
+        description: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        startDate: new Date(),
+        planEndDate: new Date(),
+        status: 'not-started' as const,
+        publishStatus: 'draft' as const,
+        phases: parsedPhases
+      });
+      setCurrentView('edit-standard');
+    } catch (error) {
+      console.error('Error loading standard project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load Standard Project Foundation",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (currentView === 'structure-manager') {
     return <StructureManager onBack={() => setCurrentView('admin')} />;
+  }
+
+  if (currentView === 'edit-standard') {
+    return <div className="min-h-screen bg-background">
+      <EditWorkflowView onBackToAdmin={() => setCurrentView('admin')} />
+    </div>;
   }
 
   return (
@@ -87,9 +136,20 @@ export const AdminView: React.FC = () => {
                  Unified project management with integrated revision control
                </CardDescription>
             </CardHeader>
-            <CardContent className="mt-auto">
+            <CardContent className="mt-auto space-y-2">
                <Button className="w-full" onClick={() => setEnhancedProjectManagementOpen(true)}>
                  Project Management
+               </Button>
+               <Button 
+                 className="w-full" 
+                 variant="outline"
+                 onClick={(e) => {
+                   e.stopPropagation();
+                   handleEditStandardProject();
+                 }}
+               >
+                 <Lock className="w-3 h-3 mr-2" />
+                 Edit Standard Project
                </Button>
             </CardContent>
           </Card>

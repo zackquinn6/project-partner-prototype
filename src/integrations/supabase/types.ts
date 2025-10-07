@@ -2383,6 +2383,10 @@ export type Database = {
         Args: { user_email: string }
         Returns: string
       }
+      apply_standard_phase_positioning: {
+        Args: { p_custom_phases?: Json; p_project_id: string }
+        Returns: Json
+      }
       calculate_pfmea_rpn: {
         Args: { failure_mode_uuid: string }
         Returns: number
@@ -2413,6 +2417,29 @@ export type Database = {
       }
       create_project_revision: {
         Args: { revision_notes_text?: string; source_project_id: string }
+        Returns: string
+      }
+      create_project_run_snapshot: {
+        Args: {
+          p_home_id?: string
+          p_plan_end_date?: string
+          p_run_name: string
+          p_start_date?: string
+          p_template_id: string
+          p_user_id: string
+        }
+        Returns: string
+      }
+      create_project_with_standard_foundation: {
+        Args: {
+          p_category?: string
+          p_description?: string
+          p_difficulty?: string
+          p_effort_level?: string
+          p_estimated_time?: string
+          p_image?: string
+          p_project_name: string
+        }
         Returns: string
       }
       delete_user_data: {
@@ -2498,6 +2525,14 @@ export type Database = {
           failed_logins_count: number
           role_changes_count: number
           unique_ips_count: number
+        }[]
+      }
+      get_standard_project_template: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          phases: Json
+          project_id: string
+          project_name: string
         }[]
       }
       get_user_notification_settings: {
