@@ -378,6 +378,8 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
     }
 
     // Legacy content display based on contentType
+    const contentStr = typeof step.content === 'string' ? step.content : '';
+    
     switch (step.contentType) {
       case 'image':
         return (
@@ -388,7 +390,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
             </div>
             {step.image && <img src={step.image} alt={step.step} className="w-full rounded-lg shadow-card max-w-2xl" />}
             <div className="prose prose-sm max-w-none">
-              <div className="whitespace-pre-wrap">{step.content}</div>
+              <div className="whitespace-pre-wrap">{contentStr}</div>
             </div>
           </div>
         );
@@ -400,7 +402,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
               <span className="font-medium">Tutorial Video</span>
             </div>
             <div className="aspect-video rounded-lg overflow-hidden shadow-card">
-              <iframe src={step.content} className="w-full h-full" allowFullScreen title={step.step} />
+              <iframe src={contentStr} className="w-full h-full" allowFullScreen title={step.step} />
             </div>
           </div>
         );
@@ -413,7 +415,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
             </div>
             <div className="prose max-w-none bg-muted/20 p-6 rounded-lg border">
               <div className="whitespace-pre-wrap text-foreground leading-relaxed text-sm">
-                {step.content}
+                {contentStr}
               </div>
             </div>
             
@@ -440,7 +442,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
         return (
           <div className="prose max-w-none">
             <div className="whitespace-pre-wrap text-foreground leading-relaxed">
-              {step.content}
+              {contentStr}
             </div>
           </div>
         );

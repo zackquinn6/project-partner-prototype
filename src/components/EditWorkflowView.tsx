@@ -250,10 +250,11 @@ export default function EditWorkflowView({
           contentSections = editingStep.contentSections;
         } else if (editingStep.content) {
           // Migrate existing content to new format
+          const contentStr = typeof editingStep.content === 'string' ? editingStep.content : '';
           contentSections = [{
             id: `section-${Date.now()}`,
             type: 'text',
-            content: editingStep.content,
+            content: contentStr,
             title: '',
             width: 'full',
             alignment: 'left'

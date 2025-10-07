@@ -152,11 +152,13 @@ export const AdaptiveGuidanceEngine: React.FC<AdaptiveGuidanceEngineProps> = ({
   const generateAdaptedInstructions = (): any => {
     const baseContent = currentStep.content;
     
+    const contentStr = typeof baseContent === 'string' ? baseContent : '';
+    
     switch (guidanceLevel) {
       case 'minimal':
         return {
           type: 'checklist',
-          content: generateChecklist(baseContent),
+          content: generateChecklist(contentStr),
           showImages: false,
           showVideo: false,
           safetyNotes: false
@@ -165,7 +167,7 @@ export const AdaptiveGuidanceEngine: React.FC<AdaptiveGuidanceEngineProps> = ({
       case 'standard':
         return {
           type: 'standard',
-          content: baseContent,
+          content: contentStr,
           showImages: showVisualAids,
           showVideo: false,
           safetyNotes: safetyReminders
@@ -174,7 +176,7 @@ export const AdaptiveGuidanceEngine: React.FC<AdaptiveGuidanceEngineProps> = ({
       case 'detailed':
         return {
           type: 'detailed',
-          content: expandInstructions(baseContent),
+          content: expandInstructions(contentStr),
           showImages: true,
           showVideo: true,
           safetyNotes: true,
@@ -184,7 +186,7 @@ export const AdaptiveGuidanceEngine: React.FC<AdaptiveGuidanceEngineProps> = ({
       case 'comprehensive':
         return {
           type: 'comprehensive',
-          content: expandInstructions(baseContent),
+          content: expandInstructions(contentStr),
           showImages: true,
           showVideo: true,
           safetyNotes: true,

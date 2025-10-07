@@ -857,6 +857,8 @@ export default function UserView({
       );
     }
     
+    const contentStr = typeof step.content === 'string' ? step.content : '';
+    
     switch (step.contentType) {
       case 'document':
         return <div className="space-y-4">
@@ -866,7 +868,7 @@ export default function UserView({
                 <span className="font-medium text-orange-800">External Resource</span>
               </div>
               <div className="text-foreground break-all">
-                {step.content}
+                {contentStr}
               </div>
             </div>
           </div>;
@@ -878,7 +880,7 @@ export default function UserView({
             </div>
             {step.image && <img src={step.image} alt={step.step} className="w-full rounded-lg shadow-card max-w-2xl" />}
             <div className="prose prose-sm max-w-none">
-              <div className="whitespace-pre-wrap">{step.content}</div>
+              <div className="whitespace-pre-wrap">{contentStr}</div>
             </div>
           </div>;
       case 'video':
@@ -888,13 +890,13 @@ export default function UserView({
               <span className="font-medium">Tutorial Video</span>
             </div>
             <div className="aspect-video rounded-lg overflow-hidden shadow-card">
-              <iframe src={step.content} className="w-full h-full" allowFullScreen title={step.step} />
+              <iframe src={contentStr} className="w-full h-full" allowFullScreen title={step.step} />
             </div>
           </div>;
       default:
         return <div className="prose max-w-none">
             <div className="whitespace-pre-wrap text-foreground leading-relaxed">
-              {step.content}
+              {contentStr}
             </div>
           </div>;
     }
