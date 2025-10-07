@@ -178,4 +178,6 @@ export interface Project {
   parentProjectId?: string;
   revisionNotes?: string;
   createdFromRevision?: number;
+  // Standard Project Foundation marker
+  isStandardTemplate?: boolean;
 }

@@ -37,6 +37,9 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     currentProject,
     updateProject
   } = useProject();
+  
+  // Detect if editing Standard Project Foundation
+  const isEditingStandardProject = currentProject?.id === '00000000-0000-0000-0000-000000000001' || currentProject?.isStandardTemplate;
   const [editingItem, setEditingItem] = useState<{
     type: 'phase' | 'operation' | 'step';
     id: string;
@@ -200,6 +203,12 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     }
 
     if (type === 'phases') {
+      // If editing Standard Project, don't allow any phase reordering
+      if (isEditingStandardProject) {
+        toast.error('Cannot reorder phases in Standard Project. Use position rules to control phase positioning.');
+        return;
+      }
+      
       // Get phase being moved
       const sourcePhase = displayPhases[source.index];
       const destinationPhase = displayPhases[destination.index];
@@ -733,8 +742,9 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                         <Button variant="ghost" size="sm" onClick={() => togglePhaseExpansion(phase.id)} className="p-0.5 h-auto">
                                           {expandedPhases.has(phase.id) ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                                         </Button>
+                                        {isStandardPhase && <span className="mr-1">🔒</span>}
                                         {phase.name}
-                                        {isStandardPhase && <span className="text-xs text-blue-600 ml-1">(Standard)</span>}
+                                        {isStandardPhase && <span className="text-xs text-blue-600 ml-1">(Standard - Locked)</span>}
                                         {isLinkedPhase && (
                                           <div className="flex items-center gap-1 ml-1">
                                             <Link className="w-3 h-3 text-purple-600" />
@@ -751,10 +761,10 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                    </div>}
                               </div>
                               
-                              <div className="flex items-center gap-2">
+                               <div className="flex items-center gap-2">
                                 <Badge variant="outline">{phase.operations.length} operations</Badge>
                                 
-                                {!isStandardPhase && phase.name !== 'Close Project' && <>
+                                {!isStandardPhase && !isLinkedPhase && <>
                                     <Button size="sm" variant="ghost" onClick={() => copyItem('phase', phase)}>
                                       <Copy className="w-4 h-4" />
                                     </Button>

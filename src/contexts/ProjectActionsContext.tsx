@@ -166,82 +166,31 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
     if (!user) return;
 
     try {
-      const phasesWithStandard = ensureStandardPhasesForNewProject(projectRunData.phases);
-
-      const { data, error } = await supabase
-        .from('project_runs')
-        .insert({
-          template_id: projectRunData.templateId,
-          user_id: user.id,
-          home_id: null,
-          name: projectRunData.name,
-          description: projectRunData.description,
-          start_date: projectRunData.startDate.toISOString(),
-          plan_end_date: projectRunData.planEndDate.toISOString(),
-          end_date: projectRunData.endDate?.toISOString(),
-          status: projectRunData.status,
-          project_leader: projectRunData.projectLeader,
-          accountability_partner: projectRunData.accountabilityPartner,
-          custom_project_name: projectRunData.customProjectName,
-          current_phase_id: projectRunData.currentPhaseId,
-          current_operation_id: projectRunData.currentOperationId,
-          current_step_id: projectRunData.currentStepId,
-          completed_steps: JSON.stringify(projectRunData.completedSteps),
-          progress: projectRunData.progress,
-          phases: JSON.stringify(phasesWithStandard),
-          category: projectRunData.category,
-          effort_level: projectRunData.effortLevel,
-          skill_level: projectRunData.skillLevel,
-          estimated_time: projectRunData.estimatedTime
-        })
-        .select()
-        .single();
+      // Use new RPC function to create immutable project run snapshot
+      const { data: newProjectRunId, error } = await supabase
+        .rpc('create_project_run_snapshot', {
+          p_template_id: projectRunData.templateId,
+          p_user_id: user.id,
+          p_run_name: projectRunData.name,
+          p_home_id: null, // Will be added later
+          p_start_date: projectRunData.startDate.toISOString(),
+          p_plan_end_date: projectRunData.planEndDate.toISOString()
+        });
 
       if (error) throw error;
 
-      // Optimistic update: Add to cache immediately instead of refetching
-      if (data) {
-        const newProjectRun: ProjectRun = {
-          id: data.id,
-          templateId: projectRunData.templateId,
-          name: projectRunData.name,
-          description: projectRunData.description,
-          diyLengthChallenges: projectRunData.diyLengthChallenges,
-          isManualEntry: projectRunData.isManualEntry,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          startDate: projectRunData.startDate,
-          planEndDate: projectRunData.planEndDate,
-          endDate: projectRunData.endDate,
-          status: projectRunData.status,
-          projectLeader: projectRunData.projectLeader,
-          accountabilityPartner: projectRunData.accountabilityPartner,
-          customProjectName: projectRunData.customProjectName,
-          currentPhaseId: projectRunData.currentPhaseId,
-          currentOperationId: projectRunData.currentOperationId,
-          currentStepId: projectRunData.currentStepId,
-          completedSteps: projectRunData.completedSteps,
-          progress: projectRunData.progress,
-          phases: phasesWithStandard,
-          category: projectRunData.category,
-          effortLevel: projectRunData.effortLevel,
-          skillLevel: projectRunData.skillLevel,
-          estimatedTime: projectRunData.estimatedTime
-        };
-
-        // Update cache optimistically
-        updateProjectRunsCache([...projectRuns, newProjectRun]);
-        
-        // Call success callback immediately
-        if (onSuccess) {
-          console.log("🎯 ProjectActions: Calling onSuccess callback with ID:", data.id);
-          onSuccess(data.id);
-        } else {
-          console.log("🎯 ProjectActions: Dispatching navigation event for Index.tsx");
-          window.dispatchEvent(new CustomEvent('navigate-to-kickoff', { 
-            detail: { projectRunId: data.id } 
-          }));
-        }
+      // Refetch to get the complete project run data
+      await refetchProjectRuns();
+      
+      // Call success callback with the new ID
+      if (newProjectRunId && onSuccess) {
+        console.log("🎯 ProjectActions: Project run created with ID:", newProjectRunId);
+        onSuccess(newProjectRunId);
+      } else if (newProjectRunId) {
+        console.log("🎯 ProjectActions: Dispatching navigation event for Index.tsx");
+        window.dispatchEvent(new CustomEvent('navigate-to-kickoff', { 
+          detail: { projectRunId: newProjectRunId } 
+        }));
       }
     } catch (error) {
       console.error('Error adding project run:', error);
@@ -251,7 +200,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
         variant: "destructive",
       });
     }
-  }, [isGuest, addGuestProjectRun, user, updateProjectRunsCache, projectRuns]);
+  }, [isGuest, addGuestProjectRun, user, refetchProjectRuns]);
 
   const updateProject = useCallback(async (project: Project) => {
     if (!user || !isAdmin) {
