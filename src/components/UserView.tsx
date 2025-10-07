@@ -37,6 +37,7 @@ import { DecisionRollupWindow } from './DecisionRollupWindow';
 import { KeyCharacteristicsWindow } from './KeyCharacteristicsWindow';
 import { ProjectCustomizer } from './ProjectCustomizer/ProjectCustomizer';
 import { ProjectScheduler } from './ProjectScheduler';
+import { MultiContentRenderer } from './MultiContentRenderer';
 import { useResponsive } from '@/hooks/useResponsive';
 import { isKickoffPhaseComplete } from '@/utils/projectUtils';
 import { markOrderingStepIncompleteIfNeeded, extractProjectToolsAndMaterials } from '@/utils/shoppingUtils';
@@ -825,6 +826,55 @@ export default function UserView({
   };
   const renderContent = (step: typeof currentStep) => {
     if (!step) return null;
+    
+    // Handle multi-content sections (new format with buttons)
+    if (step.contentSections && step.contentSections.length > 0) {
+      const handleButtonAction = (action: string) => {
+        console.log('Button action triggered:', action);
+        switch (action) {
+          case 'project-customizer':
+            setProjectCustomizerOpen(true);
+            break;
+          case 'project-scheduler':
+            setProjectSchedulerOpen(true);
+            break;
+          case 'shopping-checklist':
+            setMaterialsSelectionOpen(true);
+            break;
+          default:
+            console.warn('Unknown button action:', action);
+        }
+      };
+      
+      return <MultiContentRenderer 
+        sections={step.contentSections} 
+        onButtonAction={handleButtonAction}
+      />;
+    }
+    
+    // Handle case where content might be an array (backwards compatibility)
+    if (Array.isArray(step.content) && step.content.length > 0) {
+      const handleButtonAction = (action: string) => {
+        switch (action) {
+          case 'project-customizer':
+            setProjectCustomizerOpen(true);
+            break;
+          case 'project-scheduler':
+            setProjectSchedulerOpen(true);
+            break;
+          case 'shopping-checklist':
+            setMaterialsSelectionOpen(true);
+            break;
+          default:
+            console.warn('Unknown button action:', action);
+        }
+      };
+      
+      return <MultiContentRenderer 
+        sections={step.content} 
+        onButtonAction={handleButtonAction}
+      />;
+    }
     
     // Special case for ordering step - add Shopping List button in content
     if (step.step === 'Tool & Material Ordering' || 
