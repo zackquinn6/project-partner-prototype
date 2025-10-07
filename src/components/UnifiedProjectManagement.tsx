@@ -321,11 +321,11 @@ export function UnifiedProjectManagement() {
         status: 'not-started' as const,
         publishStatus: 'draft' as const,
         phases: parsedPhases,
-        isStandardTemplate: true
+      isStandardTemplate: true
       });
       
-      // Navigate to project catalog (no /admin route exists)
-      navigate('/projects');
+      // Navigate to edit workflow view using Index.tsx view state management
+      navigate('/', { state: { view: 'editWorkflow' } });
     } catch (error) {
       console.error('Error loading standard project:', error);
       toast({
