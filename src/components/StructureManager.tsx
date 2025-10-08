@@ -799,10 +799,10 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                              <CollapsibleContent>
                                <CardContent>
                               <div className="flex items-center gap-2 mb-4">
-                                 <Button onClick={() => addOperation(phase.id)} className="flex items-center gap-2">
-                                   <Plus className="w-3 h-3" />
-                                   Add Operation
-                                 </Button>
+                                  <Button size="sm" onClick={() => addOperation(phase.id)} className="flex items-center gap-2">
+                                    <Plus className="w-3 h-3" />
+                                    Add Operation
+                                  </Button>
                               </div>
                             
                             <Droppable droppableId={`operations-${phase.id}`} type="operations">
