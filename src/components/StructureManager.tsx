@@ -21,7 +21,6 @@ import { DecisionTreeFlowchart } from './DecisionTreeFlowchart';
 import { DecisionPointEditor } from './DecisionPointEditor';
 import { PhaseIncorporationDialog } from './PhaseIncorporationDialog';
 import { DecisionTreeManager } from './DecisionTreeManager';
-import { addStandardPhasesToProjectRun } from '@/utils/projectUtils';
 import { enforceStandardPhaseOrdering } from '@/utils/phaseOrderingUtils';
 interface StructureManagerProps {
   onBack: () => void;
@@ -273,10 +272,9 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     } else if (type === 'operations') {
       const phaseId = source.droppableId.split('-')[1];
       const phase = displayPhases.find(p => p.id === phaseId);
-      const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
-      const isStandardPhase = standardPhaseNames.includes(phase?.name || '') && !phase?.isLinked;
       
-      if (isStandardPhase) {
+      // Prevent editing standard phases in non-standard projects
+      if (!isEditingStandardProject && phase?.isStandard) {
         toast.error('Cannot reorder operations in standard phases');
         return;
       }
@@ -294,10 +292,9 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     } else if (type === 'steps') {
       const [phaseId, operationId] = source.droppableId.split('-').slice(1);
       const phase = displayPhases.find(p => p.id === phaseId);
-      const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
-      const isStandardPhase = standardPhaseNames.includes(phase?.name || '') && !phase?.isLinked;
       
-      if (isStandardPhase) {
+      // Prevent editing standard phases in non-standard projects
+      if (!isEditingStandardProject && phase?.isStandard) {
         toast.error('Cannot reorder steps in standard phases');
         return;
       }
@@ -443,10 +440,10 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
     // Check if this is a standard phase
     const phase = displayPhases.find(p => p.id === phaseId);
-    const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
-    const isStandardPhase = standardPhaseNames.includes(phase?.name || '');
-    if (isStandardPhase) {
-      toast.error('Cannot add operations to standard phases. Operations are predefined for standard phases.');
+    
+    // Prevent adding operations to standard phases in non-standard projects
+    if (!isEditingStandardProject && phase?.isStandard) {
+      toast.error('Cannot add operations to standard phases. Standard phases are read-only in this project.');
       return;
     }
     const newOperation: Operation = {
@@ -500,10 +497,10 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
     // Check if this is a standard phase
     const phase = displayPhases.find(p => p.id === phaseId);
-    const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
-    const isStandardPhase = standardPhaseNames.includes(phase?.name || '');
-    if (isStandardPhase) {
-      toast.error('Cannot delete standard phases (Kickoff, Planning, Ordering, Close Project)');
+    
+    // Prevent deleting standard phases in non-standard projects
+    if (!isEditingStandardProject && phase?.isStandard) {
+      toast.error('Cannot delete standard phases. Standard phases are read-only in this project.');
       return;
     }
     const updatedProject = {
@@ -516,6 +513,15 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
   };
   const deleteOperation = (phaseId: string, operationId: string) => {
     if (!currentProject) return;
+    
+    const phase = currentProject.phases.find(p => p.id === phaseId);
+    
+    // Prevent deleting operations from standard phases in non-standard projects
+    if (!isEditingStandardProject && phase?.isStandard) {
+      toast.error('Cannot delete operations from standard phases. Standard phases are read-only in this project.');
+      return;
+    }
+    
     const updatedProject = {
       ...currentProject,
       phases: currentProject.phases.map(phase => phase.id === phaseId ? {
@@ -529,6 +535,14 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
   };
   const deleteStep = (phaseId: string, operationId: string, stepId: string) => {
     if (!currentProject) return;
+    
+    const phase = currentProject.phases.find(p => p.id === phaseId);
+    
+    // Prevent deleting steps from standard phases in non-standard projects
+    if (!isEditingStandardProject && phase?.isStandard) {
+      toast.error('Cannot delete steps from standard phases. Standard phases are read-only in this project.');
+      return;
+    }
     const updatedProject = {
       ...currentProject,
       phases: currentProject.phases.map(phase => phase.id === phaseId ? {

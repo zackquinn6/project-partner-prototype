@@ -76,7 +76,8 @@ export const createKickoffPhase = (): Phase => {
     id: 'kickoff-phase',
     name: 'Kickoff',
     description: 'Essential project setup and agreement',
-    operations: [kickoffOperation]
+    operations: [kickoffOperation],
+    isStandard: true
   };
 
   return kickoffPhase;
@@ -222,7 +223,8 @@ export const createPlanningPhase = (): Phase => {
     id: 'planning-phase',
     name: 'Planning',
     description: 'Comprehensive project planning and preparation',
-    operations: [initialPlanningOperation, measurementOperation, finalPlanningOperation, projectCustomizerOperation, projectSchedulingOperation]
+    operations: [initialPlanningOperation, measurementOperation, finalPlanningOperation, projectCustomizerOperation, projectSchedulingOperation],
+    isStandard: true
   };
 
   return planningPhase;
@@ -290,7 +292,8 @@ export const createOrderingPhase = (): Phase => {
     id: 'ordering-phase',
     name: 'Ordering',
     description: 'Order all required tools and materials for the project',
-    operations: [shoppingChecklistOperation, orderingOperation]
+    operations: [shoppingChecklistOperation, orderingOperation],
+    isStandard: true
   };
 
   return orderingPhase;
@@ -392,7 +395,8 @@ export const createCloseProjectPhase = (): Phase => {
     id: 'close-project-phase',
     name: 'Close Project',
     description: 'Final cleanup, organization, and celebration of project completion',
-    operations: [toolMaterialProcessingOperation, celebrateOperation]
+    operations: [toolMaterialProcessingOperation, celebrateOperation],
+    isStandard: true
   };
 
   return closeProjectPhase;

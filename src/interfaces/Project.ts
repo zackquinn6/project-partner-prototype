@@ -170,6 +170,8 @@ export interface Phase {
   sourceProjectId?: string;
   sourceProjectName?: string;
   incorporatedRevision?: number;
+  // Standard phase flag - marks phases that shouldn't be edited in non-standard projects
+  isStandard?: boolean;
 }
 
 export interface Project {

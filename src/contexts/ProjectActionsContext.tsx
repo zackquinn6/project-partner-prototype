@@ -105,6 +105,9 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
     if (!user) return null;
 
     try {
+      // ensureStandardPhasesForNewProject preserves existing phases (including apps)
+      // and only adds missing standard phases. This ensures apps defined in the
+      // template project are copied to the new project run.
       const phasesWithStandard = ensureStandardPhasesForNewProject(project.phases);
       
       const { data, error } = await supabase
