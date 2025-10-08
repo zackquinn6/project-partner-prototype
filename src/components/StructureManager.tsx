@@ -465,6 +465,16 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
   };
   const addStep = (phaseId: string, operationId: string) => {
     if (!currentProject) return;
+    
+    // Check if this is a standard phase
+    const phase = displayPhases.find(p => p.id === phaseId);
+    
+    // Prevent adding steps to standard phases in non-standard projects
+    if (!isEditingStandardProject && phase?.isStandard) {
+      toast.error('Cannot add steps to standard phases. Standard phases are read-only in this project.');
+      return;
+    }
+    
     const newStep: WorkflowStep = {
       id: `step-${Date.now()}`,
       step: 'New Step',
@@ -560,6 +570,35 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
   // Edit operations
   const startEdit = (type: 'phase' | 'operation' | 'step', id: string, data: any) => {
+    // Check if trying to edit standard phase content in non-standard project
+    if (!isEditingStandardProject) {
+      if (type === 'phase') {
+        const phase = displayPhases.find(p => p.id === id);
+        if (phase?.isStandard) {
+          toast.error('Cannot edit standard phases. Standard phases are read-only in this project.');
+          return;
+        }
+      } else if (type === 'operation' || type === 'step') {
+        // Find which phase this operation/step belongs to
+        for (const phase of displayPhases) {
+          if (phase.isStandard) {
+            const hasOperation = phase.operations.some(o => o.id === id);
+            if (hasOperation) {
+              toast.error('Cannot edit operations in standard phases. Standard phases are read-only in this project.');
+              return;
+            }
+            for (const operation of phase.operations) {
+              const hasStep = operation.steps.some(s => s.id === id);
+              if (hasStep) {
+                toast.error('Cannot edit steps in standard phases. Standard phases are read-only in this project.');
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
+    
     setEditingItem({
       type,
       id,
