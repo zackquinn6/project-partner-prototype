@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Info, ShoppingCart, Plus, Award, Eye, EyeOff, HelpCircle, Calendar as CalendarIcon, Sparkles } from "lucide-react";
+import { toast } from 'sonner';
 import { getStepIndicator } from './FlowTypeLegend';
 import { WorkflowSidebar } from './WorkflowSidebar';
 import {
@@ -828,29 +829,47 @@ export default function UserView({
   
   // Handle app launches
   const handleLaunchApp = (app: AppReference) => {
-    console.log('App launched:', app);
+    console.log('🚀 App launched:', app);
+    
+    // Handle external apps
+    if (app.appType === 'external-link' && app.linkUrl) {
+      window.open(app.linkUrl, app.openInNewTab ? '_blank' : '_self');
+      return;
+    }
+    
+    if (app.appType === 'external-embed' && app.embedUrl) {
+      // TODO: Open embed modal
+      console.log('Opening embed for:', app.embedUrl);
+      toast.info('Embed functionality coming soon');
+      return;
+    }
+    
+    // Handle native apps
     switch (app.actionKey) {
       case 'project-customizer':
+        setDecisionRollupMode('initial-plan');
         setProjectCustomizerOpen(true);
         break;
       case 'project-scheduler':
         setProjectSchedulerOpen(true);
         break;
       case 'shopping-checklist':
-        setMaterialsSelectionOpen(true);
+        setOrderingWindowOpen(true);
         break;
       case 'materials-selection':
         setMaterialsSelectionOpen(true);
         break;
+      case 'my-homes':
+        toast.info('My Homes feature coming soon');
+        break;
+      case 'my-profile':
+        setShowProfileManager(true);
+        break;
+      case 'my-tools':
+        toast.info('My Tools feature coming soon');
+        break;
       default:
-        if (app.appType === 'external-link' && app.linkUrl) {
-          window.open(app.linkUrl, app.openInNewTab ? '_blank' : '_self');
-        } else if (app.appType === 'external-embed' && app.embedUrl) {
-          // Future: Open embed modal
-          console.warn('Embed apps not yet supported');
-        } else {
-          console.warn('Unknown app action:', app.actionKey);
-        }
+        console.warn('Unknown app action:', app.actionKey);
     }
   };
   
@@ -1412,58 +1431,10 @@ export default function UserView({
           <Card className="gradient-card border-0 shadow-card">
             <CardContent className="p-8">
               {renderContent(currentStep)}
-              
-              {/* Decision Buttons for Planning Steps */}
-              {currentStep && (
-                (currentStep.step?.toLowerCase().includes('project') && (currentStep.step?.toLowerCase().includes('plan') || currentStep.step?.toLowerCase().includes('scope'))) ||
-                (currentStep.step?.toLowerCase().includes('finalize') && currentStep.step?.toLowerCase().includes('plan')) ||
-                (currentStep.step?.toLowerCase() === 'project scheduling')
-              ) && (
-                <div className="mt-6 pt-6 border-t border-border">
-                  <div className="flex gap-3 justify-center">
-                    {/* Show Project Customizer button for Project Planning and Scope steps */}
-                    {(currentStep.step?.toLowerCase().includes('project') && (currentStep.step?.toLowerCase().includes('plan') || currentStep.step?.toLowerCase().includes('scope'))) && (
-                      <Button 
-                        onClick={() => {
-                          setDecisionRollupMode('initial-plan');
-                          setProjectCustomizerOpen(true);
-                        }}
-                        variant="outline"
-                        className="flex items-center gap-2"
-                      >
-                        <HelpCircle className="w-4 h-4" />
-                        Project Customizer
-                      </Button>
-                    )}
-
-                    {/* Show Project Scheduler button only for Project Scheduling step */}
-                    {(() => {
-                      const showScheduler = currentStep.step?.toLowerCase().includes('scheduling');
-                      console.log("🗓️ Project Scheduler button check:", {
-                        stepName: currentStep.step,
-                        stepNameLower: currentStep.step?.toLowerCase(),
-                        includesScheduling: showScheduler,
-                        shouldShow: showScheduler
-                      });
-                      return showScheduler;
-                    })() && (
-                      <Button 
-                        onClick={() => setProjectSchedulerOpen(true)}
-                        variant="outline"
-                        className="flex items-center gap-2"
-                      >
-                        <CalendarIcon className="w-4 h-4" />
-                        Project Scheduler
-                      </Button>
-                    )}
-
-                  </div>
-                </div>
-              )}
             </CardContent>
           </Card>
 
-          {/* Apps Section */}
+          {/* Apps Section - Positioned prominently after content */}
           {currentStep && currentStep.apps && currentStep.apps.length > 0 && (
             <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 shadow-card">
               <CardHeader>
