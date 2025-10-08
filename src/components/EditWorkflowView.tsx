@@ -682,9 +682,6 @@ export default function EditWorkflowView({
                       <Sparkles className="w-5 h-5" />
                       Apps for This Step
                     </CardTitle>
-                    <CardDescription>
-                      Interactive tools to help complete this step
-                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <CompactAppsSection
