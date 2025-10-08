@@ -674,6 +674,30 @@ export default function EditWorkflowView({
                 </CardContent>
               </Card>
 
+              {/* Apps Section - View Mode */}
+              {currentStep && currentStep.apps && currentStep.apps.length > 0 && (
+                <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Sparkles className="w-5 h-5" />
+                      Apps for This Step
+                    </CardTitle>
+                    <CardDescription>
+                      Interactive tools to help complete this step
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <CompactAppsSection
+                      apps={currentStep.apps}
+                      onAppsChange={() => {}}
+                      onAddApp={() => {}}
+                      onLaunchApp={() => {}}
+                      editMode={false}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Tools, Materials, and Outputs */}
               <Card className="bg-muted/30 border shadow-sm">
                 <CardContent className="p-6">
