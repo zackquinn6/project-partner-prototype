@@ -65,6 +65,19 @@ export interface Output {
   referenceSpecification?: string;
 }
 
+export interface AppReference {
+  id: string;
+  appName: string;
+  appType: 'native' | 'external-embed' | 'external-link';
+  icon: string;
+  description?: string;
+  actionKey?: string;
+  embedUrl?: string;
+  linkUrl?: string;
+  openInNewTab?: boolean;
+  displayOrder?: number;
+}
+
 export interface ContentSection {
   id: string;
   type: 'text' | 'image' | 'video' | 'link' | 'button';
@@ -119,6 +132,7 @@ export interface WorkflowStep {
   outputs: Output[];
   inputs?: StepInput[]; // Admin-defined inputs for this step
   contentSections?: ContentSection[];
+  apps?: AppReference[]; // Interactive apps for this step
   flowType?: 'prime' | 'repeat' | 'inspection' | 'alternate' | 'if-necessary';
   // Decision tree fields
   isDecisionPoint?: boolean;

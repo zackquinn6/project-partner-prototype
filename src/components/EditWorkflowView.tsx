@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useProject } from '@/contexts/ProjectContext';
-import { WorkflowStep, Tool, Material, Output, ContentSection, Phase, Operation, Project } from '@/interfaces/Project';
+import { WorkflowStep, Tool, Material, Output, ContentSection, Phase, Operation, Project, AppReference } from '@/interfaces/Project';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -25,7 +25,9 @@ import { CompactMaterialsTable } from '@/components/CompactMaterialsTable';
 import { CompactProcessVariablesTable } from '@/components/CompactProcessVariablesTable';
 import { CompactOutputsTable } from '@/components/CompactOutputsTable';
 import { CompactTimeEstimation } from '@/components/CompactTimeEstimation';
-import { ArrowLeft, Eye, Edit, Package, Wrench, FileOutput, Plus, X, Settings, Save, ChevronLeft, ChevronRight, FileText, List, Upload, Trash2, Brain } from 'lucide-react';
+import { CompactAppsSection } from '@/components/CompactAppsSection';
+import { AppsLibraryDialog } from '@/components/AppsLibraryDialog';
+import { ArrowLeft, Eye, Edit, Package, Wrench, FileOutput, Plus, X, Settings, Save, ChevronLeft, ChevronRight, FileText, List, Upload, Trash2, Brain, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Extended interfaces for step-level usage
@@ -60,6 +62,7 @@ export default function EditWorkflowView({
   const [toolsMaterialsOpen, setToolsMaterialsOpen] = useState(false);
   const [toolsLibraryOpen, setToolsLibraryOpen] = useState(false);
   const [materialsLibraryOpen, setMaterialsLibraryOpen] = useState(false);
+  const [appsLibraryOpen, setAppsLibraryOpen] = useState(false);
   const [showStructureManager, setShowStructureManager] = useState(false);
   const [processImprovementOpen, setProcessImprovementOpen] = useState(false);
 
@@ -481,6 +484,28 @@ export default function EditWorkflowView({
                   </CardContent>
                 </Card>
 
+                {/* Apps Section */}
+                <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 shadow-card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5" />
+                      Apps & Tools
+                    </CardTitle>
+                    <CardDescription>
+                      Interactive apps to help complete this step
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <CompactAppsSection
+                      apps={editingStep.apps || []}
+                      onAppsChange={(apps) => updateEditingStep('apps', apps)}
+                      onAddApp={() => setAppsLibraryOpen(true)}
+                      onLaunchApp={() => {}}
+                      editMode={true}
+                    />
+                  </CardContent>
+                </Card>
+
                 {/* Tools, Materials, Inputs, and Outputs */}
                 <div className="grid lg:grid-cols-1 gap-6">
                   {/* Tools & Materials Card */}
@@ -757,6 +782,14 @@ export default function EditWorkflowView({
       {processImprovementOpen && currentProject && <ProcessImprovementEngine project={currentProject} onProjectUpdate={updateProject} onClose={() => setProcessImprovementOpen(false)} />}
       {/* Tools & Materials Library */}
       <ToolsMaterialsWindow open={toolsMaterialsOpen} onOpenChange={setToolsMaterialsOpen} />
+      
+      {/* Apps Library Dialog */}
+      <AppsLibraryDialog
+        open={appsLibraryOpen}
+        onOpenChange={setAppsLibraryOpen}
+        selectedApps={editingStep?.apps || []}
+        onAppsSelected={(apps) => updateEditingStep('apps', apps)}
+      />
       
       <MultiSelectLibraryDialog open={toolsLibraryOpen} onOpenChange={setToolsLibraryOpen} type="tools" availableStepTools={editingStep?.tools?.map(t => ({id: t.id, name: t.name})) || []} onSelect={selectedItems => {
       const newTools: StepTool[] = selectedItems.map(item => ({

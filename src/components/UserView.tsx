@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Info, ShoppingCart, Plus, Award, Eye, EyeOff, HelpCircle, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Info, ShoppingCart, Plus, Award, Eye, EyeOff, HelpCircle, Calendar as CalendarIcon, Sparkles } from "lucide-react";
 import { getStepIndicator } from './FlowTypeLegend';
 import { WorkflowSidebar } from './WorkflowSidebar';
 import {
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
-import { Output, Project } from '@/interfaces/Project';
+import { Output, Project, AppReference } from '@/interfaces/Project';
 import ProjectListing from './ProjectListing';
 import { MobileProjectListing } from './MobileProjectListing';
 import { MobileWorkflowView } from './MobileWorkflowView';
@@ -38,6 +38,7 @@ import { KeyCharacteristicsWindow } from './KeyCharacteristicsWindow';
 import { ProjectCustomizer } from './ProjectCustomizer/ProjectCustomizer';
 import { ProjectScheduler } from './ProjectScheduler';
 import { MultiContentRenderer } from './MultiContentRenderer';
+import { CompactAppsSection } from './CompactAppsSection';
 import { useResponsive } from '@/hooks/useResponsive';
 import { isKickoffPhaseComplete } from '@/utils/projectUtils';
 import { markOrderingStepIncompleteIfNeeded, extractProjectToolsAndMaterials } from '@/utils/shoppingUtils';
@@ -824,6 +825,35 @@ export default function UserView({
     setReportComments("");
     setIssueReportOpen(false);
   };
+  
+  // Handle app launches
+  const handleLaunchApp = (app: AppReference) => {
+    console.log('App launched:', app);
+    switch (app.actionKey) {
+      case 'project-customizer':
+        setProjectCustomizerOpen(true);
+        break;
+      case 'project-scheduler':
+        setProjectSchedulerOpen(true);
+        break;
+      case 'shopping-checklist':
+        setMaterialsSelectionOpen(true);
+        break;
+      case 'materials-selection':
+        setMaterialsSelectionOpen(true);
+        break;
+      default:
+        if (app.appType === 'external-link' && app.linkUrl) {
+          window.open(app.linkUrl, app.openInNewTab ? '_blank' : '_self');
+        } else if (app.appType === 'external-embed' && app.embedUrl) {
+          // Future: Open embed modal
+          console.warn('Embed apps not yet supported');
+        } else {
+          console.warn('Unknown app action:', app.actionKey);
+        }
+    }
+  };
+  
   const renderContent = (step: typeof currentStep) => {
     if (!step) return null;
     
@@ -1432,6 +1462,30 @@ export default function UserView({
               )}
             </CardContent>
           </Card>
+
+          {/* Apps Section */}
+          {currentStep && currentStep.apps && currentStep.apps.length > 0 && (
+            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Sparkles className="w-5 h-5" />
+                  Apps for This Step
+                </CardTitle>
+                <CardDescription>
+                  Interactive tools to help you complete this step
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CompactAppsSection
+                  apps={currentStep.apps}
+                  onAppsChange={() => {}}
+                  onAddApp={() => {}}
+                  onLaunchApp={handleLaunchApp}
+                  editMode={false}
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Outputs */}
           {currentStep && currentStep.outputs?.length > 0 && (

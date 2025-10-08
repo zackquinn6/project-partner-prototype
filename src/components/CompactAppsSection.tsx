@@ -1,0 +1,106 @@
+import { AppReference } from '@/interfaces/Project';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Plus, ExternalLink, X } from 'lucide-react';
+import * as Icons from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
+
+interface CompactAppsSectionProps {
+  apps: AppReference[];
+  onAppsChange: (apps: AppReference[]) => void;
+  onAddApp: () => void;
+  onLaunchApp: (app: AppReference) => void;
+  editMode?: boolean;
+}
+
+export const CompactAppsSection = ({
+  apps,
+  onAppsChange,
+  onAddApp,
+  onLaunchApp,
+  editMode = false
+}: CompactAppsSectionProps) => {
+  
+  const getIconComponent = (iconName: string): LucideIcon => {
+    const Icon = (Icons as any)[iconName];
+    return Icon || Icons.Sparkles;
+  };
+
+  const handleRemoveApp = (appId: string) => {
+    onAppsChange(apps.filter(app => app.id !== appId));
+  };
+
+  if (!apps || apps.length === 0) {
+    if (!editMode) return null;
+    
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground mb-4">No apps added yet</p>
+        <Button onClick={onAddApp} variant="outline" size="sm">
+          <Plus className="w-4 h-4 mr-2" />
+          Add App
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {apps.map((app) => {
+          const IconComponent = getIconComponent(app.icon);
+          
+          return (
+            <Card
+              key={app.id}
+              className="relative group cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200 border-border/50 hover:border-primary/50"
+              onClick={() => !editMode && onLaunchApp(app)}
+            >
+              {editMode && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveApp(app.id);
+                  }}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              )}
+              
+              <div className="flex flex-col items-center justify-center p-4 space-y-2">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <IconComponent className="w-6 h-6 text-primary" />
+                </div>
+                
+                <div className="text-center">
+                  <p className="text-sm font-medium line-clamp-2 leading-tight">
+                    {app.appName}
+                  </p>
+                  {app.description && (
+                    <p className="text-xs text-muted-foreground line-clamp-1 mt-1">
+                      {app.description}
+                    </p>
+                  )}
+                </div>
+                
+                {app.appType === 'external-link' && (
+                  <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                )}
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+      
+      {editMode && (
+        <Button onClick={onAddApp} variant="outline" size="sm" className="w-full">
+          <Plus className="w-4 h-4 mr-2" />
+          Add App
+        </Button>
+      )}
+    </div>
+  );
+};
