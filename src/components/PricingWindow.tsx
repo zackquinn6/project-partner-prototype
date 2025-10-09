@@ -11,72 +11,63 @@ interface PricingWindowProps {
 }
 
 export const PricingWindow = ({ open, onOpenChange }: PricingWindowProps) => {
-  const plans = [
+  const freeFeatures = [
+    "Project management dashboard",
+    "Home maintenance tracking",
+    "Step-by-step instructions",
+    "Basic project tracking",
+    "Continuous improvement tips",
+    "Tool and material lists",
+    "Project completion certificates",
+    "Basic workflow guidance",
+    "Community access",
+    "Mobile-friendly interface"
+  ];
+
+  const expertPlans = [
     {
-      name: "Free",
-      price: "Free",
-      period: "",
-      description: "Essential DIY tools and project management features",
+      name: "Planning",
+      price: "$99",
+      duration: "40min",
+      description: "Get your project off to the right start with expert planning guidance",
       popular: false,
       features: [
-        "Project management dashboard",
-        "Home maintenance tracking",
-        "Step-by-step instructions",
-        "Basic project tracking",
-        "Continuous improvement tips",
-        "Tool and material lists",
-        "Project completion certificates",
-        "Basic workflow guidance",
-        "Community access",
-        "Mobile-friendly interface"
+        "40-minute video consultation",
+        "Project scope assessment",
+        "Material and tool recommendations",
+        "Timeline and budget planning",
+        "Risk identification",
+        "Personalized project roadmap"
       ]
     },
     {
-      name: "Project Planning",
-      price: "$29",
-      period: "/project",
-      altPrice: "$99/year unlimited projects",
-      description: "Advanced planning and detailed project guidance",
-      popular: false,
-      features: [
-        "Everything in Free tier",
-        "Detailed project customization",
-        "Advanced scheduling tools",
-        "Weather-based planning",
-        "Risk assessment",
-        "Budget optimization"
-      ]
-    },
-    {
-      name: "Road Block Resolutions",
-      price: "$49",
-      period: "/project",
-      altPrice: "$149/year unlimited projects", 
-      description: "Expert help when you encounter challenges",
+      name: "Troubleshooting",
+      price: "$79",
+      duration: "20min",
+      description: "Quick expert help when you hit a roadblock",
       popular: true,
       features: [
-        "Everything in Project Planning",
-        "Priority chat support",
-        "Problem diagnosis assistance",
-        "Alternative solution recommendations",
-        "24/7 expert guidance access",
-        "Video troubleshooting sessions"
+        "20-minute video consultation",
+        "Problem diagnosis",
+        "Solution recommendations",
+        "Alternative approaches",
+        "Next steps guidance",
+        "Follow-up resources"
       ]
     },
     {
-      name: "End-to-End Coaching",
+      name: "Whole-Project Partner",
       price: "$149",
-      period: "/project",
-      altPrice: "$399/year unlimited projects",
+      duration: "Full support",
       description: "Complete project coaching from start to finish",
       popular: false,
       features: [
-        "Everything in Road Block Resolutions",
-        "Personal project coach assignment",
-        "Weekly progress check-ins",
+        "Personal project coach",
         "Unlimited video consultations",
+        "Weekly progress check-ins",
         "Quality assurance reviews",
-        "Post-project follow-up support"
+        "Real-time problem solving",
+        "Post-project follow-up"
       ]
     }
   ];
@@ -86,12 +77,42 @@ export const PricingWindow = ({ open, onOpenChange }: PricingWindowProps) => {
       open={open}
       onOpenChange={onOpenChange}
       size="content-large"
-      title="Choose Your Plan"
-      description="Get the right level of support for your DIY project success"
+      title="Get the right level of support"
+      description="Free apps let you run projects easier than ever before - and we offer an expert human video chat service for a confident, comprehensive project experience."
     >
-        
-        <div className="grid md:grid-cols-3 gap-6 mt-6">
-          {plans.map((plan, index) => (
+        {/* Free Apps Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-2xl">Free Apps</CardTitle>
+            <CardDescription>
+              Everything you need to successfully complete your DIY projects
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-3">
+              {freeFeatures.map((feature, index) => (
+                <div key={index} className="flex items-start">
+                  <Check className="w-4 h-4 text-primary mt-0.5 mr-3 flex-shrink-0" />
+                  <span className="text-sm">{feature}</span>
+                </div>
+              ))}
+            </div>
+            <Button className="w-full mt-6" variant="outline">
+              Get Started Free
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Expert Calls Section */}
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-center mb-2">Expert Video Calls</h3>
+          <p className="text-sm text-muted-foreground text-center mb-6">
+            Connect with experienced DIY professionals via video chat
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {expertPlans.map((plan, index) => (
             <Card key={index} className={`relative ${plan.popular ? 'border-primary ring-2 ring-primary/20' : ''}`}>
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -106,14 +127,7 @@ export const PricingWindow = ({ open, onOpenChange }: PricingWindowProps) => {
                 <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
                 <div className="mt-2">
                   <div className="text-3xl font-bold text-primary">{plan.price}</div>
-                  {plan.period && (
-                    <div className="text-sm text-muted-foreground">{plan.period}</div>
-                  )}
-                  {plan.altPrice && (
-                    <div className="text-sm text-muted-foreground mt-1">
-                      or {plan.altPrice}
-                    </div>
-                  )}
+                  <div className="text-sm text-muted-foreground">{plan.duration}</div>
                 </div>
                 <CardDescription className="mt-3">{plan.description}</CardDescription>
               </CardHeader>
@@ -128,23 +142,13 @@ export const PricingWindow = ({ open, onOpenChange }: PricingWindowProps) => {
                   ))}
                 </ul>
                 
-                 <Button 
-                   className={`w-full ${plan.popular ? 'bg-primary hover:bg-primary/90' : ''}`}
-                   variant={plan.popular ? 'default' : 'outline'}
-                 >
-                   {plan.name === 'Free' ? 'Get Started Free' : 
-                    plan.name === 'End-to-End Coaching' ? (
-                      <>
-                        <Phone className="w-4 h-4 mr-2" />
-                        Book Full Coaching
-                      </>
-                    ) : (
-                      <>
-                        <MessageCircle className="w-4 h-4 mr-2" />
-                        Choose Plan
-                      </>
-                    )}
-                 </Button>
+                <Button 
+                  className={`w-full ${plan.popular ? 'bg-primary hover:bg-primary/90' : ''}`}
+                  variant={plan.popular ? 'default' : 'outline'}
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  Book {plan.name}
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -152,9 +156,7 @@ export const PricingWindow = ({ open, onOpenChange }: PricingWindowProps) => {
         
         <div className="text-center mt-6 pt-6 border-t">
           <p className="text-sm text-muted-foreground">
-            All plans include access to our project catalog and basic planning tools.
-            <br />
-            Upgrade or downgrade anytime to match your project needs.
+            All expert calls are conducted via secure video chat with verified DIY professionals.
           </p>
         </div>
     </ResponsiveDialog>
