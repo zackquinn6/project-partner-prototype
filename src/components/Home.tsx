@@ -300,7 +300,7 @@ export default function Home({
               
               <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4">A DIY Project Management App</h1>
               
-              <p className="text-lg sm:text-xl md:text-2xl text-primary-foreground/90 mb-8 leading-relaxed">The Go-to App for DIY Home Improvement</p>
+              <p className="text-lg sm:text-xl md:text-2xl text-primary-foreground/90 mb-8 leading-relaxed">Organize projects with step-by-step guidance and video chat live with pro's for support.</p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button variant="secondary" size="lg" className="px-6 md:px-8 text-base md:text-lg bg-orange-500 text-white hover:bg-orange-600 border-0 shadow-elegant" asChild>
