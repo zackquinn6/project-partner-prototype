@@ -49,15 +49,15 @@ export default function EditWorkflowView({
     currentProject,
     updateProject
   } = useProject();
-  
+
   // Detect if editing Standard Project Foundation
   const isEditingStandardProject = currentProject?.id === '00000000-0000-0000-0000-000000000001' || currentProject?.isStandardTemplate;
-  
+
   // Helper to check if a phase is standard by name
   const isStandardPhase = (phaseName: string) => {
     return ['Kickoff', 'Planning', 'Ordering', 'Close Project'].includes(phaseName);
   };
-  
+
   // Debug log to check phases
   useEffect(() => {
     if (currentProject) {
@@ -127,7 +127,6 @@ export default function EditWorkflowView({
     phaseId: phase.id,
     operationId: operation.id
   }))));
-  
   console.log('🔍 EditWorkflowView - allSteps flattened:', {
     totalSteps: allSteps.length,
     steps: allSteps.map(s => `${s.phaseName} > ${s.operationName} > ${s.step}`)
@@ -160,18 +159,13 @@ export default function EditWorkflowView({
   };
   const handleStartEdit = () => {
     // Check if this step is in a standard phase
-    const stepPhase = displayPhases.find(phase => 
-      phase.operations.some(op => 
-        op.steps.some(s => s.id === currentStep?.id)
-      )
-    );
-    
+    const stepPhase = displayPhases.find(phase => phase.operations.some(op => op.steps.some(s => s.id === currentStep?.id)));
+
     // Prevent editing steps in standard phases for non-standard projects
     if (!isEditingStandardProject && stepPhase?.isStandard) {
       toast('Cannot edit steps in standard phases. Standard phases are read-only in this project.');
       return;
     }
-    
     setEditMode(true);
     setEditingStep({
       ...currentStep
@@ -234,14 +228,13 @@ export default function EditWorkflowView({
     setOutputEditOpen(false);
     setEditingOutput(null);
   };
-
   const handleAddStepInput = (inputName: string) => {
     if (!editingStep || !inputName.trim()) return;
-    
+
     // Check if input already exists
     const existingInput = editingStep.inputs?.find(input => input.name === inputName.trim());
     if (existingInput) return;
-    
+
     // Add new input to step
     const newInput = {
       id: `input-${Date.now()}-${Math.random()}`,
@@ -249,7 +242,6 @@ export default function EditWorkflowView({
       type: 'text' as const,
       required: false
     };
-    
     updateEditingStep('inputs', [...(editingStep.inputs || []), newInput]);
   };
   const updateEditingStep = (field: keyof WorkflowStep, value: any) => {
@@ -281,7 +273,6 @@ export default function EditWorkflowView({
   };
   const renderContent = (step: typeof currentStep) => {
     if (!step) return null;
-    
     console.log('🎨 EditWorkflowView renderContent:', {
       stepId: step.id,
       stepName: step.step,
@@ -291,7 +282,6 @@ export default function EditWorkflowView({
       contentType: (step as any).contentType,
       editMode
     });
-    
     if (editMode && editingStep) {
       // Parse existing content sections or create default
       let contentSections: ContentSection[] = [];
@@ -527,21 +517,16 @@ export default function EditWorkflowView({
                       <Sparkles className="w-5 h-5" />
                       Apps & Tools
                     </CardTitle>
-                    <CardDescription>
-                      Interactive apps to help complete this step
-                    </CardDescription>
+                    
                   </CardHeader>
                   <CardContent>
-                    <CompactAppsSection
-                      apps={editingStep.apps || []}
-                      onAppsChange={(apps) => {
-                        console.log('📱 Apps changed:', { count: apps.length, apps });
-                        updateEditingStep('apps', apps);
-                      }}
-                      onAddApp={() => setAppsLibraryOpen(true)}
-                      onLaunchApp={() => {}}
-                      editMode={true}
-                    />
+                    <CompactAppsSection apps={editingStep.apps || []} onAppsChange={apps => {
+                console.log('📱 Apps changed:', {
+                  count: apps.length,
+                  apps
+                });
+                updateEditingStep('apps', apps);
+              }} onAddApp={() => setAppsLibraryOpen(true)} onLaunchApp={() => {}} editMode={true} />
                   </CardContent>
                 </Card>
 
@@ -554,17 +539,9 @@ export default function EditWorkflowView({
                       <CardDescription>Manage tools and materials for this step</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <CompactToolsTable
-                        tools={editingStep.tools}
-                        onToolsChange={(tools) => updateEditingStep('tools', tools)}
-                        onAddTool={() => setToolsLibraryOpen(true)}
-                      />
+                      <CompactToolsTable tools={editingStep.tools} onToolsChange={tools => updateEditingStep('tools', tools)} onAddTool={() => setToolsLibraryOpen(true)} />
                       
-                      <CompactMaterialsTable
-                        materials={editingStep.materials}
-                        onMaterialsChange={(materials) => updateEditingStep('materials', materials)}
-                        onAddMaterial={() => setMaterialsLibraryOpen(true)}
-                      />
+                      <CompactMaterialsTable materials={editingStep.materials} onMaterialsChange={materials => updateEditingStep('materials', materials)} onAddMaterial={() => setMaterialsLibraryOpen(true)} />
                     </CardContent>
                   </Card>
 
@@ -575,19 +552,15 @@ export default function EditWorkflowView({
                        <CardDescription>Define process variables for this step</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <CompactProcessVariablesTable
-                        variables={editingStep.inputs || []}
-                        onVariablesChange={(variables) => updateEditingStep('inputs', variables)}
-                        onAddVariable={() => {
-                          const newInput = {
-                            id: `input-${Date.now()}-${Math.random()}`,
-                            name: '',
-                            type: 'text' as const,
-                            required: false
-                          };
-                          updateEditingStep('inputs', [...(editingStep?.inputs || []), newInput]);
-                        }}
-                      />
+                      <CompactProcessVariablesTable variables={editingStep.inputs || []} onVariablesChange={variables => updateEditingStep('inputs', variables)} onAddVariable={() => {
+                  const newInput = {
+                    id: `input-${Date.now()}-${Math.random()}`,
+                    name: '',
+                    type: 'text' as const,
+                    required: false
+                  };
+                  updateEditingStep('inputs', [...(editingStep?.inputs || []), newInput]);
+                }} />
                     </CardContent>
                   </Card>
 
@@ -598,33 +571,24 @@ export default function EditWorkflowView({
                       <CardDescription>Manage outputs produced by this step</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <CompactOutputsTable
-                        outputs={editingStep.outputs || []}
-                        onOutputsChange={(outputs) => updateEditingStep('outputs', outputs)}
-                        onAddOutput={() => {
-                          const newOutput: Output = {
-                            id: `output-${Date.now()}-${Math.random()}`,
-                            name: 'New Output',
-                            description: '',
-                            type: 'none'
-                          };
-                          updateEditingStep('outputs', [...(editingStep?.outputs || []), newOutput]);
-                        }}
-                        onEditOutput={(output) => {
-                          setEditingOutput(output);
-                          setOutputEditOpen(true);
-                        }}
-                      />
+                      <CompactOutputsTable outputs={editingStep.outputs || []} onOutputsChange={outputs => updateEditingStep('outputs', outputs)} onAddOutput={() => {
+                  const newOutput: Output = {
+                    id: `output-${Date.now()}-${Math.random()}`,
+                    name: 'New Output',
+                    description: '',
+                    type: 'none'
+                  };
+                  updateEditingStep('outputs', [...(editingStep?.outputs || []), newOutput]);
+                }} onEditOutput={output => {
+                  setEditingOutput(output);
+                  setOutputEditOpen(true);
+                }} />
                     </CardContent>
                   </Card>
                 </div>
 
                 {/* Time Estimation */}
-                <CompactTimeEstimation 
-                  step={editingStep} 
-                  scalingUnit={currentProject?.scalingUnit} 
-                  onChange={timeEstimation => updateEditingStep('timeEstimation', timeEstimation)} 
-                />
+                <CompactTimeEstimation step={editingStep} scalingUnit={currentProject?.scalingUnit} onChange={timeEstimation => updateEditingStep('timeEstimation', timeEstimation)} />
 
                 {/* Navigation */}
                 <div className="flex justify-between">
@@ -715,18 +679,17 @@ export default function EditWorkflowView({
 
               {/* Apps Section - View Mode */}
               {(() => {
-                console.log('🎨 Rendering apps section:', {
-                  stepId: currentStep?.id,
-                  stepName: currentStep?.step,
-                  hasApps: !!currentStep?.apps,
-                  appsLength: currentStep?.apps?.length || 0,
-                  apps: currentStep?.apps
-                });
-                return null;
-              })()}
+            console.log('🎨 Rendering apps section:', {
+              stepId: currentStep?.id,
+              stepName: currentStep?.step,
+              hasApps: !!currentStep?.apps,
+              appsLength: currentStep?.apps?.length || 0,
+              apps: currentStep?.apps
+            });
+            return null;
+          })()}
               
-              {currentStep && currentStep.apps && currentStep.apps.length > 0 && (
-                <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 shadow-sm">
+              {currentStep && currentStep.apps && currentStep.apps.length > 0 && <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 shadow-sm">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-xs font-medium">
                       <Sparkles className="w-3 h-3" />
@@ -734,16 +697,9 @@ export default function EditWorkflowView({
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-2">
-                    <CompactAppsSection
-                      apps={currentStep.apps}
-                      onAppsChange={() => {}}
-                      onAddApp={() => {}}
-                      onLaunchApp={() => {}}
-                      editMode={false}
-                    />
+                    <CompactAppsSection apps={currentStep.apps} onAppsChange={() => {}} onAddApp={() => {}} onLaunchApp={() => {}} editMode={false} />
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
 
               {/* Tools, Materials, and Outputs */}
               <Card className="bg-muted/30 border shadow-sm">
@@ -834,17 +790,10 @@ export default function EditWorkflowView({
       </div>
 
       {/* Output Edit Form */}
-      {editingOutput && <OutputEditForm 
-        output={editingOutput} 
-        isOpen={outputEditOpen} 
-        onClose={() => {
-          setOutputEditOpen(false);
-          setEditingOutput(null);
-        }} 
-        onSave={handleSaveOutput}
-        stepInputs={editingStep?.inputs || []}
-        onAddStepInput={handleAddStepInput}
-      />}
+      {editingOutput && <OutputEditForm output={editingOutput} isOpen={outputEditOpen} onClose={() => {
+      setOutputEditOpen(false);
+      setEditingOutput(null);
+    }} onSave={handleSaveOutput} stepInputs={editingStep?.inputs || []} onAddStepInput={handleAddStepInput} />}
 
       {/* Import Dialog */}
       <ProjectContentImport open={importOpen} onOpenChange={setImportOpen} onImport={handleImport} />
@@ -855,14 +804,12 @@ export default function EditWorkflowView({
       <ToolsMaterialsWindow open={toolsMaterialsOpen} onOpenChange={setToolsMaterialsOpen} />
       
       {/* Apps Library Dialog */}
-      <AppsLibraryDialog
-        open={appsLibraryOpen}
-        onOpenChange={setAppsLibraryOpen}
-        selectedApps={editingStep?.apps || []}
-        onAppsSelected={(apps) => updateEditingStep('apps', apps)}
-      />
+      <AppsLibraryDialog open={appsLibraryOpen} onOpenChange={setAppsLibraryOpen} selectedApps={editingStep?.apps || []} onAppsSelected={apps => updateEditingStep('apps', apps)} />
       
-      <MultiSelectLibraryDialog open={toolsLibraryOpen} onOpenChange={setToolsLibraryOpen} type="tools" availableStepTools={editingStep?.tools?.map(t => ({id: t.id, name: t.name})) || []} onSelect={selectedItems => {
+      <MultiSelectLibraryDialog open={toolsLibraryOpen} onOpenChange={setToolsLibraryOpen} type="tools" availableStepTools={editingStep?.tools?.map(t => ({
+      id: t.id,
+      name: t.name
+    })) || []} onSelect={selectedItems => {
       const newTools: StepTool[] = selectedItems.map(item => ({
         id: `tool-${Date.now()}-${Math.random()}`,
         name: item.item,
