@@ -423,12 +423,8 @@ Personalized, success-oriented, and built for real-world usage during a project.
       {/* CTA Section */}
       <section className="py-16 gradient-hero">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-6">
-            Ready to Transform Your Home Management?
-          </h2>
-          <p className="text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-            Join thousands of homeowners who've discovered the power of having everything they need in one place.
-          </p>
+          <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-6">Let's Make DIY a Fun and Repeatable Experience</h2>
+          <p className="text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">Join the DIYers who've added a partner with them on their next project. </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="secondary" size="lg" className="px-8 py-4 text-lg font-semibold bg-accent text-accent-foreground hover:bg-accent-light border-0 shadow-accent" onClick={() => navigate('/projects')}>
               Explore Project Templates
