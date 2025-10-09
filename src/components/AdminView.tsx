@@ -11,14 +11,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollableDialog } from '@/components/ScrollableDialog';
-import { Settings, BarChart3, Shield, Wrench, Brain, AlertTriangle, RefreshCw, Bell, FileText, MapPin, Cog, Upload } from 'lucide-react';
+import { Settings, BarChart3, Shield, Wrench, Brain, AlertTriangle, RefreshCw, Bell, FileText, MapPin, Cog } from 'lucide-react';
 import { StructureManager } from './StructureManager';
 import { AdminRoadmapManager } from './AdminRoadmapManager';
 import { AdminFeatureRequestManager } from './AdminFeatureRequestManager';
 import { AdminDataRefresh } from './AdminDataRefresh';
 import { AdminGuideWindow } from './AdminGuideWindow';
 import { PFMEAManagement } from './PFMEAManagement';
-import { TileFlooringImportButton } from './TileFlooringImportButton';
+
 
 export const AdminView: React.FC = () => {
   const [enhancedProjectManagementOpen, setEnhancedProjectManagementOpen] = useState(false);
@@ -232,20 +232,6 @@ export const AdminView: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow flex flex-col">
-            <CardHeader className="text-center flex-1">
-              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                <Upload className="w-6 h-6 text-primary" />
-              </div>
-              <CardTitle>Import Tile Flooring</CardTitle>
-              <CardDescription className="min-h-[3rem] flex items-center justify-center">
-                Import the Tile Flooring project template with custom phases
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="mt-auto">
-              <TileFlooringImportButton />
-            </CardContent>
-          </Card>
         </div>
 
         <ScrollableDialog 

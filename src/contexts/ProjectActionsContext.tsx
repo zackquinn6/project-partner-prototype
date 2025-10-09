@@ -9,7 +9,7 @@ import { useGuest } from './GuestContext';
 import { toast } from '@/components/ui/use-toast';
 import { ensureStandardPhasesForNewProject } from '@/utils/projectUtils';
 import { useOptimizedState } from '@/hooks/useOptimizedState';
-import { parseTileFlooringData } from '@/utils/tileFlooringImporter';
+
 
 interface ProjectActionsContextType {
   currentProject: Project | null;
@@ -17,7 +17,6 @@ interface ProjectActionsContextType {
   setCurrentProject: (project: Project | null) => void;
   setCurrentProjectRun: (projectRun: ProjectRun | null) => void;
   addProject: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  importTileFlooringProject: (tableData: string) => Promise<void>;
   createProjectRun: (project: Project, customName?: string, homeId?: string) => Promise<string | null>;
   addProjectRun: (projectRun: Omit<ProjectRun, 'id' | 'createdAt' | 'updatedAt'>, onSuccess?: (projectRunId: string) => void) => Promise<void>;
   updateProject: (project: Project) => Promise<void>;
@@ -501,36 +500,6 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
     }
   }, [isGuest, deleteGuestProjectRun, user, projectRuns, updateProjectRunsCache, currentProjectRun, setCurrentProjectRun]);
 
-  const importTileFlooringProject = useCallback(async (tableData: string) => {
-    if (!user || !isAdmin) {
-      toast({
-        title: "Error",
-        description: "Only administrators can import projects",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Parse the table data into a Project object
-      const project = parseTileFlooringData(tableData);
-      
-      // Use addProject to insert it into the database
-      await addProject(project);
-      
-      toast({
-        title: "Success",
-        description: "Tile Flooring project imported successfully",
-      });
-    } catch (error) {
-      console.error('Error importing Tile Flooring project:', error);
-      toast({
-        title: "Error",
-        description: "Failed to import Tile Flooring project",
-        variant: "destructive",
-      });
-    }
-  }, [user, isAdmin, addProject]);
 
   const value = {
     currentProject,
@@ -538,7 +507,6 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
     setCurrentProject,
     setCurrentProjectRun,
     addProject,
-    importTileFlooringProject,
     createProjectRun,
     addProjectRun,
     updateProject,
