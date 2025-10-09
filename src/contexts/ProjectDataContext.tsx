@@ -299,11 +299,20 @@ export const ProjectDataProvider: React.FC<ProjectDataProviderProps> = ({ childr
     const enrichProjectRuns = async () => {
       if (!projectRuns || projectRuns.length === 0 || isEnrichingRuns) return;
       
+      console.log('🔧 ProjectDataContext: Starting to enrich project runs with apps data', {
+        projectRunsCount: projectRuns.length
+      });
+      
       setIsEnrichingRuns(true);
       
       try {
         const enriched = await Promise.all(projectRuns.map(async (run) => {
-          if (!run.phases || run.phases.length === 0) return run;
+          console.log('🔧 Enriching project run:', run.name, 'template:', run.templateId);
+          
+          if (!run.phases || run.phases.length === 0) {
+            console.log('⚠️ No phases in project run:', run.name);
+            return run;
+          }
 
           // Get the template project to check which phases are standard
           const { data: templateOps, error: opsError } = await supabase
@@ -315,7 +324,12 @@ export const ProjectDataProvider: React.FC<ProjectDataProviderProps> = ({ childr
             `)
             .eq('project_id', run.templateId);
 
-          if (opsError || !templateOps) return run;
+          if (opsError || !templateOps) {
+            console.error('❌ Error fetching template operations:', opsError);
+            return run;
+          }
+          
+          console.log('✅ Found template operations:', templateOps.length);
 
           // Get all template steps for these operations
           const operationIds = templateOps.map(op => op.id);
@@ -324,21 +338,54 @@ export const ProjectDataProvider: React.FC<ProjectDataProviderProps> = ({ childr
             .select('*')
             .in('operation_id', operationIds);
 
-          if (stepsError || !templateSteps) return run;
+          if (stepsError || !templateSteps) {
+            console.error('❌ Error fetching template steps:', stepsError);
+            return run;
+          }
+          
+          console.log('✅ Found template steps:', templateSteps.length);
+          
+          // Count steps with apps
+          const stepsWithApps = templateSteps.filter(s => s.apps && Array.isArray(s.apps) && (s.apps as any[]).length > 0);
+          console.log('📱 Template steps with apps:', stepsWithApps.length, stepsWithApps.map(s => ({
+            title: s.step_title,
+            appsCount: Array.isArray(s.apps) ? (s.apps as any[]).length : 0
+          })));
 
           // Enrich the phases with apps data
           const enrichedPhases = run.phases.map(phase => {
-            // Check if this is a standard phase
-            const standardPhaseOps = templateOps.filter(op => 
-              op.standard_phase_id && phase.id === op.standard_phase_id
-            );
+            // Check if this is a standard phase by matching phase NAME to standard_phases
+            // (we can't match by ID because project run phases get new UUIDs)
+            const standardPhaseOps = templateOps.filter(op => {
+              if (!op.standard_phase_id) return false;
+              
+              // Get the standard phase name from the template operations
+              // We need to match by phase name since phase.id is a new UUID in project runs
+              const matchesByName = ['Kickoff', 'Planning', 'Ordering', 'Close Project'].includes(phase.name) &&
+                                   op.name && phase.operations?.some(phaseOp => phaseOp.name === op.name);
+              
+              return matchesByName;
+            });
 
-            if (standardPhaseOps.length === 0) return phase; // Not a standard phase, return as is
+            console.log(`📋 Phase "${phase.name}":`, {
+              phaseId: phase.id,
+              isStandardPhase: ['Kickoff', 'Planning', 'Ordering', 'Close Project'].includes(phase.name),
+              matchingOps: standardPhaseOps.length,
+              operationsInPhase: phase.operations?.length || 0
+            });
+
+            if (standardPhaseOps.length === 0) {
+              console.log(`⚠️ No standard phase ops found for phase: ${phase.name}`);
+              return phase; // Not a standard phase or no matching ops, return as is
+            }
 
             // Enrich operations within this phase
             const enrichedOperations = (phase.operations || []).map(operation => {
               const templateOp = standardPhaseOps.find(op => op.name === operation.name);
-              if (!templateOp) return operation;
+              if (!templateOp) {
+                console.log(`⚠️ No matching template operation for: ${operation.name}`);
+                return operation;
+              }
 
               // Enrich steps with apps data
               const enrichedSteps = (operation.steps || []).map(step => {
@@ -346,10 +393,12 @@ export const ProjectDataProvider: React.FC<ProjectDataProviderProps> = ({ childr
                   ts.operation_id === templateOp.id && ts.step_title === step.step
                 );
 
-                if (templateStep && templateStep.apps) {
+                if (templateStep && templateStep.apps && Array.isArray(templateStep.apps)) {
+                  const appsArray = templateStep.apps as any[];
+                  console.log(`✨ Enriching step "${step.step}" with ${appsArray.length} apps`);
                   return {
                     ...step,
-                    apps: (Array.isArray(templateStep.apps) ? templateStep.apps : []) as any
+                    apps: appsArray
                   };
                 }
 
@@ -368,12 +417,24 @@ export const ProjectDataProvider: React.FC<ProjectDataProviderProps> = ({ childr
             };
           });
 
-          return {
+          const result = {
             ...run,
             phases: enrichedPhases
           };
+          
+          // Log final result
+          const totalStepsWithApps = result.phases.flatMap(p => 
+            p.operations?.flatMap(o => o.steps?.filter(s => s.apps && s.apps.length > 0) || []) || []
+          ).length;
+          
+          console.log('✅ Enrichment complete for:', run.name, {
+            totalStepsWithApps
+          });
+          
+          return result;
         }));
 
+        console.log('🎉 All project runs enriched successfully');
         setEnrichedProjectRuns(enriched);
       } catch (e) {
         console.error('Failed to enrich project runs:', e);

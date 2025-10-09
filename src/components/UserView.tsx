@@ -363,28 +363,16 @@ export default function UserView({
   const currentStep = allSteps[currentStepIndex];
   const progress = allSteps.length > 0 ? completedSteps.size / allSteps.length * 100 : 0;
   
-  // Debug current step to identify materials/tools issue
+  // Debug current step to identify materials/tools/apps issue
   console.log('🔧 Current step debug:', {
     stepIndex: currentStepIndex,
     stepId: currentStep?.id,
     stepName: currentStep?.step,
+    phaseName: currentStep?.phaseName,
     materialsLength: currentStep?.materials?.length || 0,
     toolsLength: currentStep?.tools?.length || 0,
-    materials: currentStep?.materials,
-    tools: currentStep?.tools,
-    fullStep: currentStep,
-    allStepsWithMaterials: allSteps.filter(step => step.materials && step.materials.length > 0).map(step => ({
-      id: step.id,
-      name: step.step,
-      materialsCount: step.materials?.length || 0,
-      materials: step.materials
-    })),
-    allStepsWithTools: allSteps.filter(step => step.tools && step.tools.length > 0).map(step => ({
-      id: step.id,
-      name: step.step,
-      toolsCount: step.tools?.length || 0,
-      tools: step.tools
-    }))
+    appsLength: currentStep?.apps?.length || 0,
+    hasApps: !!currentStep?.apps
   });
   
   // Update project run progress whenever completed steps change - BUT NOT during kickoff
