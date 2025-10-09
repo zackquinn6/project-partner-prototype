@@ -433,7 +433,7 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
             phaseId: schedulingTasks.find(t => t.id === task.taskId)?.phaseId || '',
             operationId: schedulingTasks.find(t => t.id === task.taskId)?.operationId || '',
             duration: Math.round((task.endTime.getTime() - task.startTime.getTime()) / 60000),
-            notes: schedulingTasks.find(t => t.id === task.taskId)?.description || '',
+            notes: schedulingTasks.find(t => t.id === task.taskId)?.title || '',
             assignedTo: (task as any).assignedTo || ''
           })),
           teamMembers: teamMembers,

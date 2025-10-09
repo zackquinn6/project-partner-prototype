@@ -214,6 +214,7 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
       const updatedProjectRun = {
         ...currentProjectRun,
         phases: orderedPhases,
+        customization_decisions: customizationState,
         updatedAt: new Date()
       };
 
