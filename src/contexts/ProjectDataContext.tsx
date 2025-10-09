@@ -221,7 +221,8 @@ export const ProjectDataProvider: React.FC<ProjectDataProviderProps> = ({ childr
                     content: step.content_sections || [],
                     materials: step.materials || [],
                     tools: step.tools || [],
-                    outputs: step.outputs || []
+                    outputs: step.outputs || [],
+                    apps: step.apps || []
                   }));
                 
                 phaseMap.get(phase.id).operations.push({
