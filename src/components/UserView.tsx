@@ -41,6 +41,9 @@ import { ProjectScheduler } from './ProjectScheduler';
 import { MultiContentRenderer } from './MultiContentRenderer';
 import { CompactAppsSection } from './CompactAppsSection';
 import { useResponsive } from '@/hooks/useResponsive';
+import { UserToolsMaterialsWindow } from './UserToolsMaterialsWindow';
+import { ToolRentalsWindow } from './ToolRentalsWindow';
+import { HomeManager } from './HomeManager';
 import { isKickoffPhaseComplete } from '@/utils/projectUtils';
 import { markOrderingStepIncompleteIfNeeded, extractProjectToolsAndMaterials } from '@/utils/shoppingUtils';
 import { MobileDIYDropdown } from './MobileDIYDropdown';
@@ -125,6 +128,9 @@ export default function UserView({
   const [projectCustomizerOpen, setProjectCustomizerOpen] = useState(false);
   const [projectSchedulerOpen, setProjectSchedulerOpen] = useState(false);
   const [materialsSelectionOpen, setMaterialsSelectionOpen] = useState(false);
+  const [toolsWindowOpen, setToolsWindowOpen] = useState(false);
+  const [toolRentalsOpen, setToolRentalsOpen] = useState(false);
+  const [homeManagerOpen, setHomeManagerOpen] = useState(false);
   const [selectedMaterialsForShopping, setSelectedMaterialsForShopping] = useState<{
     materials: any[];
     tools: any[];
@@ -848,13 +854,20 @@ export default function UserView({
         setMaterialsSelectionOpen(true);
         break;
       case 'my-homes':
-        toast.info('My Homes feature coming soon');
+        console.log('🏠 Launching My Homes app');
+        setHomeManagerOpen(true);
         break;
       case 'my-profile':
+        console.log('🧑 Launching My Profile app');
         setShowProfileManager(true);
         break;
       case 'my-tools':
-        toast.info('My Tools feature coming soon');
+        console.log('🔧 Launching My Tools app');
+        setToolsWindowOpen(true);
+        break;
+      case 'tool-access':
+        console.log('🛠️ Launching Tool Access app');
+        setToolRentalsOpen(true);
         break;
       default:
         console.warn('Unknown app action:', app.actionKey);
@@ -1975,6 +1988,25 @@ export default function UserView({
       <ProfileManager 
         open={showProfileManager}
         onOpenChange={setShowProfileManager}
+      />
+
+      {/* Tools & Materials Window */}
+      <UserToolsMaterialsWindow 
+        open={toolsWindowOpen}
+        onOpenChange={setToolsWindowOpen}
+        initialToolsMode="library"
+      />
+
+      {/* Tool Rentals Window */}
+      <ToolRentalsWindow 
+        isOpen={toolRentalsOpen}
+        onClose={() => setToolRentalsOpen(false)}
+      />
+
+      {/* Home Manager */}
+      <HomeManager
+        open={homeManagerOpen}
+        onOpenChange={setHomeManagerOpen}
       />
     </>
   );

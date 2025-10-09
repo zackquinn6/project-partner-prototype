@@ -167,4 +167,46 @@ export interface ProjectRun {
       uploadedAt: string;
     }>;
   };
+
+  // App-specific data storage
+  shopping_checklist_data?: {
+    orderedItems: Array<{
+      itemId: string;
+      itemName: string;
+      orderedDate: string;
+      vendor?: string;
+    }>;
+    completedDate?: string;
+  };
+
+  schedule_events?: {
+    events: Array<{
+      id: string;
+      date: string;
+      phaseId: string;
+      operationId?: string;
+      duration: number;
+      notes: string;
+      assignedTo?: string;
+    }>;
+    teamMembers: Array<{
+      id: string;
+      name: string;
+      skillLevel: string;
+    }>;
+    globalSettings: {
+      quietHours?: {
+        start: string;
+        end: string;
+      };
+    };
+  };
+
+  customization_decisions?: {
+    standardDecisions: Record<string, string[]>;
+    ifNecessaryWork: Record<string, string[]>;
+    customPlannedWork: any[];
+    customUnplannedWork: any[];
+    workflowOrder: string[];
+  };
 }

@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Project, Material, Tool } from "@/interfaces/Project";
 import { supabase } from "@/integrations/supabase/client";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useProject } from "@/contexts/ProjectContext";
+import { toast } from "sonner";
 
 interface OrderingWindowProps {
   open: boolean;
@@ -45,6 +47,7 @@ const SHOPPING_SITES: ShoppingSite[] = [
 ];
 
 export function OrderingWindow({ open, onOpenChange, project, projectRun, userOwnedTools, completedSteps, selectedMaterials, onOrderingComplete }: OrderingWindowProps) {
+  const { updateProjectRun } = useProject();
   const [urlInput, setUrlInput] = useState<string>("");
   const [orderedTools, setOrderedTools] = useState<Set<string>>(new Set());
   const [orderedMaterials, setOrderedMaterials] = useState<Set<string>>(new Set());
@@ -54,6 +57,69 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
   const [userProfile, setUserProfile] = useState<any>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [itemDetailsOpen, setItemDetailsOpen] = useState(false);
+
+  // Load shopping checklist data from database on mount
+  useEffect(() => {
+    if (!open || !projectRun?.shopping_checklist_data) return;
+    
+    const savedData = projectRun.shopping_checklist_data;
+    if (savedData.orderedItems && Array.isArray(savedData.orderedItems)) {
+      const shoppedToolIds = new Set<string>();
+      const shoppedMaterialIds = new Set<string>();
+      
+      savedData.orderedItems.forEach((item: any) => {
+        if (item.itemType === 'tool') {
+          shoppedToolIds.add(item.itemId);
+        } else if (item.itemType === 'material') {
+          shoppedMaterialIds.add(item.itemId);
+        }
+      });
+      
+      setShoppedTools(shoppedToolIds);
+      setShoppedMaterials(shoppedMaterialIds);
+    }
+  }, [open, projectRun]);
+
+  // Save shopping checklist data to database
+  const saveShoppingData = async (shoppedToolsSet: Set<string>, shoppedMaterialsSet: Set<string>) => {
+    if (!projectRun) return;
+    
+    try {
+      const orderedItems = [
+        ...Array.from(shoppedToolsSet).map(toolId => {
+          const tool = uniqueTools.find(t => t.id === toolId);
+          return {
+            itemId: toolId,
+            itemName: tool?.name || 'Unknown Tool',
+            itemType: 'tool',
+            orderedDate: new Date().toISOString()
+          };
+        }),
+        ...Array.from(shoppedMaterialsSet).map(materialId => {
+          const material = uniqueMaterials.find(m => m.id === materialId);
+          return {
+            itemId: materialId,
+            itemName: material?.name || 'Unknown Material',
+            itemType: 'material',
+            orderedDate: new Date().toISOString()
+          };
+        })
+      ];
+
+      const allItemsOrdered = orderedItems.length >= (uniqueTools.length + uniqueMaterials.length);
+      
+      await updateProjectRun({
+        ...projectRun,
+        shopping_checklist_data: {
+          orderedItems,
+          completedDate: allItemsOrdered ? new Date().toISOString() : null
+        }
+      });
+    } catch (error) {
+      console.error('Error saving shopping data:', error);
+      toast.error('Failed to save shopping checklist');
+    }
+  };
 
   const handleGoogleSearch = () => {
     const query = urlInput.trim();
@@ -272,45 +338,55 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
   }, [uniqueTools, userOwnedTools]);
 
   const handleToolToggle = (toolId: string) => {
+    let newShoppedTools: Set<string>;
+    let newOrderedTools: Set<string>;
+    
     // Check if item is currently shopped
     if (shoppedTools.has(toolId)) {
       // Move from shopped back to active
-      setShoppedTools(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(toolId);
-        return newSet;
-      });
-      setOrderedTools(prev => new Set(prev).add(toolId));
+      newShoppedTools = new Set(shoppedTools);
+      newShoppedTools.delete(toolId);
+      newOrderedTools = new Set(orderedTools);
+      newOrderedTools.add(toolId);
     } else {
       // Move to shopped when checked off
-      setOrderedTools(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(toolId);
-        return newSet;
-      });
-      setShoppedTools(prev => new Set(prev).add(toolId));
+      newOrderedTools = new Set(orderedTools);
+      newOrderedTools.delete(toolId);
+      newShoppedTools = new Set(shoppedTools);
+      newShoppedTools.add(toolId);
     }
+    
+    setShoppedTools(newShoppedTools);
+    setOrderedTools(newOrderedTools);
+    
+    // Persist to database
+    saveShoppingData(newShoppedTools, shoppedMaterials);
   };
 
   const handleMaterialToggle = (materialId: string) => {
+    let newShoppedMaterials: Set<string>;
+    let newOrderedMaterials: Set<string>;
+    
     // Check if item is currently shopped
     if (shoppedMaterials.has(materialId)) {
       // Move from shopped back to active
-      setShoppedMaterials(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(materialId);
-        return newSet;
-      });
-      setOrderedMaterials(prev => new Set(prev).add(materialId));
+      newShoppedMaterials = new Set(shoppedMaterials);
+      newShoppedMaterials.delete(materialId);
+      newOrderedMaterials = new Set(orderedMaterials);
+      newOrderedMaterials.add(materialId);
     } else {
       // Move to shopped when checked off
-      setOrderedMaterials(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(materialId);
-        return newSet;
-      });
-      setShoppedMaterials(prev => new Set(prev).add(materialId));
+      newOrderedMaterials = new Set(orderedMaterials);
+      newOrderedMaterials.delete(materialId);
+      newShoppedMaterials = new Set(shoppedMaterials);
+      newShoppedMaterials.add(materialId);
     }
+    
+    setShoppedMaterials(newShoppedMaterials);
+    setOrderedMaterials(newOrderedMaterials);
+    
+    // Persist to database
+    saveShoppingData(shoppedTools, newShoppedMaterials);
   };
 
   const handleItemDetails = (item: any, type: 'tool' | 'material') => {

@@ -1474,6 +1474,7 @@ export type Database = {
           current_phase_id: string | null
           current_step_id: string | null
           custom_project_name: string | null
+          customization_decisions: Json | null
           description: string | null
           difficulty: string | null
           diy_length_challenges: string | null
@@ -1491,6 +1492,8 @@ export type Database = {
           progress: number
           project_leader: string | null
           project_photos: Json | null
+          schedule_events: Json | null
+          shopping_checklist_data: Json | null
           skill_level: string | null
           start_date: string
           status: string
@@ -1507,6 +1510,7 @@ export type Database = {
           current_phase_id?: string | null
           current_step_id?: string | null
           custom_project_name?: string | null
+          customization_decisions?: Json | null
           description?: string | null
           difficulty?: string | null
           diy_length_challenges?: string | null
@@ -1524,6 +1528,8 @@ export type Database = {
           progress?: number
           project_leader?: string | null
           project_photos?: Json | null
+          schedule_events?: Json | null
+          shopping_checklist_data?: Json | null
           skill_level?: string | null
           start_date?: string
           status?: string
@@ -1540,6 +1546,7 @@ export type Database = {
           current_phase_id?: string | null
           current_step_id?: string | null
           custom_project_name?: string | null
+          customization_decisions?: Json | null
           description?: string | null
           difficulty?: string | null
           diy_length_challenges?: string | null
@@ -1557,6 +1564,8 @@ export type Database = {
           progress?: number
           project_leader?: string | null
           project_photos?: Json | null
+          schedule_events?: Json | null
+          shopping_checklist_data?: Json | null
           skill_level?: string | null
           start_date?: string
           status?: string

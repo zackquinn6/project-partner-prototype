@@ -49,6 +49,20 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
   const [showPhaseBrowser, setShowPhaseBrowser] = useState(false);
   const [showCustomWorkManager, setShowCustomWorkManager] = useState(false);
 
+  // Load customization decisions from database on mount
+  useEffect(() => {
+    if (!open || !currentProjectRun?.customization_decisions) return;
+    
+    const savedData = currentProjectRun.customization_decisions;
+    setCustomizationState({
+      standardDecisions: savedData.standardDecisions || {},
+      ifNecessaryWork: savedData.ifNecessaryWork || {},
+      customPlannedWork: savedData.customPlannedWork || [],
+      customUnplannedWork: savedData.customUnplannedWork || [],
+      workflowOrder: savedData.workflowOrder || []
+    });
+  }, [open, currentProjectRun]);
+
   // Initialize workflow order from current project run
   useEffect(() => {
     if (currentProjectRun?.phases && open) {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -151,6 +151,38 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
       end: '07:00'
     }
   });
+
+  // Load saved schedule data from database on mount
+  useEffect(() => {
+    if (!open || !projectRun?.schedule_events) return;
+    
+    const savedData = projectRun.schedule_events;
+    
+    if (savedData.teamMembers && Array.isArray(savedData.teamMembers) && savedData.teamMembers.length > 0) {
+      const mergedTeamMembers = savedData.teamMembers.map((member: any) => ({
+        id: member.id || '1',
+        name: member.name || 'You',
+        type: (member.type || 'helper') as 'owner' | 'helper',
+        skillLevel: (member.skillLevel || 'intermediate') as 'novice' | 'intermediate' | 'expert',
+        maxTotalHours: member.maxTotalHours || 40,
+        weekendsOnly: member.weekendsOnly || false,
+        weekdaysAfterFivePm: member.weekdaysAfterFivePm || false,
+        workingHours: member.workingHours || { start: '09:00', end: '17:00' },
+        availability: member.availability || {},
+        costPerHour: member.costPerHour || 0,
+        email: member.email || '',
+        phone: member.phone || '',
+        notificationPreferences: member.notificationPreferences || { email: false, sms: false }
+      })) as TeamMember[];
+      setTeamMembers(mergedTeamMembers);
+    }
+    
+    if (savedData.globalSettings?.quietHours) {
+      setGlobalSettings({
+        quietHours: savedData.globalSettings.quietHours
+      });
+    }
+  }, [open, projectRun]);
 
   // Calendar popup state
   const [calendarOpen, setCalendarOpen] = useState<string | null>(null);
@@ -394,6 +426,19 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
     try {
       const updatedProjectRun = {
         ...projectRun,
+        schedule_events: {
+          events: schedulingResult.scheduledTasks.map(task => ({
+            id: task.taskId,
+            date: format(task.startTime, 'yyyy-MM-dd'),
+            phaseId: schedulingTasks.find(t => t.id === task.taskId)?.phaseId || '',
+            operationId: schedulingTasks.find(t => t.id === task.taskId)?.operationId || '',
+            duration: Math.round((task.endTime.getTime() - task.startTime.getTime()) / 60000),
+            notes: schedulingTasks.find(t => t.id === task.taskId)?.description || '',
+            assignedTo: (task as any).assignedTo || ''
+          })),
+          teamMembers: teamMembers,
+          globalSettings: globalSettings
+        },
         calendar_integration: {
           scheduledDays: schedulingResult.scheduledTasks.reduce((acc, task) => {
             const dateKey = format(task.startTime, 'yyyy-MM-dd');
@@ -431,9 +476,10 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
     } catch (error) {
       toast({
         title: "Error saving schedule",
-        description: "Failed to save the schedule. Please try again.",
+        description: "There was a problem saving your schedule. Please try again.",
         variant: "destructive"
       });
+      console.error('Error saving schedule:', error);
     }
   };
 
