@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   GitBranch, Plus, Edit, Archive, Eye, CheckCircle, Clock, 
-  ArrowRight, AlertTriangle, Settings, Save, X, RefreshCw, Lock 
+  ArrowRight, AlertTriangle, Settings, Save, X, RefreshCw, Lock, Trash2 
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -253,6 +253,37 @@ export function UnifiedProjectManagement() {
       toast({
         title: "Error",
         description: "Failed to create new revision",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
+    if (!confirm('Are you sure you want to delete this project? This will delete all revisions and cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // Delete all revisions first
+      const { error: revisionsError } = await supabase
+        .from('projects')
+        .delete()
+        .or(`id.eq.${projectId},parent_project_id.eq.${projectId}`);
+
+      if (revisionsError) throw revisionsError;
+
+      toast({
+        title: "Success",
+        description: "Project deleted successfully",
+      });
+
+      setSelectedProject(null);
+      fetchProjects();
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete project",
         variant: "destructive",
       });
     }
@@ -499,10 +530,20 @@ export function UnifiedProjectManagement() {
                                 </Button>
                               </>
                             ) : (
-                              <Button onClick={startProjectEdit} className="flex items-center gap-1">
-                                <Edit className="w-4 h-4" />
-                                Edit Project
-                              </Button>
+                              <>
+                                <Button onClick={startProjectEdit} className="flex items-center gap-1">
+                                  <Edit className="w-4 h-4" />
+                                  Edit Project
+                                </Button>
+                                <Button 
+                                  onClick={() => handleDeleteProject(selectedProject.id)} 
+                                  variant="ghost" 
+                                  size="sm"
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </>
                             )}
                           </div>
                         </div>

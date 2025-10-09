@@ -92,32 +92,32 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
       alreadyCompleted: newCompletedSteps.includes(stepId)
     });
     
+    // Find the actual workflow step ID in the Kickoff phase
+    const kickoffPhase = currentProjectRun.phases.find(p => p.name === 'Kickoff');
+    let actualStepId = stepId;
+    
+    if (kickoffPhase && kickoffPhase.operations && kickoffPhase.operations.length > 0) {
+      // Map kickoff step index to actual step in the workflow
+      const allKickoffSteps = kickoffPhase.operations.flatMap(op => op.steps || []);
+      if (allKickoffSteps[stepIndex]) {
+        actualStepId = allKickoffSteps[stepIndex].id;
+        console.log("KickoffWorkflow - Found actual workflow step ID:", actualStepId);
+      }
+    }
+    
+    // Add both the kickoff step ID and the actual workflow step ID
     if (!newCompletedSteps.includes(stepId)) {
       newCompletedSteps.push(stepId);
+    }
+    if (actualStepId !== stepId && !newCompletedSteps.includes(actualStepId)) {
+      newCompletedSteps.push(actualStepId);
+      console.log("KickoffWorkflow - Also marking actual step as complete:", actualStepId);
     }
 
     // Update completed kickoff steps state immediately
     const newCompletedKickoffSteps = new Set(completedKickoffSteps);
     newCompletedKickoffSteps.add(stepIndex);
     setCompletedKickoffSteps(newCompletedKickoffSteps);
-
-    // Automatically mark outputs as complete for this step
-    setCheckedOutputs(prev => {
-      const newOutputs = { ...prev };
-      const outputMap: Record<string, string[]> = {
-        'kickoff-step-1': ['overview-output'],
-        'kickoff-step-2': ['overview-complete-output'], 
-        'kickoff-step-3': ['planning-output'],
-        'kickoff-step-4': ['agreement-output']
-      };
-      
-      if (outputMap[stepId]) {
-        newOutputs[stepId] = new Set(outputMap[stepId]);
-      }
-      
-      console.log("✅ Auto-marked outputs complete for step:", stepId, newOutputs[stepId]);
-      return newOutputs;
-    });
 
     console.log("KickoffWorkflow - Updating project run with steps:", newCompletedSteps);
 
