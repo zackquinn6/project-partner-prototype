@@ -20,11 +20,7 @@ const coreFeatures = [{
   icon: Target,
   title: "Build Smarter. Build Your Way.",
   description: "At Toolio, we believe two truths about DIY:",
-  features: [
-    "🔨 Your project is not a snowflake. The hard lessons have already been solved—why waste weekends reinventing plans or repeating mistakes? We bring those lessons straight to you.",
-    "✨ You are a maker's mark. Every builder leaves a distinct imprint. Your pace, your tools, your support system—they're yours alone. Toolio learns how you work and adapts over time, so every project feels like it was designed for you.",
-    "👉 Proven playbooks. Personalized delivery. That's DIY Done Smarter."
-  ]
+  features: ["🔨 Your project is not a snowflake. The hard lessons have already been solved—why waste weekends reinventing plans or repeating mistakes? We bring those lessons straight to you.", "✨ You are a maker's mark. Every builder leaves a distinct imprint. Your pace, your tools, your support system—they're yours alone. Toolio learns how you work and adapts over time, so every project feels like it was designed for you.", "👉 Proven playbooks. Personalized delivery. That's DIY Done Smarter."]
 }];
 export default function Home({
   onViewChange
@@ -326,16 +322,13 @@ export default function Home({
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             
-            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
-              Everything You Need in One Place
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Access all your home management tools with beautiful, intuitive apps designed for homeowners.
-            </p>
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">Do It Yourself, Not Alone</h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">A suite of apps to guide you through home improvement projects.
+Personalized, success-oriented, and built for real-world usage during a project. </p>
             
             {/* Key Characteristics Section */}
             <div className="bg-gradient-subtle p-6 rounded-lg max-w-4xl mx-auto mb-12">
-              <h3 className="text-xl font-semibold text-foreground mb-3">🔑 Engineered Processes, Personalized</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">🔑 Personalized Projects Every Step of The Way</h3>
               
               <Button variant="outline" size="default" onClick={() => setIsKCExplainerOpen(true)} className="text-primary border-primary hover:bg-primary/10 mb-4">
                 <span className="hidden sm:inline">Learn More About Our Approach to Personalization</span>
@@ -448,11 +441,7 @@ export default function Home({
       {/* Modals */}
       <PricingWindow open={isPricingOpen} onOpenChange={open => setIsPricingOpen(open)} />
       
-      {user ? (
-        <DIYSurveyPopup open={isDIYQuizOpen} onOpenChange={open => setIsDIYQuizOpen(open)} />
-      ) : (
-        <PreSignInDIYQuiz open={isDIYQuizOpen} onOpenChange={open => setIsDIYQuizOpen(open)} />
-      )}
+      {user ? <DIYSurveyPopup open={isDIYQuizOpen} onOpenChange={open => setIsDIYQuizOpen(open)} /> : <PreSignInDIYQuiz open={isDIYQuizOpen} onOpenChange={open => setIsDIYQuizOpen(open)} />}
 
       <AIRepairWindow open={isAIRepairOpen} onOpenChange={open => setIsAIRepairOpen(open)} />
 
