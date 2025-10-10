@@ -20,7 +20,7 @@ const coreFeatures = [{
   icon: Target,
   title: "Build Smarter. Build Your Way.",
   description: "At Toolio, we believe two truths about DIY:",
-  features: ["🔨 Your project is not a snowflake. The hard lessons have already been solved—why waste weekends reinventing plans or repeating mistakes? We bring those lessons straight to you.", "✨ You are a maker's mark. Every builder leaves a distinct imprint. Your pace, your tools, your support system—they're yours alone. Toolio learns how you work and adapts over time, so every project feels like it was designed for you.", "👉 Proven playbooks. Personalized delivery. That's DIY Done Smarter."]
+  content: "Your project is not unique - but you are.\n\nHard lessons of home improvement have been solved by someone- but that doesn't mean you have. Our personalized approach adapts to your speed, learning style, and specific project."
 }];
 export default function Home({
   onViewChange
@@ -408,12 +408,9 @@ Personalized, success-oriented, and built for real-world usage during a project.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <ul className="space-y-3">
-                    {feature.features.map((item, itemIndex) => <li key={itemIndex} className="flex items-start">
-                        {itemIndex !== feature.features.length - 1 && <CheckCircle className="h-5 w-5 text-primary mr-3 mt-0.5 flex-shrink-0" />}
-                        <span className="text-sm lg:text-base text-muted-foreground">{item}</span>
-                      </li>)}
-                  </ul>
+                  <p className="text-sm lg:text-base text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {feature.content}
+                  </p>
                 </CardContent>
               </Card>)}
           </div>
