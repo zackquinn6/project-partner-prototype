@@ -957,6 +957,7 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
                           <tbody>
                             {schedulingResult.scheduledTasks
                               .filter(st => st.status === 'confirmed')
+                              .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
                               .map((scheduledTask) => {
                                 const task = schedulingTasks.find(t => t.id === scheduledTask.taskId);
                                 const worker = teamMembers.find(w => w.id === scheduledTask.workerId);
