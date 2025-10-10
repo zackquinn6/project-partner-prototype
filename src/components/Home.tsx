@@ -410,7 +410,7 @@ Personalized, success-oriented, and built for real-world usage during a project.
                 <CardContent className="pt-0">
                   <ul className="space-y-3">
                     {feature.features.map((item, itemIndex) => <li key={itemIndex} className="flex items-start">
-                        <CheckCircle className="h-5 w-5 text-primary mr-3 mt-0.5 flex-shrink-0" />
+                        {itemIndex !== feature.features.length - 1 && <CheckCircle className="h-5 w-5 text-primary mr-3 mt-0.5 flex-shrink-0" />}
                         <span className="text-sm lg:text-base text-muted-foreground">{item}</span>
                       </li>)}
                   </ul>
