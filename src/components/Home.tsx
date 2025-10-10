@@ -408,7 +408,7 @@ Personalized, success-oriented, and built for real-world usage during a project.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <p className="text-sm lg:text-base text-muted-foreground leading-relaxed whitespace-pre-line">
+                  <p className="text-sm lg:text-base text-muted-foreground leading-relaxed whitespace-pre-line text-center">
                     {feature.content}
                   </p>
                 </CardContent>
