@@ -492,11 +492,85 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
   };
 
   // Print to PDF
-  const printToPDF = () => {
-    toast({
-      title: "PDF generation",
-      description: "Your schedule is being prepared for download."
-    });
+  const printToPDF = async () => {
+    if (!schedulingResult) return;
+    
+    try {
+      const { default: html2canvas } = await import('html2canvas');
+      const { default: jsPDF } = await import('jspdf');
+      
+      // Create a temporary container with the schedule content
+      const printContent = document.createElement('div');
+      printContent.style.padding = '20px';
+      printContent.style.backgroundColor = 'white';
+      printContent.style.position = 'absolute';
+      printContent.style.left = '-9999px';
+      printContent.innerHTML = `
+        <div style="font-family: Arial, sans-serif;">
+          <h1 style="margin-bottom: 20px; color: #333;">${project?.name || 'Project'} - Schedule</h1>
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <thead>
+              <tr style="background-color: #f3f4f6; border-bottom: 2px solid #e5e7eb;">
+                <th style="text-align: left; padding: 8px; border: 1px solid #e5e7eb;">Task</th>
+                <th style="text-align: left; padding: 8px; border: 1px solid #e5e7eb;">Worker</th>
+                <th style="text-align: left; padding: 8px; border: 1px solid #e5e7eb;">Start</th>
+                <th style="text-align: left; padding: 8px; border: 1px solid #e5e7eb; color: #15803d;">Target Complete</th>
+                <th style="text-align: left; padding: 8px; border: 1px solid #e5e7eb; color: #b91c1c;">Latest Complete</th>
+                <th style="text-align: left; padding: 8px; border: 1px solid #e5e7eb;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${schedulingResult.scheduledTasks
+                .filter(st => st.status === 'confirmed')
+                .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+                .map(scheduledTask => {
+                  const task = schedulingTasks.find(t => t.id === scheduledTask.taskId);
+                  const worker = teamMembers.find(w => w.id === scheduledTask.workerId);
+                  return `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                      <td style="padding: 8px; border: 1px solid #e5e7eb;">${task?.title || 'Unknown'}</td>
+                      <td style="padding: 8px; border: 1px solid #e5e7eb;">${worker?.name || 'Unknown'}</td>
+                      <td style="padding: 8px; border: 1px solid #e5e7eb;">${format(scheduledTask.startTime, 'MMM dd, h:mm a')}</td>
+                      <td style="padding: 8px; border: 1px solid #e5e7eb; color: #15803d; font-weight: 500;">${format(scheduledTask.targetCompletionDate, 'MMM dd, h:mm a')}</td>
+                      <td style="padding: 8px; border: 1px solid #e5e7eb; color: #b91c1c; font-weight: 500;">${format(scheduledTask.latestCompletionDate, 'MMM dd, h:mm a')}</td>
+                      <td style="padding: 8px; border: 1px solid #e5e7eb;">${scheduledTask.status}</td>
+                    </tr>
+                  `;
+                }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      document.body.appendChild(printContent);
+      
+      const canvas = await html2canvas(printContent, {
+        scale: 2,
+        backgroundColor: '#ffffff'
+      });
+      
+      document.body.removeChild(printContent);
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${project?.name || 'project'}-schedule.pdf`);
+      
+      toast({
+        title: "PDF downloaded",
+        description: "Your schedule has been downloaded successfully."
+      });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: "PDF generation failed",
+        description: "There was an error generating the PDF. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Email schedule
@@ -948,7 +1022,6 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
                               <th className="text-left p-2 font-medium">Task</th>
                               <th className="text-left p-2 font-medium">Worker</th>
                               <th className="text-left p-2 font-medium">Start</th>
-                              <th className="text-left p-2 font-medium">End</th>
                               <th className="text-left p-2 font-medium text-green-700">Target Complete</th>
                               <th className="text-left p-2 font-medium text-red-700">Latest Complete</th>
                               <th className="text-left p-2 font-medium">Status</th>
@@ -968,7 +1041,6 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
                                     </td>
                                     <td className="p-2">{worker?.name || 'Unknown'}</td>
                                     <td className="p-2 text-xs">{format(scheduledTask.startTime, 'MMM dd, h:mm a')}</td>
-                                    <td className="p-2 text-xs">{format(scheduledTask.endTime, 'MMM dd, h:mm a')}</td>
                                     <td className="p-2 text-xs text-green-700 font-medium">
                                       {format(scheduledTask.targetCompletionDate, 'MMM dd, h:mm a')}
                                     </td>
