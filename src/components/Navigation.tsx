@@ -101,15 +101,8 @@ export default function Navigation({
   const handleProjectSelect = (projectRunId: string) => {
     const selectedRun = projectRuns.find(run => run.id === projectRunId);
     if (selectedRun) {
+      console.log('🎯 Navigation: Project selected from dropdown:', selectedRun.name);
       setCurrentProjectRun(selectedRun);
-      
-      // CRITICAL: Also update currentProject to match the template
-      // This ensures EditWorkflowView shows the correct project
-      const matchingProject = projects.find(p => p.id === selectedRun.templateId);
-      if (matchingProject) {
-        setCurrentProject(matchingProject);
-      }
-      
       onViewChange('user');
       onProjectSelected?.();
     }
