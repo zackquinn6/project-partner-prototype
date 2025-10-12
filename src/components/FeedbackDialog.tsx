@@ -76,19 +76,37 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
         .single();
       
       const userName = profile?.display_name || profile?.nickname || user.email.split('@')[0];
+      const categoryLabel = categories.find(c => c.value === sanitizedCategory)?.label || sanitizedCategory;
       
-      const { data, error } = await supabase.functions.invoke('send-feedback', {
-        body: {
-          userEmail: user.email,
-          userName: sanitizeInput(userName),
-          category: categories.find(c => c.value === sanitizedCategory)?.label || sanitizedCategory,
+      // Save feedback to database
+      const { error: dbError } = await supabase
+        .from('feedback')
+        .insert({
+          user_id: user.id,
+          user_email: user.email,
+          user_name: sanitizeInput(userName),
+          category: categoryLabel,
           message: sanitizedMessage,
-          currentUrl: window.location.href,
-          csrfToken
-        }
-      });
+          status: 'open'
+        });
 
-      if (error) throw error;
+      if (dbError) throw dbError;
+
+      // Also send email notification (optional - can fail silently)
+      try {
+        await supabase.functions.invoke('send-feedback', {
+          body: {
+            userEmail: user.email,
+            userName: sanitizeInput(userName),
+            category: categoryLabel,
+            message: sanitizedMessage,
+            currentUrl: window.location.href,
+            csrfToken
+          }
+        });
+      } catch (emailError) {
+        console.log('Email notification failed (non-critical):', emailError);
+      }
 
       toast.success('Feedback submitted successfully! Thank you for helping us improve.');
       setCategory('');

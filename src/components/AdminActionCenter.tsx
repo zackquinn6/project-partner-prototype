@@ -27,12 +27,24 @@ interface ProjectAlerts {
   alerts: RevisionAlert[];
 }
 
+interface FeedbackItem {
+  id: string;
+  user_email: string;
+  user_name: string;
+  category: string;
+  message: string;
+  status: string;
+  created_at: string;
+}
+
 export const AdminActionCenter: React.FC<AdminActionCenterProps> = ({
   open,
   onOpenChange
 }) => {
   const [alerts, setAlerts] = useState<ProjectAlerts[]>([]);
+  const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
   const { toast } = useToast();
 
   const fetchRevisionAlerts = async () => {
@@ -58,6 +70,30 @@ export const AdminActionCenter: React.FC<AdminActionCenterProps> = ({
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchFeedback = async () => {
+    setFeedbackLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('feedback')
+        .select('*')
+        .neq('status', 'actioned')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      setFeedbackItems(data || []);
+    } catch (error) {
+      console.error('Error fetching feedback:', error);
+      toast({
+        title: "Failed to Load Feedback",
+        description: "Could not fetch feedback items. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setFeedbackLoading(false);
     }
   };
 
@@ -88,13 +124,56 @@ export const AdminActionCenter: React.FC<AdminActionCenterProps> = ({
     }
   };
 
+  const handleFeedbackAction = async (feedbackId: string, newStatus: 'reviewed' | 'actioned', notes?: string) => {
+    try {
+      const updateData: any = {
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      };
+
+      if (newStatus === 'reviewed') {
+        updateData.reviewed_at = new Date().toISOString();
+      } else if (newStatus === 'actioned') {
+        updateData.actioned_at = new Date().toISOString();
+      }
+
+      if (notes) {
+        updateData.admin_notes = notes;
+      }
+
+      const { error } = await supabase
+        .from('feedback')
+        .update(updateData)
+        .eq('id', feedbackId);
+
+      if (error) throw error;
+
+      // Refresh feedback
+      await fetchFeedback();
+
+      toast({
+        title: "Feedback Updated",
+        description: `Feedback marked as ${newStatus}.`
+      });
+    } catch (error) {
+      console.error('Error updating feedback:', error);
+      toast({
+        title: "Action Failed",
+        description: "Failed to update feedback status. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   useEffect(() => {
     if (open) {
       fetchRevisionAlerts();
+      fetchFeedback();
     }
   }, [open]);
 
   const totalAlerts = alerts.reduce((sum, project) => sum + project.alerts.length, 0);
+  const totalFeedback = feedbackItems.length;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -103,15 +182,96 @@ export const AdminActionCenter: React.FC<AdminActionCenterProps> = ({
           <DialogTitle className="flex items-center gap-2">
             <AlertCircle className="w-5 h-5" />
             Action Center
-            {totalAlerts > 0 && (
-              <Badge variant="destructive" className="ml-2">
-                {totalAlerts} alerts
-              </Badge>
-            )}
+            <div className="flex gap-2 ml-2">
+              {totalAlerts > 0 && (
+                <Badge variant="destructive">
+                  {totalAlerts} revision alerts
+                </Badge>
+              )}
+              {totalFeedback > 0 && (
+                <Badge variant="default">
+                  {totalFeedback} feedback items
+                </Badge>
+              )}
+            </div>
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* User Feedback Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">User Feedback</h3>
+              <Button onClick={fetchFeedback} disabled={feedbackLoading} size="sm" variant="outline">
+                Refresh
+              </Button>
+            </div>
+
+            {feedbackLoading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Loading feedback...
+              </div>
+            ) : feedbackItems.length === 0 ? (
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <CheckCircle className="w-12 h-12 mx-auto text-green-500 mb-4" />
+                  <h4 className="font-medium mb-2">No Pending Feedback</h4>
+                  <p className="text-muted-foreground">
+                    All feedback has been reviewed or actioned. New items will appear here when users submit feedback.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {feedbackItems.map((feedback) => (
+                  <Card key={feedback.id}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant={feedback.status === 'open' ? 'destructive' : 'secondary'}>
+                              {feedback.status}
+                            </Badge>
+                            <Badge variant="outline">{feedback.category}</Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            From: {feedback.user_name} ({feedback.user_email})
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(feedback.created_at).toLocaleDateString()} at {new Date(feedback.created_at).toLocaleTimeString()}
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="text-sm whitespace-pre-wrap">{feedback.message}</div>
+                      <div className="flex gap-2">
+                        {feedback.status === 'open' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleFeedbackAction(feedback.id, 'reviewed')}
+                          >
+                            Mark as Reviewed
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          onClick={() => handleFeedbackAction(feedback.id, 'actioned')}
+                        >
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Mark as Actioned
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
           {/* Phase Revision Updates Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
