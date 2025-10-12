@@ -1,11 +1,13 @@
-import { ExternalLink, HelpCircle, Calendar as CalendarIcon, ShoppingCart } from "lucide-react";
+import { ExternalLink, HelpCircle, Calendar as CalendarIcon, ShoppingCart, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface ContentSection {
   id?: string;
-  type: 'text' | 'image' | 'video' | 'link' | 'button';
+  type: 'text' | 'image' | 'video' | 'link' | 'button' | 'safety-warning';
   content: string;
   title?: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
   width?: 'full' | 'half' | 'third' | 'two-thirds';
   alignment?: 'left' | 'center' | 'right';
   // Button-specific properties
@@ -126,6 +128,21 @@ export function MultiContentRenderer({ sections, onButtonAction }: MultiContentR
                   {section.buttonLabel}
                 </Button>
               </div>
+            )}
+
+            {section.type === 'safety-warning' && section.content && (
+              <Alert variant="destructive" className="border-2">
+                <AlertTriangle className="h-5 w-5" />
+                {section.title && <AlertTitle>{section.title}</AlertTitle>}
+                <AlertDescription className="mt-2">
+                  {section.content}
+                </AlertDescription>
+                {section.severity && (
+                  <div className="mt-2 text-xs font-medium opacity-80">
+                    Severity: {section.severity.charAt(0).toUpperCase() + section.severity.slice(1)}
+                  </div>
+                )}
+              </Alert>
             )}
           </div>
         ))}

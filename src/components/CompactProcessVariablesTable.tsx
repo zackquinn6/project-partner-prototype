@@ -2,7 +2,9 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2, Plus, Settings } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Trash2, Plus, Settings, ArrowUp } from 'lucide-react';
 import { StepInput } from '@/interfaces/Project';
 
 interface CompactProcessVariablesTableProps {
@@ -42,6 +44,8 @@ export function CompactProcessVariablesTable({ variables, onVariablesChange, onA
             <TableHeader>
               <TableRow className="bg-muted/30">
                 <TableHead className="text-xs py-2">Variable Name</TableHead>
+                <TableHead className="text-xs py-2 w-24">Type</TableHead>
+                <TableHead className="text-xs py-2">Details</TableHead>
                 <TableHead className="text-xs py-2 w-16"></TableHead>
               </TableRow>
             </TableHeader>
@@ -49,19 +53,76 @@ export function CompactProcessVariablesTable({ variables, onVariablesChange, onA
               {variables.map((variable, index) => (
                 <TableRow key={variable.id} className="text-xs">
                   <TableCell className="py-2">
-                    <Input
-                      value={variable.name}
-                      onChange={(e) => handleVariableChange(index, 'name', e.target.value)}
-                      placeholder="Variable name"
-                      className="text-xs h-6"
-                    />
+                    <div className="flex items-center gap-2">
+                      {variable.type === 'upstream' && (
+                        <Badge variant="outline" className="h-5 px-1.5 text-xs">
+                          <ArrowUp className="w-3 h-3" />
+                        </Badge>
+                      )}
+                      <Input
+                        value={variable.name}
+                        onChange={(e) => handleVariableChange(index, 'name', e.target.value)}
+                        placeholder="Variable name"
+                        className="text-xs h-7"
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-2">
+                    <Select
+                      value={variable.type}
+                      onValueChange={(value) => handleVariableChange(index, 'type', value)}
+                    >
+                      <SelectTrigger className="h-7 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Text</SelectItem>
+                        <SelectItem value="number">Number</SelectItem>
+                        <SelectItem value="measurement">Measurement</SelectItem>
+                        <SelectItem value="selection">Selection</SelectItem>
+                        <SelectItem value="boolean">Boolean</SelectItem>
+                        <SelectItem value="upstream">Upstream</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell className="py-2">
+                    {variable.type === 'upstream' ? (
+                      <div className="space-y-1">
+                        <Input
+                          value={variable.sourceStepName || ''}
+                          onChange={(e) => handleVariableChange(index, 'sourceStepName', e.target.value)}
+                          placeholder="Source step"
+                          className="text-xs h-7"
+                        />
+                        <Input
+                          value={variable.targetValue || ''}
+                          onChange={(e) => handleVariableChange(index, 'targetValue', e.target.value)}
+                          placeholder="Target value/range"
+                          className="text-xs h-7"
+                        />
+                      </div>
+                    ) : variable.type === 'measurement' ? (
+                      <Input
+                        value={variable.unit || ''}
+                        onChange={(e) => handleVariableChange(index, 'unit', e.target.value)}
+                        placeholder="Unit (e.g., inches)"
+                        className="text-xs h-7"
+                      />
+                    ) : (
+                      <Input
+                        value={variable.description || ''}
+                        onChange={(e) => handleVariableChange(index, 'description', e.target.value)}
+                        placeholder="Description"
+                        className="text-xs h-7"
+                      />
+                    )}
                   </TableCell>
                   <TableCell className="py-2 text-center">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleRemoveVariable(index)}
-                      className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                      className="h-7 w-7 p-0 text-destructive hover:text-destructive"
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>

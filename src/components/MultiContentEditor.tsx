@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, FileText, Image, Video, ExternalLink } from "lucide-react";
+import { Plus, Trash2, FileText, Image, Video, ExternalLink, AlertTriangle } from "lucide-react";
 
 interface ContentSection {
   id: string;
-  type: 'text' | 'image' | 'video' | 'link' | 'button';
+  type: 'text' | 'image' | 'video' | 'link' | 'button' | 'safety-warning';
   content: string;
   title?: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
   width?: 'full' | 'half' | 'third' | 'two-thirds';
   alignment?: 'left' | 'center' | 'right';
   // Button-specific properties
@@ -67,6 +68,7 @@ export function MultiContentEditor({ sections, onChange }: MultiContentEditorPro
       case 'image': return <Image className="w-4 h-4" />;
       case 'video': return <Video className="w-4 h-4" />;
       case 'link': return <ExternalLink className="w-4 h-4" />;
+      case 'safety-warning': return <AlertTriangle className="w-4 h-4" />;
     }
   };
 
@@ -110,6 +112,15 @@ export function MultiContentEditor({ sections, onChange }: MultiContentEditorPro
           >
             <ExternalLink className="w-4 h-4 mr-2" />
             Add Link
+          </Button>
+          <Button 
+            size="sm" 
+            onClick={() => addSection('safety-warning')} 
+            variant="outline"
+            type="button"
+          >
+            <AlertTriangle className="w-4 h-4 mr-2" />
+            Safety Warning
           </Button>
         </div>
       </div>
@@ -305,6 +316,56 @@ export function MultiContentEditor({ sections, onChange }: MultiContentEditorPro
                         <ExternalLink className="w-4 h-4" />
                         {section.title}
                       </a>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {section.type === 'safety-warning' && (
+                <>
+                  <div>
+                    <Label>Warning Title</Label>
+                    <Input
+                      value={section.title || ''}
+                      onChange={(e) => updateSection(section.id, { title: e.target.value })}
+                      placeholder="Enter warning title..."
+                    />
+                  </div>
+                  <div>
+                    <Label>Severity Level</Label>
+                    <Select 
+                      value={section.severity || 'medium'} 
+                      onValueChange={(value) => updateSection(section.id, { severity: value as ContentSection['severity'] })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low - Minor injury or comfort</SelectItem>
+                        <SelectItem value="medium">Medium - Minor injury potential</SelectItem>
+                        <SelectItem value="high">High - Serious injury potential</SelectItem>
+                        <SelectItem value="critical">Critical - Life-threatening hazard</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Warning Message</Label>
+                    <Textarea
+                      value={section.content}
+                      onChange={(e) => updateSection(section.id, { content: e.target.value })}
+                      placeholder="Enter safety warning details..."
+                      className="min-h-[80px]"
+                    />
+                  </div>
+                  {section.content && (
+                    <div className="mt-2 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                        <div>
+                          {section.title && <div className="font-semibold text-destructive mb-1">{section.title}</div>}
+                          <div className="text-sm text-muted-foreground">{section.content}</div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </>

@@ -80,9 +80,10 @@ export interface AppReference {
 
 export interface ContentSection {
   id: string;
-  type: 'text' | 'image' | 'video' | 'link' | 'button';
+  type: 'text' | 'image' | 'video' | 'link' | 'button' | 'safety-warning';
   content: string;
   title?: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical'; // For safety-warning type
   width?: 'full' | 'half' | 'third' | 'two-thirds';
   alignment?: 'left' | 'center' | 'right';
   // Button-specific properties
@@ -114,10 +115,13 @@ export interface StepInput {
   id: string;
   name: string;
   description?: string;
-  type: 'text' | 'number' | 'boolean' | 'file' | 'measurement' | 'selection';
+  type: 'text' | 'number' | 'boolean' | 'file' | 'measurement' | 'selection' | 'upstream';
   required?: boolean;
   options?: string[]; // For selection type
   unit?: string; // For measurement type
+  sourceStepId?: string; // For upstream type - which step created this variable
+  sourceStepName?: string; // For upstream type - display name of source step
+  targetValue?: string; // For upstream type - expected value or range
 }
 
 export interface WorkflowStep {
