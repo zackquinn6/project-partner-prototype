@@ -159,14 +159,12 @@ export default function EditWorkflowView({
     }
   };
   const handleStartEdit = () => {
-    // Check if this step is in a standard phase
-    const stepPhase = displayPhases.find(phase => phase.operations.some(op => op.steps.some(s => s.id === currentStep?.id)));
-
-    // Prevent editing steps in standard phases for non-standard projects
-    if (!isEditingStandardProject && stepPhase?.isStandard) {
-      toast('Cannot edit steps in standard phases. Standard phases are read-only in this project.');
+    // Check if this step is standard
+    if (!isEditingStandardProject && currentStep?.isStandard) {
+      toast('Cannot edit standard steps. Only custom steps can be edited in this project.');
       return;
     }
+    
     setEditMode(true);
     setEditingStep({
       ...currentStep

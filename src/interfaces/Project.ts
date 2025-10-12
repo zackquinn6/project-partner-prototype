@@ -151,6 +151,8 @@ export interface WorkflowStep {
       high: number;
     };
   };
+  // Standard content flag - marks steps from Standard Project Foundation
+  isStandard?: boolean;
 }
 
 export interface Operation {
@@ -158,6 +160,8 @@ export interface Operation {
   name: string;
   description: string;
   steps: WorkflowStep[];
+  // Standard content flag - marks operations from Standard Project Foundation
+  isStandard?: boolean;
 }
 
 export interface Phase {

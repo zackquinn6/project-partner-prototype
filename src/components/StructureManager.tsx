@@ -278,11 +278,8 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       const phaseId = source.droppableId.split('-')[1];
       const phase = displayPhases.find(p => p.id === phaseId);
       
-      // Prevent editing standard phases in non-standard projects
-      if (!isEditingStandardProject && phase?.isStandard) {
-        toast.error('Cannot reorder operations in standard phases');
-        return;
-      }
+      // Allow reordering operations (including custom operations in standard phases)
+      // Standard operations remain locked by their isStandard flag
       
       const updatedProject = { ...currentProject };
       const phaseIndex = currentProject.phases.findIndex(p => p.id === phaseId);
@@ -296,13 +293,8 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       }
     } else if (type === 'steps') {
       const [phaseId, operationId] = source.droppableId.split('-').slice(1);
-      const phase = displayPhases.find(p => p.id === phaseId);
-      
-      // Prevent editing standard phases in non-standard projects
-      if (!isEditingStandardProject && phase?.isStandard) {
-        toast.error('Cannot reorder steps in standard phases');
-        return;
-      }
+      // Allow reordering steps (including custom steps in standard phases)
+      // Standard steps remain locked by their isStandard flag
       
       const updatedProject = { ...currentProject };
       const phaseIndex = currentProject.phases.findIndex(p => p.id === phaseId);
@@ -446,16 +438,14 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     // Check if this is a standard phase
     const phase = displayPhases.find(p => p.id === phaseId);
     
-    // Prevent adding operations to standard phases in non-standard projects
-    if (!isEditingStandardProject && phase?.isStandard) {
-      toast.error('Cannot add operations to standard phases. Standard phases are read-only in this project.');
-      return;
-    }
+    // Allow adding custom operations to standard phases in project templates
+    // (Standard Project itself still restricts, but individual templates can add custom work)
     const newOperation: Operation = {
       id: `operation-${Date.now()}`,
-      name: 'New Operation',
-      description: 'Operation description',
-      steps: []
+      name: 'New Custom Operation',
+      description: 'Custom operation description',
+      steps: [],
+      isStandard: false // Mark as custom operation
     };
     const updatedProject = {
       ...currentProject,
@@ -466,7 +456,9 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       updatedAt: new Date()
     };
     updateProject(updatedProject);
-    toast.success('Operation added successfully');
+    toast.success(phase?.isStandard 
+      ? 'Custom operation added to standard phase' 
+      : 'Operation added successfully');
   };
   const addStep = (phaseId: string, operationId: string) => {
     if (!currentProject) return;
@@ -474,23 +466,19 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     // Check if this is a standard phase
     const phase = displayPhases.find(p => p.id === phaseId);
     
-    // Prevent adding steps to standard phases in non-standard projects
-    if (!isEditingStandardProject && phase?.isStandard) {
-      toast.error('Cannot add steps to standard phases. Standard phases are read-only in this project.');
-      return;
-    }
-    
+    // Allow adding custom steps to standard phases in project templates
     const newStep: WorkflowStep = {
       id: `step-${Date.now()}`,
-      step: 'New Step',
-      description: 'Step description',
+      step: 'New Custom Step',
+      description: 'Custom step description',
       contentType: 'text',
       content: '',
       materials: [],
       tools: [],
       outputs: [],
       contentSections: [],
-      flowType: 'prime'
+      flowType: 'prime',
+      isStandard: false // Mark as custom step
     };
     const updatedProject = {
       ...currentProject,
@@ -504,6 +492,9 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       updatedAt: new Date()
     };
     updateProject(updatedProject);
+    toast.success(phase?.isStandard 
+      ? 'Custom step added to standard phase' 
+      : 'Step added successfully');
   };
 
   // Delete operations
@@ -530,10 +521,11 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     if (!currentProject) return;
     
     const phase = currentProject.phases.find(p => p.id === phaseId);
+    const operation = phase?.operations.find(op => op.id === operationId);
     
-    // Prevent deleting operations from standard phases in non-standard projects
-    if (!isEditingStandardProject && phase?.isStandard) {
-      toast.error('Cannot delete operations from standard phases. Standard phases are read-only in this project.');
+    // Prevent deleting standard operations (but allow deleting custom operations in standard phases)
+    if (!isEditingStandardProject && operation?.isStandard) {
+      toast.error('Cannot delete standard operations. Only custom operations can be deleted.');
       return;
     }
     
@@ -552,12 +544,15 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     if (!currentProject) return;
     
     const phase = currentProject.phases.find(p => p.id === phaseId);
+    const operation = phase?.operations.find(op => op.id === operationId);
+    const step = operation?.steps.find(s => s.id === stepId);
     
-    // Prevent deleting steps from standard phases in non-standard projects
-    if (!isEditingStandardProject && phase?.isStandard) {
-      toast.error('Cannot delete steps from standard phases. Standard phases are read-only in this project.');
+    // Prevent deleting standard steps (but allow deleting custom steps in standard phases)
+    if (!isEditingStandardProject && step?.isStandard) {
+      toast.error('Cannot delete standard steps. Only custom steps can be deleted.');
       return;
     }
+    
     const updatedProject = {
       ...currentProject,
       phases: currentProject.phases.map(phase => phase.id === phaseId ? {
@@ -575,7 +570,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
   // Edit operations
   const startEdit = (type: 'phase' | 'operation' | 'step', id: string, data: any) => {
-    // Check if trying to edit standard phase content in non-standard project
+    // Check if trying to edit standard content
     if (!isEditingStandardProject) {
       if (type === 'phase') {
         const phase = displayPhases.find(p => p.id === id);
@@ -583,23 +578,17 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
           toast.error('Cannot edit standard phases. Standard phases are read-only in this project.');
           return;
         }
-      } else if (type === 'operation' || type === 'step') {
-        // Find which phase this operation/step belongs to
-        for (const phase of displayPhases) {
-          if (phase.isStandard) {
-            const hasOperation = phase.operations.some(o => o.id === id);
-            if (hasOperation) {
-              toast.error('Cannot edit operations in standard phases. Standard phases are read-only in this project.');
-              return;
-            }
-            for (const operation of phase.operations) {
-              const hasStep = operation.steps.some(s => s.id === id);
-              if (hasStep) {
-                toast.error('Cannot edit steps in standard phases. Standard phases are read-only in this project.');
-                return;
-              }
-            }
-          }
+      } else if (type === 'operation') {
+        // Check if this operation is marked as standard
+        if (data?.isStandard) {
+          toast.error('Cannot edit standard operations. Only custom operations can be edited.');
+          return;
+        }
+      } else if (type === 'step') {
+        // Check if this step is marked as standard
+        if (data?.isStandard) {
+          toast.error('Cannot edit standard steps. Only custom steps can be edited.');
+          return;
         }
       }
     }
@@ -899,6 +888,12 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                            {expandedOperations.has(operation.id) ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                                                          </Button>
                                                          {operation.name}
+                                                         {operation.isStandard && !isEditingStandardProject && (
+                                                           <Badge variant="secondary" className="text-xs">Standard 🔒</Badge>
+                                                         )}
+                                                         {!operation.isStandard && phase.isStandard && (
+                                                           <Badge variant="outline" className="text-xs bg-blue-50">Custom</Badge>
+                                                         )}
                                                        </h4>
                                                        <p className="text-muted-foreground text-xs">{operation.description}</p>
                                                      </div>}
@@ -926,10 +921,10 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                             <X className="w-3 h-3" />
                                                           </Button>
                                                         </> : <>
-                                                          <Button size="sm" variant="ghost" onClick={() => startEdit('operation', operation.id, operation)}>
+                                                          <Button size="sm" variant="ghost" onClick={() => startEdit('operation', operation.id, operation)} disabled={operation.isStandard && !isEditingStandardProject}>
                                                             <Edit className="w-3 h-3" />
                                                           </Button>
-                                                          {phase.name !== 'Close Project' && <Button size="sm" variant="ghost" onClick={() => deleteOperation(phase.id, operation.id)}>
+                                                          {phase.name !== 'Close Project' && <Button size="sm" variant="ghost" onClick={() => deleteOperation(phase.id, operation.id)} disabled={operation.isStandard && !isEditingStandardProject}>
                                                               <Trash2 className="w-3 h-3" />
                                                             </Button>}
                                                         </>}
@@ -989,6 +984,12 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                                          <div className="flex items-center gap-2">
                                                                            <p className="font-medium text-xs">{step.step}</p>
                                                                            {getFlowTypeBadge(step.flowType)}
+                                                                           {step.isStandard && !isEditingStandardProject && (
+                                                                             <Badge variant="secondary" className="text-xs">Standard 🔒</Badge>
+                                                                           )}
+                                                                           {!step.isStandard && phase.isStandard && (
+                                                                             <Badge variant="outline" className="text-xs bg-blue-50">Custom</Badge>
+                                                                           )}
                                                                          </div>
                                                                          <p className="text-muted-foreground text-xs">{step.description}</p>
                                                                        </div>}
@@ -1023,7 +1024,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                              })} title="Configure decision point">
                                                               🔀
                                                             </Button>
-                                                            <Button size="sm" variant="ghost" onClick={() => startEdit('step', step.id, step)}>
+                                                            <Button size="sm" variant="ghost" onClick={() => startEdit('step', step.id, step)} disabled={step.isStandard && !isEditingStandardProject}>
                                                               <Edit className="w-3 h-3" />
                                                             </Button>
                                                             
@@ -1038,9 +1039,9 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                                 <Clipboard className="w-3 h-3" />
                                                               </Button>}
                                                             
-                                                            {!isStandardPhase && phase.name !== 'Close Project' && <Button size="sm" variant="ghost" onClick={() => deleteStep(phase.id, operation.id, step.id)}>
+                                                            <Button size="sm" variant="ghost" onClick={() => deleteStep(phase.id, operation.id, step.id)} disabled={step.isStandard && !isEditingStandardProject}>
                                                                 <Trash2 className="w-3 h-3" />
-                                                              </Button>}
+                                                              </Button>
                                                           </>}
                                                                   </div>
                                                                 </div>
