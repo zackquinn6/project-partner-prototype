@@ -178,36 +178,7 @@ export function MobileWorkflowView({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Special case for ordering step - add Shopping List button */}
-              {(currentStep.step === 'Tool & Material Ordering' || 
-                currentStep.phaseName === 'Ordering' || 
-                currentStep.id === 'ordering-step-1') ? (
-                <div className="space-y-4">
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Use our integrated shopping browser to purchase all required tools and materials for your project. 
-                    Our system will help you find the best prices and ensure you get everything you need.
-                  </p>
-                  
-                  {/* Shopping List Button */}
-                  <div className="flex justify-center pt-2">
-                     <Button 
-                       onClick={() => {
-                         console.log('Opening ordering window for mobile step:', currentStep.step);
-                         window.dispatchEvent(new CustomEvent('openOrderingWindow'));
-                       }}
-                      variant="outline"
-                      className="flex items-center gap-2"
-                      size="sm"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                      Shopping List
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
+              <div className="space-y-4">
                   {/* Render content_sections using MultiContentRenderer */}
                   {currentStep.content && Array.isArray(currentStep.content) && currentStep.content.length > 0 ? (
                     <MultiContentRenderer sections={currentStep.content} />
@@ -266,7 +237,6 @@ export function MobileWorkflowView({
                     </div>
                   )}
                 </div>
-              )}
             </CardContent>
           </Card>
 

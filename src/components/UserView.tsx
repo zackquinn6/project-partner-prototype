@@ -926,36 +926,6 @@ export default function UserView({
       />;
     }
     
-    // Special case for ordering step - add Shopping List button in content
-    if (step.step === 'Tool & Material Ordering' || 
-        step.phaseName === 'Ordering' || 
-        step.id === 'ordering-step-1') {
-      return (
-        <div className="space-y-6">
-          <div className="prose prose-base max-w-none">
-            <p>
-              Use our integrated shopping browser to purchase all required tools and materials for your project. 
-              Our system will help you find the best prices and ensure you get everything you need.
-            </p>
-          </div>
-          
-          {/* Shopping List Button - styled to match Project Customizer button */}
-          <div className="flex justify-center pt-4">
-            <Button 
-              onClick={() => {
-                console.log('Opening materials selection window for step:', step.step);
-                setMaterialsSelectionOpen(true);
-              }}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Shopping List
-            </Button>
-          </div>
-        </div>
-      );
-    }
     
     const contentStr = typeof step.content === 'string' ? step.content : '';
     
