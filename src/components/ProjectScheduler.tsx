@@ -1084,57 +1084,7 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
                     planningMode={planningMode}
                     schedulingTasks={schedulingTasks}
                     teamMembers={teamMembers}
-                          </thead>
-                          <tbody>
-                            {schedulingResult.scheduledTasks
-                              .filter(st => st.status === 'confirmed')
-                              .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
-                              .map((scheduledTask) => {
-                                const task = schedulingTasks.find(t => t.id === scheduledTask.taskId);
-                                const worker = teamMembers.find(w => w.id === scheduledTask.workerId);
-                                return (
-                                  <tr key={scheduledTask.taskId} className="border-b hover:bg-muted/50">
-                                    <td className="p-2">
-                                      <div className="font-medium">{task?.title || 'Unknown'}</div>
-                                    </td>
-                                    <td className="p-2">{worker?.name || 'Unknown'}</td>
-                                    <td className="p-2 text-xs">{format(scheduledTask.startTime, 'MMM dd, h:mm a')}</td>
-                                    <td className="p-2 text-xs text-green-700 font-medium">
-                                      {format(scheduledTask.targetCompletionDate, 'MMM dd, h:mm a')}
-                                    </td>
-                                    <td className="p-2 text-xs text-red-700 font-medium">
-                                      {format(scheduledTask.latestCompletionDate, 'MMM dd, h:mm a')}
-                                    </td>
-                                    <td className="p-2">
-                                      <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                                        {scheduledTask.status}
-                                      </Badge>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                          </tbody>
-                        </table>
-                      </div>
-                      
-                      {schedulingResult.scheduledTasks.some(st => st.status === 'conflict') && (
-                        <Alert variant="destructive" className="mt-4">
-                          <AlertTriangle className="h-4 w-4" />
-                          <AlertDescription>
-                            {schedulingResult.scheduledTasks.filter(st => st.status === 'conflict').length} tasks could not be scheduled within the constraints
-                          </AlertDescription>
-                        </Alert>
-                      )}
-
-                      <div className="mt-4 p-3 bg-muted rounded-lg">
-                        <p className="text-xs text-muted-foreground">
-                          <strong>Note:</strong> Target dates are your goal completion times based on optimal scheduling. 
-                          Latest dates represent the absolute deadlines based on critical path analysis - completing tasks 
-                          beyond these dates will delay the entire project.
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  />
                 </>
               )}
             </div>
