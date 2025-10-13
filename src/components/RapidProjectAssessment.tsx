@@ -818,6 +818,108 @@ export function RapidProjectAssessment() {
                  </div>
                </CardContent>
              </Card>
+
+             {/* Sensitivity Analysis */}
+             {project.lineItems.length > 0 && (
+               <Card className="bg-muted/10">
+                 <CardContent className="p-4">
+                   <h4 className="font-semibold mb-4 flex items-center gap-2">
+                     <Calculator className="w-4 h-4" />
+                     Sensitivity Analysis
+                   </h4>
+                   
+                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                     {/* Column 1: Uncertainty Analysis */}
+                     <div className="space-y-3">
+                       <div>
+                         <h5 className="text-sm font-semibold mb-1">Cost Uncertainty</h5>
+                         <p className="text-xs text-muted-foreground mb-3">
+                           Items with largest range between low and high estimates. Get more info to firm up these numbers.
+                         </p>
+                       </div>
+                       
+                       <div className="space-y-2">
+                         {[...project.lineItems]
+                           .map(item => ({
+                             ...item,
+                             lowTotal: item.lowCost * item.units,
+                             highTotal: item.highCost * item.units,
+                             uncertainty: (item.highCost - item.lowCost) * item.units
+                           }))
+                           .sort((a, b) => b.uncertainty - a.uncertainty)
+                           .map((item) => {
+                             const maxUncertainty = Math.max(
+                               ...project.lineItems.map(i => (i.highCost - i.lowCost) * i.units)
+                             );
+                             const barWidth = maxUncertainty > 0 ? (item.uncertainty / maxUncertainty) * 100 : 0;
+                             
+                             return (
+                               <div key={item.id} className="space-y-1">
+                                 <div className="flex justify-between items-center text-xs">
+                                   <span className="font-medium truncate flex-1 mr-2">{item.item || 'Unnamed'}</span>
+                                   <span className="font-mono text-muted-foreground whitespace-nowrap">
+                                     ±{formatCurrency(item.uncertainty)}
+                                   </span>
+                                 </div>
+                                 <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                   <div 
+                                     className="h-full bg-orange-500/70 transition-all duration-300"
+                                     style={{ width: `${barWidth}%` }}
+                                   />
+                                 </div>
+                               </div>
+                             );
+                           })}
+                       </div>
+                     </div>
+
+                     {/* Column 2: Total Cost Impact */}
+                     <div className="space-y-3">
+                       <div>
+                         <h5 className="text-sm font-semibold mb-1">Cost Impact</h5>
+                         <p className="text-xs text-muted-foreground mb-3">
+                           Items with highest average cost. Seek lower cost options to reduce total project cost.
+                         </p>
+                       </div>
+                       
+                       <div className="space-y-2">
+                         {[...project.lineItems]
+                           .map(item => ({
+                             ...item,
+                             lowTotal: item.lowCost * item.units,
+                             highTotal: item.highCost * item.units,
+                             avgCost: ((item.lowCost + item.highCost) / 2) * item.units
+                           }))
+                           .sort((a, b) => b.avgCost - a.avgCost)
+                           .map((item) => {
+                             const maxAvgCost = Math.max(
+                               ...project.lineItems.map(i => ((i.lowCost + i.highCost) / 2) * i.units)
+                             );
+                             const barWidth = maxAvgCost > 0 ? (item.avgCost / maxAvgCost) * 100 : 0;
+                             
+                             return (
+                               <div key={item.id} className="space-y-1">
+                                 <div className="flex justify-between items-center text-xs">
+                                   <span className="font-medium truncate flex-1 mr-2">{item.item || 'Unnamed'}</span>
+                                   <span className="font-mono text-muted-foreground whitespace-nowrap">
+                                     {formatCurrency(item.avgCost)}
+                                   </span>
+                                 </div>
+                                 <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                   <div 
+                                     className="h-full bg-primary/70 transition-all duration-300"
+                                     style={{ width: `${barWidth}%` }}
+                                   />
+                                 </div>
+                               </div>
+                             );
+                           })}
+                       </div>
+                     </div>
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
            </div>
         </CardContent>
         </Card>
