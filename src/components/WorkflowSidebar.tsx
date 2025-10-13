@@ -50,9 +50,9 @@ export function WorkflowSidebar({
     <Sidebar collapsible="icon">
       <SidebarTrigger className="m-2 self-end" />
       
-      <SidebarContent>
+      <SidebarContent className="pt-4">
         <SidebarGroup>
-          <SidebarGroupLabel>Workflow Progress</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-4 text-xs">Workflow Progress</SidebarGroupLabel>
           <SidebarGroupContent>
             {!collapsed && (
               <div className="space-y-4 p-2">

@@ -734,7 +734,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                     
                     return (
                       <AccordionItem value="materials">
-                        <AccordionTrigger className="text-lg font-semibold">
+                        <AccordionTrigger className="text-base font-semibold py-3">
                           <div className="flex items-center gap-2">
                             <span>Materials Needed</span>
                             <Badge variant={isAllCompleted ? "default" : "outline"} className={isAllCompleted ? "bg-green-500 text-white" : ""}>
@@ -744,20 +744,19 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                           </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                          <div className="space-y-3 pt-2">
+                          <div className="space-y-2 pt-1">
                             {currentStep.materials.map(material => (
-                              <div key={material.id} className="p-3 bg-background/50 rounded-lg">
-                                <div className="flex items-start gap-3">
+                              <div key={material.id} className="p-2 bg-background/50 rounded-lg">
+                                <div className="flex items-start gap-2">
                                   <Checkbox 
                                     id={`material-${material.id}`}
                                     checked={stepMaterials.has(material.id)}
                                     onCheckedChange={() => toggleMaterialCheck(currentStep.id, material.id)}
-                                    className="mt-1"
+                                    className="mt-0.5"
                                   />
-                                  <div className="flex-1">
-                                    <div className="font-medium">{material.name}</div>
-                                    {material.category && <Badge variant="outline" className="text-xs mt-1">{material.category}</Badge>}
-                                    {material.description && <div className="text-sm text-muted-foreground mt-1">{material.description}</div>}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium">{material.name}</div>
+                                    {material.description && <div className="text-xs text-muted-foreground mt-0.5">{material.description}</div>}
                                   </div>
                                 </div>
                               </div>
@@ -777,7 +776,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                     
                     return (
                       <AccordionItem value="tools">
-                        <AccordionTrigger className="text-lg font-semibold">
+                        <AccordionTrigger className="text-base font-semibold py-3">
                           <div className="flex items-center gap-2">
                             <span>Tools Required</span>
                             <Badge variant={isAllCompleted ? "default" : "outline"} className={isAllCompleted ? "bg-green-500 text-white" : ""}>
@@ -787,23 +786,22 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                           </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                          <div className="space-y-3 pt-2">
+                          <div className="space-y-2 pt-1">
                             {currentStep.tools.map(tool => (
-                              <div key={tool.id} className="p-3 bg-background/50 rounded-lg">
-                                <div className="flex items-start gap-3">
+                              <div key={tool.id} className="p-2 bg-background/50 rounded-lg">
+                                <div className="flex items-start gap-2">
                                   <Checkbox 
                                     id={`tool-${tool.id}`}
                                     checked={stepTools.has(tool.id)}
                                     onCheckedChange={() => toggleToolCheck(currentStep.id, tool.id)}
-                                    className="mt-1"
+                                    className="mt-0.5"
                                   />
-                                  <div className="flex-1">
+                                  <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                      <div className="font-medium">{tool.name}</div>
+                                      <div className="text-sm font-medium">{tool.name}</div>
                                       {tool.alternates && tool.alternates.length > 0 && <Badge variant="outline" className="text-xs">+{tool.alternates.length} alt</Badge>}
                                     </div>
-                                    {tool.category && <Badge variant="outline" className="text-xs mt-1">{tool.category}</Badge>}
-                                    {tool.description && <div className="text-sm text-muted-foreground mt-1">{tool.description}</div>}
+                                    {tool.description && <div className="text-xs text-muted-foreground mt-0.5">{tool.description}</div>}
                                   </div>
                                 </div>
                               </div>
@@ -823,7 +821,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                     
                     return (
                       <AccordionItem value="outputs">
-                        <AccordionTrigger className="text-lg font-semibold">
+                        <AccordionTrigger className="text-base font-semibold py-3">
                           <div className="flex items-center gap-2">
                             <span>Outputs</span>
                             <Badge variant={isAllCompleted ? "default" : "outline"} className={isAllCompleted ? "bg-green-500 text-white" : ""}>
@@ -833,19 +831,19 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                           </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                          <div className="space-y-3 pt-2">
+                          <div className="space-y-2 pt-1">
                             {currentStep.outputs.map(output => (
-                              <div key={output.id} className="p-3 bg-background/50 rounded-lg">
-                                <div className="flex items-start gap-3">
+                              <div key={output.id} className="p-2 bg-background/50 rounded-lg">
+                                <div className="flex items-start gap-2">
                                   <Checkbox 
                                     id={`output-${output.id}`}
                                     checked={stepOutputs.has(output.id)}
                                     onCheckedChange={() => toggleOutputCheck(currentStep.id, output.id)}
-                                    className="mt-1"
+                                    className="mt-0.5"
                                   />
-                                   <div className="flex-1">
+                                   <div className="flex-1 min-w-0">
                                      <div className="flex items-center gap-2">
-                                       <div className="font-medium">{output.name}</div>
+                                       <div className="text-sm font-medium">{output.name}</div>
                                        <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
                                        <button
                                          onClick={() => {
@@ -858,7 +856,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                                          <Info className="w-3 h-3 text-muted-foreground hover:text-primary" />
                                        </button>
                                      </div>
-                                     {output.description && <div className="text-sm text-muted-foreground mt-1">{output.description}</div>}
+                                     {output.description && <div className="text-xs text-muted-foreground mt-0.5">{output.description}</div>}
                                    </div>
                                 </div>
                               </div>
