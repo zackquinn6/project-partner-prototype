@@ -1,7 +1,7 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Moon, Sun, Zap } from 'lucide-react';
+import { Calendar, Moon, Sun, Zap, Clock } from 'lucide-react';
 
 interface QuickSchedulePresetsProps {
   onPresetSelect: (preset: SchedulePreset) => void;
@@ -86,21 +86,26 @@ export const QuickSchedulePresets: React.FC<QuickSchedulePresetsProps> = ({ onPr
         {presets.map((preset) => (
           <Card 
             key={preset.id}
-            className="cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
+            className="group cursor-pointer hover:border-primary hover:shadow-md transition-all duration-200"
             onClick={() => onPresetSelect(preset)}
           >
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 text-primary group-hover:scale-110 transition-transform">
                   {preset.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-sm">{preset.name}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">{preset.description}</p>
+                  <h4 className="font-semibold text-sm group-hover:text-primary transition-colors">
+                    {preset.name}
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    {preset.description}
+                  </p>
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="text-xs px-2 py-0.5 rounded bg-muted font-medium">
+                    <Badge variant="secondary" className="text-xs font-medium">
+                      <Clock className="w-3 h-3 mr-1" />
                       {preset.settings.hoursPerWeek} hrs/week
-                    </span>
+                    </Badge>
                   </div>
                 </div>
               </div>

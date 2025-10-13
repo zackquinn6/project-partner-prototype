@@ -1078,26 +1078,12 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
                     </AlertDescription>
                   </Alert>
 
-                  {/* Detailed Schedule Results */}
-                  <Card className="mt-4">
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <CalendarIcon className="w-4 h-4" />
-                        Scheduled Tasks Overview
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b">
-                              <th className="text-left p-2 font-medium">Task</th>
-                              <th className="text-left p-2 font-medium">Worker</th>
-                              <th className="text-left p-2 font-medium">Start</th>
-                              <th className="text-left p-2 font-medium text-green-700">Target Complete</th>
-                              <th className="text-left p-2 font-medium text-red-700">Latest Complete</th>
-                              <th className="text-left p-2 font-medium">Status</th>
-                            </tr>
+                  {/* Enhanced Schedule Output View */}
+                  <ScheduleOutputView
+                    schedulingResult={schedulingResult}
+                    planningMode={planningMode}
+                    schedulingTasks={schedulingTasks}
+                    teamMembers={teamMembers}
                           </thead>
                           <tbody>
                             {schedulingResult.scheduledTasks

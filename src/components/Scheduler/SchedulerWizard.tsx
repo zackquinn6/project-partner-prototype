@@ -14,7 +14,8 @@ import {
   Clock,
   ChevronDown,
   ChevronRight,
-  Settings
+  Settings,
+  Zap
 } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { PlanningMode, ScheduleTempo } from '@/interfaces/Scheduling';
@@ -103,28 +104,31 @@ export const SchedulerWizard: React.FC<SchedulerWizardProps> = ({
                 variant={scheduleTempo === 'fast_track' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setScheduleTempo('fast_track')}
-                className="h-16 flex flex-col items-center justify-center gap-1"
+                className="h-20 flex flex-col items-center justify-center gap-1.5 transition-all hover:scale-105"
               >
-                <span className="text-xs font-medium">Fast-Track</span>
-                <span className="text-[10px] text-muted-foreground">Tight schedule</span>
+                <Zap className="w-5 h-5" />
+                <span className="text-xs font-semibold">Fast-Track</span>
+                <span className="text-[10px] opacity-70">Tight schedule</span>
               </Button>
               <Button
                 variant={scheduleTempo === 'steady' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setScheduleTempo('steady')}
-                className="h-16 flex flex-col items-center justify-center gap-1"
+                className="h-20 flex flex-col items-center justify-center gap-1.5 transition-all hover:scale-105"
               >
-                <span className="text-xs font-medium">Steady Pace</span>
-                <span className="text-[10px] text-muted-foreground">Balanced</span>
+                <Clock className="w-5 h-5" />
+                <span className="text-xs font-semibold">Steady Pace</span>
+                <span className="text-[10px] opacity-70">Balanced</span>
               </Button>
               <Button
                 variant={scheduleTempo === 'extended' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setScheduleTempo('extended')}
-                className="h-16 flex flex-col items-center justify-center gap-1"
+                className="h-20 flex flex-col items-center justify-center gap-1.5 transition-all hover:scale-105"
               >
-                <span className="text-xs font-medium">Extended</span>
-                <span className="text-[10px] text-muted-foreground">Extra buffer</span>
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-semibold">Extended</span>
+                <span className="text-[10px] opacity-70">Extra buffer</span>
               </Button>
             </div>
           </div>
