@@ -953,8 +953,8 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[90vw] max-w-4xl h-[85vh] overflow-y-auto flex flex-col">
-          <DialogHeader className="text-center space-y-4">
+        <DialogContent className="w-[90vw] max-w-4xl h-[85vh] flex flex-col">
+          <DialogHeader className="text-center space-y-4 flex-shrink-0">
             <div className="flex items-center justify-center space-x-2">
               <Sparkles className="w-6 h-6 text-primary" />
               <DialogTitle className="text-2xl font-bold gradient-text">
@@ -975,12 +975,12 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
             )}
           </DialogHeader>
 
-          <div className="py-6">
+          <div className="flex-1 overflow-y-auto py-6">
             {renderStep()}
           </div>
 
           {(currentStep > 0 || (mode === 'personality' && currentStep >= 0)) && (
-            <div className="flex justify-between pt-6 border-t">
+            <div className="flex justify-between pt-6 border-t flex-shrink-0">
               {((currentStep > 1 && mode !== 'verify') || (mode === 'personality' && currentStep >= 0) || (mode === 'verify' && currentStep === 1)) && (
                 <Button variant="outline" onClick={handleBack}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
