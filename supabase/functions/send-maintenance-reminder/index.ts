@@ -64,7 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
         <p>Keep your home in great condition!</p>
         
         <p>Best regards,<br>
-        <strong>DIY Project Assistant Team</strong></p>
+        <strong>Project Partner Team</strong></p>
       `;
     } else {
       // Real maintenance reminders
@@ -100,15 +100,15 @@ const handler = async (req: Request): Promise<Response> => {
         
         <p>Regular maintenance helps prevent costly repairs and keeps your home in excellent condition.</p>
         
-        <p>Log into your DIY Project Assistant to mark tasks as complete and track your progress.</p>
+        <p>Log into your Project Partner to mark tasks as complete and track your progress.</p>
         
         <p>Best regards,<br>
-        <strong>DIY Project Assistant Team</strong></p>
+        <strong>Project Partner Team</strong></p>
       `;
     }
 
     const emailResponse = await resend.emails.send({
-      from: "DIY Project Assistant <onboarding@resend.dev>",
+      from: "Project Partner <onboarding@resend.dev>",
       to: [email],
       subject: subject,
       html: htmlContent,
