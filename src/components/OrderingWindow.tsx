@@ -48,7 +48,6 @@ const SHOPPING_SITES: ShoppingSite[] = [
 
 export function OrderingWindow({ open, onOpenChange, project, projectRun, userOwnedTools, completedSteps, selectedMaterials, onOrderingComplete }: OrderingWindowProps) {
   const { updateProjectRun } = useProject();
-  const [urlInput, setUrlInput] = useState<string>("");
   const [orderedTools, setOrderedTools] = useState<Set<string>>(new Set());
   const [orderedMaterials, setOrderedMaterials] = useState<Set<string>>(new Set());
   const [shoppedTools, setShoppedTools] = useState<Set<string>>(new Set());
@@ -121,20 +120,6 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
     }
   };
 
-  const handleGoogleSearch = () => {
-    const query = urlInput.trim();
-    if (!query) return;
-    
-    const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-    window.open(googleSearchUrl, '_blank');
-    setUrlInput("");
-  };
-
-  const handleUrlKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleGoogleSearch();
-    }
-  };
 
   // Fetch user profile to get owned tools
   useEffect(() => {
@@ -456,23 +441,17 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
             </div>
           </div>
 
-          {/* Google Search */}
+          {/* Open New Tab Button */}
           <div>
-            <h4 className="font-medium text-xs mb-2">Search Products</h4>
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="Search for products on Google..."
-                value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                onKeyPress={handleUrlKeyPress}
-                className="text-xs flex-1 h-7"
-              />
-              <Button onClick={handleGoogleSearch} size="sm" variant="outline" className="h-7 px-2 text-xs">
-                <ExternalLink className="w-3 h-3 mr-1" />
-                Search
-              </Button>
-            </div>
+            <Button 
+              onClick={() => window.open('about:blank', '_blank')} 
+              size="sm" 
+              variant="outline" 
+              className="w-full h-8 text-xs"
+            >
+              <ExternalLink className="w-3 h-3 mr-1.5" />
+              Open New Tab
+            </Button>
           </div>
         </div>
 

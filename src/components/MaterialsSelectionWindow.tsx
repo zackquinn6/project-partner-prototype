@@ -44,7 +44,7 @@ export function MaterialsSelectionWindow({
   completedSteps = new Set(), 
   onSelectionComplete 
 }: MaterialsSelectionWindowProps) {
-  const [showCompletedSteps, setShowCompletedSteps] = useState(false);
+  const [showCompletedSteps, setShowCompletedSteps] = useState(true); // Changed default to true
   const [selectedMaterials, setSelectedMaterials] = useState<Set<string>>(new Set());
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
   const isMobile = useIsMobile();
@@ -312,8 +312,8 @@ export function MaterialsSelectionWindow({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={isMobile 
-        ? "w-full h-full max-w-full max-h-full rounded-none border-0 p-0 [&>button]:hidden" 
-        : "!w-[90vw] !h-[90vh] !max-w-[90vw] !max-h-[90vh] p-0 [&>button]:hidden overflow-hidden flex flex-col !fixed !left-[50%] !top-[50%] !translate-x-[-50%] !translate-y-[-50%]"
+        ? "w-full h-full max-w-full max-h-full rounded-none border-0 p-0 [&>button]:hidden flex flex-col" 
+        : "max-w-6xl w-[90vw] max-h-[90vh] h-[90vh] p-0 [&>button]:hidden flex flex-col"
       }>
         <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -323,7 +323,7 @@ export function MaterialsSelectionWindow({
                 Select Materials & Tools Needed
               </DialogTitle>
               <DialogDescription className="mt-2 text-base">
-                Choose items you need to purchase for your project. Items from incomplete steps are shown by default.
+                Choose items you need to purchase for your project. All items are shown by default.
               </DialogDescription>
             </div>
             <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)} className="ml-2">
@@ -355,7 +355,7 @@ export function MaterialsSelectionWindow({
                   onCheckedChange={(checked) => setShowCompletedSteps(checked === true)}
                 />
                 <label htmlFor="show-completed-steps" className="text-sm font-medium">
-                  Show materials for previously completed steps
+                  Include items from completed steps
                 </label>
               </div>
             </div>
@@ -385,106 +385,100 @@ export function MaterialsSelectionWindow({
           )}
 
           {/* Items Tabs */}
-          <div className="flex-1 min-h-0">
-            <Tabs defaultValue="materials" className="flex flex-col h-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4 flex-shrink-0">
-                <TabsTrigger value="materials" className="text-sm">
-                  Materials ({availableMaterials.length})
-                </TabsTrigger>
-                <TabsTrigger value="tools" className="text-sm">
-                  Tools ({availableTools.length})
-                </TabsTrigger>
-              </TabsList>
+          <Tabs defaultValue="materials" className="flex-1 min-h-0 flex flex-col">
+            <TabsList className="grid w-full grid-cols-2 mb-4 flex-shrink-0">
+              <TabsTrigger value="materials" className="text-sm">
+                Materials ({availableMaterials.length})
+              </TabsTrigger>
+              <TabsTrigger value="tools" className="text-sm">
+                Tools ({availableTools.length})
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="materials" className="flex-1 min-h-0 flex flex-col mt-0">
+              <div className="flex items-center justify-between mb-3 flex-shrink-0">
+                <h3 className="font-medium">Select Materials</h3>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => handleSelectAll('materials')} 
+                    variant="outline" 
+                    size="sm"
+                    disabled={availableMaterials.length === 0}
+                  >
+                    Select All
+                  </Button>
+                  <Button 
+                    onClick={() => handleDeselectAll('materials')} 
+                    variant="outline" 
+                    size="sm"
+                    disabled={selectedMaterials.size === 0}
+                  >
+                    Clear All
+                  </Button>
+                </div>
+              </div>
               
-              <TabsContent value="materials" className="flex-1 min-h-0">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium">Select Materials</h3>
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={() => handleSelectAll('materials')} 
-                      variant="outline" 
-                      size="sm"
-                      disabled={availableMaterials.length === 0}
-                    >
-                      Select All
-                    </Button>
-                    <Button 
-                      onClick={() => handleDeselectAll('materials')} 
-                      variant="outline" 
-                      size="sm"
-                      disabled={selectedMaterials.size === 0}
-                    >
-                      Clear All
-                    </Button>
-                  </div>
+              <ScrollArea className="flex-1">
+                <div className="space-y-3 pr-4">
+                  {availableMaterials.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-sm">
+                        {showCompletedSteps 
+                          ? "No materials found in this project."
+                          : "No materials needed for incomplete steps."
+                        }
+                      </p>
+                    </div>
+                  ) : (
+                    availableMaterials.map(material => renderItemCard(material, 'material'))
+                  )}
                 </div>
-                
-                <div className="flex-1 min-h-0 overflow-hidden">
-                  <div className="h-full overflow-y-auto pr-2">
-                    {availableMaterials.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p className="text-sm">
-                          {showCompletedSteps 
-                            ? "No materials found in this project."
-                            : "No materials needed for incomplete steps."
-                          }
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {availableMaterials.map(material => renderItemCard(material, 'material'))}
-                      </div>
-                    )}
-                  </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="tools" className="flex-1 min-h-0 flex flex-col mt-0">
+              <div className="flex items-center justify-between mb-3 flex-shrink-0">
+                <h3 className="font-medium">Select Tools</h3>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => handleSelectAll('tools')} 
+                    variant="outline" 
+                    size="sm"
+                    disabled={availableTools.length === 0}
+                  >
+                    Select All
+                  </Button>
+                  <Button 
+                    onClick={() => handleDeselectAll('tools')} 
+                    variant="outline" 
+                    size="sm"
+                    disabled={selectedTools.size === 0}
+                  >
+                    Clear All
+                  </Button>
                 </div>
-              </TabsContent>
+              </div>
               
-              <TabsContent value="tools" className="flex-1 min-h-0">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium">Select Tools</h3>
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={() => handleSelectAll('tools')} 
-                      variant="outline" 
-                      size="sm"
-                      disabled={availableTools.length === 0}
-                    >
-                      Select All
-                    </Button>
-                    <Button 
-                      onClick={() => handleDeselectAll('tools')} 
-                      variant="outline" 
-                      size="sm"
-                      disabled={selectedTools.size === 0}
-                    >
-                      Clear All
-                    </Button>
-                  </div>
+              <ScrollArea className="flex-1">
+                <div className="space-y-3 pr-4">
+                  {availableTools.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Wrench className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-sm">
+                        {showCompletedSteps 
+                          ? "No tools found in this project."
+                          : "No tools needed for incomplete steps."
+                        }
+                      </p>
+                    </div>
+                  ) : (
+                    availableTools.map(tool => renderItemCard(tool, 'tool'))
+                  )}
                 </div>
-                
-                <div className="flex-1 min-h-0 overflow-hidden">
-                  <div className="h-full overflow-y-auto pr-2">
-                    {availableTools.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <Wrench className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p className="text-sm">
-                          {showCompletedSteps 
-                            ? "No tools found in this project."
-                            : "No tools needed for incomplete steps."
-                          }
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {availableTools.map(tool => renderItemCard(tool, 'tool'))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
 
           {/* Action Buttons */}
           <div className="flex items-center justify-between pt-4 border-t flex-shrink-0">
