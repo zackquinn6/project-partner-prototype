@@ -1,6 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { SchedulerWizard } from './Scheduler/SchedulerWizard';
+import { ScheduleOutputView } from './Scheduler/ScheduleOutputView';
+import { SchedulePreset } from './Scheduler/QuickSchedulePresets';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -45,7 +48,7 @@ import {
   Task, 
   Worker, 
   PlanningMode, 
-  RiskTolerance,
+  ScheduleTempo,
   RemediationSuggestion 
 } from '@/interfaces/Scheduling';
 
@@ -92,9 +95,9 @@ interface GlobalSettings {
 }
 
 const planningModes: { mode: PlanningMode; name: string; description: string }[] = [
-  { mode: 'quick', name: 'Quick', description: 'Phases and milestones only' },
-  { mode: 'balanced', name: 'Balanced', description: 'Task-level with basic constraints' },
-  { mode: 'detailed', name: 'Detailed', description: 'Time-of-day slots with full optimization' }
+  { mode: 'quick', name: 'Quick', description: 'Plan phases / major milestones' },
+  { mode: 'standard', name: 'Standard', description: 'Plan daily tasks (recommended)' },
+  { mode: 'detailed', name: 'Detailed', description: 'Plan hour-by-hour tasks for each team member' }
 ];
 
 export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
@@ -108,8 +111,8 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
   const { isMobile } = useResponsive();
   
   // Enhanced scheduling state
-  const [planningMode, setPlanningMode] = useState<PlanningMode>('balanced');
-  const [riskTolerance, setRiskTolerance] = useState<RiskTolerance>('moderate');
+  const [planningMode, setPlanningMode] = useState<PlanningMode>('standard');
+  const [scheduleTempo, setScheduleTempo] = useState<ScheduleTempo>('steady');
   const [schedulingResult, setSchedulingResult] = useState<SchedulingResult | null>(null);
   const [isComputing, setIsComputing] = useState(false);
   const [targetDate, setTargetDate] = useState<string>(
@@ -291,7 +294,7 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
           noiseCurfew: globalSettings.quietHours.start
         },
         blackoutDates: [],
-        riskTolerance,
+        scheduleTempo,
         preferHelpers: teamMembers.some(tm => tm.type === 'helper'),
         mode: planningMode
       };
@@ -333,6 +336,20 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
       costPerHour: 25
     };
     setTeamMembers([...teamMembers, newMember]);
+  };
+
+  // Apply preset
+  const applyPreset = (preset: SchedulePreset) => {
+    updateTeamMember(teamMembers[0].id, {
+      weekendsOnly: preset.settings.weekendsOnly,
+      weekdaysAfterFivePm: preset.settings.weekdaysAfterFivePm,
+      workingHours: preset.settings.workingHours
+    });
+    
+    toast({
+      title: "Preset applied",
+      description: `Applied "${preset.name}" schedule settings`
+    });
   };
 
   // Apply remediation suggestion
@@ -672,8 +689,63 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
 
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-6">
-            {/* Step 1-4: Configuration Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* New Wizard Interface */}
+            <SchedulerWizard
+              targetDate={targetDate}
+              setTargetDate={setTargetDate}
+              dropDeadDate={dropDeadDate}
+              setDropDeadDate={setDropDeadDate}
+              planningMode={planningMode}
+              setPlanningMode={setPlanningMode}
+              scheduleTempo={scheduleTempo}
+              setScheduleTempo={setScheduleTempo}
+              onPresetApply={applyPreset}
+            />
+
+            {/* Generate Schedule Button */}
+            <Button 
+              onClick={computeAdvancedSchedule} 
+              className="w-full h-12 text-base"
+              disabled={isComputing || teamMembers.length === 0}
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              {isComputing ? 'Computing...' : 'Generate Schedule'}
+            </Button>
+
+            {/* Results */}
+            {schedulingResult && (
+              <>
+                <ScheduleOutputView
+                  schedulingResult={schedulingResult}
+                  planningMode={planningMode}
+                  schedulingTasks={schedulingTasks}
+                  teamMembers={teamMembers}
+                />
+
+                {/* Action Buttons */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" onClick={saveDraft} className="h-10">
+                    <FileText className="w-4 h-4 mr-2" />
+                    Save Draft
+                  </Button>
+                  <Button onClick={saveSchedule} className="h-10">
+                    <Save className="w-4 h-4 mr-2" />
+                    Save & Commit
+                  </Button>
+                  <Button variant="outline" onClick={printToPDF} className="h-10">
+                    <Printer className="w-4 h-4 mr-2" />
+                    Print to PDF
+                  </Button>
+                  <Button variant="outline" onClick={emailSchedule} className="h-10">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Email Me
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* Old Configuration Section - REMOVED */}
+            <div className="hidden grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Left side - Steps 1-4 (2/3 width) */}
               <div className="lg:col-span-2 space-y-4">
                 {/* Step 1: Target & Drop-Dead Dates */}
@@ -745,7 +817,7 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
                   </CardContent>
                 </Card>
 
-                {/* Step 3: Risk Tolerance */}
+                {/* Step 3: Schedule Tempo */}
                 <Card>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">
@@ -753,15 +825,15 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
                         3
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium mb-2">Risk Tolerance</p>
-                        <Select value={riskTolerance} onValueChange={(value) => setRiskTolerance(value as RiskTolerance)}>
+                        <p className="text-sm font-medium mb-2">Schedule Tempo</p>
+                        <Select value={scheduleTempo} onValueChange={(value) => setScheduleTempo(value as ScheduleTempo)}>
                           <SelectTrigger className="h-8">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="conservative">Conservative (Extra buffers)</SelectItem>
-                            <SelectItem value="moderate">Moderate (Standard buffers)</SelectItem>
-                            <SelectItem value="aggressive">Aggressive (Minimal buffers)</SelectItem>
+                            <SelectItem value="fast_track">Fast-Track (Tight timeline)</SelectItem>
+                            <SelectItem value="steady">Steady Pace (Balanced buffers)</SelectItem>
+                            <SelectItem value="extended">Extended (Extra breathing room)</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

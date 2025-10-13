@@ -39,7 +39,7 @@ export class SchedulingEngine {
       const sortedTasks = this.validateAndSortTasks(inputs.tasks);
 
       // 3. Apply confidence-based buffers
-      const bufferedTasks = this.applyBuffers(sortedTasks, inputs.riskTolerance);
+      const bufferedTasks = this.applyBuffers(sortedTasks, inputs.scheduleTempo);
 
       // 4. Backwards placement algorithm
       const scheduledTasks = this.backwardsPlacement(
@@ -159,12 +159,12 @@ export class SchedulingEngine {
     return sorted.reverse(); // Reverse for backwards placement
   }
 
-  private applyBuffers(tasks: Task[], riskTolerance: string): Task[] {
-    const riskMultiplier = {
-      conservative: 1.5,
-      moderate: 1.0,
-      aggressive: 0.7
-    }[riskTolerance] || 1.0;
+  private applyBuffers(tasks: Task[], scheduleTempo: string): Task[] {
+    const tempoMultiplier = {
+      extended: 1.5,      // More breathing room
+      steady: 1.0,        // Balanced
+      fast_track: 0.7     // Tight schedule
+    }[scheduleTempo] || 1.0;
 
     return tasks.map(task => {
       const confidence = task.confidence ?? 0.7;
@@ -179,7 +179,7 @@ export class SchedulingEngine {
         }
       }
 
-      const adjustedBuffer = bufferPercent * riskMultiplier;
+      const adjustedBuffer = bufferPercent * tempoMultiplier;
       const bufferedHours = task.estimatedHours * (1 + adjustedBuffer);
 
       return {

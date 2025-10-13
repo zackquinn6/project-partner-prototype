@@ -1,5 +1,5 @@
-export type PlanningMode = 'quick' | 'balanced' | 'detailed';
-export type RiskTolerance = 'conservative' | 'moderate' | 'aggressive';
+export type PlanningMode = 'quick' | 'standard' | 'detailed';
+export type ScheduleTempo = 'extended' | 'steady' | 'fast_track';
 export type TaskStatus = 'confirmed' | 'tentative' | 'conflict';
 export type RemediationType = 'add_helper' | 'allow_night_work' | 'extend_date';
 
@@ -55,7 +55,7 @@ export interface SchedulingInputs {
   workers: Worker[];
   siteConstraints: SiteConstraints;
   blackoutDates: Date[];
-  riskTolerance: RiskTolerance;
+  scheduleTempo: ScheduleTempo;
   preferHelpers: boolean;
   mode: PlanningMode;
 }
