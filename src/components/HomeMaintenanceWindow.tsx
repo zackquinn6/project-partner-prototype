@@ -76,7 +76,9 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
   const [touchEnd, setTouchEnd] = useState<number>(0);
   const [sortBy, setSortBy] = useState<string>('date-desc');
   const [historyCategoryFilter, setHistoryCategoryFilter] = useState<string>('all');
-  const { isMobile } = useResponsive();
+  const {
+    isMobile
+  } = useResponsive();
   useEffect(() => {
     if (open && user) {
       fetchHomes();
@@ -124,14 +126,13 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
       setLoading(false);
     }
   };
-
   const fetchCompletions = async () => {
     if (!user || !selectedHomeId) return;
-
     try {
-      const { data, error } = await supabase
-        .from('maintenance_completions')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('maintenance_completions').select(`
           id,
           task_id,
           completed_at,
@@ -142,11 +143,9 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
             category,
             home_id
           )
-        `)
-        .eq('user_id', user.id)
-        .eq('user_maintenance_tasks.home_id', selectedHomeId)
-        .order('completed_at', { ascending: false });
-
+        `).eq('user_id', user.id).eq('user_maintenance_tasks.home_id', selectedHomeId).order('completed_at', {
+        ascending: false
+      });
       if (error) throw error;
 
       // Transform the data structure
@@ -161,7 +160,6 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
           category: completion.user_maintenance_tasks.category
         }
       })) || [];
-
       setCompletions(transformedData);
     } catch (error) {
       console.error('Error fetching completion history:', error);
@@ -241,47 +239,31 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
     setTouchEnd(0);
     setTouchStart(e.targetTouches[0].clientX);
   };
-
   const handleTouchMove = (e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
-
   const handleTouchEnd = (taskId: string) => {
     if (!touchStart || !touchEnd) return;
-    
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
-    
     if (isLeftSwipe && swipedTaskId !== taskId) {
       setSwipedTaskId(taskId);
-    } else if (isRightSwipe || (isLeftSwipe && swipedTaskId === taskId)) {
+    } else if (isRightSwipe || isLeftSwipe && swipedTaskId === taskId) {
       setSwipedTaskId(null);
     }
   };
   return <>
-    <ResponsiveDialog 
-      open={open} 
-      onOpenChange={onOpenChange}
-      size="xlarge"
-      className="[&>button]:md:block [&>button]:hidden h-[85vh] max-h-[85vh]"
-    >
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange} size="xlarge" className="[&>button]:md:block [&>button]:hidden h-[85vh] max-h-[85vh]">
       <div className="flex flex-col h-full max-h-full overflow-hidden">
         {/* Header with title and close button */}
         <div className="px-4 md:px-6 py-4 border-b flex items-center justify-between flex-shrink-0">
           <h2 className="text-lg md:text-xl font-bold">Home Maintenance Tracker</h2>
           
           {/* Close button - only show Close text on mobile */}
-          {isMobile && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => onOpenChange(false)}
-              className="ml-4 flex-shrink-0"
-            >
+          {isMobile && <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} className="ml-4 flex-shrink-0">
               Close
-            </Button>
-          )}
+            </Button>}
         </div>
         
         {/* Home Selection - Fixed at top */}
@@ -299,20 +281,13 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                      </SelectContent>
                   </Select>
 
-                  {selectedHomeId && tasks.length > 0 && (
-                    <MaintenancePdfPrinter 
-                      tasks={tasks}
-                      completions={completions}
-                      homeName={homes.find(h => h.id === selectedHomeId)?.name || 'Home'}
-                    />
-                  )}
+                  {selectedHomeId && tasks.length > 0 && <MaintenancePdfPrinter tasks={tasks} completions={completions} homeName={homes.find(h => h.id === selectedHomeId)?.name || 'Home'} />}
                 </div>
               </div>
             </div>
 
             {/* Tabs - Takes remaining space */}
-            {selectedHomeId && (
-              <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            {selectedHomeId && <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
                 <Tabs defaultValue="tasks" className="flex flex-col h-full">
                   {/* Tab bar - Fixed at top of tabs area */}
                   <div className="px-3 md:px-6 py-3 bg-background border-b shrink-0">
@@ -335,11 +310,11 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                             <SelectContent className="z-[200] bg-popover border">
                               <SelectItem value="all">All Categories ({tasks.length})</SelectItem>
                               {categories.map(category => {
-                            const count = tasks.filter(task => task.category === category).length;
-                            return count > 0 ? <SelectItem key={category} value={category}>
+                        const count = tasks.filter(task => task.category === category).length;
+                        return count > 0 ? <SelectItem key={category} value={category}>
                                     {categoryLabels[category]} ({count})
                                   </SelectItem> : null;
-                          })}
+                      })}
                             </SelectContent>
                           </Select>
                           
@@ -350,10 +325,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
 
                         {/* Scrollable task list */}
                         <div className="flex-1 min-h-0 overflow-y-auto space-y-2 py-3 px-3 md:px-6">
-                      {loading ? (
-                        <div className="text-center py-8">Loading tasks...</div>
-                      ) : getFilteredTasks().length === 0 ? (
-                        <Card className="mx-1">
+                      {loading ? <div className="text-center py-8">Loading tasks...</div> : getFilteredTasks().length === 0 ? <Card className="mx-1">
                           <CardContent className="pt-6">
                             <div className="text-center py-8">
                               <Home className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -369,32 +341,23 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                               </Button>
                             </div>
                           </CardContent>
-                        </Card>
-                      ) : (
-                        getFilteredTasks().map(task => {
-                          const progress = getTaskProgress(task);
-                          const {
-                            status,
-                            color,
-                            icon: StatusIcon
-                          } = getTaskStatus(task);
-                          return (
-                            <Card key={task.id} className="hover:shadow-sm transition-shadow relative overflow-hidden mx-1">
-                              <CardContent 
-                                className="p-3 sm:p-4"
-                                onTouchStart={handleTouchStart}
-                                onTouchMove={handleTouchMove}
-                                onTouchEnd={() => handleTouchEnd(task.id)}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSwipedTaskId(null);
-                                }}
-                              >
+                        </Card> : getFilteredTasks().map(task => {
+                    const progress = getTaskProgress(task);
+                    const {
+                      status,
+                      color,
+                      icon: StatusIcon
+                    } = getTaskStatus(task);
+                    return <Card key={task.id} className="hover:shadow-sm transition-shadow relative overflow-hidden mx-1">
+                              <CardContent className="p-3 sm:p-4" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={() => handleTouchEnd(task.id)} onClick={e => {
+                        e.stopPropagation();
+                        setSwipedTaskId(null);
+                      }}>
                                 <div className="flex items-center justify-between gap-3">
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-2">
                                       <h4 className="font-medium text-sm truncate">{task.title}</h4>
-                                      {task.is_custom && <Badge variant="outline" className="text-xs px-1 py-0">Custom</Badge>}
+                                      {task.is_custom}
                                     </div>
                                     <div className="text-xs text-muted-foreground mb-2">
                                       Due: {format(new Date(task.next_due_date), 'MMM dd, yyyy')}
@@ -408,39 +371,24 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                                     </div>
                                   </div>
                                     <div className="flex flex-col gap-1 min-h-[44px] md:min-h-[36px] justify-center">
-                                     <Button 
-                                       onClick={() => handleTaskComplete(task)} 
-                                       size="sm" 
-                                       className="w-9 h-9 md:w-8 md:h-8 p-0 bg-green-600 hover:bg-green-700 text-white" 
-                                       title="Complete Task"
-                                     >
+                                     <Button onClick={() => handleTaskComplete(task)} size="sm" className="w-9 h-9 md:w-8 md:h-8 p-0 bg-green-600 hover:bg-green-700 text-white" title="Complete Task">
                                        <CheckCircle className="h-4 w-4" />
                                      </Button>
                                      
                                      {/* Show delete button on desktop or when swiped on mobile */}
-                                     <div className={`transition-all duration-200 ${
-                                       swipedTaskId === task.id ? 'opacity-100 w-9 md:w-8' : 'md:opacity-100 md:w-8 opacity-0 w-0'
-                                     }`}>
-                                       <Button 
-                                         variant="destructive" 
-                                         size="sm" 
-                                         onClick={() => {
-                                           handleDeleteTask(task.id);
-                                           setSwipedTaskId(null);
-                                         }} 
-                                         className="w-9 h-9 md:w-8 md:h-8 p-0" 
-                                         title="Delete Task"
-                                       >
+                                     <div className={`transition-all duration-200 ${swipedTaskId === task.id ? 'opacity-100 w-9 md:w-8' : 'md:opacity-100 md:w-8 opacity-0 w-0'}`}>
+                                       <Button variant="destructive" size="sm" onClick={() => {
+                                handleDeleteTask(task.id);
+                                setSwipedTaskId(null);
+                              }} className="w-9 h-9 md:w-8 md:h-8 p-0" title="Delete Task">
                                          <Trash2 className="h-4 w-4" />
                                        </Button>
                                      </div>
                                    </div>
                                 </div>
                               </CardContent>
-                            </Card>
-                          );
-                        })
-                      )}
+                            </Card>;
+                  })}
                         </div>
                       </div>
                     </TabsContent>
@@ -455,11 +403,9 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                            </SelectTrigger>
                            <SelectContent className="z-[200] bg-popover border">
                              <SelectItem value="all">All Categories</SelectItem>
-                             {categories.map(category => (
-                               <SelectItem key={category} value={category}>
+                             {categories.map(category => <SelectItem key={category} value={category}>
                                  {categoryLabels[category]}
-                               </SelectItem>
-                             ))}
+                               </SelectItem>)}
                            </SelectContent>
                          </Select>
 
@@ -492,8 +438,7 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
                      </div>
                    </TabsContent>
                 </Tabs>
-              </div>
-            )}
+              </div>}
           </div>
     </ResponsiveDialog>
 
