@@ -149,11 +149,275 @@ export const createTileInstallationProject = (): Project => {
 };
 
 export const createFallbackTileProject = (): Project => {
-  // Surface Preparation Phase
+  // ALTERNATE OPERATIONS - Substrate Prep
+  // Option 1: Wood Floor (Plywood)
+  const woodFloorPrepOperation: Operation = {
+    id: 'wood-floor-prep-operation',
+    name: 'Wood Floor Substrate Preparation',
+    description: 'Prepare plywood subfloor for tile installation',
+    userPrompt: 'Is your subfloor made of wood/plywood or concrete?',
+    alternateGroup: 'substrate-prep',
+    steps: [
+      {
+        id: 'inspect-wood-subfloor-step',
+        step: 'Inspect and Reinforce Wood Subfloor',
+        description: 'Check plywood thickness and add reinforcement if needed',
+        contentType: 'text' as const,
+        content: 'Plywood subfloor should be at least 1-1/8" thick for tile. Add a layer of 1/2" or 5/8" plywood if current floor is too thin.',
+        flowType: 'alternate',
+        contentSections: [
+          {
+            id: 'wood-inspect-1',
+            type: 'text',
+            content: 'Plywood subfloor should be at least 1-1/8" thick for tile. Add a layer of 1/2" or 5/8" plywood if current floor is too thin.'
+          }
+        ],
+        materials: [
+          { id: 'plywood', name: 'Plywood Underlayment', description: '1/2" or 5/8" exterior grade plywood', category: 'Consumable' as const }
+        ],
+        tools: [
+          { id: 'circular-saw', name: 'Circular Saw', description: 'For cutting plywood', category: 'Power Tool' as const }
+        ],
+        outputs: [{
+          id: 'wood-subfloor-output',
+          name: 'Reinforced Wood Subfloor',
+          description: 'Wood subfloor properly reinforced and ready',
+          type: 'none' as const
+        }]
+      }
+    ]
+  } as any;
+
+  // Option 2: Concrete Floor
+  const concreteFloorPrepOperation: Operation = {
+    id: 'concrete-floor-prep-operation',
+    name: 'Concrete Substrate Preparation',
+    description: 'Prepare concrete slab for tile installation',
+    userPrompt: 'Is your subfloor made of wood/plywood or concrete?',
+    alternateGroup: 'substrate-prep',
+    steps: [
+      {
+        id: 'inspect-concrete-subfloor-step',
+        step: 'Inspect and Level Concrete',
+        description: 'Check concrete for cracks and level',
+        contentType: 'text' as const,
+        content: 'Concrete must be clean, level, and crack-free. Fill any cracks with concrete patching compound and allow to cure.',
+        flowType: 'alternate',
+        contentSections: [
+          {
+            id: 'concrete-inspect-1',
+            type: 'text',
+            content: 'Concrete must be clean, level, and crack-free. Fill any cracks with concrete patching compound and allow to cure.'
+          }
+        ],
+        materials: [
+          { id: 'concrete-patch', name: 'Concrete Patching Compound', description: 'For filling cracks', category: 'Consumable' as const }
+        ],
+        tools: [
+          { id: 'trowel', name: 'Trowel', description: 'For applying patch', category: 'Hand Tool' as const }
+        ],
+        outputs: [{
+          id: 'concrete-subfloor-output',
+          name: 'Prepared Concrete Subfloor',
+          description: 'Concrete subfloor patched and ready',
+          type: 'none' as const
+        }]
+      }
+    ]
+  } as any;
+
+  // ALTERNATE OPERATIONS - Tile Substrate
+  // Option 1: Concrete Board
+  const concreteBoardOperation: Operation = {
+    id: 'concrete-board-operation',
+    name: 'Install Concrete Backer Board',
+    description: 'Install cement backer board as tile substrate',
+    userPrompt: 'Do you want to use concrete backer board or uncoupling membrane?',
+    alternateGroup: 'tile-substrate',
+    steps: [
+      {
+        id: 'install-concrete-board-step',
+        step: 'Install Concrete Backer Board',
+        description: 'Cut and install cement board over subfloor',
+        contentType: 'text' as const,
+        content: 'Install cement backer board using appropriate screws every 8 inches. Stagger joints and leave 1/8" gaps between sheets.',
+        flowType: 'alternate',
+        contentSections: [
+          {
+            id: 'concrete-board-1',
+            type: 'text',
+            content: 'Install cement backer board using appropriate screws every 8 inches. Stagger joints and leave 1/8" gaps between sheets.'
+          }
+        ],
+        materials: [
+          { id: 'cement-board', name: 'Cement Backer Board', description: '1/2" cement board', category: 'Consumable' as const }
+        ],
+        tools: [
+          { id: 'utility-knife', name: 'Utility Knife', description: 'For scoring board', category: 'Hand Tool' as const }
+        ],
+        outputs: [{
+          id: 'concrete-board-output',
+          name: 'Installed Backer Board',
+          description: 'Cement board properly installed',
+          type: 'none' as const
+        }]
+      }
+    ]
+  } as any;
+
+  // Option 2: Uncoupling Membrane
+  const uncouplingMembraneOperation: Operation = {
+    id: 'uncoupling-membrane-operation',
+    name: 'Install Uncoupling Membrane',
+    description: 'Install uncoupling membrane as tile substrate',
+    userPrompt: 'Do you want to use concrete backer board or uncoupling membrane?',
+    alternateGroup: 'tile-substrate',
+    steps: [
+      {
+        id: 'install-membrane-step',
+        step: 'Install Uncoupling Membrane',
+        description: 'Roll out and secure uncoupling membrane',
+        contentType: 'text' as const,
+        content: 'Apply thin-set mortar to subfloor and embed uncoupling membrane into it. Use roller to ensure proper bond.',
+        flowType: 'alternate',
+        contentSections: [
+          {
+            id: 'membrane-1',
+            type: 'text',
+            content: 'Apply thin-set mortar to subfloor and embed uncoupling membrane into it. Use roller to ensure proper bond.'
+          }
+        ],
+        materials: [
+          { id: 'uncoupling-membrane', name: 'Uncoupling Membrane', description: 'DITRA or similar', category: 'Consumable' as const }
+        ],
+        tools: [
+          { id: 'roller', name: 'Floor Roller', description: 'For pressing membrane', category: 'Hand Tool' as const }
+        ],
+        outputs: [{
+          id: 'membrane-output',
+          name: 'Installed Membrane',
+          description: 'Uncoupling membrane properly installed',
+          type: 'none' as const
+        }]
+      }
+    ]
+  } as any;
+
+  // IF NECESSARY OPERATIONS
+  // 1. Toilet Removal/Installation
+  const toiletRemovalOperation: Operation = {
+    id: 'toilet-removal-operation',
+    name: 'Toilet Removal and Reinstallation',
+    description: 'Remove toilet before tiling and reinstall after',
+    userPrompt: 'Do you have a toilet in the installation area that needs to be removed?',
+    steps: [
+      {
+        id: 'remove-toilet-step',
+        step: 'Remove Toilet',
+        description: 'Safely remove toilet from floor',
+        contentType: 'text' as const,
+        content: 'Turn off water supply, flush toilet to empty tank, disconnect water line, remove bolts, and carefully lift toilet away.',
+        flowType: 'if-necessary',
+        contentSections: [
+          {
+            id: 'toilet-remove-1',
+            type: 'text',
+            content: 'Turn off water supply, flush toilet to empty tank, disconnect water line, remove bolts, and carefully lift toilet away.'
+          }
+        ],
+        materials: [
+          { id: 'wax-ring', name: 'Wax Ring', description: 'New wax ring for reinstallation', category: 'Consumable' as const }
+        ],
+        tools: [
+          { id: 'wrench', name: 'Adjustable Wrench', description: 'For disconnecting water line', category: 'Hand Tool' as const }
+        ],
+        outputs: [{
+          id: 'toilet-removed-output',
+          name: 'Toilet Removed',
+          description: 'Toilet safely removed and stored',
+          type: 'none' as const
+        }]
+      }
+    ]
+  } as any;
+
+  // 2. Dishwasher Removal/Installation
+  const dishwasherRemovalOperation: Operation = {
+    id: 'dishwasher-removal-operation',
+    name: 'Dishwasher Removal and Reinstallation',
+    description: 'Remove dishwasher if present in tiling area',
+    userPrompt: 'Do you have a dishwasher in the installation area that needs to be removed?',
+    steps: [
+      {
+        id: 'remove-dishwasher-step',
+        step: 'Remove Dishwasher',
+        description: 'Disconnect and remove dishwasher',
+        contentType: 'text' as const,
+        content: 'Turn off water and power, disconnect supply lines, remove mounting brackets, and carefully slide dishwasher out.',
+        flowType: 'if-necessary',
+        contentSections: [
+          {
+            id: 'dishwasher-remove-1',
+            type: 'text',
+            content: 'Turn off water and power, disconnect supply lines, remove mounting brackets, and carefully slide dishwasher out.'
+          }
+        ],
+        materials: [],
+        tools: [
+          { id: 'screwdriver', name: 'Screwdriver Set', description: 'For removing brackets', category: 'Hand Tool' as const }
+        ],
+        outputs: [{
+          id: 'dishwasher-removed-output',
+          name: 'Dishwasher Removed',
+          description: 'Dishwasher safely removed',
+          type: 'none' as const
+        }]
+      }
+    ]
+  } as any;
+
+  // 3. Self-Leveler Application
+  const selfLevelerOperation: Operation = {
+    id: 'self-leveler-operation',
+    name: 'Apply Self-Leveling Compound',
+    description: 'Level floor if variation exceeds 1/2"',
+    userPrompt: 'Is your floor out of level by more than 1/2" in any area?',
+    steps: [
+      {
+        id: 'apply-self-leveler-step',
+        step: 'Apply Self-Leveling Compound',
+        description: 'Mix and pour self-leveling compound',
+        contentType: 'text' as const,
+        content: 'Mix self-leveling compound per instructions, pour onto floor, and spread with trowel. It will naturally level itself.',
+        flowType: 'if-necessary',
+        contentSections: [
+          {
+            id: 'self-leveler-1',
+            type: 'text',
+            content: 'Mix self-leveling compound per instructions, pour onto floor, and spread with trowel. It will naturally level itself.'
+          }
+        ],
+        materials: [
+          { id: 'self-leveler', name: 'Self-Leveling Compound', description: 'Floor leveling compound', category: 'Consumable' as const }
+        ],
+        tools: [
+          { id: 'mixing-paddle', name: 'Mixing Paddle', description: 'For mixing compound', category: 'Power Tool' as const }
+        ],
+        outputs: [{
+          id: 'leveled-floor-output',
+          name: 'Level Floor Surface',
+          description: 'Floor leveled within tolerance',
+          type: 'performance-durability' as const
+        }]
+      }
+    ]
+  } as any;
+
+  // PRIME OPERATIONS - General preparation
   const surfacePrepOperation: Operation = {
     id: 'surface-prep-operation',
-    name: 'Surface Preparation',
-    description: 'Prepare the subfloor for tile installation',
+    name: 'Surface Cleaning and Inspection',
+    description: 'Clean and inspect the installation area',
     steps: [
       {
         id: 'inspect-subfloor-step',
