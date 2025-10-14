@@ -309,8 +309,10 @@ export default function Home({
             </div>
             
             <div className="relative flex justify-center items-center">
-              <img src={heroDIYPerson} alt="DIY Project Partner Platform" className="w-full max-w-md h-auto rounded-lg shadow-lg" style={{
-                transform: 'scale(1.15)'
+              <img src={heroDIYPerson} alt="DIY Project Partner Platform" className="w-full max-w-md rounded-lg shadow-lg" style={{
+                transform: 'scale(1.15)',
+                height: '70%',
+                objectFit: 'cover'
               }} />
             </div>
           </div>
