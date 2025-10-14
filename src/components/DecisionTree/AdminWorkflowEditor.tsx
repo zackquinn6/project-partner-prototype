@@ -139,7 +139,7 @@ export const AdminWorkflowEditor: React.FC<AdminWorkflowEditorProps> = ({
                     const isEditing = editingOperation?.phaseId === phase.id && editingOperation?.operationId === operation.id;
                     
                     return (
-                      <Card key={operation.id} className="border-l-4" style={{ borderLeftColor: `var(--${getFlowTypeColor(flowType)})` }}>
+                      <Card key={operation.id} className={`border-l-4 border-l-${getFlowTypeColor(flowType).replace('bg-', '')}`}>
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
