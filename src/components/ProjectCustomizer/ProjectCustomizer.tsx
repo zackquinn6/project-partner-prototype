@@ -226,13 +226,7 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
   };
 
   const getModeTitle = () => {
-    switch (mode) {
-      case 'initial-plan': return 'Project Customizer';
-      case 'final-plan': return 'Finalize Project Plan';
-      case 'unplanned-work': return 'Add New Work';
-      case 'replan': return 'Re-plan Project';
-      default: return 'Project Customizer';
-    }
+    return 'Project Customizer';
   };
 
   const getModeDescription = () => {

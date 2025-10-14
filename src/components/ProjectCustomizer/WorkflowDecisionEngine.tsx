@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { ScrollArea } from '../ui/scroll-area';
 import { Checkbox } from '../ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
 import { ProjectRun } from '../../interfaces/ProjectRun';
+import { Operation } from '../../interfaces/Project';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useIsMobile } from '../../hooks/use-mobile';
 
@@ -20,82 +20,6 @@ interface WorkflowDecisionEngineProps {
   };
 }
 
-interface DecisionOption {
-  id: string;
-  name: string;
-  description: string;
-  type: 'alternative' | 'if-necessary';
-  alternatives?: string[];
-  required?: boolean;
-}
-
-// Mock decision options - in a real app, these would come from your data model
-const getDecisionOptionsForPhase = (phaseName: string): DecisionOption[] => {
-  const phaseNameLower = phaseName.toLowerCase();
-  
-  if (phaseNameLower.includes('planning')) {
-    return [
-      {
-        id: 'measurement-method',
-        name: 'Measurement Method',
-        description: 'Choose your preferred measurement approach',
-        type: 'alternative',
-        alternatives: ['Digital Laser Measuring', 'Traditional Tape Measure', 'Room Mapping App'],
-        required: true
-      },
-      {
-        id: 'planning-tools',
-        name: 'Planning Tools',
-        description: 'Optional planning assistance',
-        type: 'if-necessary',
-        alternatives: ['3D Room Visualization', 'Material Calculator', 'Timeline Optimizer']
-      }
-    ];
-  }
-  
-  if (phaseNameLower.includes('prep')) {
-    return [
-      {
-        id: 'surface-prep',
-        name: 'Surface Preparation',
-        description: 'Choose surface preparation method',
-        type: 'alternative',
-        alternatives: ['Chemical Stripping', 'Sanding', 'Steam Removal'],
-        required: true
-      },
-      {
-        id: 'additional-prep',
-        name: 'Additional Preparation',
-        description: 'Optional preparation steps',
-        type: 'if-necessary',
-        alternatives: ['Crack Repair', 'Primer Application', 'Moisture Barrier']
-      }
-    ];
-  }
-  
-  if (phaseNameLower.includes('install')) {
-    return [
-      {
-        id: 'installation-pattern',
-        name: 'Installation Pattern',
-        description: 'Choose tile layout pattern',
-        type: 'alternative',
-        alternatives: ['Straight Grid', 'Diagonal', 'Herringbone', 'Brick Pattern'],
-        required: true
-      },
-      {
-        id: 'edge-treatment',
-        name: 'Edge Treatment',
-        description: 'Optional edge finishing',
-        type: 'if-necessary',
-        alternatives: ['Bullnose Tiles', 'Metal Edge Strips', 'Caulk Finishing']
-      }
-    ];
-  }
-  
-  return [];
-};
-
 export const WorkflowDecisionEngine: React.FC<WorkflowDecisionEngineProps> = ({
   projectRun,
   onStandardDecision,
@@ -104,36 +28,66 @@ export const WorkflowDecisionEngine: React.FC<WorkflowDecisionEngineProps> = ({
 }) => {
   const isMobile = useIsMobile();
 
-  const handleAlternativeSelection = (phaseId: string, decisionId: string, selectedAlternative: string) => {
+  // Extract decision points from actual operations
+  const phasesWithDecisions = useMemo(() => {
+    return projectRun.phases?.map(phase => {
+      const alternateGroups = new Map<string, { prompt: string; operations: Operation[] }>();
+      const ifNecessaryOps: Operation[] = [];
+
+      phase.operations.forEach(operation => {
+        const flowType = operation.steps[0]?.flowType || 'prime';
+        
+        if (flowType === 'alternate') {
+          const groupKey = (operation as any).alternateGroup || 'choice-group';
+          if (!alternateGroups.has(groupKey)) {
+            alternateGroups.set(groupKey, {
+              prompt: (operation as any).userPrompt || 'Choose an option:',
+              operations: []
+            });
+          }
+          alternateGroups.get(groupKey)!.operations.push(operation);
+        } else if (flowType === 'if-necessary') {
+          ifNecessaryOps.push(operation);
+        }
+      });
+
+      return {
+        phase,
+        alternateGroups: Array.from(alternateGroups.entries()),
+        ifNecessaryOps
+      };
+    }).filter(p => p.alternateGroups.length > 0 || p.ifNecessaryOps.length > 0);
+  }, [projectRun.phases]);
+
+  const handleAlternativeSelection = (phaseId: string, groupKey: string, operationId: string) => {
     const currentDecisions = customizationState.standardDecisions[phaseId] || [];
-    const updatedDecisions = currentDecisions.filter(d => !d.startsWith(decisionId + ':'));
-    updatedDecisions.push(`${decisionId}:${selectedAlternative}`);
+    const updatedDecisions = currentDecisions.filter(d => !d.startsWith(groupKey + ':'));
+    updatedDecisions.push(`${groupKey}:${operationId}`);
     onStandardDecision(phaseId, updatedDecisions);
   };
 
-  const handleIfNecessarySelection = (phaseId: string, decisionId: string, option: string, checked: boolean) => {
+  const handleIfNecessarySelection = (phaseId: string, operationId: string, checked: boolean) => {
     const currentWork = customizationState.ifNecessaryWork[phaseId] || [];
-    const optionKey = `${decisionId}:${option}`;
     
     let updatedWork;
     if (checked) {
-      updatedWork = [...currentWork, optionKey];
+      updatedWork = [...currentWork, operationId];
     } else {
-      updatedWork = currentWork.filter(w => w !== optionKey);
+      updatedWork = currentWork.filter(w => w !== operationId);
     }
     
     onIfNecessaryWork(phaseId, updatedWork);
   };
 
-  const getSelectedAlternative = (phaseId: string, decisionId: string): string | null => {
+  const getSelectedAlternative = (phaseId: string, groupKey: string): string | null => {
     const decisions = customizationState.standardDecisions[phaseId] || [];
-    const decision = decisions.find(d => d.startsWith(decisionId + ':'));
+    const decision = decisions.find(d => d.startsWith(groupKey + ':'));
     return decision ? decision.split(':')[1] : null;
   };
 
-  const isIfNecessarySelected = (phaseId: string, decisionId: string, option: string): boolean => {
+  const isIfNecessarySelected = (phaseId: string, operationId: string): boolean => {
     const work = customizationState.ifNecessaryWork[phaseId] || [];
-    return work.includes(`${decisionId}:${option}`);
+    return work.includes(operationId);
   };
 
   return (
@@ -148,107 +102,108 @@ export const WorkflowDecisionEngine: React.FC<WorkflowDecisionEngineProps> = ({
           </p>
         </div>
 
-        {projectRun.phases?.map((phase) => {
-          const decisionOptions = getDecisionOptionsForPhase(phase.name);
-          
-          if (decisionOptions.length === 0) {
-            return null;
-          }
+        {phasesWithDecisions?.map(({ phase, alternateGroups, ifNecessaryOps }) => (
+          <Card key={phase.id} className="w-full">
+            <CardHeader className={isMobile ? 'pb-3' : ''}>
+              <CardTitle className={`flex flex-col sm:flex-row sm:items-center gap-2 ${isMobile ? 'text-base' : ''}`}>
+                <span className="flex-1">{phase.name}</span>
+                <Badge variant="outline" className="self-start sm:self-center text-xs">
+                  {phase.operations?.length || 0} operations
+                </Badge>
+              </CardTitle>
+              {phase.description && <p className="text-sm text-muted-foreground">{phase.description}</p>}
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Alternate Choices */}
+              {alternateGroups.map(([groupKey, group]) => (
+                <div key={groupKey} className={`border rounded-lg ${isMobile ? 'p-3' : 'p-4'}`}>
+                  <div className={`flex items-start gap-3 mb-3 ${isMobile ? 'flex-col sm:flex-row' : ''}`}>
+                    <div className={`${isMobile ? 'self-start' : 'mt-0.5'}`}>
+                      <AlertCircle className="w-5 h-5 text-orange-500" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className={`font-medium flex flex-col sm:flex-row sm:items-center gap-2 ${isMobile ? 'text-sm' : ''}`}>
+                        <span className="flex-1">{group.prompt}</span>
+                        <Badge variant="destructive" className="text-xs">Required</Badge>
+                      </h4>
+                    </div>
+                  </div>
 
-          return (
-            <Card key={phase.id} className="w-full">
-              <CardHeader className={isMobile ? 'pb-3' : ''}>
-                <CardTitle className={`flex flex-col sm:flex-row sm:items-center gap-2 ${isMobile ? 'text-base' : ''}`}>
-                  <span className="flex-1">{phase.name}</span>
-                  <Badge variant="outline" className="self-start sm:self-center text-xs">
-                    {phase.operations?.length || 0} operations
-                  </Badge>
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">{phase.description}</p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {decisionOptions.map((decision) => (
-                  <div key={decision.id} className={`border rounded-lg ${isMobile ? 'p-3' : 'p-4'}`}>
-                    <div className={`flex items-start gap-3 mb-3 ${isMobile ? 'flex-col sm:flex-row' : ''}`}>
-                      <div className={`${isMobile ? 'self-start' : 'mt-0.5'}`}>
-                        {decision.type === 'alternative' ? (
-                          <AlertCircle className="w-5 h-5 text-orange-500" />
-                        ) : (
-                          <CheckCircle2 className="w-5 h-5 text-green-500" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className={`font-medium flex flex-col sm:flex-row sm:items-center gap-2 ${isMobile ? 'text-sm' : ''}`}>
-                          <span className="flex-1">{decision.name}</span>
-                          <div className="flex gap-2">
-                            {decision.required && (
-                              <Badge variant="destructive" className="text-xs">Required</Badge>
-                            )}
-                            {decision.type === 'if-necessary' && (
-                              <Badge variant="secondary" className="text-xs">Optional</Badge>
+                  <RadioGroup
+                    value={getSelectedAlternative(phase.id, groupKey) || ''}
+                    onValueChange={(value) => handleAlternativeSelection(phase.id, groupKey, value)}
+                    className={`space-y-3 ${isMobile ? 'ml-0 pl-0' : 'ml-8'}`}
+                  >
+                    {group.operations.map((operation) => (
+                      <div key={operation.id} className={`flex items-start space-x-3 ${isMobile ? 'p-3 bg-muted/30 rounded-lg' : ''}`}>
+                        <RadioGroupItem 
+                          value={operation.id} 
+                          id={operation.id}
+                          className={`mt-1 ${isMobile ? 'scale-110' : ''}`}
+                        />
+                        <Label 
+                          htmlFor={operation.id}
+                          className={`font-normal cursor-pointer flex-1 ${isMobile ? 'text-sm leading-relaxed' : 'text-sm'}`}
+                        >
+                          <div>
+                            <p className="font-medium">{operation.name}</p>
+                            {operation.description && (
+                              <p className="text-muted-foreground mt-1">{operation.description}</p>
                             )}
                           </div>
-                        </h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {decision.description}
-                        </p>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              ))}
+
+              {/* If Necessary Options */}
+              {ifNecessaryOps.map((operation) => (
+                <div key={operation.id} className={`border rounded-lg ${isMobile ? 'p-3' : 'p-4'}`}>
+                  <div className={`flex items-start gap-3 ${isMobile ? 'flex-col sm:flex-row' : ''}`}>
+                    <div className={`${isMobile ? 'self-start' : 'mt-0.5'}`}>
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id={operation.id}
+                          checked={isIfNecessarySelected(phase.id, operation.id)}
+                          onCheckedChange={(checked) => 
+                            handleIfNecessarySelection(phase.id, operation.id, checked as boolean)
+                          }
+                          className={`mt-1 ${isMobile ? 'scale-110' : ''}`}
+                        />
+                        <Label 
+                          htmlFor={operation.id}
+                          className={`font-normal cursor-pointer flex-1 ${isMobile ? 'text-sm leading-relaxed' : 'text-sm'}`}
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                            <div className="flex-1">
+                              <p className="font-medium">{operation.name}</p>
+                              {operation.description && (
+                                <p className="text-muted-foreground mt-1">{operation.description}</p>
+                              )}
+                              {(operation as any).userPrompt && (
+                                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-900">
+                                  {(operation as any).userPrompt}
+                                </div>
+                              )}
+                            </div>
+                            <Badge variant="secondary" className="text-xs self-start">Optional</Badge>
+                          </div>
+                        </Label>
                       </div>
                     </div>
-
-                    {decision.type === 'alternative' && decision.alternatives && (
-                      <RadioGroup
-                        value={getSelectedAlternative(phase.id, decision.id) || ''}
-                        onValueChange={(value) => handleAlternativeSelection(phase.id, decision.id, value)}
-                        className={`space-y-3 ${isMobile ? 'ml-0 pl-0' : 'ml-8'}`}
-                      >
-                        {decision.alternatives.map((alternative) => (
-                          <div key={alternative} className={`flex items-center space-x-3 ${isMobile ? 'p-3 bg-muted/30 rounded-lg' : ''}`}>
-                            <RadioGroupItem 
-                              value={alternative} 
-                              id={`${decision.id}-${alternative}`}
-                              className={isMobile ? 'scale-110' : ''}
-                            />
-                            <Label 
-                              htmlFor={`${decision.id}-${alternative}`}
-                              className={`font-normal cursor-pointer flex-1 ${isMobile ? 'text-sm leading-relaxed' : 'text-sm'}`}
-                            >
-                              {alternative}
-                            </Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    )}
-
-                    {decision.type === 'if-necessary' && decision.alternatives && (
-                      <div className={`space-y-3 ${isMobile ? 'ml-0 pl-0' : 'ml-8'}`}>
-                        {decision.alternatives.map((option) => (
-                          <div key={option} className={`flex items-center space-x-3 ${isMobile ? 'p-3 bg-muted/30 rounded-lg' : ''}`}>
-                            <Checkbox
-                              id={`${decision.id}-${option}`}
-                              checked={isIfNecessarySelected(phase.id, decision.id, option)}
-                              onCheckedChange={(checked) => 
-                                handleIfNecessarySelection(phase.id, decision.id, option, checked as boolean)
-                              }
-                              className={isMobile ? 'scale-110' : ''}
-                            />
-                            <Label 
-                              htmlFor={`${decision.id}-${option}`}
-                              className={`font-normal cursor-pointer flex-1 ${isMobile ? 'text-sm leading-relaxed' : 'text-sm'}`}
-                            >
-                              {option}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
-                ))}
-              </CardContent>
-            </Card>
-          );
-        })}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        ))}
 
-        {projectRun.phases?.every(phase => getDecisionOptionsForPhase(phase.name).length === 0) && (
+        {(!phasesWithDecisions || phasesWithDecisions.length === 0) && (
           <Card>
             <CardContent className={`text-center ${isMobile ? 'py-6' : 'py-8'}`}>
               <CheckCircle2 className={`text-green-500 mx-auto mb-4 ${isMobile ? 'w-10 h-10' : 'w-12 h-12'}`} />
