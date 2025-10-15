@@ -1908,34 +1908,43 @@ export type Database = {
       }
       template_operations: {
         Row: {
+          alternate_group: string | null
           created_at: string | null
           description: string | null
           display_order: number
+          flow_type: string | null
           id: string
           name: string
           project_id: string
           standard_phase_id: string
           updated_at: string | null
+          user_prompt: string | null
         }
         Insert: {
+          alternate_group?: string | null
           created_at?: string | null
           description?: string | null
           display_order?: number
+          flow_type?: string | null
           id?: string
           name: string
           project_id: string
           standard_phase_id: string
           updated_at?: string | null
+          user_prompt?: string | null
         }
         Update: {
+          alternate_group?: string | null
           created_at?: string | null
           description?: string | null
           display_order?: number
+          flow_type?: string | null
           id?: string
           name?: string
           project_id?: string
           standard_phase_id?: string
           updated_at?: string | null
+          user_prompt?: string | null
         }
         Relationships: [
           {
@@ -1962,6 +1971,7 @@ export type Database = {
           description: string | null
           display_order: number
           estimated_time_minutes: number | null
+          flow_type: string | null
           id: string
           materials: Json | null
           operation_id: string
@@ -1978,6 +1988,7 @@ export type Database = {
           description?: string | null
           display_order?: number
           estimated_time_minutes?: number | null
+          flow_type?: string | null
           id?: string
           materials?: Json | null
           operation_id: string
@@ -1994,6 +2005,7 @@ export type Database = {
           description?: string | null
           display_order?: number
           estimated_time_minutes?: number | null
+          flow_type?: string | null
           id?: string
           materials?: Json | null
           operation_id?: string
