@@ -138,6 +138,9 @@ export default function Navigation({
                 variant={currentView === 'user' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => {
+                  console.log('🔄 Navigation: My Projects clicked - clearing current project');
+                  setCurrentProjectRun(null);
+                  setCurrentProject(null);
                   onViewChange('user');
                   onProjectsView?.();
                 }}
