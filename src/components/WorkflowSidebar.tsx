@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CheckCircle, EyeOff, MessageCircle, Key, Settings } from "lucide-react";
+import { CheckCircle, EyeOff, MessageCircle, Key, Settings, Layers } from "lucide-react";
 import { getStepIndicator, FlowTypeLegend } from './FlowTypeLegend';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +24,8 @@ interface WorkflowSidebarProps {
   progress: number;
   groupedSteps: any;
   isKickoffComplete: boolean;
+  instructionLevel: 'quick' | 'detailed' | 'contractor';
+  onInstructionLevelChange: (level: 'quick' | 'detailed' | 'contractor') => void;
   onStepClick: (stepIndex: number, step: any) => void;
   onHelpClick: () => void;
   onUnplannedWorkClick: () => void;
@@ -37,6 +40,8 @@ export function WorkflowSidebar({
   progress,
   groupedSteps,
   isKickoffComplete,
+  instructionLevel,
+  onInstructionLevelChange,
   onStepClick,
   onHelpClick,
   onUnplannedWorkClick,
@@ -68,6 +73,29 @@ export function WorkflowSidebar({
                     </div>
                     <Progress value={progress} className="h-2" />
                   </div>
+                </div>
+
+                {/* Instruction Detail Level */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold text-primary">Detail Level</h3>
+                  </div>
+                  <Select value={instructionLevel} onValueChange={onInstructionLevelChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="quick">Quick Overview</SelectItem>
+                      <SelectItem value="detailed">Detailed (Default)</SelectItem>
+                      <SelectItem value="contractor">Contractor Level</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {instructionLevel === 'quick' && 'High-level overview for experienced DIYers'}
+                    {instructionLevel === 'detailed' && 'Step-by-step detailed instructions (recommended)'}
+                    {instructionLevel === 'contractor' && 'Professional-level technical details'}
+                  </p>
                 </div>
 
                 {/* DIY Tools Section */}

@@ -209,4 +209,7 @@ export interface ProjectRun {
     customUnplannedWork: any[];
     workflowOrder: string[];
   };
+
+  // Instruction detail level preference
+  instruction_level_preference?: 'quick' | 'detailed' | 'contractor';
 }

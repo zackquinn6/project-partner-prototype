@@ -1542,6 +1542,7 @@ export type Database = {
           estimated_time: string | null
           home_id: string | null
           id: string
+          instruction_level_preference: string | null
           is_manual_entry: boolean
           issue_reports: Json | null
           name: string
@@ -1578,6 +1579,7 @@ export type Database = {
           estimated_time?: string | null
           home_id?: string | null
           id?: string
+          instruction_level_preference?: string | null
           is_manual_entry?: boolean
           issue_reports?: Json | null
           name: string
@@ -1614,6 +1616,7 @@ export type Database = {
           estimated_time?: string | null
           home_id?: string | null
           id?: string
+          instruction_level_preference?: string | null
           is_manual_entry?: boolean
           issue_reports?: Json | null
           name?: string
@@ -1905,6 +1908,41 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      step_instructions: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          instruction_level: string
+          template_step_id: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          instruction_level: string
+          template_step_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          instruction_level?: string
+          template_step_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "step_instructions_template_step_id_fkey"
+            columns: ["template_step_id"]
+            isOneToOne: false
+            referencedRelation: "template_steps"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       template_operations: {
         Row: {

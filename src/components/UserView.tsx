@@ -136,9 +136,30 @@ export default function UserView({
     tools: any[];
   }>({ materials: [], tools: [] });
   const [previousToolsAndMaterials, setPreviousToolsAndMaterials] = useState<{ tools: any[], materials: any[] } | null>(null);
+  
+  // Instruction level state - defaults to 'detailed' for maximum detail
+  const [instructionLevel, setInstructionLevel] = useState<'quick' | 'detailed' | 'contractor'>('detailed');
 
   // Check if kickoff phase is complete for project runs - MOVED UP to fix TypeScript error
   const isKickoffComplete = currentProjectRun ? isKickoffPhaseComplete(currentProjectRun.completedSteps) : true;
+
+  // Sync instruction level with project run preference
+  useEffect(() => {
+    if (currentProjectRun?.instruction_level_preference) {
+      setInstructionLevel(currentProjectRun.instruction_level_preference as 'quick' | 'detailed' | 'contractor');
+    }
+  }, [currentProjectRun?.instruction_level_preference]);
+
+  // Handle instruction level change and save to project run
+  const handleInstructionLevelChange = async (level: 'quick' | 'detailed' | 'contractor') => {
+    setInstructionLevel(level);
+    if (currentProjectRun) {
+      await updateProjectRun({
+        ...currentProjectRun,
+        instruction_level_preference: level
+      });
+    }
+  };
 
   // Add event listeners for Re-plan window actions
   useEffect(() => {
@@ -1326,6 +1347,8 @@ export default function UserView({
             progress={progress}
             groupedSteps={groupedSteps}
             isKickoffComplete={isKickoffComplete}
+            instructionLevel={instructionLevel}
+            onInstructionLevelChange={handleInstructionLevelChange}
             onStepClick={(stepIndex, step) => {
               console.log('🎯 Step clicked:', {
                 stepName: step.step,
