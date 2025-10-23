@@ -199,6 +199,41 @@ export const AdminWorkflowEditor: React.FC<AdminWorkflowEditorProps> = ({
                               </div>
                             )}
 
+                            <div className="space-y-3 pt-3 border-t">
+                              <div>
+                                <Label className="text-sm font-semibold">Step Content Detail Levels</Label>
+                                <p className="text-xs text-muted-foreground mb-3">
+                                  Configure instruction content for each detail level. Tools, materials, outputs remain the same across all levels.
+                                </p>
+                              </div>
+                              
+                              {operation.steps.map((step, stepIndex) => (
+                                <Card key={step.id} className="p-3 bg-muted/50">
+                                  <div className="space-y-2">
+                                    <div className="font-medium text-sm">
+                                      Step {stepIndex + 1}: {step.step}
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label className="text-xs">Instruction Detail Level</Label>
+                                      <Select defaultValue="detailed">
+                                        <SelectTrigger className="h-8 text-xs">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="quick">Quick - Brief essentials</SelectItem>
+                                          <SelectItem value="detailed">Detailed - Step-by-step guidance</SelectItem>
+                                          <SelectItem value="contractor">Contractor - Technical specifications</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <p className="text-xs text-muted-foreground">
+                                        Select to edit content for this detail level in Step Content Editor
+                                      </p>
+                                    </div>
+                                  </div>
+                                </Card>
+                              ))}
+                            </div>
+
                             <div className="flex items-center gap-2 pt-2 border-t">
                               <Badge className={getFlowTypeColor(flowType)}>
                                 {FLOW_TYPES.find(ft => ft.value === flowType)?.label}

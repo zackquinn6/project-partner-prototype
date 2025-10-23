@@ -130,19 +130,17 @@ export default function Home({
             <div className="border-b border-border pb-1 mb-6"></div>
             
             {/* Core Apps Grid */}
-            {/* Project Catalog - Featured Top Button */}
-            <div className="col-span-3 mb-4 px-2">
-              <Button 
-                onClick={() => navigate('/projects')}
-                className={`w-full ${appColors.projectCatalog} text-white hover:opacity-90 transition-all shadow-lg h-12 text-sm font-semibold`}
-              >
-                <BookOpen className="w-5 h-5 mr-2" />
-                Project Catalog - Get Started Today
-              </Button>
-            </div>
-
-            {/* App Grid */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto mb-6 px-2 col-span-3">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto mb-6 px-2">
+              {/* Project Catalog - Featured Top Button spanning all 3 columns */}
+              <div className="col-span-3 mb-2">
+                <Button 
+                  onClick={() => navigate('/projects')}
+                  className={`w-full ${appColors.projectCatalog} text-white hover:opacity-90 transition-all shadow-lg h-12 text-sm font-semibold`}
+                >
+                  <BookOpen className="w-5 h-5 mr-2" />
+                  Project Catalog - Get Started Today
+                </Button>
+              </div>
               
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => {
             navigate('/', {
