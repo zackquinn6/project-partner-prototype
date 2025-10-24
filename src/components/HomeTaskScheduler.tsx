@@ -2,10 +2,15 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Calendar, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
+import { Calendar, AlertTriangle, CheckCircle2, Loader2, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { scheduleHomeTasksOptimized } from "@/utils/homeTaskScheduler";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface HomeTaskSchedulerProps {
   userId: string;
@@ -15,6 +20,7 @@ interface HomeTaskSchedulerProps {
 export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [schedule, setSchedule] = useState<any>(null);
+  const [startDate, setStartDate] = useState<Date>(new Date());
 
   const handleGenerateSchedule = async () => {
     setIsGenerating(true);
@@ -67,7 +73,7 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
       const result = scheduleHomeTasksOptimized(
         tasksWithSubtasks as any,
         people as any,
-        new Date()
+        startDate
       );
 
       setSchedule(result);
@@ -123,23 +129,54 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="space-y-3">
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <Label className="text-xs">Start Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal mt-1 h-9",
+                    !startDate && "text-muted-foreground"
+                  )}
+                  size="sm"
+                >
+                  <CalendarIcon className="mr-2 h-3 w-3" />
+                  {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={startDate}
+                  onSelect={(date) => date && setStartDate(date)}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="flex-1 flex items-end">
+            <Button onClick={handleGenerateSchedule} disabled={isGenerating} size="sm" className="w-full">
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Calendar className="h-3 w-3 mr-1" />
+                  Generate Schedule
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
         <div className="text-xs text-muted-foreground">
           Generate an optimized schedule matching people's skills and availability
         </div>
-        <Button onClick={handleGenerateSchedule} disabled={isGenerating} size="sm">
-          {isGenerating ? (
-            <>
-              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Calendar className="h-3 w-3 mr-1" />
-              Generate Schedule
-            </>
-          )}
-        </Button>
       </div>
 
       {schedule?.warnings && schedule.warnings.length > 0 && (
