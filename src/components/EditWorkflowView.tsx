@@ -94,6 +94,10 @@ export default function EditWorkflowView({
   const [pendingContentLevel, setPendingContentLevel] = useState<'quick' | 'detailed' | 'contractor'>('detailed');
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSaveRef = useRef<Date>(new Date());
+  const pendingContentRef = useRef<{ changes: ContentSection[] | null; level: 'quick' | 'detailed' | 'contractor' }>({ 
+    changes: null, 
+    level: 'detailed' 
+  });
 
   // Structure editing state
   const [editingPhase, setEditingPhase] = useState<Phase | null>(null);
@@ -204,11 +208,13 @@ export default function EditWorkflowView({
   const loadInstructionContent = useCallback(async () => {
     if (!editingStep?.id || !editMode) return;
     
-    // Save pending changes to their ORIGINAL level before loading new level (silent)
-    if (pendingContentChanges && pendingContentLevel) {
-      console.log(`💾 Saving pending changes for level: ${pendingContentLevel} before switching to: ${instructionLevel}`);
-      await saveInstructionContent(pendingContentChanges, pendingContentLevel, true);
+    // Save pending changes from ref to their ORIGINAL level before loading new level (silent)
+    if (pendingContentRef.current.changes && pendingContentRef.current.level) {
+      console.log(`💾 Saving pending changes for level: ${pendingContentRef.current.level} before switching to: ${instructionLevel}`);
+      await saveInstructionContent(pendingContentRef.current.changes, pendingContentRef.current.level, true);
       lastSaveRef.current = new Date();
+      pendingContentRef.current = { changes: null, level: instructionLevel };
+      setPendingContentChanges(null);
     }
     
     setIsLoadingContent(true);
@@ -225,25 +231,29 @@ export default function EditWorkflowView({
         console.error('Error loading instruction content:', error);
         setLevelSpecificContent(null);
         setPendingContentLevel(instructionLevel);
+        pendingContentRef.current.level = instructionLevel;
       } else if (data?.content) {
         // Content is stored as Json, convert to ContentSection[]
         const content = Array.isArray(data.content) ? data.content as unknown as ContentSection[] : null;
         setLevelSpecificContent(content);
         setPendingContentLevel(instructionLevel);
+        pendingContentRef.current.level = instructionLevel;
         console.log(`✅ Loaded ${content?.length || 0} sections for ${instructionLevel}`);
       } else {
         setLevelSpecificContent(null);
         setPendingContentLevel(instructionLevel);
+        pendingContentRef.current.level = instructionLevel;
         console.log(`ℹ️ No content found for ${instructionLevel} level`);
       }
     } catch (err) {
       console.error('Exception loading instruction content:', err);
       setLevelSpecificContent(null);
       setPendingContentLevel(instructionLevel);
+      pendingContentRef.current.level = instructionLevel;
     } finally {
       setIsLoadingContent(false);
     }
-  }, [editingStep?.id, instructionLevel, editMode, pendingContentChanges, pendingContentLevel, saveInstructionContent]);
+  }, [editingStep?.id, instructionLevel, editMode, saveInstructionContent]);
 
   // Load content when instruction level changes or step changes
   useEffect(() => {
@@ -336,10 +346,12 @@ export default function EditWorkflowView({
     });
 
     // Save pending content changes to correct level first (silent)
-    if (pendingContentChanges && pendingContentLevel) {
-      console.log(`💾 Saving pending changes for level: ${pendingContentLevel} before closing edit mode`);
-      await saveInstructionContent(pendingContentChanges, pendingContentLevel, true);
+    if (pendingContentRef.current.changes && pendingContentRef.current.level) {
+      console.log(`💾 Saving pending changes for level: ${pendingContentRef.current.level} before closing edit mode`);
+      await saveInstructionContent(pendingContentRef.current.changes, pendingContentRef.current.level, true);
       lastSaveRef.current = new Date();
+      pendingContentRef.current = { changes: null, level: 'detailed' };
+      setPendingContentChanges(null);
     }
 
     // Update only custom phases (standard phases are generated dynamically)
@@ -504,6 +516,7 @@ export default function EditWorkflowView({
               // Track both the changes and which level they belong to
               setPendingContentChanges(sections);
               setPendingContentLevel(instructionLevel);
+              pendingContentRef.current = { changes: sections, level: instructionLevel };
             }} 
           />
         </div>;
