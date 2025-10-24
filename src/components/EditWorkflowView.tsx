@@ -738,7 +738,7 @@ export default function EditWorkflowView({
                           <SelectContent>
                             <SelectItem value="quick">Quick</SelectItem>
                             <SelectItem value="detailed">Detailed</SelectItem>
-                            <SelectItem value="contractor">Contractor</SelectItem>
+                            <SelectItem value="contractor">New User</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
