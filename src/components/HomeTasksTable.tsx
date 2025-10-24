@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Pencil, Trash2, ChevronDown, ChevronUp, Plus, Link2, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +28,7 @@ interface Subtask {
   title: string;
   estimated_hours: number | null;
   skill_level: 'high' | 'medium' | 'low';
+  completed: boolean;
 }
 interface HomeTasksTableProps {
   tasks: HomeTask[];
@@ -111,6 +113,17 @@ export function HomeTasksTable({
       newExpanded.add(taskId);
     }
     setExpandedRows(newExpanded);
+  };
+
+  const handleToggleSubtaskComplete = async (subtaskId: string, currentCompleted: boolean) => {
+    const { error } = await supabase
+      .from('home_task_subtasks')
+      .update({ completed: !currentCompleted })
+      .eq('id', subtaskId);
+
+    if (!error) {
+      fetchSubtasks();
+    }
   };
 
   const getDisplayStatus = (task: HomeTask) => {
@@ -380,11 +393,12 @@ export function HomeTasksTable({
                   {expandedRows.has(task.id) && subtasks[task.id]?.length > 0 && (
                     <TableRow key={`${task.id}-subtasks`}>
                       <TableCell colSpan={8} className="bg-muted/50 p-0">
-                        <div className="px-12 py-3">
+                          <div className="px-12 py-3">
                           <div className="text-xs font-medium mb-2">Subtasks:</div>
                           <Table>
                             <TableHeader>
                               <TableRow>
+                                <TableHead className="text-xs h-8 w-10"></TableHead>
                                 <TableHead className="text-xs h-8">Subtask</TableHead>
                                 <TableHead className="text-xs h-8">Est. Hours</TableHead>
                                 <TableHead className="text-xs h-8">Skill Level</TableHead>
@@ -392,8 +406,17 @@ export function HomeTasksTable({
                             </TableHeader>
                             <TableBody>
                               {subtasks[task.id].map(subtask => (
-                                <TableRow key={subtask.id}>
-                                  <TableCell className="text-xs py-2">{subtask.title}</TableCell>
+                                <TableRow key={subtask.id} className={subtask.completed ? 'opacity-60' : ''}>
+                                  <TableCell className="py-2">
+                                    <Checkbox
+                                      checked={subtask.completed}
+                                      onCheckedChange={() => handleToggleSubtaskComplete(subtask.id, subtask.completed)}
+                                      className="h-3.5 w-3.5"
+                                    />
+                                  </TableCell>
+                                  <TableCell className={`text-xs py-2 ${subtask.completed ? 'line-through' : ''}`}>
+                                    {subtask.title}
+                                  </TableCell>
                                   <TableCell className="text-xs py-2">{subtask.estimated_hours || '-'}</TableCell>
                                   <TableCell className="text-xs py-2">
                                     <Badge variant={getSkillColor(subtask.skill_level)} className="text-[10px] px-1.5 py-0">

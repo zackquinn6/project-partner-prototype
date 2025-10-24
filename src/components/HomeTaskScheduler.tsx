@@ -3,13 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Calendar, AlertTriangle, CheckCircle2, Loader2, CalendarIcon, Save, Mail } from "lucide-react";
-import { toast } from "sonner";
 import { scheduleHomeTasksOptimized } from "@/utils/homeTaskScheduler";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -24,7 +22,6 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [isSaving, setIsSaving] = useState(false);
   const [isEmailing, setIsEmailing] = useState(false);
-  const [completedSubtasks, setCompletedSubtasks] = useState<Set<string>>(new Set());
 
   const handleGenerateSchedule = async () => {
     setIsGenerating(true);
@@ -105,15 +102,10 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
           .insert(assignmentsToSave);
 
         if (saveError) throw saveError;
-
-        toast.success('Schedule generated and saved');
-      } else {
-        toast.info('No assignments could be generated');
       }
 
     } catch (error) {
       console.error('Error generating schedule:', error);
-      toast.error('Failed to generate schedule');
     } finally {
       setIsGenerating(false);
     }
@@ -121,7 +113,6 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
 
   const handleSaveSchedule = async () => {
     if (!schedule?.assignments?.length) {
-      toast.error('No schedule to save');
       return;
     }
 
@@ -150,11 +141,8 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
         .insert(assignmentsToSave);
 
       if (error) throw error;
-      
-      toast.success('Schedule saved successfully');
     } catch (error) {
       console.error('Error saving schedule:', error);
-      toast.error('Failed to save schedule');
     } finally {
       setIsSaving(false);
     }
@@ -162,7 +150,6 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
 
   const handleEmailSchedule = async () => {
     if (!schedule?.assignments?.length) {
-      toast.error('No schedule to email');
       return;
     }
 
@@ -170,7 +157,6 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email) {
-        toast.error('User email not found');
         return;
       }
 
@@ -191,36 +177,10 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
       });
 
       if (response.error) throw response.error;
-      
-      toast.success('Schedule emailed successfully');
     } catch (error) {
       console.error('Error emailing schedule:', error);
-      toast.error('Failed to email schedule');
     } finally {
       setIsEmailing(false);
-    }
-  };
-
-  const handleToggleSubtaskComplete = async (subtaskId: string) => {
-    const newCompleted = new Set(completedSubtasks);
-    if (newCompleted.has(subtaskId)) {
-      newCompleted.delete(subtaskId);
-    } else {
-      newCompleted.add(subtaskId);
-    }
-    setCompletedSubtasks(newCompleted);
-
-    // Update in database
-    try {
-      const { error } = await supabase
-        .from('home_task_subtasks')
-        .update({ completed: !completedSubtasks.has(subtaskId) })
-        .eq('id', subtaskId);
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error updating subtask:', error);
-      toast.error('Failed to update subtask');
     }
   };
 
@@ -372,18 +332,8 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
                   <div className="divide-y">
                     {assignmentsByDate[date].map((assignment: any, idx: number) => (
                       <div key={idx} className="px-3 py-2 text-xs flex items-center gap-3 hover:bg-muted/30">
-                        {assignment.subtaskId && (
-                          <Checkbox
-                            checked={completedSubtasks.has(assignment.subtaskId)}
-                            onCheckedChange={() => handleToggleSubtaskComplete(assignment.subtaskId)}
-                            className="h-3.5 w-3.5"
-                          />
-                        )}
                         <div className="flex-1">
-                          <div className={cn(
-                            "font-medium",
-                            assignment.subtaskId && completedSubtasks.has(assignment.subtaskId) && "line-through text-muted-foreground"
-                          )}>
+                          <div className="font-medium">
                             {assignment.subtaskTitle}
                           </div>
                           <div className="text-[10px] text-muted-foreground">{assignment.taskTitle}</div>
