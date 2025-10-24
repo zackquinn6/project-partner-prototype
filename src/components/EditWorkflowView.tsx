@@ -93,6 +93,7 @@ export default function EditWorkflowView({
   const [pendingContentChanges, setPendingContentChanges] = useState<ContentSection[] | null>(null);
   const [pendingContentLevel, setPendingContentLevel] = useState<'quick' | 'detailed' | 'contractor'>('detailed');
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSaveRef = useRef<Date>(new Date());
 
   // Structure editing state
   const [editingPhase, setEditingPhase] = useState<Phase | null>(null);
@@ -207,6 +208,7 @@ export default function EditWorkflowView({
     if (pendingContentChanges && pendingContentLevel) {
       console.log(`💾 Saving pending changes for level: ${pendingContentLevel} before switching to: ${instructionLevel}`);
       await saveInstructionContent(pendingContentChanges, pendingContentLevel, true);
+      lastSaveRef.current = new Date();
     }
     
     setIsLoadingContent(true);
@@ -250,29 +252,37 @@ export default function EditWorkflowView({
     }
   }, [instructionLevel, editingStep?.id, editMode, loadInstructionContent]);
 
-  // Auto-save after 60 seconds of inactivity (debounced)
+  // Debounced auto-save - only saves after 60 seconds of complete inactivity
   useEffect(() => {
-    if (editMode && pendingContentChanges && pendingContentLevel) {
-      // Clear existing timeout
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-      
-      // Set up new timeout - only saves after 60 seconds of NO changes
-      autoSaveTimeoutRef.current = setTimeout(() => {
-        console.log(`⏰ Auto-saving content for level: ${pendingContentLevel} after 60s inactivity`);
-        saveInstructionContent(pendingContentChanges, pendingContentLevel, true); // silent = true
-      }, 60000); // 60 seconds
+    if (!editMode || !pendingContentChanges || !pendingContentLevel) {
+      return;
     }
     
-    // Cleanup
+    // Clear any existing timeout
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+      autoSaveTimeoutRef.current = null;
+    }
+    
+    // Set up new timeout that only fires after 60 seconds of no changes
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      // Only save if content hasn't been saved recently (prevent duplicate saves)
+      const timeSinceLastSave = new Date().getTime() - lastSaveRef.current.getTime();
+      if (timeSinceLastSave > 5000) { // At least 5 seconds since last save
+        console.log(`⏰ Auto-saving content for level: ${pendingContentLevel} after 60s inactivity`);
+        saveInstructionContent(pendingContentChanges, pendingContentLevel, true);
+        lastSaveRef.current = new Date();
+      }
+    }, 60000); // 60 seconds
+    
+    // Cleanup function
     return () => {
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
         autoSaveTimeoutRef.current = null;
       }
     };
-  }, [editMode, pendingContentChanges, pendingContentLevel, saveInstructionContent]);
+  }, [editMode, pendingContentChanges, pendingContentLevel]); // Removed saveInstructionContent from deps
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -329,6 +339,7 @@ export default function EditWorkflowView({
     if (pendingContentChanges && pendingContentLevel) {
       console.log(`💾 Saving pending changes for level: ${pendingContentLevel} before closing edit mode`);
       await saveInstructionContent(pendingContentChanges, pendingContentLevel, true);
+      lastSaveRef.current = new Date();
     }
 
     // Update only custom phases (standard phases are generated dynamically)
