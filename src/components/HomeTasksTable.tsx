@@ -1,10 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, ChevronDown, ChevronUp, Plus, Link2 } from "lucide-react";
+import { Pencil, Trash2, ChevronDown, ChevronUp, Plus, Link2, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface HomeTask {
   id: string;
@@ -17,6 +19,7 @@ interface HomeTask {
   due_date: string | null;
   task_type: 'general' | 'pre_sale' | 'diy' | 'contractor';
   created_at: string;
+  project_run_id: string | null;
 }
 
 interface HomeTasksTableProps {
@@ -31,12 +34,39 @@ type SortField = 'title' | 'priority' | 'status' | 'skill_level' | 'due_date' | 
 type SortDirection = 'asc' | 'desc';
 
 export function HomeTasksTable({ tasks, onEdit, onDelete, onAddSubtasks, onLinkProject }: HomeTasksTableProps) {
+  const navigate = useNavigate();
   const [sortField, setSortField] = useState<SortField>('due_date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterSkill, setFilterSkill] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [projectStatuses, setProjectStatuses] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetchProjectStatuses();
+  }, [tasks]);
+
+  const fetchProjectStatuses = async () => {
+    const linkedProjectIds = tasks
+      .filter(task => task.project_run_id)
+      .map(task => task.project_run_id as string);
+    
+    if (linkedProjectIds.length === 0) return;
+
+    const { data, error } = await supabase
+      .from("project_runs")
+      .select("id, status")
+      .in("id", linkedProjectIds);
+    
+    if (!error && data) {
+      const statusMap: Record<string, string> = {};
+      data.forEach(project => {
+        statusMap[project.id] = project.status;
+      });
+      setProjectStatuses(statusMap);
+    }
+  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -227,8 +257,10 @@ export function HomeTasksTable({ tasks, onEdit, onDelete, onAddSubtasks, onLinkP
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getStatusColor(task.status)} className="text-[10px] px-1.5 py-0">
-                        {task.status.replace('_', ' ')}
+                      <Badge variant={getStatusColor(task.project_run_id && projectStatuses[task.project_run_id] ? projectStatuses[task.project_run_id] : task.status)} className="text-[10px] px-1.5 py-0">
+                        {task.project_run_id && projectStatuses[task.project_run_id] 
+                          ? projectStatuses[task.project_run_id].replace(/-/g, ' ')
+                          : task.status.replace('_', ' ')}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -245,6 +277,17 @@ export function HomeTasksTable({ tasks, onEdit, onDelete, onAddSubtasks, onLinkP
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
+                        {task.project_run_id && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => navigate(`/?project=${task.project_run_id}`)} 
+                            className="h-7 px-2" 
+                            title="Open Project"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        )}
                         <Button variant="ghost" size="sm" onClick={() => onLinkProject(task)} className="h-7 px-2" title="Link to Project">
                           <Link2 className="h-3 w-3" />
                         </Button>

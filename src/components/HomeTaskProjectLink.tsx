@@ -15,6 +15,7 @@ interface HomeTaskProjectLinkProps {
   taskId: string;
   taskTitle: string;
   currentProjectRunId: string | null;
+  onSuccess?: () => void;
 }
 
 interface ProjectRun {
@@ -38,7 +39,8 @@ export function HomeTaskProjectLink({
   onOpenChange, 
   taskId, 
   taskTitle,
-  currentProjectRunId 
+  currentProjectRunId,
+  onSuccess
 }: HomeTaskProjectLinkProps) {
   const { user } = useAuth();
   const [myProjects, setMyProjects] = useState<ProjectRun[]>([]);
@@ -71,6 +73,7 @@ export function HomeTaskProjectLink({
       .from("projects")
       .select("id, name, description, category, difficulty, estimated_time")
       .in("publish_status", ["published", "beta-testing"])
+      .neq("id", "00000000-0000-0000-0000-000000000000")
       .order("name");
     
     if (!error && data) {
@@ -90,6 +93,7 @@ export function HomeTaskProjectLink({
       toast.error("Failed to link project");
     } else {
       toast.success("Task linked to project");
+      onSuccess?.();
       onOpenChange(false);
     }
     
@@ -126,6 +130,7 @@ export function HomeTaskProjectLink({
       if (linkError) throw linkError;
       
       toast.success("New project created and linked");
+      onSuccess?.();
       onOpenChange(false);
     } catch (error) {
       console.error("Error creating and linking project:", error);
@@ -147,6 +152,7 @@ export function HomeTaskProjectLink({
       toast.error("Failed to unlink project");
     } else {
       toast.success("Task unlinked from project");
+      onSuccess?.();
       onOpenChange(false);
     }
     

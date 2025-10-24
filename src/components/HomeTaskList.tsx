@@ -568,6 +568,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
             taskId={selectedTask.id}
             taskTitle={selectedTask.title}
             currentProjectRunId={selectedTask.project_run_id}
+            onSuccess={fetchTasks}
           />
         </>
       )}
