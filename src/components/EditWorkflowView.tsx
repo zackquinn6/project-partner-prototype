@@ -165,7 +165,6 @@ export default function EditWorkflowView({
       toast('Cannot edit standard steps. Only custom steps can be edited in this project.');
       return;
     }
-    
     setEditMode(true);
     setEditingStep({
       ...currentStep
@@ -206,28 +205,25 @@ export default function EditWorkflowView({
       })),
       updatedAt: new Date()
     };
-    
     console.log('SaveEdit: Calling updateProject');
     updateProject(updatedProject);
-    
+
     // If editing Standard Project Foundation, also update template_steps table
     if (isEditingStandardProject) {
       console.log('💾 SaveEdit: Also updating template_steps table for Standard Project');
       try {
-        const { error } = await supabase
-          .from('template_steps')
-          .update({
-            apps: editingStep.apps || [] as any,
-            materials: editingStep.materials || [] as any,
-            tools: editingStep.tools || [] as any,
-            outputs: editingStep.outputs || [] as any,
-            content_sections: (editingStep.contentSections || editingStep.content) as any,
-            description: editingStep.description,
-            estimated_time_minutes: (editingStep as any).estimated_time || 0,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', editingStep.id);
-        
+        const {
+          error
+        } = await supabase.from('template_steps').update({
+          apps: editingStep.apps || [] as any,
+          materials: editingStep.materials || [] as any,
+          tools: editingStep.tools || [] as any,
+          outputs: editingStep.outputs || [] as any,
+          content_sections: (editingStep.contentSections || editingStep.content) as any,
+          description: editingStep.description,
+          estimated_time_minutes: (editingStep as any).estimated_time || 0,
+          updated_at: new Date().toISOString()
+        }).eq('id', editingStep.id);
         if (error) {
           console.error('SaveEdit: Error updating template_steps:', error);
           toast.error("Warning: Step saved to project but failed to sync to template. Apps may not appear in new projects.");
@@ -238,7 +234,6 @@ export default function EditWorkflowView({
         console.error('SaveEdit: Exception updating template_steps:', err);
       }
     }
-    
     setEditMode(false);
     console.log('SaveEdit: Completed successfully');
   };
@@ -554,13 +549,7 @@ export default function EditWorkflowView({
                     </div>
                   </CardHeader>
                   <CardContent className="p-8">
-                    <div className="mb-4 p-3 bg-muted/50 rounded-md border border-muted">
-                      <p className="text-xs text-muted-foreground">
-                        <strong>Current Level: {instructionLevel.charAt(0).toUpperCase() + instructionLevel.slice(1)}</strong>
-                        {' - '}Content for this instruction level is stored in the <strong>step_instructions</strong> table with instruction_level='{instructionLevel}'. 
-                        When users select their preferred instruction level in project runs, they will see the corresponding content.
-                      </p>
-                    </div>
+                    
                     {renderContent(currentStep)}
                   </CardContent>
                 </Card>
