@@ -12,15 +12,15 @@ interface DataPrivacyManagerProps {
 export const DataPrivacyManager: React.FC<DataPrivacyManagerProps> = ({ open, onOpenChange }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-4">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-4">
         <DialogHeader className="pb-2">
           <DialogTitle className="text-lg">Privacy & Data Management</DialogTitle>
         </DialogHeader>
         
         <Tabs defaultValue="security" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-8">
-            <TabsTrigger value="security" className="text-sm">Password & Security</TabsTrigger>
-            <TabsTrigger value="privacy" className="text-sm">Privacy Settings</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 h-9">
+            <TabsTrigger value="security" className="text-xs px-2">Password & Security</TabsTrigger>
+            <TabsTrigger value="privacy" className="text-xs px-2">Privacy Settings</TabsTrigger>
           </TabsList>
           
           <TabsContent value="security" className="mt-3">
