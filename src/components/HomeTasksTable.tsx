@@ -282,13 +282,13 @@ export function HomeTasksTable({
                   </Button>
                 </TableHead>
                 <TableHead className="w-[100px] text-xs">
-                  <Button variant="ghost" size="sm" onClick={() => handleSort('priority')} className="h-6 px-2 text-xs font-medium">
-                    Priority <SortIcon field="priority" />
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('status')} className="h-6 px-2 text-xs font-medium">
+                    Status <SortIcon field="status" />
                   </Button>
                 </TableHead>
                 <TableHead className="w-[100px] text-xs">
-                  <Button variant="ghost" size="sm" onClick={() => handleSort('status')} className="h-6 px-2 text-xs font-medium">
-                    Status <SortIcon field="status" />
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('priority')} className="h-6 px-2 text-xs font-medium">
+                    Priority <SortIcon field="priority" />
                   </Button>
                 </TableHead>
                 <TableHead className="w-[100px] text-xs">
@@ -338,13 +338,13 @@ export function HomeTasksTable({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getPriorityColor(task.priority)} className="text-[10px] px-1.5 py-0">
-                        {task.priority}
+                      <Badge variant={getStatusColor(getDisplayStatus(task))} className="text-[10px] px-1.5 py-0">
+                        {getDisplayStatus(task).replace('_', ' ').replace('-', ' ')}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getStatusColor(getDisplayStatus(task))} className="text-[10px] px-1.5 py-0">
-                        {getDisplayStatus(task).replace('_', ' ').replace('-', ' ')}
+                      <Badge variant={getPriorityColor(task.priority)} className="text-[10px] px-1.5 py-0">
+                        {task.priority}
                       </Badge>
                     </TableCell>
                     <TableCell>

@@ -128,37 +128,37 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
 
       {/* Add new person form */}
       <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-[1fr,auto,auto] gap-2">
           <Input
             placeholder="Name"
             value={newPerson.name}
             onChange={(e) => setNewPerson({ ...newPerson, name: e.target.value })}
             className="text-xs h-8"
           />
-          <div className="flex gap-2">
+          <div className="flex gap-1 items-center">
             <Input
               type="number"
               min="1"
               max="24"
               value={newPerson.available_hours}
               onChange={(e) => setNewPerson({ ...newPerson, available_hours: parseInt(e.target.value) })}
-              className="text-xs h-8 w-20"
+              className="text-xs h-8 w-14"
               placeholder="Hrs"
             />
-            <span className="text-xs self-center">hrs/day</span>
+            <span className="text-xs whitespace-nowrap">hrs/day</span>
           </div>
-          <div className="flex gap-1">
-            <span className="text-xs self-center">$</span>
+          <div className="flex gap-1 items-center">
+            <span className="text-xs">$</span>
             <Input
               type="number"
               min="0"
               step="0.01"
               value={newPerson.hourly_rate}
               onChange={(e) => setNewPerson({ ...newPerson, hourly_rate: parseFloat(e.target.value) || 0 })}
-              className="text-xs h-8"
+              className="text-xs h-8 w-14"
               placeholder="Rate"
             />
-            <span className="text-xs self-center">/hr</span>
+            <span className="text-xs">/hr</span>
           </div>
         </div>
 
@@ -235,7 +235,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                     </Badge>
                     {person.hourly_rate > 0 && (
                       <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                        ${person.hourly_rate}/hr
+                        ${person.hourly_rate.toString().replace(/^0+/, '')}/hr
                       </Badge>
                     )}
                   </div>
