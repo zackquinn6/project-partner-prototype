@@ -242,10 +242,10 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
 
           <div className="flex-1 overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="mx-4 mt-2 mb-4 w-auto grid grid-cols-3 text-xs h-8 flex-shrink-0">
-                <TabsTrigger value="tasks" className="text-xs py-1.5">Tasks</TabsTrigger>
-                <TabsTrigger value="people" className="text-xs py-1.5">Team</TabsTrigger>
-                <TabsTrigger value="schedule" className="text-xs py-1.5">Schedule</TabsTrigger>
+              <TabsList className="mx-4 mt-2 mb-4 w-auto grid grid-cols-3 text-xs h-10 flex-shrink-0">
+                <TabsTrigger value="tasks" className="text-xs h-9">Tasks</TabsTrigger>
+                <TabsTrigger value="people" className="text-xs h-9">Team</TabsTrigger>
+                <TabsTrigger value="schedule" className="text-xs h-9">Schedule</TabsTrigger>
               </TabsList>
 
               <div className="flex-1 overflow-auto px-4 pb-4 min-h-0">
