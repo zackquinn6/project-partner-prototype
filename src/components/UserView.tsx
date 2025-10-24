@@ -127,6 +127,7 @@ export default function UserView({
   const [decisionRollupMode, setDecisionRollupMode] = useState<'initial-plan' | 'final-plan' | 'unplanned-work'>('initial-plan');
   const [keyCharacteristicsOpen, setKeyCharacteristicsOpen] = useState(false);
   const [projectCustomizerOpen, setProjectCustomizerOpen] = useState(false);
+  const [projectCustomizerMode, setProjectCustomizerMode] = useState<'initial-plan' | 'final-plan' | 'unplanned-work' | 'replan'>('replan');
   const [projectSchedulerOpen, setProjectSchedulerOpen] = useState(false);
   const [materialsSelectionOpen, setMaterialsSelectionOpen] = useState(false);
   const [toolsWindowOpen, setToolsWindowOpen] = useState(false);
@@ -176,15 +177,17 @@ export default function UserView({
       console.log('🎯 UserView: Opening Ordering Window');
       setOrderingWindowOpen(true);
     };
-    const handleOpenProjectCustomizer = () => {
-      console.log('🎯 UserView: Opening Project Customizer');
+    const handleOpenProjectCustomizer = (event?: any) => {
+      console.log('🎯 UserView: Opening Project Customizer', event?.detail);
+      const mode = event?.detail?.mode || 'replan';
+      setProjectCustomizerMode(mode);
       setProjectCustomizerOpen(true);
     };
 
     window.addEventListener('openProjectScheduler', handleOpenProjectScheduler);
     window.addEventListener('openMaterialsSelection', handleOpenMaterialsSelection);
     window.addEventListener('openOrderingWindow', handleOpenOrderingWindow);
-    window.addEventListener('openProjectCustomizer', handleOpenProjectCustomizer);
+    window.addEventListener('openProjectCustomizer', handleOpenProjectCustomizer as EventListener);
 
     return () => {
       window.removeEventListener('openProjectScheduler', handleOpenProjectScheduler);
@@ -863,7 +866,7 @@ export default function UserView({
     // Handle native apps
     switch (app.actionKey) {
       case 'project-customizer':
-        setDecisionRollupMode('initial-plan');
+        setProjectCustomizerMode('initial-plan');
         setProjectCustomizerOpen(true);
         break;
       case 'project-scheduler':
@@ -1013,6 +1016,7 @@ export default function UserView({
         console.log('Button action triggered:', action);
         switch (action) {
           case 'project-customizer':
+            setProjectCustomizerMode('initial-plan');
             setProjectCustomizerOpen(true);
             break;
           case 'project-scheduler':
@@ -1037,6 +1041,7 @@ export default function UserView({
       const handleButtonAction = (action: string) => {
         switch (action) {
           case 'project-customizer':
+            setProjectCustomizerMode('initial-plan');
             setProjectCustomizerOpen(true);
             break;
           case 'project-scheduler':
@@ -2037,9 +2042,7 @@ export default function UserView({
             }
           }}
           currentProjectRun={currentProjectRun}
-          mode={currentStep?.step.includes('Project Work Scope') ? 'initial-plan' : 
-                currentStep?.step.includes('Finalize Project Plan') ? 'final-plan' : 
-                decisionRollupMode === 'unplanned-work' ? 'unplanned-work' : 'replan'}
+          mode={projectCustomizerMode}
         />
       )}
 

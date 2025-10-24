@@ -224,12 +224,12 @@ export const DecisionRollupWindow: React.FC<DecisionRollupWindowProps> = ({
         window.dispatchEvent(new CustomEvent('openProjectScheduler'));
         break;
       case 'New materials needed':
-        console.log('🎯 DecisionRollup: Dispatching openMaterialsSelection event');
-        window.dispatchEvent(new CustomEvent('openMaterialsSelection'));
+        console.log('🎯 DecisionRollup: Dispatching openOrderingWindow event');
+        window.dispatchEvent(new CustomEvent('openOrderingWindow'));
         break;
       case 'New work needed':
-        console.log('🎯 DecisionRollup: Dispatching openProjectCustomizer event');
-        window.dispatchEvent(new CustomEvent('openProjectCustomizer'));
+        console.log('🎯 DecisionRollup: Dispatching openProjectCustomizer event with unplanned-work mode');
+        window.dispatchEvent(new CustomEvent('openProjectCustomizer', { detail: { mode: 'unplanned-work' } }));
         break;
       default:
         console.log('🎯 DecisionRollup: Unknown option:', option);
