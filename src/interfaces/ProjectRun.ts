@@ -211,5 +211,5 @@ export interface ProjectRun {
   };
 
   // Instruction detail level preference
-  instruction_level_preference?: 'quick' | 'detailed' | 'contractor';
+  instruction_level_preference?: 'quick' | 'detailed' | 'new_user';
 }

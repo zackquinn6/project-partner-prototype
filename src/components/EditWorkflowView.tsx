@@ -87,14 +87,14 @@ export default function EditWorkflowView({
   const [appsLibraryOpen, setAppsLibraryOpen] = useState(false);
   const [showStructureManager, setShowStructureManager] = useState(false);
   const [processImprovementOpen, setProcessImprovementOpen] = useState(false);
-  const [instructionLevel, setInstructionLevel] = useState<'quick' | 'detailed' | 'contractor'>('detailed');
+  const [instructionLevel, setInstructionLevel] = useState<'quick' | 'detailed' | 'new_user'>('detailed');
   const [levelSpecificContent, setLevelSpecificContent] = useState<ContentSection[] | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
   const [pendingContentChanges, setPendingContentChanges] = useState<ContentSection[] | null>(null);
-  const [pendingContentLevel, setPendingContentLevel] = useState<'quick' | 'detailed' | 'contractor'>('detailed');
+  const [pendingContentLevel, setPendingContentLevel] = useState<'quick' | 'detailed' | 'new_user'>('detailed');
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSaveRef = useRef<Date>(new Date());
-  const pendingContentRef = useRef<{ changes: ContentSection[] | null; level: 'quick' | 'detailed' | 'contractor' }>({ 
+  const pendingContentRef = useRef<{ changes: ContentSection[] | null; level: 'quick' | 'detailed' | 'new_user' }>({ 
     changes: null, 
     level: 'detailed' 
   });
@@ -158,7 +158,7 @@ export default function EditWorkflowView({
   // Save instruction content to database - stable version using refs
   const saveInstructionContentStable = useCallback(async (
     sections: ContentSection[] | null, 
-    targetLevel: 'quick' | 'detailed' | 'contractor',
+    targetLevel: 'quick' | 'detailed' | 'new_user',
     silent: boolean = false
   ) => {
     const stepId = editingStepRef.current?.id;
@@ -731,14 +731,14 @@ export default function EditWorkflowView({
                       </div>
                       <div className="flex items-center gap-2">
                         <Label className="text-sm font-medium whitespace-nowrap">Instruction Level:</Label>
-                        <Select value={instructionLevel} onValueChange={(value: 'quick' | 'detailed' | 'contractor') => setInstructionLevel(value)}>
+                        <Select value={instructionLevel} onValueChange={(value: 'quick' | 'detailed' | 'new_user') => setInstructionLevel(value)}>
                           <SelectTrigger className="w-[160px]">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="quick">Quick</SelectItem>
                             <SelectItem value="detailed">Detailed</SelectItem>
-                            <SelectItem value="contractor">New User</SelectItem>
+                            <SelectItem value="new_user">New User</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

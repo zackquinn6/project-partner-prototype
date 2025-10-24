@@ -205,7 +205,7 @@ export const AdminWorkflowEditor: React.FC<AdminWorkflowEditorProps> = ({
                               <div>
                                 <Label className="text-sm font-semibold">Step Content</Label>
                                 <p className="text-xs text-muted-foreground mb-3">
-                                  Configure instruction content for each detail level. Each step can have different content for Quick, Detailed, and Contractor levels.
+                                  Configure instruction content for each detail level. Each step can have different content for Quick, Detailed, and New User levels.
                                 </p>
                               </div>
                               

@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface StepInstruction {
   id: string;
   template_step_id: string;
-  instruction_level: 'quick' | 'detailed' | 'contractor';
+  instruction_level: 'quick' | 'detailed' | 'new_user';
   content: {
     text: string;
     sections: Array<{
@@ -32,7 +32,7 @@ export interface StepInstruction {
   updated_at: string;
 }
 
-export function useStepInstructions(stepId: string, instructionLevel: 'quick' | 'detailed' | 'contractor') {
+export function useStepInstructions(stepId: string, instructionLevel: 'quick' | 'detailed' | 'new_user') {
   const [instruction, setInstruction] = useState<StepInstruction | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);

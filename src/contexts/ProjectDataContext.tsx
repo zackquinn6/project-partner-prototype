@@ -151,7 +151,7 @@ export const ProjectDataProvider: React.FC<ProjectDataProviderProps> = ({ childr
         skillLevel: run.skill_level as Project['skillLevel'],
         estimatedTime: run.estimated_time,
         customization_decisions: customizationDecisions,
-        instruction_level_preference: (run.instruction_level_preference as 'quick' | 'detailed' | 'contractor') || 'detailed'
+        instruction_level_preference: (run.instruction_level_preference as 'quick' | 'detailed' | 'new_user') || 'detailed'
       };
     });
   }, []);

@@ -29,8 +29,8 @@ interface MobileWorkflowViewProps {
   checkedTools: Record<string, Set<string>>;
   onToggleMaterial: (stepId: string, materialId: string) => void;
   onToggleTool: (stepId: string, toolId: string) => void;
-  instructionLevel?: 'quick' | 'detailed' | 'contractor';
-  onInstructionLevelChange?: (level: 'quick' | 'detailed' | 'contractor') => void;
+  instructionLevel?: 'quick' | 'detailed' | 'new_user';
+  onInstructionLevelChange?: (level: 'quick' | 'detailed' | 'new_user') => void;
 }
 
 export function MobileWorkflowView({

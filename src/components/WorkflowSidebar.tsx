@@ -24,8 +24,8 @@ interface WorkflowSidebarProps {
   progress: number;
   groupedSteps: any;
   isKickoffComplete: boolean;
-  instructionLevel: 'quick' | 'detailed' | 'contractor';
-  onInstructionLevelChange: (level: 'quick' | 'detailed' | 'contractor') => void;
+  instructionLevel: 'quick' | 'detailed' | 'new_user';
+  onInstructionLevelChange: (level: 'quick' | 'detailed' | 'new_user') => void;
   onStepClick: (stepIndex: number, step: any) => void;
   onHelpClick: () => void;
   onUnplannedWorkClick: () => void;
@@ -88,13 +88,13 @@ export function WorkflowSidebar({
                     <SelectContent>
                       <SelectItem value="quick">Quick Overview</SelectItem>
                       <SelectItem value="detailed">Detailed (Default)</SelectItem>
-                      <SelectItem value="contractor">Contractor Level</SelectItem>
+                      <SelectItem value="new_user">New User</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
                     {instructionLevel === 'quick' && 'High-level overview for experienced DIYers'}
                     {instructionLevel === 'detailed' && 'Step-by-step detailed instructions (recommended)'}
-                    {instructionLevel === 'contractor' && 'Professional-level technical details'}
+                    {instructionLevel === 'new_user' && 'Extra guidance and tips for first-time DIYers'}
                   </p>
                 </div>
 
