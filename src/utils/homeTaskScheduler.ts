@@ -55,7 +55,12 @@ function getSkillMatchScore(person: Person, taskSkillLevel: 'high' | 'medium' | 
 export function scheduleHomeTasksOptimized(
   tasks: Task[],
   people: Person[],
-  startDate: Date = new Date()
+  startDate: Date = (() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
+  })()
 ): ScheduleResult {
   const assignments: Assignment[] = [];
   const unassigned: Array<{ taskId: string; taskTitle: string; subtaskId: string | null; reason: string }> = [];

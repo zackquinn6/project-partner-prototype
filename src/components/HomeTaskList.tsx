@@ -15,6 +15,7 @@ import { HomeTasksTable } from "./HomeTasksTable";
 import { HomeTaskSubtasks } from "./HomeTaskSubtasks";
 import { HomeTaskPeople } from "./HomeTaskPeople";
 import { HomeTaskScheduler } from "./HomeTaskScheduler";
+import { HomeTaskProjectLink } from "./HomeTaskProjectLink";
 
 interface HomeTask {
   id: string;
@@ -46,7 +47,9 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   const [editingTask, setEditingTask] = useState<HomeTask | null>(null);
   const [showSubtasks, setShowSubtasks] = useState(false);
   const [selectedTask, setSelectedTask] = useState<HomeTask | null>(null);
+  const [showProjectLink, setShowProjectLink] = useState(false);
   const [activeTab, setActiveTab] = useState('tasks');
+  const [subtasks, setSubtasks] = useState<Array<{ id: string; title: string; estimated_hours: number; skill_level: 'high' | 'medium' | 'low' }>>([]);
   
   const [formData, setFormData] = useState<{
     title: string;
@@ -56,7 +59,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
     skill_level: 'high' | 'medium' | 'low';
     notes: string;
     due_date: string;
-    task_type: 'general' | 'pre_sale' | 'diy' | 'contractor';
+    task_type: 'diy' | 'contractor';
   }>({
     title: "",
     description: "",
@@ -65,7 +68,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
     skill_level: "medium",
     notes: "",
     due_date: "",
-    task_type: "general",
+    task_type: "diy",
   });
 
   useEffect(() => {
@@ -130,31 +133,74 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
       due_date: formData.due_date || null,
     };
 
-    if (editingTask) {
-      const { error } = await supabase
-        .from("home_tasks")
-        .update(taskData)
-        .eq("id", editingTask.id);
-      
-      if (error) {
-        toast.error("Failed to update task");
-        return;
-      }
-      toast.success("Task updated");
-    } else {
-      const { error } = await supabase
-        .from("home_tasks")
-        .insert([taskData]);
-      
-      if (error) {
-        toast.error("Failed to create task");
-        return;
-      }
-      toast.success("Task created");
-    }
+    try {
+      if (editingTask) {
+        const { error } = await supabase
+          .from("home_tasks")
+          .update(taskData)
+          .eq("id", editingTask.id);
+        
+        if (error) throw error;
 
-    resetForm();
-    fetchTasks();
+        // Delete existing subtasks and insert new ones
+        await supabase.from('home_task_subtasks').delete().eq('task_id', editingTask.id);
+        
+        if (subtasks.length > 0) {
+          const subtasksToInsert = subtasks.filter(st => st.title.trim()).map((st, idx) => ({
+            task_id: editingTask.id,
+            user_id: user.id,
+            title: st.title,
+            estimated_hours: st.estimated_hours,
+            skill_level: st.skill_level,
+            order_index: idx
+          }));
+          
+          if (subtasksToInsert.length > 0) {
+            const { error: subtaskError } = await supabase
+              .from('home_task_subtasks')
+              .insert(subtasksToInsert);
+            if (subtaskError) throw subtaskError;
+          }
+        }
+        
+        toast.success("Task updated");
+      } else {
+        const { data: newTask, error } = await supabase
+          .from("home_tasks")
+          .insert([taskData])
+          .select()
+          .single();
+        
+        if (error) throw error;
+
+        // Insert subtasks if any
+        if (subtasks.length > 0 && newTask) {
+          const subtasksToInsert = subtasks.filter(st => st.title.trim()).map((st, idx) => ({
+            task_id: newTask.id,
+            user_id: user.id,
+            title: st.title,
+            estimated_hours: st.estimated_hours,
+            skill_level: st.skill_level,
+            order_index: idx
+          }));
+          
+          if (subtasksToInsert.length > 0) {
+            const { error: subtaskError } = await supabase
+              .from('home_task_subtasks')
+              .insert(subtasksToInsert);
+            if (subtaskError) throw subtaskError;
+          }
+        }
+        
+        toast.success("Task created");
+      }
+
+      resetForm();
+      fetchTasks();
+    } catch (error) {
+      console.error("Error saving task:", error);
+      toast.error("Failed to save task");
+    }
   };
 
   const handleDelete = async (taskId: string) => {
@@ -180,13 +226,14 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
       skill_level: "medium",
       notes: "",
       due_date: "",
-      task_type: "general",
+      task_type: "diy",
     });
+    setSubtasks([]);
     setEditingTask(null);
     setShowAddTask(false);
   };
 
-  const startEdit = (task: HomeTask) => {
+  const startEdit = async (task: HomeTask) => {
     setEditingTask(task);
     setFormData({
       title: task.title,
@@ -196,14 +243,53 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
       skill_level: task.skill_level as 'high' | 'medium' | 'low',
       notes: task.notes || "",
       due_date: task.due_date || "",
-      task_type: task.task_type as 'general' | 'pre_sale' | 'diy' | 'contractor',
+      task_type: task.task_type === 'general' || task.task_type === 'pre_sale' ? 'diy' : task.task_type as 'diy' | 'contractor',
     });
+    
+    // Fetch existing subtasks
+    const { data: existingSubtasks } = await supabase
+      .from('home_task_subtasks')
+      .select('id, title, estimated_hours, skill_level')
+      .eq('task_id', task.id)
+      .order('order_index');
+    
+    if (existingSubtasks) {
+      setSubtasks(existingSubtasks.map(st => ({
+        id: st.id,
+        title: st.title,
+        estimated_hours: st.estimated_hours,
+        skill_level: st.skill_level as 'high' | 'medium' | 'low'
+      })));
+    }
+    
     setShowAddTask(true);
   };
 
   const handleAddSubtasks = (task: HomeTask) => {
     setSelectedTask(task);
     setShowSubtasks(true);
+  };
+
+  const handleLinkProject = (task: HomeTask) => {
+    setSelectedTask(task);
+    setShowProjectLink(true);
+  };
+
+  const addSubtask = () => {
+    setSubtasks([...subtasks, { 
+      id: crypto.randomUUID(), 
+      title: "", 
+      estimated_hours: 1, 
+      skill_level: "medium"
+    }]);
+  };
+
+  const updateSubtask = (id: string, field: string, value: any) => {
+    setSubtasks(subtasks.map(st => st.id === id ? { ...st, [field]: value } : st));
+  };
+
+  const removeSubtask = (id: string) => {
+    setSubtasks(subtasks.filter(st => st.id !== id));
   };
 
   return (
@@ -242,10 +328,10 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
 
           <div className="flex-1 overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="mx-4 mt-2 mb-4 w-auto grid grid-cols-3 text-xs h-10 flex-shrink-0">
-                <TabsTrigger value="tasks" className="text-xs h-9">Tasks</TabsTrigger>
-                <TabsTrigger value="people" className="text-xs h-9">Team</TabsTrigger>
-                <TabsTrigger value="schedule" className="text-xs h-9">Schedule</TabsTrigger>
+              <TabsList className="mx-4 mt-2 mb-4 w-auto grid grid-cols-3 text-xs h-8 flex-shrink-0">
+                <TabsTrigger value="tasks" className="text-xs px-3 py-1">Tasks</TabsTrigger>
+                <TabsTrigger value="people" className="text-xs px-3 py-1">Team</TabsTrigger>
+                <TabsTrigger value="schedule" className="text-xs px-3 py-1">Schedule</TabsTrigger>
               </TabsList>
 
               <div className="flex-1 overflow-auto px-4 pb-4 min-h-0">
@@ -321,8 +407,6 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="general">General</SelectItem>
-                                <SelectItem value="pre_sale">Pre-Sale</SelectItem>
                                 <SelectItem value="diy">DIY</SelectItem>
                                 <SelectItem value="contractor">Contractor</SelectItem>
                               </SelectContent>
@@ -337,6 +421,78 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                               className="text-xs h-8"
                             />
                           </div>
+                        </div>
+                        
+                        {/* Subtasks Section */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-medium">Sub-tasks</label>
+                            <Button type="button" variant="outline" size="sm" onClick={addSubtask} className="h-6 text-xs">
+                              <Plus className="h-3 w-3 mr-1" />
+                              Add Sub-task
+                            </Button>
+                          </div>
+                          {subtasks.length > 0 && (
+                            <div className="border rounded-md overflow-hidden">
+                              <table className="w-full text-xs">
+                                <thead className="bg-muted">
+                                  <tr>
+                                    <th className="text-left p-2 font-medium">Task Name</th>
+                                    <th className="text-left p-2 font-medium w-24">Hours</th>
+                                    <th className="text-left p-2 font-medium w-28">Skill Level</th>
+                                    <th className="w-8"></th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {subtasks.map((subtask) => (
+                                    <tr key={subtask.id} className="border-t">
+                                      <td className="p-2">
+                                        <Input
+                                          value={subtask.title}
+                                          onChange={(e) => updateSubtask(subtask.id, 'title', e.target.value)}
+                                          placeholder="Sub-task name"
+                                          className="h-7 text-xs"
+                                        />
+                                      </td>
+                                      <td className="p-2">
+                                        <Input
+                                          type="number"
+                                          min="0.5"
+                                          step="0.5"
+                                          value={subtask.estimated_hours}
+                                          onChange={(e) => updateSubtask(subtask.id, 'estimated_hours', parseFloat(e.target.value))}
+                                          className="h-7 text-xs"
+                                        />
+                                      </td>
+                                      <td className="p-2">
+                                        <Select value={subtask.skill_level} onValueChange={(val) => updateSubtask(subtask.id, 'skill_level', val)}>
+                                          <SelectTrigger className="h-7 text-xs">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="low">Low</SelectItem>
+                                            <SelectItem value="medium">Medium</SelectItem>
+                                            <SelectItem value="high">High</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </td>
+                                      <td className="p-2">
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => removeSubtask(subtask.id)}
+                                          className="h-6 w-6 p-0 text-destructive"
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </Button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
                         </div>
                         <Textarea
                           placeholder="Notes and questions"
@@ -361,6 +517,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                     onEdit={startEdit}
                     onDelete={handleDelete}
                     onAddSubtasks={handleAddSubtasks}
+                    onLinkProject={handleLinkProject}
                   />
                 </TabsContent>
 
@@ -396,14 +553,23 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
       />
 
       {selectedTask && (
-        <HomeTaskSubtasks
-          open={showSubtasks}
-          onOpenChange={setShowSubtasks}
-          taskId={selectedTask.id}
-          taskTitle={selectedTask.title}
-          userId={user?.id || ''}
-          homeId={selectedHomeId === 'all' ? null : selectedHomeId}
-        />
+        <>
+          <HomeTaskSubtasks
+            open={showSubtasks}
+            onOpenChange={setShowSubtasks}
+            taskId={selectedTask.id}
+            taskTitle={selectedTask.title}
+            userId={user?.id || ''}
+            homeId={selectedHomeId === 'all' ? null : selectedHomeId}
+          />
+          <HomeTaskProjectLink
+            open={showProjectLink}
+            onOpenChange={setShowProjectLink}
+            taskId={selectedTask.id}
+            taskTitle={selectedTask.title}
+            currentProjectRunId={selectedTask.project_run_id}
+          />
+        </>
       )}
     </>
   );

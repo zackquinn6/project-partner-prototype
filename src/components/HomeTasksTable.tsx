@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, ChevronDown, ChevronUp, Plus } from "lucide-react";
+import { Pencil, Trash2, ChevronDown, ChevronUp, Plus, Link2 } from "lucide-react";
 
 interface HomeTask {
   id: string;
@@ -24,12 +24,13 @@ interface HomeTasksTableProps {
   onEdit: (task: HomeTask) => void;
   onDelete: (taskId: string) => void;
   onAddSubtasks: (task: HomeTask) => void;
+  onLinkProject: (task: HomeTask) => void;
 }
 
 type SortField = 'title' | 'priority' | 'status' | 'skill_level' | 'due_date' | 'task_type';
 type SortDirection = 'asc' | 'desc';
 
-export function HomeTasksTable({ tasks, onEdit, onDelete, onAddSubtasks }: HomeTasksTableProps) {
+export function HomeTasksTable({ tasks, onEdit, onDelete, onAddSubtasks, onLinkProject }: HomeTasksTableProps) {
   const [sortField, setSortField] = useState<SortField>('due_date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [filterPriority, setFilterPriority] = useState<string>('all');
@@ -206,7 +207,7 @@ export function HomeTasksTable({ tasks, onEdit, onDelete, onAddSubtasks }: HomeT
                   </Button>
                 </TableHead>
                 <TableHead className="w-[200px] text-xs">Notes</TableHead>
-                <TableHead className="w-[150px] text-xs text-right">Actions</TableHead>
+                <TableHead className="w-[180px] text-xs text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -244,13 +245,16 @@ export function HomeTasksTable({ tasks, onEdit, onDelete, onAddSubtasks }: HomeT
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
-                        <Button variant="ghost" size="sm" onClick={() => onAddSubtasks(task)} className="h-7 px-2">
+                        <Button variant="ghost" size="sm" onClick={() => onLinkProject(task)} className="h-7 px-2" title="Link to Project">
+                          <Link2 className="h-3 w-3" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => onAddSubtasks(task)} className="h-7 px-2" title="Add Subtasks">
                           <Plus className="h-3 w-3" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => onEdit(task)} className="h-7 px-2">
+                        <Button variant="ghost" size="sm" onClick={() => onEdit(task)} className="h-7 px-2" title="Edit Task">
                           <Pencil className="h-3 w-3" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => onDelete(task.id)} className="h-7 px-2 text-destructive">
+                        <Button variant="ghost" size="sm" onClick={() => onDelete(task.id)} className="h-7 px-2 text-destructive" title="Delete Task">
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
