@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Package } from 'lucide-react';
+import { Plus, Search, Package, Minus } from 'lucide-react';
 import { toast } from 'sonner';
 import { ProjectRun } from '@/interfaces/ProjectRun';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -59,8 +59,9 @@ export const MaterialsSelectionDialog: React.FC<MaterialsSelectionDialogProps> =
           operation.steps.forEach(step => {
             step.materials?.forEach(material => {
               const existingMaterial = extractedMaterials.get(material.id);
+              // Extract actual unit from material, with proper fallback
+              const materialUnit = (material as any).unit || (material as any).scalingUnit || 'ea';
               const quantity = (material as any).quantity || 1;
-              const unit = (material as any).unit || 'unit';
               
               if (existingMaterial) {
                 existingMaterial.quantity += quantity;
@@ -69,7 +70,7 @@ export const MaterialsSelectionDialog: React.FC<MaterialsSelectionDialogProps> =
                   id: material.id,
                   name: material.name || 'Unknown Material',
                   quantity,
-                  unit,
+                  unit: materialUnit,
                   selected: false
                 });
               }
@@ -154,53 +155,69 @@ export const MaterialsSelectionDialog: React.FC<MaterialsSelectionDialogProps> =
       title="Select Materials to Purchase"
       description="Choose which materials you need to purchase for your project"
     >
-      <div className="space-y-4">
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder="Search materials..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+      <ScrollArea className="h-[calc(100vh-16rem)] max-h-[600px]">
+        <div className="space-y-4 pr-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Search materials..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
 
-        {/* Materials List */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center justify-between">
-              <span>Project Materials</span>
-              <Badge variant="secondary">{filteredMaterials.length} items</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[300px] pr-4">
-              <div className="space-y-3">
+          {/* Materials List */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center justify-between">
+                <span>Project Materials</span>
+                <Badge variant="secondary">{filteredMaterials.length} items</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
                 {filteredMaterials.map(material => (
-                  <div key={material.id} className="flex items-start gap-3 p-3 border rounded-lg">
+                  <div key={material.id} className="flex items-center gap-3 p-3 border rounded-lg">
                     <Checkbox
                       id={material.id}
                       checked={material.selected}
                       onCheckedChange={() => toggleMaterial(material.id)}
-                      className="mt-1"
                     />
-                    <div className="flex-1">
-                      <Label htmlFor={material.id} className="cursor-pointer font-medium">
+                    <div className="flex-1 min-w-0">
+                      <Label htmlFor={material.id} className="cursor-pointer font-medium block truncate">
                         {material.name}
                       </Label>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Label className="text-xs text-muted-foreground">Qty:</Label>
-                        <Input
-                          type="number"
-                          value={material.quantity}
-                          onChange={(e) => updateQuantity(material.id, parseInt(e.target.value) || 0)}
-                          className="w-20 h-8"
-                          min="0"
-                          disabled={!material.selected}
-                        />
-                        <span className="text-sm text-muted-foreground">{material.unit}</span>
-                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => updateQuantity(material.id, material.quantity - 1)}
+                        disabled={material.quantity <= 0 || !material.selected}
+                        className="h-7 w-7 p-0"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </Button>
+                      <Input
+                        type="number"
+                        value={material.quantity}
+                        onChange={(e) => updateQuantity(material.id, parseInt(e.target.value) || 0)}
+                        className="w-16 h-7 text-center text-sm"
+                        min="0"
+                        disabled={!material.selected}
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => updateQuantity(material.id, material.quantity + 1)}
+                        disabled={!material.selected}
+                        className="h-7 w-7 p-0"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                      <span className="text-sm text-muted-foreground w-12">{material.unit}</span>
                     </div>
                   </div>
                 ))}
@@ -210,112 +227,111 @@ export const MaterialsSelectionDialog: React.FC<MaterialsSelectionDialogProps> =
                   </p>
                 )}
               </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Custom Materials */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center justify-between">
-              <span>Custom Materials</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAddCustom(!showAddCustom)}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Custom
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {showAddCustom && (
-              <div className="p-4 border rounded-lg space-y-3 bg-muted/30">
-                <div className="space-y-2">
-                  <Label>Material Name</Label>
-                  <Input
-                    placeholder="Enter material name"
-                    value={customName}
-                    onChange={(e) => setCustomName(e.target.value)}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>Quantity</Label>
-                    <Input
-                      type="number"
-                      value={customQuantity}
-                      onChange={(e) => setCustomQuantity(parseInt(e.target.value) || 1)}
-                      min="0"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Unit</Label>
-                    <Input
-                      placeholder="e.g., box, bag, ft"
-                      value={customUnit}
-                      onChange={(e) => setCustomUnit(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <Button onClick={addCustomMaterial} className="w-full">
-                  Add Material
+          {/* Custom Materials */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center justify-between">
+                <span>Custom Materials</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAddCustom(!showAddCustom)}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Custom
                 </Button>
-              </div>
-            )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {showAddCustom && (
+                <div className="p-4 border rounded-lg space-y-3 bg-muted/30">
+                  <div className="space-y-2">
+                    <Label>Material Name</Label>
+                    <Input
+                      placeholder="Enter material name"
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Quantity</Label>
+                      <Input
+                        type="number"
+                        value={customQuantity}
+                        onChange={(e) => setCustomQuantity(parseInt(e.target.value) || 1)}
+                        min="0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Unit</Label>
+                      <Input
+                        placeholder="e.g., box, bag, ft"
+                        value={customUnit}
+                        onChange={(e) => setCustomUnit(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={addCustomMaterial} className="w-full">
+                    Add Material
+                  </Button>
+                </div>
+              )}
 
-            {customMaterials.length > 0 ? (
-              <ScrollArea className="h-[150px] pr-4">
+              {customMaterials.length > 0 ? (
                 <div className="space-y-2">
                   {customMaterials.map(material => (
-                    <div key={material.id} className="flex items-center gap-2 p-3 border rounded-lg">
-                      <Package className="w-4 h-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{material.name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Input
-                            type="number"
-                            value={material.quantity}
-                            onChange={(e) => updateCustomQuantity(material.id, parseInt(e.target.value) || 0)}
-                            className="w-16 h-7 text-xs"
-                            min="0"
-                          />
-                          <span className="text-xs text-muted-foreground">{material.unit}</span>
-                        </div>
+                    <div key={material.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                      <Package className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{material.name}</p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeCustomMaterial(material.id)}
-                      >
-                        Remove
-                      </Button>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Input
+                          type="number"
+                          value={material.quantity}
+                          onChange={(e) => updateCustomQuantity(material.id, parseInt(e.target.value) || 0)}
+                          className="w-16 h-7 text-xs text-center"
+                          min="0"
+                        />
+                        <span className="text-xs text-muted-foreground w-12">{material.unit}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeCustomMaterial(material.id)}
+                          className="h-7 px-2"
+                        >
+                          Remove
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </ScrollArea>
-            ) : (
-              <p className="text-center text-muted-foreground text-sm py-4">
-                No custom materials added
-              </p>
-            )}
-          </CardContent>
-        </Card>
+              ) : (
+                <p className="text-center text-muted-foreground text-sm py-4">
+                  No custom materials added
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </ScrollArea>
 
-        {/* Actions */}
-        <div className="flex justify-between items-center pt-4 border-t">
-          <div className="text-sm text-muted-foreground">
-            {selectedCount} item{selectedCount !== 1 ? 's' : ''} selected
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleConfirm}>
-              Continue to Shopping
-            </Button>
-          </div>
+      {/* Actions - Fixed at bottom */}
+      <div className="flex justify-between items-center pt-4 mt-4 border-t">
+        <div className="text-sm text-muted-foreground">
+          {selectedCount} item{selectedCount !== 1 ? 's' : ''} selected
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm}>
+            Apply
+          </Button>
         </div>
       </div>
     </ResponsiveDialog>
