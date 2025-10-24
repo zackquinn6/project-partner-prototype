@@ -210,7 +210,7 @@ export default function EditWorkflowView({
     } finally {
       setIsLoadingContent(false);
     }
-  }, [editingStep?.id, instructionLevel, editMode, pendingContentChanges, saveInstructionContent]);
+  }, [editingStep?.id, instructionLevel, editMode, saveInstructionContent]);
 
   // Load content when instruction level changes or step changes
   useEffect(() => {
@@ -432,7 +432,10 @@ export default function EditWorkflowView({
       }
       
       try {
-        if (levelSpecificContent && levelSpecificContent.length > 0) {
+        // Use pending changes if available, otherwise use loaded content
+        if (pendingContentChanges) {
+          contentSections = pendingContentChanges;
+        } else if (levelSpecificContent && levelSpecificContent.length > 0) {
           contentSections = levelSpecificContent;
         } else if (editingStep.contentSections) {
           contentSections = editingStep.contentSections;
@@ -456,8 +459,7 @@ export default function EditWorkflowView({
           <MultiContentEditor 
             sections={contentSections} 
             onChange={(sections) => {
-              // Store changes in state without saving immediately
-              setLevelSpecificContent(sections);
+              // Only update pending changes, don't trigger reload
               setPendingContentChanges(sections);
             }} 
           />
