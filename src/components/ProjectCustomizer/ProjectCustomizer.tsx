@@ -357,7 +357,7 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
                     <CardHeader className={isMobile ? 'pb-3' : ''}>
                       <CardTitle className={`flex items-center gap-2 ${isMobile ? 'text-base' : ''}`}>
                         <GitBranch className="w-5 h-5" />
-                        Add Conventional Work
+                        Add Workflow Steps
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -380,7 +380,7 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
                     <CardHeader className={isMobile ? 'pb-3' : ''}>
                       <CardTitle className={`flex items-center gap-2 text-orange-800 ${isMobile ? 'text-base' : ''}`}>
                         <AlertTriangle className="w-5 h-5" />
-                        Add Novel Work
+                        Add Custom Steps
                       </CardTitle>
                     </CardHeader>
                     <CardContent>

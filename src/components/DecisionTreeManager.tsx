@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -13,6 +13,7 @@ import { ChevronRight, ChevronDown, Plus, X, ChevronsDownUp, ChevronsUpDown, Git
 import { Project, Phase, Operation, WorkflowStep } from '@/interfaces/Project';
 import { useProject } from '@/contexts/ProjectContext';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   ReactFlow,
   Node, 
@@ -55,6 +56,43 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
   
   // Store which item is currently showing alternate selector
   const [showAlternateSelector, setShowAlternateSelector] = useState<string | null>(null);
+
+  // Load existing flow configurations from database when component opens
+  useEffect(() => {
+    if (open && currentProject) {
+      loadFlowConfigs();
+    }
+  }, [open, currentProject.id]);
+
+  const loadFlowConfigs = async () => {
+    try {
+      // Load flow configurations from template_operations
+      const { data: operations, error } = await supabase
+        .from('template_operations')
+        .select('id, flow_type, user_prompt, alternate_group, dependent_on')
+        .eq('project_id', currentProject.id);
+
+      if (error) throw error;
+
+      const configs: Record<string, FlowTypeConfig> = {};
+      operations?.forEach(op => {
+        if (op.flow_type) {
+          configs[op.id] = {
+            type: op.flow_type as 'if-necessary' | 'alternate' | 'dependent',
+            decisionPrompt: op.user_prompt || undefined,
+            alternateIds: op.alternate_group ? op.alternate_group.split(',') : undefined,
+            dependentOn: op.dependent_on || undefined,
+            predecessorIds: []
+          };
+        }
+      });
+
+      setFlowConfigs(configs);
+    } catch (error) {
+      console.error('Error loading flow configs:', error);
+      toast.error('Failed to load decision tree configuration');
+    }
+  };
 
   const togglePhase = (phaseId: string) => {
     setExpandedPhases(prev => {
@@ -387,11 +425,42 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
     );
   };
 
-  const handleSave = () => {
-    // TODO: Save flow configs to project data structure
-    // This would require updating the Phase/Operation/Step interfaces to include flow type metadata
-    toast.success('Decision tree configuration saved');
-    onOpenChange(false);
+  const handleSave = async () => {
+    try {
+      // Save flow configurations to database through template_operations
+      for (const [itemId, config] of Object.entries(flowConfigs)) {
+        if (!config.type) continue;
+        
+        // Check if this is an operation (exists in template_operations)
+        const isOperation = currentProject.phases.some(phase => 
+          phase.operations.some(op => op.id === itemId)
+        );
+        
+        if (isOperation) {
+          // Update template_operations with flow_type, user_prompt, alternate_group, dependent_on
+          const { error } = await supabase
+            .from('template_operations')
+            .update({
+              flow_type: config.type,
+              user_prompt: config.decisionPrompt || null,
+              alternate_group: config.type === 'alternate' ? (config.alternateIds?.join(',') || null) : null,
+              dependent_on: config.type === 'dependent' ? config.dependentOn : null,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', itemId);
+          
+          if (error) {
+            console.error('Error updating operation:', error);
+          }
+        }
+      }
+      
+      toast.success('Decision tree configuration saved');
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error saving decision tree:', error);
+      toast.error('Failed to save decision tree configuration');
+    }
   };
 
   // Generate flowchart nodes and edges based on level

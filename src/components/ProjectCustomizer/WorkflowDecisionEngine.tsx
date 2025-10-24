@@ -28,19 +28,22 @@ export const WorkflowDecisionEngine: React.FC<WorkflowDecisionEngineProps> = ({
 }) => {
   const isMobile = useIsMobile();
 
-  // Extract decision points from actual operations
+  // Extract decision points from actual operations - reading directly from database flow_type metadata
   const phasesWithDecisions = useMemo(() => {
     return projectRun.phases?.map(phase => {
       const alternateGroups = new Map<string, { prompt: string; operations: Operation[] }>();
       const ifNecessaryOps: Operation[] = [];
 
       phase.operations.forEach(operation => {
-        const flowType = operation.steps[0]?.flowType || 'prime';
+        // Read flow_type from operation metadata (set by DecisionTreeManager in template_operations)
+        const flowType = (operation as any).flowType || operation.steps[0]?.flowType || 'standard';
         
         if (flowType === 'alternate') {
+          // Group alternates by their alternate_group field
           const groupKey = (operation as any).alternateGroup || 'choice-group';
           if (!alternateGroups.has(groupKey)) {
             alternateGroups.set(groupKey, {
+              // Use user_prompt from DecisionTreeManager as the decision prompt
               prompt: (operation as any).userPrompt || 'Choose an option:',
               operations: []
             });

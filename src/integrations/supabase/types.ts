@@ -2176,6 +2176,7 @@ export type Database = {
         Row: {
           alternate_group: string | null
           created_at: string | null
+          dependent_on: string | null
           description: string | null
           display_order: number
           flow_type: string | null
@@ -2189,6 +2190,7 @@ export type Database = {
         Insert: {
           alternate_group?: string | null
           created_at?: string | null
+          dependent_on?: string | null
           description?: string | null
           display_order?: number
           flow_type?: string | null
@@ -2202,6 +2204,7 @@ export type Database = {
         Update: {
           alternate_group?: string | null
           created_at?: string | null
+          dependent_on?: string | null
           description?: string | null
           display_order?: number
           flow_type?: string | null
@@ -2213,6 +2216,13 @@ export type Database = {
           user_prompt?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "template_operations_dependent_on_fkey"
+            columns: ["dependent_on"]
+            isOneToOne: false
+            referencedRelation: "template_operations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "template_operations_project_id_fkey"
             columns: ["project_id"]
