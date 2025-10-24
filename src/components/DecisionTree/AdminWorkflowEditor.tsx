@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, Save, Plus, Settings2, Trash2 } from 'lucide-react';
 import { Phase, Operation } from '@/interfaces/Project';
 import { toast } from 'sonner';
@@ -203,7 +204,7 @@ export const AdminWorkflowEditor: React.FC<AdminWorkflowEditorProps> = ({
                               <div>
                                 <Label className="text-sm font-semibold">Step Content Detail Levels</Label>
                                 <p className="text-xs text-muted-foreground mb-3">
-                                  Configure instruction content for each detail level. Tools, materials, outputs remain the same across all levels.
+                                  Configure instruction content for each detail level in the database. Tools, materials, outputs remain the same.
                                 </p>
                               </div>
                               
@@ -213,22 +214,12 @@ export const AdminWorkflowEditor: React.FC<AdminWorkflowEditorProps> = ({
                                     <div className="font-medium text-sm">
                                       Step {stepIndex + 1}: {step.step}
                                     </div>
-                                    <div className="space-y-1">
-                                      <Label className="text-xs">Instruction Detail Level</Label>
-                                      <Select defaultValue="detailed">
-                                        <SelectTrigger className="h-8 text-xs">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="quick">Quick - Brief essentials</SelectItem>
-                                          <SelectItem value="detailed">Detailed - Step-by-step guidance</SelectItem>
-                                          <SelectItem value="contractor">Contractor - Technical specifications</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                      <p className="text-xs text-muted-foreground">
-                                        Select to edit content for this detail level in Step Content Editor
-                                      </p>
-                                    </div>
+                                    <Alert className="py-2">
+                                      <AlertDescription className="text-xs">
+                                        Instruction content for Quick/Detailed/Contractor levels is stored in the <strong>step_instructions</strong> table. 
+                                        Use the Step Content Editor or database to manage content for each level.
+                                      </AlertDescription>
+                                    </Alert>
                                   </div>
                                 </Card>
                               ))}

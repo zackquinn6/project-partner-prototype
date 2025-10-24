@@ -739,6 +739,7 @@ export type Database = {
       }
       home_task_subtasks: {
         Row: {
+          assigned_person_id: string | null
           completed: boolean
           created_at: string
           estimated_hours: number
@@ -751,6 +752,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          assigned_person_id?: string | null
           completed?: boolean
           created_at?: string
           estimated_hours?: number
@@ -763,6 +765,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          assigned_person_id?: string | null
           completed?: boolean
           created_at?: string
           estimated_hours?: number
@@ -775,6 +778,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "home_task_subtasks_assigned_person_id_fkey"
+            columns: ["assigned_person_id"]
+            isOneToOne: false
+            referencedRelation: "home_task_people"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "home_task_subtasks_task_id_fkey"
             columns: ["task_id"]

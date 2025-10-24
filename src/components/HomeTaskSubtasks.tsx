@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Check } from "lucide-react";
+import { Plus, Trash2, Check, User } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
@@ -15,6 +15,13 @@ interface Subtask {
   skill_level: 'high' | 'medium' | 'low';
   completed: boolean;
   order_index: number;
+  assigned_person_id: string | null;
+  assigned_person_name?: string;
+}
+
+interface Person {
+  id: string;
+  name: string;
 }
 
 interface HomeTaskSubtasksProps {
@@ -23,31 +30,58 @@ interface HomeTaskSubtasksProps {
   taskId: string;
   taskTitle: string;
   userId: string;
+  homeId: string | null;
 }
 
-export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId }: HomeTaskSubtasksProps) {
+export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId, homeId }: HomeTaskSubtasksProps) {
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
+  const [people, setPeople] = useState<Person[]>([]);
   const [newSubtask, setNewSubtask] = useState({
     title: '',
     estimated_hours: 1,
-    skill_level: 'medium' as 'high' | 'medium' | 'low'
+    skill_level: 'medium' as 'high' | 'medium' | 'low',
+    assigned_person_id: null as string | null
   });
 
   useEffect(() => {
     if (open) {
       fetchSubtasks();
+      fetchPeople();
     }
   }, [open, taskId]);
+
+  const fetchPeople = async () => {
+    let query = supabase
+      .from('home_task_people')
+      .select('id, name')
+      .eq('user_id', userId);
+    
+    if (homeId) {
+      query = query.eq('home_id', homeId);
+    }
+
+    const { data, error } = await query;
+    if (!error && data) {
+      setPeople(data);
+    }
+  };
 
   const fetchSubtasks = async () => {
     const { data, error } = await supabase
       .from('home_task_subtasks')
-      .select('*')
+      .select(`
+        *,
+        assigned_person:home_task_people!assigned_person_id(name)
+      `)
       .eq('task_id', taskId)
       .order('order_index', { ascending: true });
 
     if (!error && data) {
-      setSubtasks(data as Subtask[]);
+      const subtasksWithNames = data.map(st => ({
+        ...st,
+        assigned_person_name: (st.assigned_person as any)?.name || null
+      }));
+      setSubtasks(subtasksWithNames as any);
     }
   };
 
@@ -65,6 +99,7 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
         title: newSubtask.title,
         estimated_hours: newSubtask.estimated_hours,
         skill_level: newSubtask.skill_level,
+        assigned_person_id: newSubtask.assigned_person_id,
         order_index: subtasks.length
       }]);
 
@@ -74,8 +109,22 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
     }
 
     toast.success('Subtask added');
-    setNewSubtask({ title: '', estimated_hours: 1, skill_level: 'medium' });
+    setNewSubtask({ title: '', estimated_hours: 1, skill_level: 'medium', assigned_person_id: null });
     fetchSubtasks();
+  };
+
+  const handleUpdateAssignment = async (subtaskId: string, personId: string | null) => {
+    const { error } = await supabase
+      .from('home_task_subtasks')
+      .update({ assigned_person_id: personId })
+      .eq('id', subtaskId);
+
+    if (!error) {
+      toast.success('Assignment updated');
+      fetchSubtasks();
+    } else {
+      toast.error('Failed to update assignment');
+    }
   };
 
   const handleToggleComplete = async (subtask: Subtask) => {
@@ -119,37 +168,47 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
           </div>
 
           {/* Add new subtask */}
-          <div className="flex gap-2 items-end">
-            <div className="flex-1">
-              <Input
-                placeholder="Subtask title"
-                value={newSubtask.title}
-                onChange={(e) => setNewSubtask({ ...newSubtask, title: e.target.value })}
-                className="text-xs h-8"
-              />
-            </div>
-            <div className="w-24">
-              <Input
-                type="number"
-                min="0.5"
-                step="0.5"
-                value={newSubtask.estimated_hours}
-                onChange={(e) => setNewSubtask({ ...newSubtask, estimated_hours: parseFloat(e.target.value) })}
-                className="text-xs h-8"
-                placeholder="Hours"
-              />
-            </div>
+          <div className="grid grid-cols-[1fr,auto,auto,auto,auto] gap-2 items-end">
+            <Input
+              placeholder="Subtask title"
+              value={newSubtask.title}
+              onChange={(e) => setNewSubtask({ ...newSubtask, title: e.target.value })}
+              className="text-xs h-8"
+            />
+            <Input
+              type="number"
+              min="0.5"
+              step="0.5"
+              value={newSubtask.estimated_hours}
+              onChange={(e) => setNewSubtask({ ...newSubtask, estimated_hours: parseFloat(e.target.value) })}
+              className="text-xs h-8 w-20"
+              placeholder="Hrs"
+            />
             <Select 
               value={newSubtask.skill_level} 
               onValueChange={(val) => setNewSubtask({ ...newSubtask, skill_level: val as any })}
             >
-              <SelectTrigger className="w-28 text-xs h-8">
+              <SelectTrigger className="w-24 text-xs h-8">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">Low Skill</SelectItem>
-                <SelectItem value="medium">Med Skill</SelectItem>
-                <SelectItem value="high">High Skill</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Med</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select 
+              value={newSubtask.assigned_person_id || "unassigned"} 
+              onValueChange={(val) => setNewSubtask({ ...newSubtask, assigned_person_id: val === 'unassigned' ? null : val })}
+            >
+              <SelectTrigger className="w-32 text-xs h-8">
+                <SelectValue placeholder="Assign to" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {people.map(person => (
+                  <SelectItem key={person.id} value={person.id}>{person.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Button onClick={handleAddSubtask} size="sm" className="h-8">
@@ -165,7 +224,7 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
               subtasks.map((subtask) => (
                 <div
                   key={subtask.id}
-                  className={`flex items-center gap-2 p-2 border rounded text-xs ${
+                  className={`grid grid-cols-[auto,1fr,auto,auto,auto,auto,auto] gap-2 items-center p-2 border rounded text-xs ${
                     subtask.completed ? 'bg-muted opacity-60' : ''
                   }`}
                 >
@@ -177,7 +236,7 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
                   >
                     <Check className={`h-3 w-3 ${subtask.completed ? 'text-green-600' : 'text-muted-foreground'}`} />
                   </Button>
-                  <div className={`flex-1 ${subtask.completed ? 'line-through' : ''}`}>
+                  <div className={`${subtask.completed ? 'line-through' : ''}`}>
                     {subtask.title}
                   </div>
                   <Badge variant="outline" className="text-[10px] px-1.5 py-0">
@@ -186,6 +245,30 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
                   <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                     {subtask.skill_level}
                   </Badge>
+                  <Select 
+                    value={subtask.assigned_person_id || "unassigned"}
+                    onValueChange={(val) => handleUpdateAssignment(subtask.id, val === 'unassigned' ? null : val)}
+                    disabled={subtask.completed}
+                  >
+                    <SelectTrigger className="w-32 h-6 text-[10px] px-2">
+                      <SelectValue>
+                        {subtask.assigned_person_name ? (
+                          <span className="flex items-center gap-1">
+                            <User className="h-2.5 w-2.5" />
+                            {subtask.assigned_person_name}
+                          </span>
+                        ) : (
+                          'Unassigned'
+                        )}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
+                      {people.map(person => (
+                        <SelectItem key={person.id} value={person.id}>{person.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button
                     variant="ghost"
                     size="sm"
