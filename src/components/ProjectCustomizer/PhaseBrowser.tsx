@@ -39,11 +39,40 @@ export const PhaseBrowser: React.FC<PhaseBrowserProps> = ({
   const [showPhaseSelector, setShowPhaseSelector] = useState(false);
   const isMobile = useIsMobile();
 
-  // Get available projects (excluding current project)
+  // Get available projects (excluding current project, drafts, Manual Project Template, and showing only latest revisions)
   const availableProjectsList = useMemo(() => {
-    return availableProjects.filter(p => 
-      p.id !== currentProjectId && p.publishStatus !== 'draft'
+    // Filter out drafts, current project, and Manual Project Template
+    const filtered = availableProjects.filter(p => 
+      p.id !== currentProjectId && 
+      p.publishStatus !== 'draft' &&
+      p.name !== 'Manual Project Template'
     );
+    
+    // Group projects by their base ID (parentProjectId or own id if no parent)
+    const projectGroups = new Map<string, Project[]>();
+    
+    filtered.forEach(project => {
+      const baseId = project.parentProjectId || project.id;
+      if (!projectGroups.has(baseId)) {
+        projectGroups.set(baseId, []);
+      }
+      projectGroups.get(baseId)!.push(project);
+    });
+    
+    // For each group, keep only the latest revision
+    const latestRevisions: Project[] = [];
+    projectGroups.forEach(group => {
+      // Sort by revision number (highest first), then by updatedAt date as fallback
+      const sorted = group.sort((a, b) => {
+        const revA = a.revisionNumber ?? 0;
+        const revB = b.revisionNumber ?? 0;
+        if (revA !== revB) return revB - revA;
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      });
+      latestRevisions.push(sorted[0]);
+    });
+    
+    return latestRevisions;
   }, [availableProjects, currentProjectId]);
 
   // Get phases for selected project only
