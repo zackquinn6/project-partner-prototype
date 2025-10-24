@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useProject } from '@/contexts/ProjectContext';
 import { WorkflowStep, Tool, Material, Output, ContentSection, Phase, Operation, Project, AppReference } from '@/interfaces/Project';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -90,6 +90,8 @@ export default function EditWorkflowView({
   const [instructionLevel, setInstructionLevel] = useState<'quick' | 'detailed' | 'contractor'>('detailed');
   const [levelSpecificContent, setLevelSpecificContent] = useState<ContentSection[] | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
+  const [pendingContentChanges, setPendingContentChanges] = useState<ContentSection[] | null>(null);
+  const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Structure editing state
   const [editingPhase, setEditingPhase] = useState<Phase | null>(null);
@@ -145,9 +147,43 @@ export default function EditWorkflowView({
     }
   }, [currentStep?.id]);
 
+  // Save instruction content to database
+  const saveInstructionContent = useCallback(async (sections: ContentSection[] | null) => {
+    if (!editingStep?.id || !sections) return;
+    
+    try {
+      const { error } = await supabase
+        .from('step_instructions')
+        .upsert({
+          template_step_id: editingStep.id,
+          instruction_level: instructionLevel,
+          content: sections as any,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'template_step_id,instruction_level'
+        });
+
+      if (error) {
+        console.error('Error saving instruction content:', error);
+        toast.error('Failed to save content');
+      } else {
+        setPendingContentChanges(null);
+        console.log(`${instructionLevel} content saved`);
+      }
+    } catch (err) {
+      console.error('Exception saving instruction content:', err);
+      toast.error('Failed to save content');
+    }
+  }, [editingStep?.id, instructionLevel]);
+
   // Load instruction content based on selected level
   const loadInstructionContent = useCallback(async () => {
     if (!editingStep?.id || !editMode) return;
+    
+    // Save pending changes before loading new level
+    if (pendingContentChanges) {
+      await saveInstructionContent(pendingContentChanges);
+    }
     
     setIsLoadingContent(true);
     try {
@@ -174,7 +210,7 @@ export default function EditWorkflowView({
     } finally {
       setIsLoadingContent(false);
     }
-  }, [editingStep?.id, instructionLevel, editMode]);
+  }, [editingStep?.id, instructionLevel, editMode, pendingContentChanges, saveInstructionContent]);
 
   // Load content when instruction level changes or step changes
   useEffect(() => {
@@ -182,6 +218,31 @@ export default function EditWorkflowView({
       loadInstructionContent();
     }
   }, [instructionLevel, editingStep?.id, editMode, loadInstructionContent]);
+
+  // Auto-save every 60 seconds
+  useEffect(() => {
+    if (editMode && pendingContentChanges) {
+      // Clear existing interval
+      if (autoSaveIntervalRef.current) {
+        clearInterval(autoSaveIntervalRef.current);
+      }
+      
+      // Set up new interval
+      autoSaveIntervalRef.current = setInterval(() => {
+        if (pendingContentChanges) {
+          saveInstructionContent(pendingContentChanges);
+        }
+      }, 60000); // 60 seconds
+    }
+    
+    // Cleanup
+    return () => {
+      if (autoSaveIntervalRef.current) {
+        clearInterval(autoSaveIntervalRef.current);
+        autoSaveIntervalRef.current = null;
+      }
+    };
+  }, [editMode, pendingContentChanges, saveInstructionContent]);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -233,6 +294,11 @@ export default function EditWorkflowView({
       appsCount: editingStep.apps?.length || 0,
       apps: editingStep.apps
     });
+
+    // Save pending content changes first
+    if (pendingContentChanges) {
+      await saveInstructionContent(pendingContentChanges);
+    }
 
     // Update only custom phases (standard phases are generated dynamically)
     const updatedProject = {
@@ -389,31 +455,10 @@ export default function EditWorkflowView({
       return <div className="space-y-6">
           <MultiContentEditor 
             sections={contentSections} 
-            onChange={async (sections) => {
-              // Save to step_instructions table with the current instruction level
-              try {
-                const { error } = await supabase
-                  .from('step_instructions')
-                  .upsert({
-                    template_step_id: editingStep.id,
-                    instruction_level: instructionLevel,
-                    content: sections as any,
-                    updated_at: new Date().toISOString()
-                  }, {
-                    onConflict: 'template_step_id,instruction_level'
-                  });
-
-                if (error) {
-                  console.error('Error saving instruction content:', error);
-                  toast.error('Failed to save content');
-                } else {
-                  setLevelSpecificContent(sections);
-                  toast.success(`${instructionLevel.charAt(0).toUpperCase() + instructionLevel.slice(1)} content saved`);
-                }
-              } catch (err) {
-                console.error('Exception saving instruction content:', err);
-                toast.error('Failed to save content');
-              }
+            onChange={(sections) => {
+              // Store changes in state without saving immediately
+              setLevelSpecificContent(sections);
+              setPendingContentChanges(sections);
             }} 
           />
         </div>;
