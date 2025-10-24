@@ -22,6 +22,48 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [isSaving, setIsSaving] = useState(false);
   const [isEmailing, setIsEmailing] = useState(false);
+  const [currentScheduleId, setCurrentScheduleId] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadLatestSchedule();
+  }, [userId, homeId]);
+
+  const loadLatestSchedule = async () => {
+    try {
+      let query = supabase
+        .from('home_task_schedules')
+        .select('*')
+        .eq('user_id', userId)
+        .order('generated_at', { ascending: false })
+        .limit(1);
+
+      if (homeId) {
+        query = query.eq('home_id', homeId);
+      }
+
+      const { data, error } = await query.single();
+      
+      if (!error && data) {
+        setCurrentScheduleId(data.id);
+        setStartDate(new Date(data.start_date));
+        
+        // Reconstruct schedule from stored data
+        if (data.schedule_data && typeof data.schedule_data === 'object') {
+          const scheduleData = data.schedule_data as any;
+          setSchedule({
+            assignments: (scheduleData.assignments || []).map((a: any) => ({
+              ...a,
+              scheduledDate: new Date(a.scheduledDate)
+            })),
+            warnings: data.warnings || [],
+            unassigned: data.unassigned || []
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading schedule:', error);
+    }
+  };
 
   const handleGenerateSchedule = async () => {
     setIsGenerating(true);
@@ -79,8 +121,61 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
 
       setSchedule(result);
 
+      // Save to database
+      await saveScheduleToDatabase(result);
+
+    } catch (error) {
+      console.error('Error generating schedule:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const saveScheduleToDatabase = async (scheduleData: any) => {
+    try {
+      const taskIds = [...new Set(scheduleData.assignments.map((a: any) => a.taskId))] as string[];
+      
+      // Save schedule metadata
+      const scheduleRecord = {
+        user_id: userId,
+        home_id: homeId,
+        start_date: startDate.toISOString().split('T')[0],
+        schedule_data: {
+          assignments: scheduleData.assignments.map((a: any) => ({
+            ...a,
+            scheduledDate: a.scheduledDate.toISOString()
+          }))
+        },
+        assignments_count: scheduleData.assignments.length,
+        warnings: scheduleData.warnings || [],
+        unassigned: scheduleData.unassigned || []
+      };
+
+      let scheduleId = currentScheduleId;
+
+      if (currentScheduleId) {
+        // Update existing schedule
+        const { error: updateError } = await supabase
+          .from('home_task_schedules')
+          .update(scheduleRecord)
+          .eq('id', currentScheduleId);
+
+        if (updateError) throw updateError;
+      } else {
+        // Create new schedule
+        const { data: newSchedule, error: insertError } = await supabase
+          .from('home_task_schedules')
+          .insert([scheduleRecord])
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+        scheduleId = newSchedule.id;
+        setCurrentScheduleId(scheduleId);
+      }
+
       // Save assignments to database
-      if (result.assignments.length > 0) {
+      if (scheduleData.assignments.length > 0) {
         // Clear existing assignments for these tasks
         await supabase
           .from('home_task_assignments')
@@ -88,7 +183,7 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
           .in('task_id', taskIds);
 
         // Insert new assignments
-        const assignmentsToSave = result.assignments.map(a => ({
+        const assignmentsToSave = scheduleData.assignments.map((a: any) => ({
           task_id: a.taskId,
           subtask_id: a.subtaskId,
           person_id: a.personId,
@@ -103,11 +198,9 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
 
         if (saveError) throw saveError;
       }
-
     } catch (error) {
-      console.error('Error generating schedule:', error);
-    } finally {
-      setIsGenerating(false);
+      console.error('Error saving schedule:', error);
+      throw error;
     }
   };
 
@@ -118,29 +211,7 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
 
     setIsSaving(true);
     try {
-      const taskIds = [...new Set(schedule.assignments.map((a: any) => a.taskId))] as string[];
-      
-      // Clear existing assignments
-      await supabase
-        .from('home_task_assignments')
-        .delete()
-        .in('task_id', taskIds);
-
-      // Insert new assignments
-      const assignmentsToSave = schedule.assignments.map((a: any) => ({
-        task_id: a.taskId,
-        subtask_id: a.subtaskId,
-        person_id: a.personId,
-        user_id: userId,
-        scheduled_date: a.scheduledDate.toISOString().split('T')[0],
-        scheduled_hours: a.scheduledHours
-      }));
-
-      const { error } = await supabase
-        .from('home_task_assignments')
-        .insert(assignmentsToSave);
-
-      if (error) throw error;
+      await saveScheduleToDatabase(schedule);
     } catch (error) {
       console.error('Error saving schedule:', error);
     } finally {

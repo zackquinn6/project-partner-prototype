@@ -737,6 +737,48 @@ export type Database = {
           },
         ]
       }
+      home_task_schedules: {
+        Row: {
+          assignments_count: number
+          created_at: string
+          generated_at: string
+          home_id: string | null
+          id: string
+          schedule_data: Json
+          start_date: string
+          unassigned: Json | null
+          updated_at: string
+          user_id: string
+          warnings: Json | null
+        }
+        Insert: {
+          assignments_count?: number
+          created_at?: string
+          generated_at?: string
+          home_id?: string | null
+          id?: string
+          schedule_data?: Json
+          start_date: string
+          unassigned?: Json | null
+          updated_at?: string
+          user_id: string
+          warnings?: Json | null
+        }
+        Update: {
+          assignments_count?: number
+          created_at?: string
+          generated_at?: string
+          home_id?: string | null
+          id?: string
+          schedule_data?: Json
+          start_date?: string
+          unassigned?: Json | null
+          updated_at?: string
+          user_id?: string
+          warnings?: Json | null
+        }
+        Relationships: []
+      }
       home_task_subtasks: {
         Row: {
           assigned_person_id: string | null
