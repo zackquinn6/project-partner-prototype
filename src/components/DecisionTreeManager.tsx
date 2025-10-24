@@ -197,13 +197,13 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
     // Try to find as operation
     const allOps = getAllOperations();
     const op = allOps.find(o => o.id === itemId || o.fullId === itemId);
-    if (op) return `${op.phaseName} > ${op.name}`;
+    if (op) return op.name;
     
     // Try to find as step
     for (const phase of currentProject.phases) {
       for (const operation of phase.operations) {
         const step = operation.steps.find(s => s.id === itemId);
-        if (step) return `${phase.name} > ${operation.name} > ${step.step}`;
+        if (step) return step.step;
       }
     }
     
@@ -455,7 +455,6 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
         }
       }
       
-      toast.success('Decision tree configuration saved');
       onOpenChange(false);
     } catch (error) {
       console.error('Error saving decision tree:', error);
@@ -467,12 +466,12 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
   const generateFlowchart = useCallback(() => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
-    let yPos = 0;
-    const levelSpacing = 150;
-    const horizontalSpacing = 300;
+    let xPos = 0;
+    const nodeSpacing = 250;
+    const verticalSpacing = 200;
 
     if (flowchartLevel === 'phase') {
-      // Phase-level flowchart
+      // Phase-level flowchart (horizontal)
       currentProject.phases.forEach((phase, index) => {
         const config = flowConfigs[phase.id];
         const nodeType = config?.type === 'if-necessary' ? 'if-necessary' : 
@@ -486,7 +485,7 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
             type: nodeType,
             prompt: config?.decisionPrompt
           },
-          position: { x: 250, y: yPos },
+          position: { x: xPos, y: 100 },
           type: 'default',
           style: {
             background: config?.type === 'if-necessary' ? '#fef3c7' : 
@@ -516,13 +515,13 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
         // Add alternate branches
         if (config?.alternateIds) {
           config.alternateIds.forEach((altId, altIndex) => {
-            const xOffset = (altIndex + 1) * horizontalSpacing;
+            const yOffset = (altIndex + 1) * verticalSpacing;
             const altPhase = currentProject.phases.find(p => p.id === altId);
             if (altPhase && !nodes.find(n => n.id === altId)) {
               nodes.push({
                 id: altId,
                 data: { label: altPhase.name, type: 'alternate' },
-                position: { x: 250 + xOffset, y: yPos },
+                position: { x: xPos, y: 100 + yOffset },
                 type: 'default',
                 style: {
                   background: '#dbeafe',
@@ -546,16 +545,16 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
           });
         }
 
-        yPos += levelSpacing;
+        xPos += nodeSpacing;
       });
     } else if (flowchartLevel === 'operation') {
-      // Operation-level flowchart
+      // Operation-level flowchart (horizontal)
       currentProject.phases.forEach((phase) => {
         // Add phase header
         nodes.push({
           id: `phase-header-${phase.id}`,
           data: { label: `Phase: ${phase.name}` },
-          position: { x: 0, y: yPos },
+          position: { x: xPos, y: 0 },
           type: 'default',
           style: {
             background: '#e0e7ff',
@@ -566,7 +565,7 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
             width: 200,
           },
         });
-        yPos += levelSpacing / 2;
+        xPos += nodeSpacing / 2;
 
         phase.operations.forEach((operation, opIndex) => {
           const config = flowConfigs[operation.id];
@@ -581,7 +580,7 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
               type: nodeType,
               prompt: config?.decisionPrompt
             },
-            position: { x: 250, y: yPos },
+            position: { x: xPos, y: 100 },
             type: 'default',
             style: {
               background: config?.type === 'if-necessary' ? '#fef3c7' : 
@@ -619,13 +618,13 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
           // Add alternate branches
           if (config?.alternateIds) {
             config.alternateIds.forEach((altId, altIndex) => {
-              const xOffset = (altIndex + 1) * horizontalSpacing;
+              const yOffset = (altIndex + 1) * verticalSpacing;
               const altOp = phase.operations.find(o => o.id === altId);
               if (altOp && !nodes.find(n => n.id === altId)) {
                 nodes.push({
                   id: altId,
                   data: { label: altOp.name, type: 'alternate' },
-                  position: { x: 250 + xOffset, y: yPos },
+                  position: { x: xPos, y: 100 + yOffset },
                   type: 'default',
                   style: {
                     background: '#dbeafe',
@@ -649,18 +648,18 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
             });
           }
 
-          yPos += levelSpacing;
+          xPos += nodeSpacing;
         });
       });
     } else {
-      // Step-level flowchart
+      // Step-level flowchart (horizontal)
       currentProject.phases.forEach((phase) => {
         phase.operations.forEach((operation) => {
           // Add operation header
           nodes.push({
             id: `op-header-${operation.id}`,
             data: { label: `${phase.name} > ${operation.name}` },
-            position: { x: 0, y: yPos },
+            position: { x: xPos, y: 0 },
             type: 'default',
             style: {
               background: '#e0e7ff',
@@ -671,7 +670,7 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
               width: 200,
             },
           });
-          yPos += levelSpacing / 2;
+          xPos += nodeSpacing / 2;
 
           operation.steps.forEach((step, stepIndex) => {
             const config = flowConfigs[step.id];
@@ -686,7 +685,7 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
                 type: nodeType,
                 prompt: config?.decisionPrompt
               },
-              position: { x: 250, y: yPos },
+              position: { x: xPos, y: 100 },
               type: 'default',
               style: {
                 background: config?.type === 'if-necessary' ? '#fef3c7' : 
@@ -725,13 +724,13 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
             // Add alternate branches
             if (config?.alternateIds) {
               config.alternateIds.forEach((altId, altIndex) => {
-                const xOffset = (altIndex + 1) * horizontalSpacing;
+                const yOffset = (altIndex + 1) * verticalSpacing;
                 const altStep = operation.steps.find(s => s.id === altId);
                 if (altStep && !nodes.find(n => n.id === altId)) {
                   nodes.push({
                     id: altId,
                     data: { label: altStep.step, type: 'alternate' },
-                    position: { x: 250 + xOffset, y: yPos },
+                    position: { x: xPos, y: 100 + yOffset },
                     type: 'default',
                     style: {
                       background: '#dbeafe',
@@ -756,10 +755,10 @@ export const DecisionTreeManager: React.FC<DecisionTreeManagerProps> = ({
               });
             }
 
-            yPos += levelSpacing * 0.7;
+            xPos += nodeSpacing * 0.7;
           });
 
-          yPos += levelSpacing / 2;
+          xPos += nodeSpacing / 2;
         });
       });
     }

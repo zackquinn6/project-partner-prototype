@@ -239,11 +239,6 @@ export function UnifiedProjectManagement() {
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "New draft revision created!",
-      });
-
       setCreateRevisionDialogOpen(false);
       setRevisionNotes('');
       fetchProjects();
