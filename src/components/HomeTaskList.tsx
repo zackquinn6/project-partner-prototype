@@ -209,7 +209,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[90vw] max-w-[90vw] md:max-w-[90vw] max-h-[90vh] p-0 overflow-hidden flex flex-col">
+        <DialogContent className="w-[90vw] max-w-[90vw] md:max-w-[90vw] h-[90vh] p-0 overflow-hidden flex flex-col">
           <DialogHeader className="px-4 pt-4 pb-2 border-b flex-shrink-0">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-sm font-semibold">Home Task Manager</DialogTitle>
@@ -242,14 +242,14 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
 
           <div className="flex-1 overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="mx-4 mt-2 w-auto grid grid-cols-3 text-xs h-8">
+              <TabsList className="mx-4 mt-2 mb-2 w-auto grid grid-cols-3 text-xs h-8 flex-shrink-0">
                 <TabsTrigger value="tasks" className="text-xs">Tasks</TabsTrigger>
                 <TabsTrigger value="people" className="text-xs">Team</TabsTrigger>
                 <TabsTrigger value="schedule" className="text-xs">Schedule</TabsTrigger>
               </TabsList>
 
-              <div className="flex-1 overflow-auto px-4 pb-4">
-                <TabsContent value="tasks" className="mt-3 space-y-3">
+              <div className="flex-1 overflow-auto px-4 pb-4 min-h-0">
+                <TabsContent value="tasks" className="mt-0 space-y-3 h-full">
                   <div className="flex justify-end">
                     <Button onClick={() => setShowAddTask(true)} size="sm" className="h-8 text-xs">
                       <Plus className="h-3 w-3 mr-1" />
@@ -364,7 +364,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                   />
                 </TabsContent>
 
-                <TabsContent value="people" className="mt-3">
+                <TabsContent value="people" className="mt-0 h-full">
                   {user && (
                     <HomeTaskPeople
                       userId={user.id}
@@ -373,7 +373,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                   )}
                 </TabsContent>
 
-                <TabsContent value="schedule" className="mt-3">
+                <TabsContent value="schedule" className="mt-0 h-full">
                   {user && (
                     <HomeTaskScheduler
                       userId={user.id}

@@ -33,7 +33,7 @@ export const AdminWorkflowEditor: React.FC<AdminWorkflowEditorProps> = ({
   const [editingPhases, setEditingPhases] = useState<Phase[]>(phases);
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
   const [editingOperation, setEditingOperation] = useState<{ phaseId: string; operationId: string } | null>(null);
-  const [detailLevel, setDetailLevel] = useState<'quick' | 'detailed' | 'contractor'>('detailed');
+  const [stepDetailLevels, setStepDetailLevels] = useState<Record<string, 'quick' | 'detailed' | 'contractor'>>({});
 
   const updateOperationFlowType = (phaseId: string, operationId: string, flowType: string) => {
     setEditingPhases(prev => prev.map(phase => {
@@ -103,25 +103,10 @@ export const AdminWorkflowEditor: React.FC<AdminWorkflowEditorProps> = ({
               <p className="text-muted-foreground">Configure operation types and decision prompts</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Label className="text-sm font-medium">Step Content Detail:</Label>
-              <Select value={detailLevel} onValueChange={(value: any) => setDetailLevel(value)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="quick">Quick</SelectItem>
-                  <SelectItem value="detailed">Detailed</SelectItem>
-                  <SelectItem value="contractor">Contractor</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={handleSave}>
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
-            </Button>
-          </div>
+          <Button onClick={handleSave}>
+            <Save className="w-4 h-4 mr-2" />
+            Save Changes
+          </Button>
         </div>
       </div>
 
@@ -218,30 +203,46 @@ export const AdminWorkflowEditor: React.FC<AdminWorkflowEditorProps> = ({
 
                             <div className="space-y-3 pt-3 border-t">
                               <div>
-                                <Label className="text-sm font-semibold">
-                                  Step Content - {detailLevel.charAt(0).toUpperCase() + detailLevel.slice(1)} Level
-                                </Label>
+                                <Label className="text-sm font-semibold">Step Content</Label>
                                 <p className="text-xs text-muted-foreground mb-3">
-                                  Viewing {detailLevel} level instructions. Change detail level at the top to view other levels.
+                                  Configure instruction content for each detail level. Each step can have different content for Quick, Detailed, and Contractor levels.
                                 </p>
                               </div>
                               
-                              {operation.steps.map((step, stepIndex) => (
-                                <Card key={step.id} className="p-3 bg-muted/50">
-                                  <div className="space-y-2">
-                                    <div className="font-medium text-sm">
-                                      Step {stepIndex + 1}: {step.step}
+                              {operation.steps.map((step, stepIndex) => {
+                                const detailLevel = stepDetailLevels[step.id] || 'detailed';
+                                return (
+                                  <Card key={step.id} className="p-3 bg-muted/50">
+                                    <div className="space-y-2">
+                                      <div className="flex items-center justify-between">
+                                        <div className="font-medium text-sm">
+                                          Step {stepIndex + 1}: {step.step}
+                                        </div>
+                                        <Select 
+                                          value={detailLevel} 
+                                          onValueChange={(value: any) => setStepDetailLevels(prev => ({ ...prev, [step.id]: value }))}
+                                        >
+                                          <SelectTrigger className="w-[140px] h-7 text-xs">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="quick">Quick</SelectItem>
+                                            <SelectItem value="detailed">Detailed</SelectItem>
+                                            <SelectItem value="contractor">Contractor</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                      <Alert className="py-2">
+                                        <AlertDescription className="text-xs">
+                                          <strong>{detailLevel.charAt(0).toUpperCase() + detailLevel.slice(1)}</strong> level instructions 
+                                          are stored in the <strong>step_instructions</strong> table with instruction_level='{detailLevel}'. 
+                                          Use the Step Content Editor or database to manage content for this level.
+                                        </AlertDescription>
+                                      </Alert>
                                     </div>
-                                    <Alert className="py-2">
-                                      <AlertDescription className="text-xs">
-                                        <strong>{detailLevel.charAt(0).toUpperCase() + detailLevel.slice(1)}</strong> level instructions 
-                                        are stored in the <strong>step_instructions</strong> table with instruction_level='{detailLevel}'. 
-                                        Use the Step Content Editor or database to manage content for this level.
-                                      </AlertDescription>
-                                    </Alert>
-                                  </div>
-                                </Card>
-                              ))}
+                                  </Card>
+                                );
+                              })}
                             </div>
 
                             <div className="flex items-center gap-2 pt-2 border-t">
