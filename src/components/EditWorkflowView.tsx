@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useProject } from '@/contexts/ProjectContext';
 import { WorkflowStep, Tool, Material, Output, ContentSection, Phase, Operation, Project, AppReference } from '@/interfaces/Project';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -88,6 +88,8 @@ export default function EditWorkflowView({
   const [showStructureManager, setShowStructureManager] = useState(false);
   const [processImprovementOpen, setProcessImprovementOpen] = useState(false);
   const [instructionLevel, setInstructionLevel] = useState<'quick' | 'detailed' | 'contractor'>('detailed');
+  const [levelSpecificContent, setLevelSpecificContent] = useState<ContentSection[] | null>(null);
+  const [isLoadingContent, setIsLoadingContent] = useState(false);
 
   // Structure editing state
   const [editingPhase, setEditingPhase] = useState<Phase | null>(null);
@@ -142,6 +144,44 @@ export default function EditWorkflowView({
       });
     }
   }, [currentStep?.id]);
+
+  // Load instruction content based on selected level
+  const loadInstructionContent = useCallback(async () => {
+    if (!editingStep?.id || !editMode) return;
+    
+    setIsLoadingContent(true);
+    try {
+      const { data, error } = await supabase
+        .from('step_instructions')
+        .select('content')
+        .eq('template_step_id', editingStep.id)
+        .eq('instruction_level', instructionLevel)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading instruction content:', error);
+        setLevelSpecificContent(null);
+      } else if (data?.content) {
+        // Content is stored as Json, convert to ContentSection[]
+        const content = Array.isArray(data.content) ? data.content as unknown as ContentSection[] : null;
+        setLevelSpecificContent(content);
+      } else {
+        setLevelSpecificContent(null);
+      }
+    } catch (err) {
+      console.error('Exception loading instruction content:', err);
+      setLevelSpecificContent(null);
+    } finally {
+      setIsLoadingContent(false);
+    }
+  }, [editingStep?.id, instructionLevel, editMode]);
+
+  // Load content when instruction level changes or step changes
+  useEffect(() => {
+    if (editMode) {
+      loadInstructionContent();
+    }
+  }, [instructionLevel, editingStep?.id, editMode, loadInstructionContent]);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -311,13 +351,24 @@ export default function EditWorkflowView({
       contentSectionsLength: step.contentSections?.length,
       contentSections: step.contentSections,
       contentType: (step as any).contentType,
-      editMode
+      editMode,
+      instructionLevel,
+      levelSpecificContent: levelSpecificContent?.length
     });
     if (editMode && editingStep) {
-      // Parse existing content sections or create default
+      // Use level-specific content if available, otherwise use default step content
       let contentSections: ContentSection[] = [];
+      
+      if (isLoadingContent) {
+        return <div className="flex items-center justify-center h-32">
+          <p className="text-muted-foreground">Loading {instructionLevel} level content...</p>
+        </div>;
+      }
+      
       try {
-        if (editingStep.contentSections) {
+        if (levelSpecificContent && levelSpecificContent.length > 0) {
+          contentSections = levelSpecificContent;
+        } else if (editingStep.contentSections) {
           contentSections = editingStep.contentSections;
         } else if (editingStep.content) {
           // Migrate existing content to new format
@@ -334,8 +385,37 @@ export default function EditWorkflowView({
       } catch (e) {
         contentSections = [];
       }
+      
       return <div className="space-y-6">
-          <MultiContentEditor sections={contentSections} onChange={sections => updateEditingStep('contentSections', sections)} />
+          <MultiContentEditor 
+            sections={contentSections} 
+            onChange={async (sections) => {
+              // Save to step_instructions table with the current instruction level
+              try {
+                const { error } = await supabase
+                  .from('step_instructions')
+                  .upsert({
+                    template_step_id: editingStep.id,
+                    instruction_level: instructionLevel,
+                    content: sections as any,
+                    updated_at: new Date().toISOString()
+                  }, {
+                    onConflict: 'template_step_id,instruction_level'
+                  });
+
+                if (error) {
+                  console.error('Error saving instruction content:', error);
+                  toast.error('Failed to save content');
+                } else {
+                  setLevelSpecificContent(sections);
+                  toast.success(`${instructionLevel.charAt(0).toUpperCase() + instructionLevel.slice(1)} content saved`);
+                }
+              } catch (err) {
+                console.error('Exception saving instruction content:', err);
+                toast.error('Failed to save content');
+              }
+            }} 
+          />
         </div>;
     }
 
@@ -554,13 +634,6 @@ export default function EditWorkflowView({
                     </div>
                   </CardHeader>
                   <CardContent className="p-8">
-                    <div className="mb-4 p-3 bg-muted/50 rounded-md border border-muted">
-                      <p className="text-xs text-muted-foreground">
-                        <strong>Current Level: {instructionLevel.charAt(0).toUpperCase() + instructionLevel.slice(1)}</strong>
-                        {' - '}Content for this instruction level is stored in the <strong>step_instructions</strong> table with instruction_level='{instructionLevel}'. 
-                        When users select their preferred instruction level in project runs, they will see the corresponding content.
-                      </p>
-                    </div>
                     {renderContent(currentStep)}
                   </CardContent>
                 </Card>
