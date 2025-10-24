@@ -33,6 +33,7 @@ export const AdminWorkflowEditor: React.FC<AdminWorkflowEditorProps> = ({
   const [editingPhases, setEditingPhases] = useState<Phase[]>(phases);
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
   const [editingOperation, setEditingOperation] = useState<{ phaseId: string; operationId: string } | null>(null);
+  const [detailLevel, setDetailLevel] = useState<'quick' | 'detailed' | 'contractor'>('detailed');
 
   const updateOperationFlowType = (phaseId: string, operationId: string, flowType: string) => {
     setEditingPhases(prev => prev.map(phase => {
@@ -102,10 +103,25 @@ export const AdminWorkflowEditor: React.FC<AdminWorkflowEditorProps> = ({
               <p className="text-muted-foreground">Configure operation types and decision prompts</p>
             </div>
           </div>
-          <Button onClick={handleSave}>
-            <Save className="w-4 h-4 mr-2" />
-            Save Changes
-          </Button>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Label className="text-sm font-medium">Step Content Detail:</Label>
+              <Select value={detailLevel} onValueChange={(value: any) => setDetailLevel(value)}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="quick">Quick</SelectItem>
+                  <SelectItem value="detailed">Detailed</SelectItem>
+                  <SelectItem value="contractor">Contractor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={handleSave}>
+              <Save className="w-4 h-4 mr-2" />
+              Save Changes
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -202,9 +218,11 @@ export const AdminWorkflowEditor: React.FC<AdminWorkflowEditorProps> = ({
 
                             <div className="space-y-3 pt-3 border-t">
                               <div>
-                                <Label className="text-sm font-semibold">Step Content Detail Levels</Label>
+                                <Label className="text-sm font-semibold">
+                                  Step Content - {detailLevel.charAt(0).toUpperCase() + detailLevel.slice(1)} Level
+                                </Label>
                                 <p className="text-xs text-muted-foreground mb-3">
-                                  Configure instruction content for each detail level in the database. Tools, materials, outputs remain the same.
+                                  Viewing {detailLevel} level instructions. Change detail level at the top to view other levels.
                                 </p>
                               </div>
                               
@@ -216,8 +234,9 @@ export const AdminWorkflowEditor: React.FC<AdminWorkflowEditorProps> = ({
                                     </div>
                                     <Alert className="py-2">
                                       <AlertDescription className="text-xs">
-                                        Instruction content for Quick/Detailed/Contractor levels is stored in the <strong>step_instructions</strong> table. 
-                                        Use the Step Content Editor or database to manage content for each level.
+                                        <strong>{detailLevel.charAt(0).toUpperCase() + detailLevel.slice(1)}</strong> level instructions 
+                                        are stored in the <strong>step_instructions</strong> table with instruction_level='{detailLevel}'. 
+                                        Use the Step Content Editor or database to manage content for this level.
                                       </AlertDescription>
                                     </Alert>
                                   </div>

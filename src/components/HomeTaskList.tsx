@@ -209,7 +209,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[90vw] max-w-[90vw] max-h-[90vh] p-0 overflow-hidden flex flex-col">
+        <DialogContent className="w-[90vw] max-w-[90vw] md:max-w-[90vw] max-h-[90vh] p-0 overflow-hidden flex flex-col">
           <DialogHeader className="px-4 pt-4 pb-2 border-b flex-shrink-0">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-sm font-semibold">Home Task Manager</DialogTitle>
