@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Home as HomeIcon, X } from "lucide-react";
+import { Plus, Home as HomeIcon, X, GripVertical, List, ListOrdered } from "lucide-react";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HomeManager } from "./HomeManager";
@@ -47,6 +48,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   const [selectedTask, setSelectedTask] = useState<HomeTask | null>(null);
   const [showProjectLink, setShowProjectLink] = useState(false);
   const [activeTab, setActiveTab] = useState('tasks');
+  const [subtasksOrdered, setSubtasksOrdered] = useState(false);
   const [subtasks, setSubtasks] = useState<Array<{ 
     id: string; 
     title: string; 
@@ -291,6 +293,16 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
     setSubtasks(subtasks.filter(st => st.id !== id));
   };
 
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    
+    const items = Array.from(subtasks);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    setSubtasks(items);
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -395,72 +407,109 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                           <div className="space-y-2 border-t pt-3">
                             <div className="flex items-center justify-between">
                               <label className="text-xs font-medium">Subtasks</label>
-                              <Button type="button" variant="outline" size="sm" onClick={addSubtask} className="h-7 text-xs">
-                                <Plus className="h-3 w-3 mr-1" />
-                                New Subtask
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button 
+                                  type="button"
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => setSubtasksOrdered(!subtasksOrdered)} 
+                                  className="h-7 text-xs"
+                                >
+                                  {subtasksOrdered ? <ListOrdered className="h-3 w-3 mr-1" /> : <List className="h-3 w-3 mr-1" />}
+                                  {subtasksOrdered ? 'Ordered' : 'Unordered'}
+                                </Button>
+                                <Button type="button" variant="outline" size="sm" onClick={addSubtask} className="h-7 text-xs">
+                                  <Plus className="h-3 w-3 mr-1" />
+                                  New Subtask
+                                </Button>
+                              </div>
                             </div>
                             {subtasks.length > 0 && (
-                              <div className="border rounded-md overflow-hidden">
-                                <table className="w-full text-xs">
-                                  <thead className="bg-muted">
-                                    <tr>
-                                      <th className="text-left p-2 font-medium">Task Name</th>
-                                      <th className="text-left p-2 font-medium w-24">Hours</th>
-                                      <th className="text-left p-2 font-medium w-28">DIY Level</th>
-                                      <th className="w-8"></th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {subtasks.map((subtask) => (
-                                      <tr key={subtask.id} className="border-t">
-                                        <td className="p-2">
-                                          <Input
-                                            value={subtask.title}
-                                            onChange={(e) => updateSubtask(subtask.id, 'title', e.target.value)}
-                                            placeholder="Subtask name"
-                                            className="h-7 text-xs"
-                                          />
-                                        </td>
-                                        <td className="p-2">
-                                          <Input
-                                            type="number"
-                                            min="0.25"
-                                            step="0.25"
-                                            value={subtask.estimated_hours}
-                                            onChange={(e) => updateSubtask(subtask.id, 'estimated_hours', parseFloat(e.target.value))}
-                                            className="h-7 text-xs"
-                                          />
-                                        </td>
-                                        <td className="p-2">
-                                          <Select value={subtask.diy_level} onValueChange={(val) => updateSubtask(subtask.id, 'diy_level', val)}>
-                                            <SelectTrigger className="h-7 text-xs">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="beginner">Beginner</SelectItem>
-                                              <SelectItem value="intermediate">Intermediate</SelectItem>
-                                              <SelectItem value="advanced">Advanced</SelectItem>
-                                              <SelectItem value="pro">Professional</SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                        </td>
-                                        <td className="p-2">
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => removeSubtask(subtask.id)}
-                                            className="h-6 w-6 p-0 text-destructive"
-                                          >
-                                            <X className="h-3 w-3" />
-                                          </Button>
-                                        </td>
+                              <DragDropContext onDragEnd={handleDragEnd}>
+                                <div className="border rounded-md overflow-hidden">
+                                  <table className="w-full text-xs">
+                                    <thead className="bg-muted">
+                                      <tr>
+                                        <th className="w-8"></th>
+                                        {subtasksOrdered && <th className="text-left p-2 font-medium w-12">#</th>}
+                                        <th className="text-left p-2 font-medium">Task Name</th>
+                                        <th className="text-left p-2 font-medium w-24">Hours</th>
+                                        <th className="text-left p-2 font-medium w-28">DIY Level</th>
+                                        <th className="w-8"></th>
                                       </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
+                                    </thead>
+                                    <Droppable droppableId="subtasks">
+                                      {(provided) => (
+                                        <tbody {...provided.droppableProps} ref={provided.innerRef}>
+                                          {subtasks.map((subtask, index) => (
+                                            <Draggable key={subtask.id} draggableId={subtask.id} index={index}>
+                                              {(provided) => (
+                                                <tr
+                                                  ref={provided.innerRef}
+                                                  {...provided.draggableProps}
+                                                  className="border-t"
+                                                >
+                                                  <td className="p-2" {...provided.dragHandleProps}>
+                                                    <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
+                                                  </td>
+                                                  {subtasksOrdered && (
+                                                    <td className="p-2 font-medium text-muted-foreground">
+                                                      {index + 1}
+                                                    </td>
+                                                  )}
+                                                  <td className="p-2">
+                                                    <Input
+                                                      value={subtask.title}
+                                                      onChange={(e) => updateSubtask(subtask.id, 'title', e.target.value)}
+                                                      placeholder="Subtask name"
+                                                      className="h-7 text-xs"
+                                                    />
+                                                  </td>
+                                                  <td className="p-2">
+                                                    <Input
+                                                      type="number"
+                                                      min="0.25"
+                                                      step="0.25"
+                                                      value={subtask.estimated_hours}
+                                                      onChange={(e) => updateSubtask(subtask.id, 'estimated_hours', parseFloat(e.target.value))}
+                                                      className="h-7 text-xs"
+                                                    />
+                                                  </td>
+                                                  <td className="p-2">
+                                                    <Select value={subtask.diy_level} onValueChange={(val) => updateSubtask(subtask.id, 'diy_level', val)}>
+                                                      <SelectTrigger className="h-7 text-xs">
+                                                        <SelectValue />
+                                                      </SelectTrigger>
+                                                      <SelectContent>
+                                                        <SelectItem value="beginner">Beginner</SelectItem>
+                                                        <SelectItem value="intermediate">Intermediate</SelectItem>
+                                                        <SelectItem value="advanced">Advanced</SelectItem>
+                                                        <SelectItem value="pro">Professional</SelectItem>
+                                                      </SelectContent>
+                                                    </Select>
+                                                  </td>
+                                                  <td className="p-2">
+                                                    <Button
+                                                      type="button"
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={() => removeSubtask(subtask.id)}
+                                                      className="h-6 w-6 p-0 text-destructive"
+                                                    >
+                                                      <X className="h-3 w-3" />
+                                                    </Button>
+                                                  </td>
+                                                </tr>
+                                              )}
+                                            </Draggable>
+                                          ))}
+                                          {provided.placeholder}
+                                        </tbody>
+                                      )}
+                                    </Droppable>
+                                  </table>
+                                </div>
+                              </DragDropContext>
                             )}
                           </div>
                         )}
