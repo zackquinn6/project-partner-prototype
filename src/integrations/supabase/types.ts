@@ -863,6 +863,7 @@ export type Database = {
           home_id: string | null
           id: string
           notes: string | null
+          ordered: boolean
           priority: string
           project_run_id: string | null
           status: string
@@ -879,6 +880,7 @@ export type Database = {
           home_id?: string | null
           id?: string
           notes?: string | null
+          ordered?: boolean
           priority?: string
           project_run_id?: string | null
           status?: string
@@ -895,6 +897,7 @@ export type Database = {
           home_id?: string | null
           id?: string
           notes?: string | null
+          ordered?: boolean
           priority?: string
           project_run_id?: string | null
           status?: string

@@ -3,6 +3,7 @@ interface Task {
   title: string;
   diy_level: 'beginner' | 'intermediate' | 'advanced' | 'pro';
   priority?: 'high' | 'medium' | 'low';
+  ordered?: boolean;
   subtasks: Subtask[];
 }
 
@@ -83,14 +84,22 @@ export function scheduleHomeTasksOptimized(
     hours: number;
     diyLevel: 'beginner' | 'intermediate' | 'advanced' | 'pro';
     priority: 'high' | 'medium' | 'low';
+    ordered: boolean;
+    orderIndex?: number;
+    dependsOn?: string | null; // subtaskId that must be completed first
   }
 
   const workUnits: WorkUnit[] = [];
   
   for (const task of tasks) {
     const taskPriority = task.priority || 'medium';
+    const taskOrdered = task.ordered || false;
+    
     if (task.subtasks.length > 0) {
-      for (const subtask of task.subtasks) {
+      for (let i = 0; i < task.subtasks.length; i++) {
+        const subtask = task.subtasks[i];
+        const prevSubtask = i > 0 ? task.subtasks[i - 1] : null;
+        
         workUnits.push({
           taskId: task.id,
           taskTitle: task.title,
@@ -98,7 +107,10 @@ export function scheduleHomeTasksOptimized(
           subtaskTitle: subtask.title,
           hours: subtask.estimated_hours,
           diyLevel: subtask.diy_level,
-          priority: taskPriority
+          priority: taskPriority,
+          ordered: taskOrdered,
+          orderIndex: i,
+          dependsOn: taskOrdered && prevSubtask ? prevSubtask.id : null
         });
       }
     } else {
@@ -110,7 +122,10 @@ export function scheduleHomeTasksOptimized(
         subtaskTitle: task.title,
         hours: 1,
         diyLevel: task.diy_level,
-        priority: taskPriority
+        priority: taskPriority,
+        ordered: false,
+        orderIndex: 0,
+        dependsOn: null
       });
     }
   }
@@ -144,6 +159,10 @@ export function scheduleHomeTasksOptimized(
     consecutiveDaysWorked: 0
   }));
 
+  // Track completed work units (by subtaskId) for ordered dependencies
+  const completedSubtasks = new Set<string>();
+  const subtaskCompletionDates = new Map<string, Date>();
+
   // Initialize availability for next 90 days (starting day after startDate)
   const currentDate = new Date(startDate);
   for (let dayOffset = 1; dayOffset < 91; dayOffset++) {
@@ -169,8 +188,22 @@ export function scheduleHomeTasksOptimized(
 
   // Assign work units
   for (const unit of workUnits) {
+    // Check if this unit has an ordering dependency
+    if (unit.ordered && unit.dependsOn && !completedSubtasks.has(unit.dependsOn)) {
+      unassigned.push({
+        taskId: unit.taskId,
+        taskTitle: unit.taskTitle,
+        subtaskId: unit.subtaskId,
+        reason: `Waiting for previous subtask to complete (ordered task)`
+      });
+      continue;
+    }
+
     let remainingHours = unit.hours;
     let assigned = false;
+    let earliestStart = unit.dependsOn && subtaskCompletionDates.has(unit.dependsOn) 
+      ? subtaskCompletionDates.get(unit.dependsOn)!
+      : new Date(startDate);
 
     // Find best person for this task
     const eligiblePeople = availability
@@ -210,7 +243,10 @@ export function scheduleHomeTasksOptimized(
     // Try to assign to best-match person
     for (const personAvail of eligiblePeople) {
       const sortedDates = Array.from(personAvail.availableHoursByDay.entries())
-        .filter(([, hours]) => hours > 0)
+        .filter(([dateStr, hours]) => {
+          const date = new Date(dateStr);
+          return hours > 0 && date >= earliestStart; // Respect earliestStart for ordered tasks
+        })
         .sort(([dateA], [dateB]) => dateA.localeCompare(dateB));
 
       for (const [dateStr, availHours] of sortedDates) {
@@ -250,9 +286,23 @@ export function scheduleHomeTasksOptimized(
         personAvail.lastWorkDay = schedDate;
         remainingHours -= hoursToAssign;
         assigned = true;
+
+        // Track the latest completion date for this subtask for ordering
+        if (unit.subtaskId) {
+          const currentLatest = subtaskCompletionDates.get(unit.subtaskId);
+          if (!currentLatest || schedDate > currentLatest) {
+            subtaskCompletionDates.set(unit.subtaskId, schedDate);
+          }
+        }
       }
 
-      if (remainingHours <= 0) break;
+      if (remainingHours <= 0) {
+        // Mark this subtask as completed
+        if (unit.subtaskId) {
+          completedSubtasks.add(unit.subtaskId);
+        }
+        break;
+      }
     }
 
     if (remainingHours > 0) {

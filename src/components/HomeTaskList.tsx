@@ -28,6 +28,7 @@ interface HomeTask {
   home_id: string | null;
   task_type: 'general' | 'pre_sale' | 'diy' | 'contractor';
   project_run_id: string | null;
+  ordered: boolean;
   created_at: string;
 }
 
@@ -49,6 +50,20 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   const [showProjectLink, setShowProjectLink] = useState(false);
   const [activeTab, setActiveTab] = useState('tasks');
   const [subtasks, setSubtasks] = useState<Array<{ id: string; title: string; estimated_hours: number; diy_level: 'beginner' | 'intermediate' | 'advanced' | 'professional' }>>([]);
+  
+  const handleOrderedChange = async (ordered: boolean) => {
+    if (!selectedTask) return;
+    
+    const { error } = await supabase
+      .from('home_tasks')
+      .update({ ordered })
+      .eq('id', selectedTask.id);
+    
+    if (!error) {
+      setSelectedTask({ ...selectedTask, ordered });
+      fetchTasks();
+    }
+  };
   
   const [formData, setFormData] = useState<{
     title: string;
@@ -523,6 +538,8 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
             taskTitle={selectedTask.title}
             userId={user?.id || ''}
             homeId={selectedHomeId === 'all' ? null : selectedHomeId}
+            ordered={selectedTask.ordered || false}
+            onOrderedChange={handleOrderedChange}
           />
           <HomeTaskProjectLink
             open={showProjectLink}
