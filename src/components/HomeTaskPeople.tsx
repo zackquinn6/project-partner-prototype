@@ -155,22 +155,38 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
 
       {/* Add new person form */}
       <div className="border rounded-lg p-2 md:p-3 space-y-2 bg-muted/30">
-        <div className="grid grid-cols-1 md:grid-cols-[200px,auto,auto] gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Input
             placeholder="Name"
             value={newPerson.name}
             onChange={(e) => setNewPerson({ ...newPerson, name: e.target.value })}
-            className="text-[10px] md:text-xs h-7"
+            className="text-[10px] md:text-xs h-7 w-32"
           />
+          <Select 
+            value={newPerson.diy_level} 
+            onValueChange={(val) => setNewPerson({ ...newPerson, diy_level: val as any })}
+          >
+            <SelectTrigger className="text-[10px] md:text-xs h-7 w-28">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="z-50 bg-popover">
+              <SelectItem value="beginner">Beginner</SelectItem>
+              <SelectItem value="intermediate">Intermediate</SelectItem>
+              <SelectItem value="advanced">Advanced</SelectItem>
+              <SelectItem value="professional">Professional</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="flex gap-1 items-center">
             <Input
               type="number"
               min="1"
               max="24"
               value={newPerson.available_hours}
-              onChange={(e) => setNewPerson({ ...newPerson, available_hours: parseInt(e.target.value) || 1 })}
+              onChange={(e) => {
+                const val = e.target.value === '' ? 8 : parseInt(e.target.value);
+                setNewPerson({ ...newPerson, available_hours: val });
+              }}
               className="text-[10px] md:text-xs h-7 w-12"
-              placeholder="Hrs"
             />
             <span className="text-[10px] md:text-xs whitespace-nowrap">hrs/day</span>
           </div>
@@ -181,39 +197,27 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
               min="0"
               step="0.01"
               value={newPerson.hourly_rate}
-              onChange={(e) => setNewPerson({ ...newPerson, hourly_rate: parseFloat(e.target.value) || 0 })}
-              className="text-[10px] md:text-xs h-7 w-12"
-              placeholder="Rate"
+              onChange={(e) => {
+                const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                setNewPerson({ ...newPerson, hourly_rate: val });
+              }}
+              className="text-[10px] md:text-xs h-7 w-16"
             />
             <span className="text-[10px] md:text-xs">/hr</span>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-[160px,1fr] gap-2">
-          <Select 
-            value={newPerson.diy_level} 
-            onValueChange={(val) => setNewPerson({ ...newPerson, diy_level: val as any })}
-          >
-            <SelectTrigger className="text-[10px] md:text-xs h-7">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="z-50 bg-popover">
-              <SelectItem value="beginner">Beginner</SelectItem>
-              <SelectItem value="intermediate">Intermediate</SelectItem>
-              <SelectItem value="advanced">Advanced</SelectItem>
-              <SelectItem value="professional">Professional</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-1 items-center">
             <Input
               type="number"
               min="1"
               max="7"
               value={newPerson.consecutive_days}
-              onChange={(e) => setNewPerson({ ...newPerson, consecutive_days: parseInt(e.target.value) || 1 })}
-              className="text-[10px] md:text-xs h-7 w-14"
+              onChange={(e) => {
+                const val = e.target.value === '' ? 5 : parseInt(e.target.value);
+                setNewPerson({ ...newPerson, consecutive_days: val });
+              }}
+              className="text-[10px] md:text-xs h-7 w-12"
             />
-            <span className="text-[10px] md:text-xs">consec. days</span>
+            <span className="text-[10px] md:text-xs whitespace-nowrap">consec. days</span>
           </div>
         </div>
 
