@@ -12,7 +12,7 @@ interface Subtask {
   id: string;
   title: string;
   estimated_hours: number;
-  diy_level: 'beginner' | 'intermediate' | 'pro';
+  diy_level: 'beginner' | 'intermediate' | 'advanced' | 'professional';
   completed: boolean;
   order_index: number;
   assigned_person_id: string | null;
@@ -39,7 +39,7 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
   const [newSubtask, setNewSubtask] = useState({
     title: '',
     estimated_hours: 1,
-    diy_level: 'intermediate' as 'beginner' | 'intermediate' | 'pro',
+    diy_level: 'intermediate' as 'beginner' | 'intermediate' | 'advanced' | 'professional',
     assigned_person_id: null as string | null
   });
 
@@ -193,9 +193,10 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="pro">Pro</SelectItem>
+                  <SelectItem value="beginner">New</SelectItem>
+                  <SelectItem value="intermediate">Mid</SelectItem>
+                  <SelectItem value="advanced">Adv</SelectItem>
+                  <SelectItem value="professional">Pro</SelectItem>
                 </SelectContent>
               </Select>
               <Select 
@@ -248,7 +249,10 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
                     {subtask.estimated_hours}h
                   </Badge>
                   <Badge variant="outline" className="hidden sm:inline-flex text-[10px] px-2 py-0.5 flex-shrink-0">
-                    {subtask.diy_level}
+                    {subtask.diy_level === 'beginner' ? 'new' : 
+                     subtask.diy_level === 'intermediate' ? 'mid' : 
+                     subtask.diy_level === 'advanced' ? 'adv' : 
+                     subtask.diy_level === 'professional' ? 'pro' : subtask.diy_level}
                   </Badge>
                   <Select 
                     value={subtask.assigned_person_id || "unassigned"}

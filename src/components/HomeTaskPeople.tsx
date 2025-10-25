@@ -18,7 +18,7 @@ interface Person {
   available_hours: number;
   available_days: string[];
   consecutive_days: number;
-  diy_level: 'beginner' | 'intermediate' | 'pro';
+  diy_level: 'beginner' | 'intermediate' | 'advanced' | 'professional';
   hourly_rate: number;
   not_available_dates?: string[];
 }
@@ -40,7 +40,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
     available_hours: 8,
     available_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
     consecutive_days: 5,
-    diy_level: 'intermediate' as 'beginner' | 'intermediate' | 'pro',
+    diy_level: 'intermediate' as 'beginner' | 'intermediate' | 'advanced' | 'professional',
     hourly_rate: 0
   });
 
@@ -208,9 +208,10 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="beginner">Beginner</SelectItem>
-              <SelectItem value="intermediate">Intermediate</SelectItem>
-              <SelectItem value="pro">Pro</SelectItem>
+              <SelectItem value="beginner">New</SelectItem>
+              <SelectItem value="intermediate">Mid</SelectItem>
+              <SelectItem value="advanced">Adv</SelectItem>
+              <SelectItem value="professional">Pro</SelectItem>
             </SelectContent>
           </Select>
           <div className="flex gap-2 items-center">
