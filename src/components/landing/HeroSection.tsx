@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, PlayCircle, Star } from 'lucide-react';
+import { ArrowRight, PlayCircle } from 'lucide-react';
 interface HeroSectionProps {
   onOpenDemo?: () => void;
 }
@@ -27,44 +27,46 @@ export const HeroSection = ({
         <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
           {/* Left Column - Copy */}
           <div className="text-center lg:text-left space-y-6">
-            <Badge className="bg-accent hover:bg-accent text-accent-foreground mb-4 text-sm px-4 py-2">
-              🎉 Free 7-Day Trial • No Credit Card Required
-            </Badge>
-
             <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight">
-              Stop Guessing.<br />
-              <span className="gradient-text">Start Building</span> with Confidence.
+              Make Your DIY Project Actually Finish
             </h1>
 
             <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              Get step-by-step guidance tailored to <strong className="text-foreground">YOUR skill level</strong>, <strong className="text-foreground">YOUR timeline</strong>, and <strong className="text-foreground">YOUR available tools</strong>.
+              <strong className="text-foreground">Predictable, repeatable, and built for humans.</strong> Aggregate expert videos, step-by-step process content, tools, materials, and risk planning into a single, playable project workflow.
             </p>
 
-            <p className="text-base text-muted-foreground">Join DIYers who've successfully completed projects they thought were impossible</p>
+            <p className="text-base text-muted-foreground italic border-l-4 border-accent pl-4 my-6">
+              "I want to run a DIY project and I want it to be successful."
+            </p>
 
-            {/* Trust badge */}
-            <div className="flex items-center justify-center lg:justify-start gap-2 mb-8">
-              <div className="flex text-accent">
-                {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 fill-current" />)}
-              </div>
-              <span className="text-sm text-muted-foreground font-medium">4.8/5 from 500+ DIYers</span>
+            {/* Benefit Badges */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-8">
+              <Badge className="bg-card border-2 border-primary text-primary px-4 py-2 text-sm font-semibold">
+                Predictable
+              </Badge>
+              <Badge className="bg-card border-2 border-primary text-primary px-4 py-2 text-sm font-semibold">
+                Playable
+              </Badge>
+              <Badge className="bg-card border-2 border-primary text-primary px-4 py-2 text-sm font-semibold">
+                Auditable
+              </Badge>
             </div>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button size="xl" className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300" onClick={() => navigate('/auth?mode=signup')}>
-                Start Your First Project Free
+                Start a Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
 
               <Button variant="outline" size="xl" className="border-2 hover:bg-muted" onClick={onOpenDemo}>
                 <PlayCircle className="mr-2 h-5 w-5" />
-                See How It Works
+                Request a Demo
               </Button>
             </div>
 
             <p className="text-xs text-muted-foreground mt-4">
-              ✓ No credit card required • ✓ 7-day free trial • ✓ Cancel anytime
+              ✓ 14-day free trial • ✓ No credit card required • ✓ Cancel anytime
             </p>
           </div>
 

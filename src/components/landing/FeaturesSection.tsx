@@ -1,46 +1,47 @@
-import { useState } from 'react';
 import { Card, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Target, Calculator, HelpCircle, Home, Calendar, Wrench, ShoppingCart, Users, FileText, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
+import { useState } from 'react';
+
 export const FeaturesSection = () => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const coreFeatures = [
     {
-      icon: Target,
-      title: "Smart Project Planner",
-      description: "Get a customized roadmap for any project, adjusted to your experience level",
-      badge: "Personalized Workflows",
+      icon: FileText,
+      title: "Process Library & Templates",
+      description: "Curated, categorized workflows from top videos and expert content",
+      badge: "Repeatable Workflows",
       color: "bg-primary"
     },
     {
       icon: Calculator,
-      title: "Tool & Material Calculator",
-      description: "Know exactly what to buy—no waste, no multiple trips to the store",
-      badge: "Zero Waste Shopping",
+      title: "Materials Rollup & Scaling",
+      description: "Dynamic bills of materials that scale to unit count and site specifics",
+      badge: "Cost Control",
       color: "bg-accent"
     },
     {
-      icon: HelpCircle,
-      title: "Expert Help on Demand",
-      description: "Stuck? Get help from real contractors and experienced DIYers",
-      badge: "Human Support",
-      color: "bg-purple-600"
+      icon: Calendar,
+      title: "Time Estimates & Scheduling",
+      description: "Realistic durations, buffer logic, and calendar coordination",
+      badge: "Stay On Track",
+      color: "bg-green-600"
     }
   ];
 
   const additionalFeatures = [
-    { icon: Home, label: "Home Maintenance" },
-    { icon: Calendar, label: "Project Scheduler" },
-    { icon: Wrench, label: "Tool Rentals" },
-    { icon: ShoppingCart, label: "Materials Ordering" },
-    { icon: Users, label: "Contractor Finder" },
-    { icon: FileText, label: "Project Analytics" },
-    { icon: TrendingUp, label: "Progress Tracking" },
-    { icon: Target, label: "Risk Manager" }
+    { icon: Target, label: "Layered Instructions" },
+    { icon: Wrench, label: "Tool Library & Lists" },
+    { icon: TrendingUp, label: "Risk Management" },
+    { icon: Users, label: "Mobile-First Execution" },
+    { icon: HelpCircle, label: "Scenario Planning" },
+    { icon: ShoppingCart, label: "Checkout-Ready Lists" },
+    { icon: FileText, label: "Evidence Logs" },
+    { icon: Home, label: "Safety Checks" }
   ];
 
   return (
@@ -48,10 +49,10 @@ export const FeaturesSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-            Everything You Need to Succeed
+            Core Product Promise
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Powerful tools that work together to guide you from start to finish
+            Convert scattered videos and advice into a living, auditable workflow you can assign, track, and finish
           </p>
         </div>
 
