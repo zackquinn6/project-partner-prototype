@@ -3,10 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, CalendarIcon, Edit2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface Person {
   id: string;
@@ -16,6 +20,7 @@ interface Person {
   consecutive_days: number;
   diy_level: 'beginner' | 'intermediate' | 'pro';
   hourly_rate: number;
+  not_available_dates?: string[];
 }
 
 interface HomeTaskPeopleProps {
@@ -28,6 +33,8 @@ const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'
 
 export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopleProps) {
   const [people, setPeople] = useState<Person[]>([]);
+  const [editingPersonId, setEditingPersonId] = useState<string | null>(null);
+  const [editingDates, setEditingDates] = useState<Date[]>([]);
   const [newPerson, setNewPerson] = useState({
     name: '',
     available_hours: 8,
@@ -118,6 +125,36 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
         ? prev.available_days.filter(d => d !== day)
         : [...prev.available_days, day]
     }));
+  };
+
+  const handleEditDates = (person: Person) => {
+    setEditingPersonId(person.id);
+    const dates = (person.not_available_dates || []).map(d => new Date(d));
+    setEditingDates(dates);
+  };
+
+  const handleSaveDates = async (personId: string) => {
+    const dateStrings = editingDates.map(d => d.toISOString().split('T')[0]);
+    
+    const { error } = await supabase
+      .from('home_task_people')
+      .update({ not_available_dates: dateStrings })
+      .eq('id', personId);
+
+    if (error) {
+      toast.error('Failed to update dates');
+      return;
+    }
+
+    toast.success('Unavailable dates updated');
+    setEditingPersonId(null);
+    fetchPeople();
+    onPeopleChange?.();
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPersonId(null);
+    setEditingDates([]);
   };
 
   return (
@@ -241,6 +278,65 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                   </div>
                   <div className="mt-1 text-[9px] md:text-[10px] text-muted-foreground">
                     {person.available_days.map(d => d.slice(0, 3)).join(', ')}
+                  </div>
+                  
+                  {/* Not Available Dates */}
+                  <div className="mt-2 pt-1.5 border-t">
+                    {editingPersonId === person.id ? (
+                      <div className="space-y-2">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full h-6 text-[10px] justify-start"
+                            >
+                              <CalendarIcon className="h-3 w-3 mr-1" />
+                              {editingDates.length > 0 ? `${editingDates.length} dates selected` : 'Select dates'}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="multiple"
+                              selected={editingDates}
+                              onSelect={(dates) => setEditingDates(dates || [])}
+                              initialFocus
+                              className="rounded-md border"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSaveDates(person.id)}
+                            className="flex-1 h-6 text-[10px]"
+                          >
+                            <Check className="h-3 w-3 mr-1" />
+                            Save
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleCancelEdit}
+                            className="flex-1 h-6 text-[10px]"
+                          >
+                            <X className="h-3 w-3 mr-1" />
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditDates(person)}
+                        className="h-6 w-full text-[10px] justify-start px-2"
+                      >
+                        <CalendarIcon className="h-3 w-3 mr-1" />
+                        Not Available: {person.not_available_dates?.length || 0} dates
+                      </Button>
+                    )}
                   </div>
                 </div>
                 <Button

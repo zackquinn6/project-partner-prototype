@@ -701,6 +701,7 @@ export type Database = {
           hourly_rate: number | null
           id: string
           name: string
+          not_available_dates: string[] | null
           updated_at: string
           user_id: string
         }
@@ -714,6 +715,7 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           name: string
+          not_available_dates?: string[] | null
           updated_at?: string
           user_id: string
         }
@@ -727,6 +729,7 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           name?: string
+          not_available_dates?: string[] | null
           updated_at?: string
           user_id?: string
         }

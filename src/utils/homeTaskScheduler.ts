@@ -21,6 +21,7 @@ interface Person {
   consecutive_days: number;
   diy_level: 'beginner' | 'intermediate' | 'pro';
   hourly_rate?: number;
+  not_available_dates?: string[];
 }
 
 interface Assignment {
@@ -152,8 +153,16 @@ export function scheduleHomeTasksOptimized(
     const dateStr = date.toISOString().split('T')[0];
 
     for (const avail of availability) {
+      // Check if person is available on this day of week
       if (avail.person.available_days.includes(dayName)) {
-        avail.availableHoursByDay.set(dateStr, avail.person.available_hours);
+        // Check if this specific date is in the person's not_available_dates
+        const isDateUnavailable = avail.person.not_available_dates?.some(
+          unavailableDate => unavailableDate === dateStr
+        );
+        
+        if (!isDateUnavailable) {
+          avail.availableHoursByDay.set(dateStr, avail.person.available_hours);
+        }
       }
     }
   }

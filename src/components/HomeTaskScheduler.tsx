@@ -21,7 +21,6 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [schedule, setSchedule] = useState<any>(null);
   const [startDate, setStartDate] = useState<Date>(new Date());
-  const [notAvailableDates, setNotAvailableDates] = useState<Date[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isEmailing, setIsEmailing] = useState(false);
   const [currentScheduleId, setCurrentScheduleId] = useState<string | null>(null);
@@ -294,34 +293,6 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
                   mode="single"
                   selected={startDate}
                   onSelect={(date) => date && setStartDate(date)}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          
-          <div className="flex-1">
-            <Label className="text-[10px] md:text-xs">Not Available Dates</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal mt-1 h-7 text-[10px] md:text-xs",
-                    notAvailableDates.length === 0 && "text-muted-foreground"
-                  )}
-                  size="sm"
-                >
-                  <CalendarIcon className="mr-1.5 h-2.5 w-2.5 md:h-3 md:w-3" />
-                  {notAvailableDates.length > 0 ? `${notAvailableDates.length} dates selected` : <span>Select dates</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 z-50 bg-popover" align="start">
-                <CalendarComponent
-                  mode="multiple"
-                  selected={notAvailableDates}
-                  onSelect={(dates) => setNotAvailableDates(dates || [])}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
                 />
