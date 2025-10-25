@@ -482,9 +482,9 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="beginner">Beginner</SelectItem>
-                                            <SelectItem value="medium">Medium</SelectItem>
-                                            <SelectItem value="high">High</SelectItem>
-                                          </SelectContent>
+                            <SelectItem value="intermediate">Intermediate</SelectItem>
+                            <SelectItem value="pro">Pro</SelectItem>
+                          </SelectContent>
                                         </Select>
                                       </td>
                                       <td className="p-2">
