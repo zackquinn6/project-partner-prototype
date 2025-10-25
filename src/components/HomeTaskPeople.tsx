@@ -10,7 +10,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { toast } from "sonner";
 
 // Helper to parse YYYY-MM-DD strings without timezone issues
 const parseLocalDate = (dateString: string): Date => {
@@ -167,7 +166,6 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
   const handleSaveEdit = async () => {
     if (!editingPerson || !editingPersonId) {
       console.error('Save failed: Missing editing person or ID');
-      toast.error('Failed to save: Missing data');
       return;
     }
 
@@ -192,12 +190,10 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
 
     if (error) {
       console.error('Save error:', error);
-      toast.error(`Failed to save: ${error.message}`);
       return;
     }
 
     console.log('Save successful');
-    toast.success('Team member updated successfully');
     setEditingPersonId(null);
     setEditingPerson(null);
     fetchPeople();
