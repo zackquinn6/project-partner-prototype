@@ -257,10 +257,12 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         type="number"
                         min="1"
                         max="24"
-                        value={editingPerson.available_hours}
+                        value={editingPerson.available_hours || 8}
                         onChange={(e) => {
-                          const val = e.target.value === '' ? '' : e.target.value;
-                          setEditingPerson({ ...editingPerson, available_hours: val === '' ? 8 : parseInt(val) });
+                          const val = e.target.valueAsNumber;
+                          if (!isNaN(val)) {
+                            setEditingPerson({ ...editingPerson, available_hours: val });
+                          }
                         }}
                         onBlur={(e) => {
                           const val = Math.max(1, Math.min(24, parseInt(e.target.value) || 8));
@@ -276,10 +278,12 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         type="number"
                         min="0"
                         step="0.01"
-                        value={editingPerson.hourly_rate}
+                        value={editingPerson.hourly_rate || 0}
                         onChange={(e) => {
-                          const val = e.target.value === '' ? '' : e.target.value;
-                          setEditingPerson({ ...editingPerson, hourly_rate: val === '' ? 0 : parseFloat(val) });
+                          const val = e.target.valueAsNumber;
+                          if (!isNaN(val)) {
+                            setEditingPerson({ ...editingPerson, hourly_rate: val });
+                          }
                         }}
                         onBlur={(e) => {
                           const val = Math.max(0, parseFloat(e.target.value) || 0);
@@ -294,10 +298,12 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         type="number"
                         min="1"
                         max="7"
-                        value={editingPerson.consecutive_days}
+                        value={editingPerson.consecutive_days || 5}
                         onChange={(e) => {
-                          const val = e.target.value === '' ? '' : e.target.value;
-                          setEditingPerson({ ...editingPerson, consecutive_days: val === '' ? 5 : parseInt(val) });
+                          const val = e.target.valueAsNumber;
+                          if (!isNaN(val)) {
+                            setEditingPerson({ ...editingPerson, consecutive_days: val });
+                          }
                         }}
                         onBlur={(e) => {
                           const val = Math.max(1, Math.min(7, parseInt(e.target.value) || 5));
@@ -562,10 +568,12 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                 type="number"
                 min="1"
                 max="24"
-                value={newPerson.available_hours}
+                value={newPerson.available_hours || 8}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? '' : e.target.value;
-                  setNewPerson({ ...newPerson, available_hours: val === '' ? 8 : parseInt(val) });
+                  const val = e.target.valueAsNumber;
+                  if (!isNaN(val)) {
+                    setNewPerson({ ...newPerson, available_hours: val });
+                  }
                 }}
                 onBlur={(e) => {
                   const val = Math.max(1, Math.min(24, parseInt(e.target.value) || 8));
@@ -581,10 +589,12 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                 type="number"
                 min="0"
                 step="0.01"
-                value={newPerson.hourly_rate}
+                value={newPerson.hourly_rate || 0}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? '' : e.target.value;
-                  setNewPerson({ ...newPerson, hourly_rate: val === '' ? 0 : parseFloat(val) });
+                  const val = e.target.valueAsNumber;
+                  if (!isNaN(val)) {
+                    setNewPerson({ ...newPerson, hourly_rate: val });
+                  }
                 }}
                 onBlur={(e) => {
                   const val = Math.max(0, parseFloat(e.target.value) || 0);
@@ -599,10 +609,12 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                 type="number"
                 min="1"
                 max="7"
-                value={newPerson.consecutive_days}
+                value={newPerson.consecutive_days || 5}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? '' : e.target.value;
-                  setNewPerson({ ...newPerson, consecutive_days: val === '' ? 5 : parseInt(val) });
+                  const val = e.target.valueAsNumber;
+                  if (!isNaN(val)) {
+                    setNewPerson({ ...newPerson, consecutive_days: val });
+                  }
                 }}
                 onBlur={(e) => {
                   const val = Math.max(1, Math.min(7, parseInt(e.target.value) || 5));
