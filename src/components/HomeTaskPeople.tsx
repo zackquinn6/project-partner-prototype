@@ -282,13 +282,13 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                       <div className="text-[10px] md:text-xs font-medium">General Availability</div>
                       
                       {/* Availability Numbers */}
-                      <div className="grid grid-cols-3 gap-2">
-                        <div>
+                      <div className="flex gap-2">
+                        <div className="w-16">
                           <label className="text-[10px] md:text-xs block mb-1">Hrs/Day</label>
                           <input
                             type="text"
                             inputMode="numeric"
-                            value={editingPerson.available_hours || 8}
+                            value={editingPerson.available_hours ?? 8}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^0-9.]/g, '');
                               if (val === '') {
@@ -308,12 +308,12 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                             className="w-full h-7 px-2 text-[10px] md:text-xs border rounded-md"
                           />
                         </div>
-                        <div>
+                        <div className="w-20">
                           <label className="text-[10px] md:text-xs block mb-1">$/Hr</label>
                           <input
                             type="text"
                             inputMode="decimal"
-                            value={editingPerson.hourly_rate || 0}
+                            value={editingPerson.hourly_rate ?? 0}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^0-9.]/g, '');
                               if (val === '') {
@@ -333,12 +333,12 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                             className="w-full h-7 px-2 text-[10px] md:text-xs border rounded-md"
                           />
                         </div>
-                        <div>
+                        <div className="w-24">
                           <label className="text-[10px] md:text-xs block mb-1">Consec Days</label>
                           <input
                             type="text"
                             inputMode="numeric"
-                            value={editingPerson.consecutive_days || 5}
+                            value={editingPerson.consecutive_days ?? 5}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^0-9]/g, '');
                               if (val === '') {
@@ -610,13 +610,13 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
           {newPerson.availability_mode === 'general' ? (
             <div className="space-y-2">
               {/* Availability Numbers */}
-              <div className="grid grid-cols-3 gap-2">
-                <div>
+              <div className="flex gap-2">
+                <div className="w-16">
                   <label className="text-[10px] md:text-xs block mb-1">Hrs/Day</label>
                   <input
                     type="text"
                     inputMode="numeric"
-                    value={newPerson.available_hours || 8}
+                    value={newPerson.available_hours ?? 8}
                     onChange={(e) => {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       if (val === '') {
@@ -636,12 +636,12 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                     className="w-full h-7 px-2 text-[10px] md:text-xs border rounded-md"
                   />
                 </div>
-                <div>
+                <div className="w-20">
                   <label className="text-[10px] md:text-xs block mb-1">$/Hr</label>
                   <input
                     type="text"
                     inputMode="decimal"
-                    value={newPerson.hourly_rate || 0}
+                    value={newPerson.hourly_rate ?? 0}
                     onChange={(e) => {
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       if (val === '') {
@@ -661,12 +661,12 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                     className="w-full h-7 px-2 text-[10px] md:text-xs border rounded-md"
                   />
                 </div>
-                <div>
+                <div className="w-24">
                   <label className="text-[10px] md:text-xs block mb-1">Consec Days</label>
                   <input
                     type="text"
                     inputMode="numeric"
-                    value={newPerson.consecutive_days || 5}
+                    value={newPerson.consecutive_days ?? 5}
                     onChange={(e) => {
                       const val = e.target.value.replace(/[^0-9]/g, '');
                       if (val === '') {
