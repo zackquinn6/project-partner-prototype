@@ -422,8 +422,8 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                                       <td className="p-2">
                                         <Input
                                           type="number"
-                                          min="0.5"
-                                          step="0.5"
+                                          min="0.25"
+                                          step="0.25"
                                           value={subtask.estimated_hours}
                                           onChange={(e) => updateSubtask(subtask.id, 'estimated_hours', parseFloat(e.target.value))}
                                           className="h-7 text-xs"

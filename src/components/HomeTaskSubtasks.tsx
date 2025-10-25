@@ -168,8 +168,8 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <Input
                 type="number"
-                min="0.5"
-                step="0.5"
+                min="0.25"
+                step="0.25"
                 value={newSubtask.estimated_hours}
                 onChange={(e) => setNewSubtask({ ...newSubtask, estimated_hours: parseFloat(e.target.value) })}
                 className="text-xs md:text-sm h-9 md:h-10"
