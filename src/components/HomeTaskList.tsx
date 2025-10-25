@@ -369,7 +369,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                           className="text-xs min-h-[60px]"
                         />
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-2 gap-2">
                           <div>
                             <label className="text-xs font-medium mb-1 block">Priority</label>
                             <Select value={formData.priority} onValueChange={(val) => setFormData({ ...formData, priority: val as any })}>
@@ -383,19 +383,6 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                               </SelectContent>
                             </Select>
                           </div>
-                          <div>
-                            <label className="text-xs font-medium mb-1 block">Status</label>
-                            <Select value={formData.status} onValueChange={(val) => setFormData({ ...formData, status: val as any })}>
-                              <SelectTrigger className="text-xs h-8">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="open">Open</SelectItem>
-                                <SelectItem value="in_progress">In Progress</SelectItem>
-                                <SelectItem value="closed">Closed</SelectItem>
-                              </SelectContent>
-                            </Select>
-          </div>
           <div>
             <label className="text-xs font-medium mb-1 block">DIY Level</label>
             <Select value={formData.diy_level} onValueChange={(val) => setFormData({ ...formData, diy_level: val as any })}>
@@ -411,28 +398,14 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
             </Select>
           </div>
         </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="text-xs font-medium mb-1 block">Task Type</label>
-                            <Select value={formData.task_type} onValueChange={(val) => setFormData({ ...formData, task_type: val as any })}>
-                              <SelectTrigger className="text-xs h-8">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="diy">DIY</SelectItem>
-                                <SelectItem value="contractor">Contractor</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <label className="text-xs font-medium mb-1 block">Due Date</label>
-                            <Input
-                              type="date"
-                              value={formData.due_date}
-                              onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                              className="text-xs h-8"
-                            />
-                          </div>
+                        <div>
+                          <label className="text-xs font-medium mb-1 block">Due Date</label>
+                          <Input
+                            type="date"
+                            value={formData.due_date}
+                            onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                            className="text-xs h-8"
+                          />
                         </div>
                         
                         {/* Subtasks Section */}
