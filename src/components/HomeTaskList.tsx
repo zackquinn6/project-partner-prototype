@@ -126,8 +126,8 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
       return;
     }
 
-    if (!selectedHomeId) {
-      toast.error("Please select a home first");
+    if (!selectedHomeId || selectedHomeId === 'all') {
+      toast.error("Please select a specific home (not 'All Homes')");
       return;
     }
 
@@ -204,7 +204,20 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
       fetchTasks();
     } catch (error) {
       console.error("Error saving task:", error);
-      toast.error(`Failed to save task: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error("Error details:", JSON.stringify(error, null, 2));
+      
+      // Extract more specific error information
+      let errorMessage = "Unknown error";
+      if (error && typeof error === 'object') {
+        if ('message' in error) {
+          errorMessage = (error as any).message;
+        }
+        if ('code' in error) {
+          errorMessage = `${errorMessage} (code: ${(error as any).code})`;
+        }
+      }
+      
+      toast.error(`Failed to save task: ${errorMessage}`);
     }
   };
 
