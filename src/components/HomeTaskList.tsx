@@ -293,7 +293,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[95vw] max-w-[95vw] md:max-w-[90vw] h-[92vh] p-0 overflow-hidden flex flex-col">
+        <DialogContent className="w-[95vw] max-w-[95vw] md:max-w-[90vw] h-[98vh] p-0 overflow-hidden flex flex-col">
           <DialogHeader className="px-2 md:px-4 pt-3 pb-2 border-b flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
               <DialogTitle className="text-xs md:text-sm font-semibold">Task Manager</DialogTitle>
@@ -332,7 +332,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                 <TabsTrigger value="schedule" className="text-[10px] md:text-xs px-2 md:px-3 py-1">Schedule</TabsTrigger>
               </TabsList>
 
-              <div className="flex-1 overflow-auto px-2 md:px-4 pb-3 min-h-0">
+              <div className="flex-1 overflow-auto px-2 md:px-4 pb-1 min-h-0">
                 <TabsContent value="tasks" className="mt-0 space-y-2 md:space-y-3 h-full">
                   {showAddTask && (
                     <Card>
