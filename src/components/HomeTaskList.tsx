@@ -359,7 +359,14 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                           </div>
           <div>
             <label className="text-xs font-medium mb-1 block">DIY Level</label>
-            <Select value={formData.diy_level} onValueChange={(val) => setFormData({ ...formData, diy_level: val as any })}>
+            <Select 
+              value={formData.diy_level} 
+              onValueChange={(val) => {
+                setFormData({ ...formData, diy_level: val as any });
+                // Update all subtasks to match the main DIY level
+                setSubtasks(subtasks.map(st => ({ ...st, diy_level: val as any })));
+              }}
+            >
               <SelectTrigger className="text-xs h-8">
                 <SelectValue />
               </SelectTrigger>
