@@ -36,12 +36,9 @@ const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'
 
 export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopleProps) {
   const [people, setPeople] = useState<Person[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
   const [editingPersonId, setEditingPersonId] = useState<string | null>(null);
-  const [editMode, setEditMode] = useState<'info' | 'not-available' | null>(null);
-  const [editingDates, setEditingDates] = useState<Date[]>([]);
-  const [editingStartDate, setEditingStartDate] = useState<Date | undefined>();
-  const [editingEndDate, setEditingEndDate] = useState<Date | undefined>();
-  const [editingSpecificDates, setEditingSpecificDates] = useState<Date[]>([]);
+  const [editingPerson, setEditingPerson] = useState<Person | null>(null);
   const [newPerson, setNewPerson] = useState({
     name: '',
     available_hours: 8,
@@ -49,9 +46,12 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
     consecutive_days: 5,
     diy_level: 'intermediate' as 'beginner' | 'intermediate' | 'advanced' | 'professional',
     hourly_rate: 0,
-    availability_mode: 'general' as 'general' | 'specific'
+    availability_mode: 'general' as 'general' | 'specific',
+    not_available_dates: [] as string[],
+    availability_start_date: undefined as string | undefined,
+    availability_end_date: undefined as string | undefined,
+    specific_dates: [] as string[]
   });
-  const [editingPerson, setEditingPerson] = useState<Person | null>(null);
 
   useEffect(() => {
     fetchPeople();
@@ -101,8 +101,13 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
       consecutive_days: 5,
       diy_level: 'intermediate',
       hourly_rate: 0,
-      availability_mode: 'general'
+      availability_mode: 'general',
+      not_available_dates: [],
+      availability_start_date: undefined,
+      availability_end_date: undefined,
+      specific_dates: []
     });
+    setShowAddForm(false);
     fetchPeople();
     onPeopleChange?.();
   };
@@ -121,18 +126,26 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
     onPeopleChange?.();
   };
 
-  const toggleDay = (day: string) => {
-    setNewPerson(prev => ({
-      ...prev,
-      available_days: prev.available_days.includes(day)
-        ? prev.available_days.filter(d => d !== day)
-        : [...prev.available_days, day]
-    }));
+  const toggleDay = (day: string, isEditing: boolean = false) => {
+    if (isEditing && editingPerson) {
+      setEditingPerson({
+        ...editingPerson,
+        available_days: editingPerson.available_days.includes(day)
+          ? editingPerson.available_days.filter(d => d !== day)
+          : [...editingPerson.available_days, day]
+      });
+    } else {
+      setNewPerson(prev => ({
+        ...prev,
+        available_days: prev.available_days.includes(day)
+          ? prev.available_days.filter(d => d !== day)
+          : [...prev.available_days, day]
+      }));
+    }
   };
 
   const handleEditPerson = (person: Person) => {
     setEditingPersonId(person.id);
-    setEditMode('info');
     setEditingPerson({ ...person });
   };
 
@@ -151,96 +164,39 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
         availability_mode: editingPerson.availability_mode,
         availability_start_date: editingPerson.availability_start_date,
         availability_end_date: editingPerson.availability_end_date,
-        specific_dates: editingPerson.specific_dates
+        specific_dates: editingPerson.specific_dates,
+        not_available_dates: editingPerson.not_available_dates
       })
       .eq('id', editingPersonId);
 
     if (error) return;
 
     setEditingPersonId(null);
-    setEditMode(null);
     setEditingPerson(null);
-    fetchPeople();
-    onPeopleChange?.();
-  };
-
-  const handleEditNotAvailableDates = (person: Person) => {
-    setEditingPersonId(person.id);
-    setEditMode('not-available');
-    const dates = (person.not_available_dates || []).map(d => new Date(d));
-    setEditingDates(dates);
-  };
-
-  const handleSaveNotAvailableDates = async (personId: string) => {
-    const dateStrings = editingDates.map(d => d.toISOString().split('T')[0]);
-    
-    const { error } = await supabase
-      .from('home_task_people')
-      .update({ not_available_dates: dateStrings })
-      .eq('id', personId);
-
-    if (error) return;
-
-    setEditingPersonId(null);
-    setEditMode(null);
-    fetchPeople();
-    onPeopleChange?.();
-  };
-
-  const handleEditAvailability = (person: Person) => {
-    setEditingPersonId(person.id);
-    setEditingPerson({ ...person });
-    
-    if (person.availability_start_date) {
-      setEditingStartDate(new Date(person.availability_start_date));
-    }
-    if (person.availability_end_date) {
-      setEditingEndDate(new Date(person.availability_end_date));
-    }
-    if (person.specific_dates) {
-      setEditingSpecificDates(person.specific_dates.map(d => new Date(d)));
-    }
-  };
-
-  const handleSaveAvailability = async (personId: string) => {
-    const updates: any = {
-      availability_mode: editingPerson?.availability_mode
-    };
-
-    if (editingPerson?.availability_mode === 'general') {
-      updates.availability_start_date = editingStartDate?.toISOString().split('T')[0];
-      updates.availability_end_date = editingEndDate?.toISOString().split('T')[0];
-      updates.specific_dates = null;
-    } else {
-      updates.specific_dates = editingSpecificDates.map(d => d.toISOString().split('T')[0]);
-      updates.availability_start_date = null;
-      updates.availability_end_date = null;
-    }
-
-    const { error } = await supabase
-      .from('home_task_people')
-      .update(updates)
-      .eq('id', personId);
-
-    if (error) return;
-
-    setEditingPersonId(null);
-    setEditingPerson(null);
-    setEditingStartDate(undefined);
-    setEditingEndDate(undefined);
-    setEditingSpecificDates([]);
     fetchPeople();
     onPeopleChange?.();
   };
 
   const handleCancelEdit = () => {
     setEditingPersonId(null);
-    setEditMode(null);
     setEditingPerson(null);
-    setEditingDates([]);
-    setEditingStartDate(undefined);
-    setEditingEndDate(undefined);
-    setEditingSpecificDates([]);
+  };
+
+  const getAvailabilityDisplay = (person: Person) => {
+    if (person.availability_mode === 'general') {
+      const parts = [];
+      if (person.available_days.length > 0) {
+        parts.push(person.available_days.map(d => d.slice(0, 3)).join(', '));
+      }
+      if (person.availability_start_date && person.availability_end_date) {
+        parts.push(`${format(new Date(person.availability_start_date), 'MMM d')} - ${format(new Date(person.availability_end_date), 'MMM d')}`);
+      }
+      return parts.length > 0 ? parts.join(' • ') : 'General availability';
+    } else {
+      return person.specific_dates && person.specific_dates.length > 0 
+        ? `${person.specific_dates.length} specific date(s)` 
+        : 'No specific dates set';
+    }
   };
 
   return (
@@ -249,136 +205,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
         Manage team members available for this project
       </div>
 
-      {/* Add new person form */}
-      <div className="border rounded-lg p-2 md:p-3 space-y-2 bg-muted/30">
-        <div className="flex flex-wrap items-center gap-2">
-          <Input
-            placeholder="Name"
-            value={newPerson.name}
-            onChange={(e) => setNewPerson({ ...newPerson, name: e.target.value })}
-            className="text-[10px] md:text-xs h-7 w-32"
-          />
-          <Select 
-            value={newPerson.diy_level} 
-            onValueChange={(val) => setNewPerson({ ...newPerson, diy_level: val as any })}
-          >
-            <SelectTrigger className="text-[10px] md:text-xs h-7 w-28">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="z-50 bg-popover">
-              <SelectItem value="beginner">Beginner</SelectItem>
-              <SelectItem value="intermediate">Intermediate</SelectItem>
-              <SelectItem value="advanced">Advanced</SelectItem>
-              <SelectItem value="professional">Professional</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="flex gap-1 items-center">
-            <Input
-              type="number"
-              min="1"
-              max="24"
-              value={newPerson.available_hours}
-              onChange={(e) => {
-                const val = Math.max(1, Math.min(24, parseInt(e.target.value) || 8));
-                setNewPerson({ ...newPerson, available_hours: val });
-              }}
-              onBlur={(e) => {
-                if (!e.target.value) {
-                  setNewPerson({ ...newPerson, available_hours: 8 });
-                }
-              }}
-              className="text-[10px] md:text-xs h-7 w-12"
-            />
-            <span className="text-[10px] md:text-xs whitespace-nowrap">hrs/day</span>
-          </div>
-          <div className="flex gap-1 items-center">
-            <span className="text-[10px] md:text-xs">$</span>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              value={newPerson.hourly_rate}
-              onChange={(e) => {
-                const val = Math.max(0, parseFloat(e.target.value) || 0);
-                setNewPerson({ ...newPerson, hourly_rate: val });
-              }}
-              onBlur={(e) => {
-                if (!e.target.value) {
-                  setNewPerson({ ...newPerson, hourly_rate: 0 });
-                }
-              }}
-              className="text-[10px] md:text-xs h-7 w-16"
-            />
-            <span className="text-[10px] md:text-xs">/hr</span>
-          </div>
-          <div className="flex gap-1 items-center">
-            <Input
-              type="number"
-              min="1"
-              max="7"
-              value={newPerson.consecutive_days}
-              onChange={(e) => {
-                const val = Math.max(1, Math.min(7, parseInt(e.target.value) || 5));
-                setNewPerson({ ...newPerson, consecutive_days: val });
-              }}
-              onBlur={(e) => {
-                if (!e.target.value) {
-                  setNewPerson({ ...newPerson, consecutive_days: 5 });
-                }
-              }}
-              className="text-[10px] md:text-xs h-7 w-12"
-            />
-            <span className="text-[10px] md:text-xs whitespace-nowrap">consec. days</span>
-          </div>
-        </div>
-
-        <div>
-          <div className="text-[10px] md:text-xs font-medium mb-1.5">Availability Mode:</div>
-          <div className="flex gap-2">
-            <label className="flex items-center gap-1 cursor-pointer">
-              <Checkbox
-                checked={newPerson.availability_mode === 'general'}
-                onCheckedChange={() => setNewPerson({ ...newPerson, availability_mode: 'general' })}
-                className="h-3 w-3"
-              />
-              <span className="text-[10px] md:text-xs">General (Days/Weeks)</span>
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer">
-              <Checkbox
-                checked={newPerson.availability_mode === 'specific'}
-                onCheckedChange={() => setNewPerson({ ...newPerson, availability_mode: 'specific' })}
-                className="h-3 w-3"
-              />
-              <span className="text-[10px] md:text-xs">Specific Dates</span>
-            </label>
-          </div>
-        </div>
-
-        {newPerson.availability_mode === 'general' && (
-          <div>
-            <div className="text-[10px] md:text-xs font-medium mb-1.5">Available Days:</div>
-            <div className="flex flex-wrap gap-1.5">
-              {DAYS.map(day => (
-                <label key={day} className="flex items-center gap-0.5 cursor-pointer">
-                  <Checkbox
-                    checked={newPerson.available_days.includes(day)}
-                    onCheckedChange={() => toggleDay(day)}
-                    className="h-2.5 w-2.5 md:h-3 md:w-3"
-                  />
-                  <span className="text-[10px] md:text-xs capitalize">{day.slice(0, 3)}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <Button onClick={handleAddPerson} size="sm" className="h-7 w-full text-[10px] md:text-xs">
-          <Plus className="h-3 w-3 mr-1" />
-          Add Team Member
-        </Button>
-      </div>
-
-      {/* People list */}
+      {/* Team Members List */}
       <div className="space-y-2">
         {people.length === 0 ? (
           <p className="text-[10px] md:text-xs text-muted-foreground text-center py-3">
@@ -387,7 +214,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
         ) : (
           people.map((person) => (
             <div key={person.id} className="border rounded-lg p-2 md:p-3 space-y-2 text-[10px] md:text-xs">
-              {editingPersonId === person.id && editMode === 'info' && editingPerson ? (
+              {editingPersonId === person.id && editingPerson ? (
                 // Edit mode
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
@@ -395,6 +222,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                       value={editingPerson.name}
                       onChange={(e) => setEditingPerson({ ...editingPerson, name: e.target.value })}
                       className="text-[10px] md:text-xs h-7 w-32"
+                      placeholder="Name"
                     />
                     <Select 
                       value={editingPerson.diy_level} 
@@ -417,7 +245,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         max="24"
                         value={editingPerson.available_hours}
                         onChange={(e) => {
-                          const val = Math.max(1, Math.min(24, parseInt(e.target.value) || 8));
+                          const val = e.target.value === '' ? 8 : Math.max(1, Math.min(24, parseInt(e.target.value) || 8));
                           setEditingPerson({ ...editingPerson, available_hours: val });
                         }}
                         className="text-[10px] md:text-xs h-7 w-12"
@@ -432,7 +260,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         step="0.01"
                         value={editingPerson.hourly_rate}
                         onChange={(e) => {
-                          const val = Math.max(0, parseFloat(e.target.value) || 0);
+                          const val = e.target.value === '' ? 0 : Math.max(0, parseFloat(e.target.value) || 0);
                           setEditingPerson({ ...editingPerson, hourly_rate: val });
                         }}
                         className="text-[10px] md:text-xs h-7 w-16"
@@ -446,7 +274,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         max="7"
                         value={editingPerson.consecutive_days}
                         onChange={(e) => {
-                          const val = Math.max(1, Math.min(7, parseInt(e.target.value) || 5));
+                          const val = e.target.value === '' ? 5 : Math.max(1, Math.min(7, parseInt(e.target.value) || 5));
                           setEditingPerson({ ...editingPerson, consecutive_days: val });
                         }}
                         className="text-[10px] md:text-xs h-7 w-12"
@@ -464,7 +292,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                           onCheckedChange={() => setEditingPerson({ ...editingPerson, availability_mode: 'general' })}
                           className="h-3 w-3"
                         />
-                        <span className="text-[10px] md:text-xs">General</span>
+                        <span className="text-[10px] md:text-xs">General (Days/Weeks)</span>
                       </label>
                       <label className="flex items-center gap-1 cursor-pointer">
                         <Checkbox
@@ -477,25 +305,130 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                     </div>
                   </div>
 
-                  {editingPerson.availability_mode === 'general' && (
-                    <div>
-                      <div className="text-[10px] md:text-xs font-medium mb-1.5">Available Days:</div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {DAYS.map(day => (
-                          <label key={day} className="flex items-center gap-0.5 cursor-pointer">
-                            <Checkbox
-                              checked={editingPerson.available_days.includes(day)}
-                              onCheckedChange={() => {
-                                const newDays = editingPerson.available_days.includes(day)
-                                  ? editingPerson.available_days.filter(d => d !== day)
-                                  : [...editingPerson.available_days, day];
-                                setEditingPerson({ ...editingPerson, available_days: newDays });
-                              }}
-                              className="h-2.5 w-2.5 md:h-3 md:w-3"
+                  {editingPerson.availability_mode === 'general' ? (
+                    <div className="space-y-2 border-t pt-2">
+                      <div className="text-[10px] md:text-xs font-medium">General Availability</div>
+                      
+                      {/* Available Days */}
+                      <div>
+                        <div className="text-[10px] md:text-xs mb-1">Available Days:</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {DAYS.map(day => (
+                            <label key={day} className="flex items-center gap-0.5 cursor-pointer">
+                              <Checkbox
+                                checked={editingPerson.available_days.includes(day)}
+                                onCheckedChange={() => toggleDay(day, true)}
+                                className="h-2.5 w-2.5 md:h-3 md:w-3"
+                              />
+                              <span className="text-[10px] md:text-xs capitalize">{day.slice(0, 3)}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Start/Finish Availability */}
+                      <div>
+                        <div className="text-[10px] md:text-xs mb-1">Start / Finish Availability:</div>
+                        <div className="flex gap-2">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" size="sm" className="h-6 text-[10px] flex-1">
+                                <CalendarIcon className="h-3 w-3 mr-1" />
+                                {editingPerson.availability_start_date 
+                                  ? format(new Date(editingPerson.availability_start_date), 'MMM d') 
+                                  : 'Start'}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={editingPerson.availability_start_date ? new Date(editingPerson.availability_start_date) : undefined}
+                                onSelect={(date) => setEditingPerson({ 
+                                  ...editingPerson, 
+                                  availability_start_date: date?.toISOString().split('T')[0] 
+                                })}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" size="sm" className="h-6 text-[10px] flex-1">
+                                <CalendarIcon className="h-3 w-3 mr-1" />
+                                {editingPerson.availability_end_date 
+                                  ? format(new Date(editingPerson.availability_end_date), 'MMM d') 
+                                  : 'End'}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={editingPerson.availability_end_date ? new Date(editingPerson.availability_end_date) : undefined}
+                                onSelect={(date) => setEditingPerson({ 
+                                  ...editingPerson, 
+                                  availability_end_date: date?.toISOString().split('T')[0] 
+                                })}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      </div>
+
+                      {/* Unavailable Dates */}
+                      <div>
+                        <div className="text-[10px] md:text-xs mb-1">Unavailable Dates:</div>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" size="sm" className="w-full h-6 text-[10px] justify-start">
+                              <CalendarIcon className="h-3 w-3 mr-1" />
+                              {editingPerson.not_available_dates && editingPerson.not_available_dates.length > 0 
+                                ? `${editingPerson.not_available_dates.length} date(s) selected` 
+                                : 'Select unavailable dates'}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="multiple"
+                              selected={editingPerson.not_available_dates?.map(d => new Date(d)) || []}
+                              onSelect={(dates) => setEditingPerson({ 
+                                ...editingPerson, 
+                                not_available_dates: dates?.map(d => d.toISOString().split('T')[0]) || [] 
+                              })}
+                              initialFocus
                             />
-                            <span className="text-[10px] md:text-xs capitalize">{day.slice(0, 3)}</span>
-                          </label>
-                        ))}
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 border-t pt-2">
+                      <div className="text-[10px] md:text-xs font-medium">Specific Availability</div>
+                      
+                      {/* Specific Dates Picker */}
+                      <div>
+                        <div className="text-[10px] md:text-xs mb-1">Available Dates:</div>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" size="sm" className="w-full h-6 text-[10px] justify-start">
+                              <CalendarIcon className="h-3 w-3 mr-1" />
+                              {editingPerson.specific_dates && editingPerson.specific_dates.length > 0 
+                                ? `${editingPerson.specific_dates.length} date(s) selected` 
+                                : 'Select specific dates'}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="multiple"
+                              selected={editingPerson.specific_dates?.map(d => new Date(d)) || []}
+                              onSelect={(dates) => setEditingPerson({ 
+                                ...editingPerson, 
+                                specific_dates: dates?.map(d => d.toISOString().split('T')[0]) || [] 
+                              })}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                       </div>
                     </div>
                   )}
@@ -523,237 +456,279 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                 </div>
               ) : (
                 // View mode
-                <>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold truncate">{person.name}</div>
-                      <div className="flex flex-wrap gap-1 md:gap-1.5 mt-1">
-                        <Badge variant="outline" className="text-[9px] md:text-[10px] px-1 md:px-1.5 py-0">
-                          {person.available_hours}h/day
-                        </Badge>
-                        <Badge variant="outline" className="text-[9px] md:text-[10px] px-1 md:px-1.5 py-0">
-                          {person.diy_level}
-                        </Badge>
-                        <Badge variant="outline" className="text-[9px] md:text-[10px] px-1 md:px-1.5 py-0">
-                          {person.consecutive_days} consec
-                        </Badge>
-                        {person.hourly_rate > 0 && (
-                          <Badge variant="secondary" className="text-[9px] md:text-[10px] px-1 md:px-1.5 py-0">
-                            ${person.hourly_rate}/hr
-                          </Badge>
-                        )}
-                        <Badge variant="secondary" className="text-[9px] md:text-[10px] px-1 md:px-1.5 py-0">
-                          {person.availability_mode === 'general' ? 'General' : 'Specific Dates'}
-                        </Badge>
-                      </div>
-                      {person.availability_mode === 'general' && (
-                        <div className="mt-1 text-[9px] md:text-[10px] text-muted-foreground">
-                          {person.available_days.map(d => d.slice(0, 3)).join(', ')}
-                          {person.availability_start_date && person.availability_end_date && (
-                            <span className="ml-2">
-                              ({format(new Date(person.availability_start_date), 'MMM d')} - {format(new Date(person.availability_end_date), 'MMM d')})
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      {person.availability_mode === 'specific' && person.specific_dates && (
-                        <div className="mt-1 text-[9px] md:text-[10px] text-muted-foreground">
-                          {person.specific_dates.length} specific date(s)
-                        </div>
-                      )}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold truncate">{person.name}</div>
+                    <div className="flex flex-wrap gap-1 md:gap-1.5 mt-1">
+                      <Badge variant="outline" className="text-[9px] md:text-[10px] px-1 md:px-1.5 py-0">
+                        {person.diy_level}
+                      </Badge>
+                      <Badge variant="secondary" className="text-[9px] md:text-[10px] px-1 md:px-1.5 py-0">
+                        {person.availability_mode === 'general' ? 'General' : 'Specific Dates'}
+                      </Badge>
                     </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditPerson(person)}
-                        className="h-5 w-5 md:h-6 md:w-6 p-0 flex-shrink-0"
-                      >
-                        <Edit2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeletePerson(person.id)}
-                        className="h-5 w-5 md:h-6 md:w-6 p-0 text-destructive flex-shrink-0"
-                      >
-                        <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                      </Button>
+                    <div className="mt-1 text-[9px] md:text-[10px] text-muted-foreground">
+                      {getAvailabilityDisplay(person)}
                     </div>
                   </div>
-
-                  {/* Availability Setup */}
-                  <div className="pt-1.5 border-t">
-                    {editingPersonId === person.id && editingPerson ? (
-                      <div className="space-y-2">
-                        {editingPerson.availability_mode === 'general' ? (
-                          <div className="space-y-2">
-                            <div className="text-[10px] font-medium">Date Range:</div>
-                            <div className="flex gap-2">
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-6 text-[10px] flex-1"
-                                  >
-                                    <CalendarIcon className="h-3 w-3 mr-1" />
-                                    {editingStartDate ? format(editingStartDate, 'MMM d') : 'Start'}
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                  <Calendar
-                                    mode="single"
-                                    selected={editingStartDate}
-                                    onSelect={setEditingStartDate}
-                                    initialFocus
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-6 text-[10px] flex-1"
-                                  >
-                                    <CalendarIcon className="h-3 w-3 mr-1" />
-                                    {editingEndDate ? format(editingEndDate, 'MMM d') : 'End'}
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                  <Calendar
-                                    mode="single"
-                                    selected={editingEndDate}
-                                    onSelect={setEditingEndDate}
-                                    initialFocus
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            <div className="text-[10px] font-medium">Specific Dates:</div>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-full h-6 text-[10px] justify-start"
-                                >
-                                  <CalendarIcon className="h-3 w-3 mr-1" />
-                                  {editingSpecificDates.length > 0 ? `${editingSpecificDates.length} dates selected` : 'Select dates'}
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                  mode="multiple"
-                                  selected={editingSpecificDates}
-                                  onSelect={(dates) => setEditingSpecificDates(dates || [])}
-                                  initialFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
-                          </div>
-                        )}
-                        <div className="flex gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleSaveAvailability(person.id)}
-                            className="flex-1 h-6 text-[10px]"
-                          >
-                            <Check className="h-3 w-3 mr-1" />
-                            Save
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleCancelEdit}
-                            className="flex-1 h-6 text-[10px]"
-                          >
-                            <X className="h-3 w-3 mr-1" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditAvailability(person)}
-                        className="h-6 w-full text-[10px] justify-start px-2"
-                      >
-                        <CalendarIcon className="h-3 w-3 mr-1" />
-                        Setup Availability
-                      </Button>
-                    )}
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditPerson(person)}
+                      className="h-5 w-5 md:h-6 md:w-6 p-0 flex-shrink-0"
+                    >
+                      <Edit2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeletePerson(person.id)}
+                      className="h-5 w-5 md:h-6 md:w-6 p-0 text-destructive flex-shrink-0"
+                    >
+                      <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                    </Button>
                   </div>
-
-                  {/* Not Available Dates */}
-                  <div className="pt-1.5 border-t">
-                    {editingPersonId === person.id && editMode === 'not-available' ? (
-                      <div className="space-y-2">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full h-6 text-[10px] justify-start"
-                            >
-                              <CalendarIcon className="h-3 w-3 mr-1" />
-                              {editingDates.length > 0 ? `${editingDates.length} dates selected` : 'Select dates'}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="multiple"
-                              selected={editingDates}
-                              onSelect={(dates) => setEditingDates(dates || [])}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleSaveNotAvailableDates(person.id)}
-                            className="flex-1 h-6 text-[10px]"
-                          >
-                            <Check className="h-3 w-3 mr-1" />
-                            Save
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleCancelEdit}
-                            className="flex-1 h-6 text-[10px]"
-                          >
-                            <X className="h-3 w-3 mr-1" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditNotAvailableDates(person)}
-                        className="h-6 w-full text-[10px] justify-start px-2"
-                      >
-                        <CalendarIcon className="h-3 w-3 mr-1" />
-                        Not Available: {person.not_available_dates?.length || 0} dates
-                      </Button>
-                    )}
-                  </div>
-                </>
+                </div>
               )}
             </div>
           ))
         )}
       </div>
+
+      {/* Add Team Member Button/Form */}
+      {!showAddForm ? (
+        <Button onClick={() => setShowAddForm(true)} size="sm" className="h-7 w-full text-[10px] md:text-xs">
+          <Plus className="h-3 w-3 mr-1" />
+          Add Team Member
+        </Button>
+      ) : (
+        <div className="border rounded-lg p-2 md:p-3 space-y-2 bg-muted/30">
+          <div className="text-[10px] md:text-xs font-medium">New Team Member</div>
+          
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              placeholder="Name"
+              value={newPerson.name}
+              onChange={(e) => setNewPerson({ ...newPerson, name: e.target.value })}
+              className="text-[10px] md:text-xs h-7 w-32"
+            />
+            <Select 
+              value={newPerson.diy_level} 
+              onValueChange={(val) => setNewPerson({ ...newPerson, diy_level: val as any })}
+            >
+              <SelectTrigger className="text-[10px] md:text-xs h-7 w-28">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="z-50 bg-popover">
+                <SelectItem value="beginner">Beginner</SelectItem>
+                <SelectItem value="intermediate">Intermediate</SelectItem>
+                <SelectItem value="advanced">Advanced</SelectItem>
+                <SelectItem value="professional">Professional</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex gap-1 items-center">
+              <Input
+                type="number"
+                min="1"
+                max="24"
+                value={newPerson.available_hours}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? 8 : Math.max(1, Math.min(24, parseInt(e.target.value) || 8));
+                  setNewPerson({ ...newPerson, available_hours: val });
+                }}
+                className="text-[10px] md:text-xs h-7 w-12"
+              />
+              <span className="text-[10px] md:text-xs whitespace-nowrap">hrs/day</span>
+            </div>
+            <div className="flex gap-1 items-center">
+              <span className="text-[10px] md:text-xs">$</span>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={newPerson.hourly_rate}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? 0 : Math.max(0, parseFloat(e.target.value) || 0);
+                  setNewPerson({ ...newPerson, hourly_rate: val });
+                }}
+                className="text-[10px] md:text-xs h-7 w-16"
+              />
+              <span className="text-[10px] md:text-xs">/hr</span>
+            </div>
+            <div className="flex gap-1 items-center">
+              <Input
+                type="number"
+                min="1"
+                max="7"
+                value={newPerson.consecutive_days}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? 5 : Math.max(1, Math.min(7, parseInt(e.target.value) || 5));
+                  setNewPerson({ ...newPerson, consecutive_days: val });
+                }}
+                className="text-[10px] md:text-xs h-7 w-12"
+              />
+              <span className="text-[10px] md:text-xs whitespace-nowrap">consec. days</span>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-[10px] md:text-xs font-medium mb-1.5">Availability Mode:</div>
+            <div className="flex gap-2">
+              <label className="flex items-center gap-1 cursor-pointer">
+                <Checkbox
+                  checked={newPerson.availability_mode === 'general'}
+                  onCheckedChange={() => setNewPerson({ ...newPerson, availability_mode: 'general' })}
+                  className="h-3 w-3"
+                />
+                <span className="text-[10px] md:text-xs">General (Days/Weeks)</span>
+              </label>
+              <label className="flex items-center gap-1 cursor-pointer">
+                <Checkbox
+                  checked={newPerson.availability_mode === 'specific'}
+                  onCheckedChange={() => setNewPerson({ ...newPerson, availability_mode: 'specific' })}
+                  className="h-3 w-3"
+                />
+                <span className="text-[10px] md:text-xs">Specific Dates</span>
+              </label>
+            </div>
+          </div>
+
+          {newPerson.availability_mode === 'general' ? (
+            <div className="space-y-2">
+              <div>
+                <div className="text-[10px] md:text-xs mb-1">Available Days:</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {DAYS.map(day => (
+                    <label key={day} className="flex items-center gap-0.5 cursor-pointer">
+                      <Checkbox
+                        checked={newPerson.available_days.includes(day)}
+                        onCheckedChange={() => toggleDay(day, false)}
+                        className="h-2.5 w-2.5 md:h-3 md:w-3"
+                      />
+                      <span className="text-[10px] md:text-xs capitalize">{day.slice(0, 3)}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[10px] md:text-xs mb-1">Start / Finish Availability:</div>
+                <div className="flex gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-6 text-[10px] flex-1">
+                        <CalendarIcon className="h-3 w-3 mr-1" />
+                        {newPerson.availability_start_date 
+                          ? format(new Date(newPerson.availability_start_date), 'MMM d') 
+                          : 'Start'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={newPerson.availability_start_date ? new Date(newPerson.availability_start_date) : undefined}
+                        onSelect={(date) => setNewPerson({ 
+                          ...newPerson, 
+                          availability_start_date: date?.toISOString().split('T')[0] 
+                        })}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-6 text-[10px] flex-1">
+                        <CalendarIcon className="h-3 w-3 mr-1" />
+                        {newPerson.availability_end_date 
+                          ? format(new Date(newPerson.availability_end_date), 'MMM d') 
+                          : 'End'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={newPerson.availability_end_date ? new Date(newPerson.availability_end_date) : undefined}
+                        onSelect={(date) => setNewPerson({ 
+                          ...newPerson, 
+                          availability_end_date: date?.toISOString().split('T')[0] 
+                        })}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[10px] md:text-xs mb-1">Unavailable Dates:</div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="w-full h-6 text-[10px] justify-start">
+                      <CalendarIcon className="h-3 w-3 mr-1" />
+                      {newPerson.not_available_dates.length > 0 
+                        ? `${newPerson.not_available_dates.length} date(s) selected` 
+                        : 'Select unavailable dates'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="multiple"
+                      selected={newPerson.not_available_dates.map(d => new Date(d))}
+                      onSelect={(dates) => setNewPerson({ 
+                        ...newPerson, 
+                        not_available_dates: dates?.map(d => d.toISOString().split('T')[0]) || [] 
+                      })}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="text-[10px] md:text-xs mb-1">Specific Available Dates:</div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full h-6 text-[10px] justify-start">
+                    <CalendarIcon className="h-3 w-3 mr-1" />
+                    {newPerson.specific_dates.length > 0 
+                      ? `${newPerson.specific_dates.length} date(s) selected` 
+                      : 'Select specific dates'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="multiple"
+                    selected={newPerson.specific_dates.map(d => new Date(d))}
+                    onSelect={(dates) => setNewPerson({ 
+                      ...newPerson, 
+                      specific_dates: dates?.map(d => d.toISOString().split('T')[0]) || [] 
+                    })}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          )}
+
+          <div className="flex gap-1 pt-1">
+            <Button onClick={handleAddPerson} size="sm" className="h-7 flex-1 text-[10px] md:text-xs">
+              <Check className="h-3 w-3 mr-1" />
+              Add
+            </Button>
+            <Button 
+              onClick={() => setShowAddForm(false)} 
+              variant="ghost" 
+              size="sm" 
+              className="h-7 flex-1 text-[10px] md:text-xs"
+            >
+              <X className="h-3 w-3 mr-1" />
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
