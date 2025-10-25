@@ -23,7 +23,6 @@ import { OrderingWindow } from './OrderingWindow';
 import { SignatureCapture } from './SignatureCapture';
 import { StepCompletionTracker } from './StepCompletionTracker';
 import { EnhancedProjectPlanning } from './EnhancedProjectPlanning';
-import { toast } from 'sonner';
 
 interface EditableUserViewProps {
   onBackToAdmin: () => void;

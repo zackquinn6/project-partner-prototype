@@ -14,7 +14,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Trash2, Plus, Check, X, ChevronRight, ChevronDown, Package, Wrench, FileOutput, Import, GripVertical, History } from 'lucide-react';
-import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollableDialog } from "@/components/ScrollableDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -370,7 +369,6 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
       // Revision created successfully - no toast needed
     } catch (error) {
       console.error('Error creating revision:', error);
-      toast.error('Failed to create revision');
     }
   };
 

@@ -5,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 import { Link2, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -89,10 +88,7 @@ export function HomeTaskProjectLink({
       .update({ project_run_id: projectRunId })
       .eq("id", taskId);
     
-    if (error) {
-      toast.error("Failed to link project");
-    } else {
-      toast.success("Task linked to project");
+    if (!error) {
       onSuccess?.();
       onOpenChange(false);
     }
@@ -129,12 +125,10 @@ export function HomeTaskProjectLink({
       
       if (linkError) throw linkError;
       
-      toast.success("New project created and linked");
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
       console.error("Error creating and linking project:", error);
-      toast.error("Failed to create and link project");
     } finally {
       setLoading(false);
     }
@@ -148,10 +142,7 @@ export function HomeTaskProjectLink({
       .update({ project_run_id: null })
       .eq("id", taskId);
     
-    if (error) {
-      toast.error("Failed to unlink project");
-    } else {
-      toast.success("Task unlinked from project");
+    if (!error) {
       onSuccess?.();
       onOpenChange(false);
     }

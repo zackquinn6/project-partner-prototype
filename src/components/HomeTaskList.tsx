@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Home as HomeIcon, X } from "lucide-react";
-import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HomeManager } from "./HomeManager";
@@ -122,12 +121,10 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
 
   const handleSubmit = async () => {
     if (!user || !formData.title.trim()) {
-      toast.error("Title is required");
       return;
     }
 
     if (!selectedHomeId || selectedHomeId === 'all') {
-      toast.error("Please select a specific home (not 'All Homes')");
       return;
     }
 
@@ -167,8 +164,6 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
             if (subtaskError) throw subtaskError;
           }
         }
-        
-        toast.success("Task updated");
       } else {
         const { data: newTask, error } = await supabase
           .from("home_tasks")
@@ -196,8 +191,6 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
             if (subtaskError) throw subtaskError;
           }
         }
-        
-        toast.success("Task created");
       }
 
       resetForm();
@@ -206,18 +199,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
       console.error("Error saving task:", error);
       console.error("Error details:", JSON.stringify(error, null, 2));
       
-      // Extract more specific error information
-      let errorMessage = "Unknown error";
-      if (error && typeof error === 'object') {
-        if ('message' in error) {
-          errorMessage = (error as any).message;
-        }
-        if ('code' in error) {
-          errorMessage = `${errorMessage} (code: ${(error as any).code})`;
-        }
-      }
-      
-      toast.error(`Failed to save task: ${errorMessage}`);
+      // Silently handle errors
     }
   };
 
@@ -228,10 +210,8 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
       .eq("id", taskId);
     
     if (error) {
-      toast.error("Failed to delete task");
       return;
     }
-    toast.success("Task deleted");
     fetchTasks();
   };
 

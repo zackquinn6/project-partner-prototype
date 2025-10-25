@@ -7,7 +7,6 @@ import { Home, ArrowRight, Star, Plus } from 'lucide-react';
 import { HomeManager } from './HomeManager';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
 
 interface ProjectCreationFlowProps {
   open: boolean;
@@ -71,7 +70,6 @@ export const ProjectCreationFlow: React.FC<ProjectCreationFlowProps> = ({
       }
     } catch (error) {
       console.error('Error fetching homes:', error);
-      toast.error('Failed to load homes');
     } finally {
       setLoading(false);
     }
@@ -79,7 +77,6 @@ export const ProjectCreationFlow: React.FC<ProjectCreationFlowProps> = ({
 
   const handleStartProject = () => {
     if (!selectedHomeId) {
-      toast.error('Please select a home for this project');
       return;
     }
     

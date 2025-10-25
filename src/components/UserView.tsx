@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Info, ShoppingCart, Plus, Award, Eye, EyeOff, HelpCircle, Calendar as CalendarIcon, Sparkles } from "lucide-react";
-import { toast } from 'sonner';
 import { getStepIndicator } from './FlowTypeLegend';
 import { WorkflowSidebar } from './WorkflowSidebar';
 import {
@@ -860,7 +859,6 @@ export default function UserView({
     if (app.appType === 'external-embed' && app.embedUrl) {
       // TODO: Open embed modal
       console.log('Opening embed for:', app.embedUrl);
-      toast.info('Embed functionality coming soon');
       return;
     }
     

@@ -1,7 +1,6 @@
 import React, { Component, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { toast } from 'sonner';
 
 interface Props {
   children: ReactNode;
@@ -31,8 +30,7 @@ export class ProjectNavigationErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('🚨 ProjectNavigationErrorBoundary: Component error:', error, errorInfo);
     
-    // Show user-friendly error message
-    toast.error('Navigation failed. Please try again or refresh the page.');
+    // Silently handle navigation error
   }
 
   handleRetry = () => {

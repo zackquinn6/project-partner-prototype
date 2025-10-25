@@ -12,7 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, FolderOpen, Edit, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 import { HomeManager } from '@/components/HomeManager';
 
 interface ProjectSelectorProps {
@@ -157,7 +156,6 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
   const handleProjectSetupComplete = () => {
     // Validate home selection is mandatory
     if (!projectSetupForm.selectedHomeId) {
-      toast.error('Please select a home before proceeding.');
       return;
     }
     
@@ -176,7 +174,6 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
   const handleSkipSetup = () => {
     // Validate home selection is mandatory
     if (!projectSetupForm.selectedHomeId) {
-      toast.error('Please select a home before proceeding.');
       return;
     }
     setIsProjectSetupOpen(false);
@@ -467,7 +464,6 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
                     onClick={(e) => {
                       e.preventDefault();
                       if (!projectSetupForm.selectedHomeId) {
-                        toast.error('Please select a home before proceeding. A home selection is required for this project.');
                         return;
                       }
                       handleSkipSetup();
@@ -480,7 +476,6 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
                     onClick={(e) => {
                       e.preventDefault();
                       if (!projectSetupForm.selectedHomeId) {
-                        toast.error('Please select a home before proceeding. A home selection is required for this project.');
                         return;
                       }
                       handleProjectSetupComplete();

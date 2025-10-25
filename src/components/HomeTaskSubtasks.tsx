@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Check, User } from "lucide-react";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
 interface Subtask {
@@ -87,7 +86,6 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
 
   const handleAddSubtask = async () => {
     if (!newSubtask.title.trim()) {
-      toast.error('Subtask title is required');
       return;
     }
 
@@ -104,11 +102,8 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
       }]);
 
     if (error) {
-      toast.error('Failed to add subtask');
       return;
     }
-
-    toast.success('Subtask added');
     setNewSubtask({ title: '', estimated_hours: 1, diy_level: 'intermediate', assigned_person_id: null });
     fetchSubtasks();
   };
@@ -120,10 +115,7 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
       .eq('id', subtaskId);
 
     if (!error) {
-      toast.success('Assignment updated');
       fetchSubtasks();
-    } else {
-      toast.error('Failed to update assignment');
     }
   };
 
@@ -145,11 +137,9 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
       .eq('id', subtaskId);
 
     if (error) {
-      toast.error('Failed to delete subtask');
       return;
     }
 
-    toast.success('Subtask deleted');
     fetchSubtasks();
   };
 

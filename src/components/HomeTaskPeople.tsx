@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, CalendarIcon, Edit2, Check, X } from "lucide-react";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -67,12 +66,10 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
 
   const handleAddPerson = async () => {
     if (!newPerson.name.trim()) {
-      toast.error('Name is required');
       return;
     }
 
     if (newPerson.available_days.length === 0) {
-      toast.error('Select at least one available day');
       return;
     }
 
@@ -85,11 +82,8 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
       }]);
 
     if (error) {
-      toast.error('Failed to add person');
       return;
     }
-
-    toast.success('Person added');
     setNewPerson({
       name: '',
       available_hours: 8,
@@ -109,11 +103,9 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
       .eq('id', personId);
 
     if (error) {
-      toast.error('Failed to delete person');
       return;
     }
 
-    toast.success('Person removed');
     fetchPeople();
     onPeopleChange?.();
   };
@@ -142,11 +134,9 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
       .eq('id', personId);
 
     if (error) {
-      toast.error('Failed to update dates');
       return;
     }
 
-    toast.success('Unavailable dates updated');
     setEditingPersonId(null);
     fetchPeople();
     onPeopleChange?.();

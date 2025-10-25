@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, FileText, AlertCircle, CheckCircle, Download, RefreshCw } from 'lucide-react';
-import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Phase, Operation, WorkflowStep, Output, Material, Tool, StepInput } from '@/interfaces/Project';
@@ -370,10 +369,8 @@ IMPORTANT FORMAT NOTES:
             const csvText = XLSX.utils.sheet_to_csv(worksheet);
             console.log('Excel converted to CSV (first 500 chars):', csvText.substring(0, 500));
             setCsvData(csvText);
-            toast.success('Excel file loaded successfully');
           } catch (error) {
             console.error('Error reading Excel file:', error);
-            toast.error('Error reading Excel file. Please check the file format.');
           }
         };
         reader.readAsArrayBuffer(file);
@@ -384,7 +381,6 @@ IMPORTANT FORMAT NOTES:
           const text = e.target?.result as string;
           console.log('Raw CSV content (first 500 chars):', text.substring(0, 500));
           setCsvData(text);
-          toast.success('CSV file loaded successfully');
         };
         reader.readAsText(file);
       }
@@ -396,14 +392,8 @@ IMPORTANT FORMAT NOTES:
       const result = parseCSV(csvData);
       setParsedContent(result);
       setShowPreview(true);
-      
-      if (result.errors.length > 0) {
-        toast.error(`Found ${result.errors.length} errors. Please review.`);
-      } else {
-        toast.success(`Successfully parsed ${result.phases.length} phases`);
-      }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Invalid CSV format');
+      // Silently handle parsing errors
     }
   };
 
@@ -413,7 +403,6 @@ IMPORTANT FORMAT NOTES:
     setLoading(true);
     try {
       onImport(parsedContent.phases);
-      toast.success(`Successfully imported ${parsedContent.phases.length} phases with their operations and steps`);
       onOpenChange(false);
       setCsvData('');
       setFileInput(null);
@@ -421,7 +410,6 @@ IMPORTANT FORMAT NOTES:
       setShowPreview(false);
     } catch (error) {
       console.error('Error importing project content:', error);
-      toast.error('Failed to import project content');
     } finally {
       setLoading(false);
     }

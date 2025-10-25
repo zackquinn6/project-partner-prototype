@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Scroll, Search, Download, Calendar, User, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 interface ProjectAgreement {
   id: string;
@@ -141,7 +140,6 @@ export const ProjectAgreementsWindow: React.FC<ProjectAgreementsWindowProps> = (
       setAgreements(agreementsWithSignatures);
     } catch (error) {
       console.error('Error fetching agreements:', error);
-      toast.error('Failed to fetch project agreements');
     } finally {
       setLoading(false);
     }
@@ -173,8 +171,6 @@ Signed on: ${new Date(agreement.agreement.signedAt).toLocaleString()}
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
-    toast.success('Agreement downloaded successfully');
   };
 
   return (
