@@ -315,7 +315,7 @@ export function HomeTasksTable({
                   </Button>
                 </TableHead>
                 <TableHead className="w-[180px] text-xs">Notes</TableHead>
-                <TableHead className="w-[80px] text-xs">
+                <TableHead className="w-[60px] text-xs">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('priority')} className="h-6 px-2 text-xs font-medium">
                     Priority <SortIcon field="priority" />
                   </Button>
@@ -379,7 +379,7 @@ export function HomeTasksTable({
                     </TableCell>
                     <TableCell>
                       <Badge variant={getPriorityColor(task.priority)} className="text-[10px] px-1.5 py-0">
-                        {task.priority}
+                        {task.priority === 'medium' ? 'med' : task.priority}
                       </Badge>
                     </TableCell>
                     <TableCell>
