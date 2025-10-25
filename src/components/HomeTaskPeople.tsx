@@ -257,20 +257,13 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         type="number"
                         min="1"
                         max="24"
-                        value={editingPerson.available_hours ?? 8}
+                        value={editingPerson.available_hours}
                         onChange={(e) => {
-                          const rawValue = e.target.value;
-                          if (rawValue === '') {
-                            setEditingPerson({ ...editingPerson, available_hours: 8 });
-                          } else {
-                            const val = parseFloat(rawValue);
-                            if (!isNaN(val)) {
-                              setEditingPerson({ ...editingPerson, available_hours: val });
-                            }
-                          }
+                          const val = e.target.value === '' ? 8 : Number(e.target.value);
+                          setEditingPerson({ ...editingPerson, available_hours: val });
                         }}
                         onBlur={(e) => {
-                          const val = Math.max(1, Math.min(24, parseInt(e.target.value) || 8));
+                          const val = Math.max(1, Math.min(24, Number(e.target.value) || 8));
                           setEditingPerson({ ...editingPerson, available_hours: val });
                         }}
                         className="text-[10px] md:text-xs h-7 w-12"
@@ -283,20 +276,13 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         type="number"
                         min="0"
                         step="0.01"
-                        value={editingPerson.hourly_rate ?? 0}
+                        value={editingPerson.hourly_rate}
                         onChange={(e) => {
-                          const rawValue = e.target.value;
-                          if (rawValue === '') {
-                            setEditingPerson({ ...editingPerson, hourly_rate: 0 });
-                          } else {
-                            const val = parseFloat(rawValue);
-                            if (!isNaN(val)) {
-                              setEditingPerson({ ...editingPerson, hourly_rate: val });
-                            }
-                          }
+                          const val = e.target.value === '' ? 0 : Number(e.target.value);
+                          setEditingPerson({ ...editingPerson, hourly_rate: val });
                         }}
                         onBlur={(e) => {
-                          const val = Math.max(0, parseFloat(e.target.value) || 0);
+                          const val = Math.max(0, Number(e.target.value) || 0);
                           setEditingPerson({ ...editingPerson, hourly_rate: val });
                         }}
                         className="text-[10px] md:text-xs h-7 w-16"
@@ -308,20 +294,13 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         type="number"
                         min="1"
                         max="7"
-                        value={editingPerson.consecutive_days ?? 5}
+                        value={editingPerson.consecutive_days}
                         onChange={(e) => {
-                          const rawValue = e.target.value;
-                          if (rawValue === '') {
-                            setEditingPerson({ ...editingPerson, consecutive_days: 5 });
-                          } else {
-                            const val = parseFloat(rawValue);
-                            if (!isNaN(val)) {
-                              setEditingPerson({ ...editingPerson, consecutive_days: val });
-                            }
-                          }
+                          const val = e.target.value === '' ? 5 : Number(e.target.value);
+                          setEditingPerson({ ...editingPerson, consecutive_days: val });
                         }}
                         onBlur={(e) => {
-                          const val = Math.max(1, Math.min(7, parseInt(e.target.value) || 5));
+                          const val = Math.max(1, Math.min(7, Number(e.target.value) || 5));
                           setEditingPerson({ ...editingPerson, consecutive_days: val });
                         }}
                         className="text-[10px] md:text-xs h-7 w-12"
@@ -583,20 +562,13 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                 type="number"
                 min="1"
                 max="24"
-                value={newPerson.available_hours ?? 8}
+                value={newPerson.available_hours}
                 onChange={(e) => {
-                  const rawValue = e.target.value;
-                  if (rawValue === '') {
-                    setNewPerson({ ...newPerson, available_hours: 8 });
-                  } else {
-                    const val = parseFloat(rawValue);
-                    if (!isNaN(val)) {
-                      setNewPerson({ ...newPerson, available_hours: val });
-                    }
-                  }
+                  const val = e.target.value === '' ? 8 : Number(e.target.value);
+                  setNewPerson({ ...newPerson, available_hours: val });
                 }}
                 onBlur={(e) => {
-                  const val = Math.max(1, Math.min(24, parseInt(e.target.value) || 8));
+                  const val = Math.max(1, Math.min(24, Number(e.target.value) || 8));
                   setNewPerson({ ...newPerson, available_hours: val });
                 }}
                 className="text-[10px] md:text-xs h-7 w-12"
@@ -609,20 +581,13 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                 type="number"
                 min="0"
                 step="0.01"
-                value={newPerson.hourly_rate ?? 0}
+                value={newPerson.hourly_rate}
                 onChange={(e) => {
-                  const rawValue = e.target.value;
-                  if (rawValue === '') {
-                    setNewPerson({ ...newPerson, hourly_rate: 0 });
-                  } else {
-                    const val = parseFloat(rawValue);
-                    if (!isNaN(val)) {
-                      setNewPerson({ ...newPerson, hourly_rate: val });
-                    }
-                  }
+                  const val = e.target.value === '' ? 0 : Number(e.target.value);
+                  setNewPerson({ ...newPerson, hourly_rate: val });
                 }}
                 onBlur={(e) => {
-                  const val = Math.max(0, parseFloat(e.target.value) || 0);
+                  const val = Math.max(0, Number(e.target.value) || 0);
                   setNewPerson({ ...newPerson, hourly_rate: val });
                 }}
                 className="text-[10px] md:text-xs h-7 w-16"
@@ -634,20 +599,13 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                 type="number"
                 min="1"
                 max="7"
-                value={newPerson.consecutive_days ?? 5}
+                value={newPerson.consecutive_days}
                 onChange={(e) => {
-                  const rawValue = e.target.value;
-                  if (rawValue === '') {
-                    setNewPerson({ ...newPerson, consecutive_days: 5 });
-                  } else {
-                    const val = parseFloat(rawValue);
-                    if (!isNaN(val)) {
-                      setNewPerson({ ...newPerson, consecutive_days: val });
-                    }
-                  }
+                  const val = e.target.value === '' ? 5 : Number(e.target.value);
+                  setNewPerson({ ...newPerson, consecutive_days: val });
                 }}
                 onBlur={(e) => {
-                  const val = Math.max(1, Math.min(7, parseInt(e.target.value) || 5));
+                  const val = Math.max(1, Math.min(7, Number(e.target.value) || 5));
                   setNewPerson({ ...newPerson, consecutive_days: val });
                 }}
                 className="text-[10px] md:text-xs h-7 w-12"
