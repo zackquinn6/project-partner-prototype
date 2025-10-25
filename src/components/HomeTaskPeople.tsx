@@ -155,7 +155,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
 
       {/* Add new person form */}
       <div className="border rounded-lg p-2 md:p-3 space-y-2 bg-muted/30">
-        <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,auto] gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-[200px,auto,auto] gap-2">
           <Input
             placeholder="Name"
             value={newPerson.name}
@@ -168,7 +168,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
               min="1"
               max="24"
               value={newPerson.available_hours}
-              onChange={(e) => setNewPerson({ ...newPerson, available_hours: parseInt(e.target.value) })}
+              onChange={(e) => setNewPerson({ ...newPerson, available_hours: parseInt(e.target.value) || 1 })}
               className="text-[10px] md:text-xs h-7 w-12"
               placeholder="Hrs"
             />
@@ -189,7 +189,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-[160px,1fr] gap-2">
           <Select 
             value={newPerson.diy_level} 
             onValueChange={(val) => setNewPerson({ ...newPerson, diy_level: val as any })}
@@ -197,7 +197,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
             <SelectTrigger className="text-[10px] md:text-xs h-7">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-50 bg-popover">
               <SelectItem value="beginner">Beginner</SelectItem>
               <SelectItem value="intermediate">Intermediate</SelectItem>
               <SelectItem value="advanced">Advanced</SelectItem>
@@ -210,7 +210,7 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
               min="1"
               max="7"
               value={newPerson.consecutive_days}
-              onChange={(e) => setNewPerson({ ...newPerson, consecutive_days: parseInt(e.target.value) })}
+              onChange={(e) => setNewPerson({ ...newPerson, consecutive_days: parseInt(e.target.value) || 1 })}
               className="text-[10px] md:text-xs h-7 w-14"
             />
             <span className="text-[10px] md:text-xs">consec. days</span>
