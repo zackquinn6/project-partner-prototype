@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MessageCircle, Send, Star } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 import { sanitizeInput, generateCSRFToken, setCSRFToken, getCSRFToken } from '@/utils/inputSanitization';
 
 interface FeedbackDialogProps {
@@ -49,19 +48,19 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
     const sanitizedCategory = sanitizeInput(category);
     
     if (!sanitizedCategory || !sanitizedMessage) {
-      toast.error('Please fill in all required fields');
+      console.error('Please fill in all required fields');
       return;
     }
 
     if (!user?.email) {
-      toast.error('Please sign in to submit feedback');
+      console.error('Please sign in to submit feedback');
       return;
     }
 
     // Validate CSRF token
     const storedToken = getCSRFToken();
     if (!storedToken || storedToken !== csrfToken) {
-      toast.error('Security validation failed. Please try again.');
+      console.error('Security validation failed. Please try again.');
       return;
     }
 
@@ -108,13 +107,11 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
         console.log('Email notification failed (non-critical):', emailError);
       }
 
-      toast.success('Feedback submitted successfully! Thank you for helping us improve.');
       setCategory('');
       setMessage('');
       onOpenChange(false);
     } catch (error) {
       console.error('Error submitting feedback:', error);
-      toast.error('Failed to submit feedback. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 import { MessageSquare, Trash2, Star, Eye, Edit } from 'lucide-react';
-import { toast } from 'sonner';
 
 interface FeatureRequest {
   id: string;
@@ -63,7 +62,6 @@ export const AdminFeatureRequestManager: React.FC<AdminFeatureRequestManagerProp
       setFeatureRequests((data || []) as FeatureRequest[]);
     } catch (error) {
       console.error('Error fetching feature requests:', error);
-      toast.error('Failed to load feature requests');
     } finally {
       setLoading(false);
     }
@@ -94,7 +92,6 @@ export const AdminFeatureRequestManager: React.FC<AdminFeatureRequestManagerProp
 
       if (error) throw error;
 
-      toast.success('Response saved successfully');
       setShowResponseForm(false);
       setSelectedRequest(null);
       setResponseForm({
@@ -105,7 +102,6 @@ export const AdminFeatureRequestManager: React.FC<AdminFeatureRequestManagerProp
       fetchFeatureRequests();
     } catch (error) {
       console.error('Error saving response:', error);
-      toast.error('Failed to save response');
     }
   };
 
@@ -121,11 +117,9 @@ export const AdminFeatureRequestManager: React.FC<AdminFeatureRequestManagerProp
         .eq('id', requestId);
 
       if (error) throw error;
-      toast.success('Feature request deleted successfully');
       fetchFeatureRequests();
     } catch (error) {
       console.error('Error deleting feature request:', error);
-      toast.error('Failed to delete feature request');
     }
   };
 

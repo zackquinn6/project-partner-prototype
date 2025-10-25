@@ -11,7 +11,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Plus, Edit, Trash2, Calendar, CheckCircle, Clock, AlertCircle, Star, MessageSquare } from 'lucide-react';
-import { toast } from 'sonner';
 import { AdminFeatureRequestManager } from './AdminFeatureRequestManager';
 
 interface RoadmapItem {
@@ -69,7 +68,6 @@ export const AdminRoadmapManager: React.FC<AdminRoadmapManagerProps> = ({
       setRoadmapItems((data || []) as RoadmapItem[]);
     } catch (error) {
       console.error('Error fetching roadmap items:', error);
-      toast.error('Failed to load roadmap items');
     } finally {
       setLoading(false);
     }
@@ -77,7 +75,7 @@ export const AdminRoadmapManager: React.FC<AdminRoadmapManagerProps> = ({
 
   const handleSaveItem = async () => {
     if (!roadmapForm.title.trim()) {
-      toast.error('Please enter a title');
+      console.error('Please enter a title');
       return;
     }
 
@@ -95,14 +93,12 @@ export const AdminRoadmapManager: React.FC<AdminRoadmapManagerProps> = ({
           .eq('id', editingItem.id);
 
         if (error) throw error;
-        toast.success('Roadmap item updated successfully');
       } else {
         const { error } = await supabase
           .from('feature_roadmap')
           .insert(itemData);
 
         if (error) throw error;
-        toast.success('Roadmap item added successfully');
       }
 
       setShowAddForm(false);
@@ -118,7 +114,6 @@ export const AdminRoadmapManager: React.FC<AdminRoadmapManagerProps> = ({
       fetchRoadmapItems();
     } catch (error) {
       console.error('Error saving roadmap item:', error);
-      toast.error('Failed to save roadmap item');
     }
   };
 
@@ -147,11 +142,9 @@ export const AdminRoadmapManager: React.FC<AdminRoadmapManagerProps> = ({
         .eq('id', itemId);
 
       if (error) throw error;
-      toast.success('Roadmap item deleted successfully');
       fetchRoadmapItems();
     } catch (error) {
       console.error('Error deleting roadmap item:', error);
-      toast.error('Failed to delete roadmap item');
     }
   };
 

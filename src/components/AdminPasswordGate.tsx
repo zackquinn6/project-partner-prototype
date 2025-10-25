@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lock, AlertTriangle } from 'lucide-react';
-import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -32,18 +31,15 @@ const AdminPasswordGate: React.FC<AdminPasswordGateProps> = ({ onAuthenticated, 
       
       if (error) {
         console.error('Error checking admin role:', error);
-        toast.error('Failed to verify admin access');
         setHasAdminRole(false);
       } else {
         setHasAdminRole(data);
         if (data) {
-          toast.success('Admin access verified');
           onAuthenticated();
         }
       }
     } catch (error) {
       console.error('Error checking admin role:', error);
-      toast.error('Failed to verify admin access');
       setHasAdminRole(false);
     } finally {
       setIsLoading(false);
