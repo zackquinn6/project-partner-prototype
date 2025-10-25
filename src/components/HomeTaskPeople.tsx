@@ -231,11 +231,12 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
               {editingPersonId === person.id && editingPerson ? (
                 // Edit mode
                 <div className="space-y-2">
+                  {/* Basic Info */}
                   <div className="flex flex-wrap items-center gap-2">
                     <Input
                       value={editingPerson.name}
                       onChange={(e) => setEditingPerson({ ...editingPerson, name: e.target.value })}
-                      className="text-[10px] md:text-xs h-7 w-32"
+                      className="text-[10px] md:text-xs h-7 flex-1 min-w-[120px]"
                       placeholder="Name"
                     />
                     <Select 
@@ -252,67 +253,6 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         <SelectItem value="professional">Professional</SelectItem>
                       </SelectContent>
                     </Select>
-                    <div className="flex gap-1 items-center">
-                      <Input
-                        type="number"
-                        min="1"
-                        max="24"
-                        value={editingPerson.available_hours || 8}
-                        onChange={(e) => {
-                          console.log('Hours onChange:', e.target.value);
-                          const numVal = e.target.value === '' ? 8 : parseFloat(e.target.value);
-                          console.log('Parsed hours:', numVal);
-                          setEditingPerson({ ...editingPerson, available_hours: numVal });
-                        }}
-                        onBlur={(e) => {
-                          const val = Math.max(1, Math.min(24, parseFloat(e.target.value) || 8));
-                          setEditingPerson({ ...editingPerson, available_hours: val });
-                        }}
-                        className="text-[10px] md:text-xs h-7 w-12"
-                      />
-                      <span className="text-[10px] md:text-xs whitespace-nowrap">hrs/day</span>
-                    </div>
-                    <div className="flex gap-1 items-center">
-                      <span className="text-[10px] md:text-xs">$</span>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={editingPerson.hourly_rate || 0}
-                        onChange={(e) => {
-                          console.log('Rate onChange:', e.target.value);
-                          const numVal = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                          console.log('Parsed rate:', numVal);
-                          setEditingPerson({ ...editingPerson, hourly_rate: numVal });
-                        }}
-                        onBlur={(e) => {
-                          const val = Math.max(0, parseFloat(e.target.value) || 0);
-                          setEditingPerson({ ...editingPerson, hourly_rate: val });
-                        }}
-                        className="text-[10px] md:text-xs h-7 w-16"
-                      />
-                      <span className="text-[10px] md:text-xs">/hr</span>
-                    </div>
-                    <div className="flex gap-1 items-center">
-                      <Input
-                        type="number"
-                        min="1"
-                        max="7"
-                        value={editingPerson.consecutive_days || 5}
-                        onChange={(e) => {
-                          console.log('Days onChange:', e.target.value);
-                          const numVal = e.target.value === '' ? 5 : parseFloat(e.target.value);
-                          console.log('Parsed days:', numVal);
-                          setEditingPerson({ ...editingPerson, consecutive_days: numVal });
-                        }}
-                        onBlur={(e) => {
-                          const val = Math.max(1, Math.min(7, parseFloat(e.target.value) || 5));
-                          setEditingPerson({ ...editingPerson, consecutive_days: val });
-                        }}
-                        className="text-[10px] md:text-xs h-7 w-12"
-                      />
-                      <span className="text-[10px] md:text-xs whitespace-nowrap">consec. days</span>
-                    </div>
                   </div>
 
                   <div>
@@ -340,6 +280,85 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                   {editingPerson.availability_mode === 'general' ? (
                     <div className="space-y-2 border-t pt-2">
                       <div className="text-[10px] md:text-xs font-medium">General Availability</div>
+                      
+                      {/* Availability Numbers */}
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <label className="text-[10px] md:text-xs block mb-1">Hrs/Day</label>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={editingPerson.available_hours || 8}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9.]/g, '');
+                              if (val === '') {
+                                setEditingPerson({ ...editingPerson, available_hours: 8 });
+                              } else {
+                                const num = parseFloat(val);
+                                if (!isNaN(num)) {
+                                  setEditingPerson({ ...editingPerson, available_hours: num });
+                                }
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const num = parseFloat(e.target.value);
+                              const clamped = isNaN(num) ? 8 : Math.max(1, Math.min(24, num));
+                              setEditingPerson({ ...editingPerson, available_hours: clamped });
+                            }}
+                            className="w-full h-7 px-2 text-[10px] md:text-xs border rounded-md"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] md:text-xs block mb-1">$/Hr</label>
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={editingPerson.hourly_rate || 0}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9.]/g, '');
+                              if (val === '') {
+                                setEditingPerson({ ...editingPerson, hourly_rate: 0 });
+                              } else {
+                                const num = parseFloat(val);
+                                if (!isNaN(num)) {
+                                  setEditingPerson({ ...editingPerson, hourly_rate: num });
+                                }
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const num = parseFloat(e.target.value);
+                              const clamped = isNaN(num) ? 0 : Math.max(0, num);
+                              setEditingPerson({ ...editingPerson, hourly_rate: clamped });
+                            }}
+                            className="w-full h-7 px-2 text-[10px] md:text-xs border rounded-md"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] md:text-xs block mb-1">Consec Days</label>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={editingPerson.consecutive_days || 5}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, '');
+                              if (val === '') {
+                                setEditingPerson({ ...editingPerson, consecutive_days: 5 });
+                              } else {
+                                const num = parseInt(val);
+                                if (!isNaN(num)) {
+                                  setEditingPerson({ ...editingPerson, consecutive_days: num });
+                                }
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const num = parseInt(e.target.value);
+                              const clamped = isNaN(num) ? 5 : Math.max(1, Math.min(7, num));
+                              setEditingPerson({ ...editingPerson, consecutive_days: clamped });
+                            }}
+                            className="w-full h-7 px-2 text-[10px] md:text-xs border rounded-md"
+                          />
+                        </div>
+                      </div>
                       
                       {/* Available Days */}
                       <div>
@@ -542,12 +561,13 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
         <div className="border rounded-lg p-2 md:p-3 space-y-2 bg-muted/30">
           <div className="text-[10px] md:text-xs font-medium">New Team Member</div>
           
+          {/* Basic Info */}
           <div className="flex flex-wrap items-center gap-2">
             <Input
               placeholder="Name"
               value={newPerson.name}
               onChange={(e) => setNewPerson({ ...newPerson, name: e.target.value })}
-              className="text-[10px] md:text-xs h-7 w-32"
+              className="text-[10px] md:text-xs h-7 flex-1 min-w-[120px]"
             />
             <Select 
               value={newPerson.diy_level} 
@@ -563,64 +583,6 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                 <SelectItem value="professional">Professional</SelectItem>
               </SelectContent>
             </Select>
-            <div className="flex gap-1 items-center">
-              <Input
-                type="number"
-                min="1"
-                max="24"
-                value={newPerson.available_hours || 8}
-                onChange={(e) => {
-                  console.log('New hours onChange:', e.target.value);
-                  const numVal = e.target.value === '' ? 8 : parseFloat(e.target.value);
-                  setNewPerson({ ...newPerson, available_hours: numVal });
-                }}
-                onBlur={(e) => {
-                  const val = Math.max(1, Math.min(24, parseFloat(e.target.value) || 8));
-                  setNewPerson({ ...newPerson, available_hours: val });
-                }}
-                className="text-[10px] md:text-xs h-7 w-12"
-              />
-              <span className="text-[10px] md:text-xs whitespace-nowrap">hrs/day</span>
-            </div>
-            <div className="flex gap-1 items-center">
-              <span className="text-[10px] md:text-xs">$</span>
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                value={newPerson.hourly_rate || 0}
-                onChange={(e) => {
-                  console.log('New rate onChange:', e.target.value);
-                  const numVal = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                  setNewPerson({ ...newPerson, hourly_rate: numVal });
-                }}
-                onBlur={(e) => {
-                  const val = Math.max(0, parseFloat(e.target.value) || 0);
-                  setNewPerson({ ...newPerson, hourly_rate: val });
-                }}
-                className="text-[10px] md:text-xs h-7 w-16"
-              />
-              <span className="text-[10px] md:text-xs">/hr</span>
-            </div>
-            <div className="flex gap-1 items-center">
-              <Input
-                type="number"
-                min="1"
-                max="7"
-                value={newPerson.consecutive_days || 5}
-                onChange={(e) => {
-                  console.log('New days onChange:', e.target.value);
-                  const numVal = e.target.value === '' ? 5 : parseFloat(e.target.value);
-                  setNewPerson({ ...newPerson, consecutive_days: numVal });
-                }}
-                onBlur={(e) => {
-                  const val = Math.max(1, Math.min(7, parseFloat(e.target.value) || 5));
-                  setNewPerson({ ...newPerson, consecutive_days: val });
-                }}
-                className="text-[10px] md:text-xs h-7 w-12"
-              />
-              <span className="text-[10px] md:text-xs whitespace-nowrap">consec. days</span>
-            </div>
           </div>
 
           <div>
@@ -647,6 +609,85 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
 
           {newPerson.availability_mode === 'general' ? (
             <div className="space-y-2">
+              {/* Availability Numbers */}
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="text-[10px] md:text-xs block mb-1">Hrs/Day</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={newPerson.available_hours || 8}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9.]/g, '');
+                      if (val === '') {
+                        setNewPerson({ ...newPerson, available_hours: 8 });
+                      } else {
+                        const num = parseFloat(val);
+                        if (!isNaN(num)) {
+                          setNewPerson({ ...newPerson, available_hours: num });
+                        }
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const num = parseFloat(e.target.value);
+                      const clamped = isNaN(num) ? 8 : Math.max(1, Math.min(24, num));
+                      setNewPerson({ ...newPerson, available_hours: clamped });
+                    }}
+                    className="w-full h-7 px-2 text-[10px] md:text-xs border rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] md:text-xs block mb-1">$/Hr</label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={newPerson.hourly_rate || 0}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9.]/g, '');
+                      if (val === '') {
+                        setNewPerson({ ...newPerson, hourly_rate: 0 });
+                      } else {
+                        const num = parseFloat(val);
+                        if (!isNaN(num)) {
+                          setNewPerson({ ...newPerson, hourly_rate: num });
+                        }
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const num = parseFloat(e.target.value);
+                      const clamped = isNaN(num) ? 0 : Math.max(0, num);
+                      setNewPerson({ ...newPerson, hourly_rate: clamped });
+                    }}
+                    className="w-full h-7 px-2 text-[10px] md:text-xs border rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] md:text-xs block mb-1">Consec Days</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={newPerson.consecutive_days || 5}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      if (val === '') {
+                        setNewPerson({ ...newPerson, consecutive_days: 5 });
+                      } else {
+                        const num = parseInt(val);
+                        if (!isNaN(num)) {
+                          setNewPerson({ ...newPerson, consecutive_days: num });
+                        }
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const num = parseInt(e.target.value);
+                      const clamped = isNaN(num) ? 5 : Math.max(1, Math.min(7, num));
+                      setNewPerson({ ...newPerson, consecutive_days: clamped });
+                    }}
+                    className="w-full h-7 px-2 text-[10px] md:text-xs border rounded-md"
+                  />
+                </div>
+              </div>
+
               <div>
                 <div className="text-[10px] md:text-xs mb-1">Available Days:</div>
                 <div className="flex flex-wrap gap-1.5">
