@@ -257,13 +257,15 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         type="number"
                         min="1"
                         max="24"
-                        value={editingPerson.available_hours}
+                        value={editingPerson.available_hours || 8}
                         onChange={(e) => {
-                          const val = e.target.value === '' ? 8 : Number(e.target.value);
-                          setEditingPerson({ ...editingPerson, available_hours: val });
+                          console.log('Hours onChange:', e.target.value);
+                          const numVal = e.target.value === '' ? 8 : parseFloat(e.target.value);
+                          console.log('Parsed hours:', numVal);
+                          setEditingPerson({ ...editingPerson, available_hours: numVal });
                         }}
                         onBlur={(e) => {
-                          const val = Math.max(1, Math.min(24, Number(e.target.value) || 8));
+                          const val = Math.max(1, Math.min(24, parseFloat(e.target.value) || 8));
                           setEditingPerson({ ...editingPerson, available_hours: val });
                         }}
                         className="text-[10px] md:text-xs h-7 w-12"
@@ -276,13 +278,15 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         type="number"
                         min="0"
                         step="0.01"
-                        value={editingPerson.hourly_rate}
+                        value={editingPerson.hourly_rate || 0}
                         onChange={(e) => {
-                          const val = e.target.value === '' ? 0 : Number(e.target.value);
-                          setEditingPerson({ ...editingPerson, hourly_rate: val });
+                          console.log('Rate onChange:', e.target.value);
+                          const numVal = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                          console.log('Parsed rate:', numVal);
+                          setEditingPerson({ ...editingPerson, hourly_rate: numVal });
                         }}
                         onBlur={(e) => {
-                          const val = Math.max(0, Number(e.target.value) || 0);
+                          const val = Math.max(0, parseFloat(e.target.value) || 0);
                           setEditingPerson({ ...editingPerson, hourly_rate: val });
                         }}
                         className="text-[10px] md:text-xs h-7 w-16"
@@ -294,13 +298,15 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                         type="number"
                         min="1"
                         max="7"
-                        value={editingPerson.consecutive_days}
+                        value={editingPerson.consecutive_days || 5}
                         onChange={(e) => {
-                          const val = e.target.value === '' ? 5 : Number(e.target.value);
-                          setEditingPerson({ ...editingPerson, consecutive_days: val });
+                          console.log('Days onChange:', e.target.value);
+                          const numVal = e.target.value === '' ? 5 : parseFloat(e.target.value);
+                          console.log('Parsed days:', numVal);
+                          setEditingPerson({ ...editingPerson, consecutive_days: numVal });
                         }}
                         onBlur={(e) => {
-                          const val = Math.max(1, Math.min(7, Number(e.target.value) || 5));
+                          const val = Math.max(1, Math.min(7, parseFloat(e.target.value) || 5));
                           setEditingPerson({ ...editingPerson, consecutive_days: val });
                         }}
                         className="text-[10px] md:text-xs h-7 w-12"
@@ -562,13 +568,14 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                 type="number"
                 min="1"
                 max="24"
-                value={newPerson.available_hours}
+                value={newPerson.available_hours || 8}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? 8 : Number(e.target.value);
-                  setNewPerson({ ...newPerson, available_hours: val });
+                  console.log('New hours onChange:', e.target.value);
+                  const numVal = e.target.value === '' ? 8 : parseFloat(e.target.value);
+                  setNewPerson({ ...newPerson, available_hours: numVal });
                 }}
                 onBlur={(e) => {
-                  const val = Math.max(1, Math.min(24, Number(e.target.value) || 8));
+                  const val = Math.max(1, Math.min(24, parseFloat(e.target.value) || 8));
                   setNewPerson({ ...newPerson, available_hours: val });
                 }}
                 className="text-[10px] md:text-xs h-7 w-12"
@@ -581,13 +588,14 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                 type="number"
                 min="0"
                 step="0.01"
-                value={newPerson.hourly_rate}
+                value={newPerson.hourly_rate || 0}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? 0 : Number(e.target.value);
-                  setNewPerson({ ...newPerson, hourly_rate: val });
+                  console.log('New rate onChange:', e.target.value);
+                  const numVal = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                  setNewPerson({ ...newPerson, hourly_rate: numVal });
                 }}
                 onBlur={(e) => {
-                  const val = Math.max(0, Number(e.target.value) || 0);
+                  const val = Math.max(0, parseFloat(e.target.value) || 0);
                   setNewPerson({ ...newPerson, hourly_rate: val });
                 }}
                 className="text-[10px] md:text-xs h-7 w-16"
@@ -599,13 +607,14 @@ export function HomeTaskPeople({ userId, homeId, onPeopleChange }: HomeTaskPeopl
                 type="number"
                 min="1"
                 max="7"
-                value={newPerson.consecutive_days}
+                value={newPerson.consecutive_days || 5}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? 5 : Number(e.target.value);
-                  setNewPerson({ ...newPerson, consecutive_days: val });
+                  console.log('New days onChange:', e.target.value);
+                  const numVal = e.target.value === '' ? 5 : parseFloat(e.target.value);
+                  setNewPerson({ ...newPerson, consecutive_days: numVal });
                 }}
                 onBlur={(e) => {
-                  const val = Math.max(1, Math.min(7, Number(e.target.value) || 5));
+                  const val = Math.max(1, Math.min(7, parseFloat(e.target.value) || 5));
                   setNewPerson({ ...newPerson, consecutive_days: val });
                 }}
                 className="text-[10px] md:text-xs h-7 w-12"
