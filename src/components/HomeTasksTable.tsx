@@ -384,7 +384,7 @@ export function HomeTasksTable({
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            onClick={() => window.open(`/?project=${task.project_run_id}`, '_blank')} 
+                            onClick={() => window.location.href = `/?project=${task.project_run_id}`} 
                             className="h-7 px-2"
                             title="Open linked project"
                           >
