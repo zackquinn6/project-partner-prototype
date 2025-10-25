@@ -343,12 +343,6 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                           className="text-xs h-8"
                         />
-                        <Textarea
-                          placeholder="Description"
-                          value={formData.description}
-                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                          className="text-xs min-h-[60px]"
-                        />
                         <div className="grid grid-cols-2 gap-2">
                           <div>
                             <label className="text-xs font-medium mb-1 block">Priority</label>
