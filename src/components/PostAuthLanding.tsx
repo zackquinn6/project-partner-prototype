@@ -271,11 +271,10 @@ export const PostAuthLanding = () => {
             {/* Labs - Experimental Features - Collapsed by default */}
             <div>
               <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="labs" className="border rounded-xl shadow-sm max-w-2xl mx-auto">
+                <AccordionItem value="labs" className="border rounded-xl shadow-sm max-w-md mx-auto">
                   <AccordionTrigger className="px-4 sm:px-6 hover:no-underline">
                     <div className="flex items-center gap-2">
                       <span className="text-lg font-semibold text-foreground">🧪 Labs</span>
-                      <Badge variant="secondary" className="text-xs">4</Badge>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>

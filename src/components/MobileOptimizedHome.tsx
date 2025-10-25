@@ -331,11 +331,10 @@ export function MobileOptimizedHome() {
         {/* Labs - Experimental Features - Collapsed by default */}
         <div>
           <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="labs" className="border rounded-xl shadow-sm">
+            <AccordionItem value="labs" className="border rounded-xl shadow-sm max-w-md mx-auto">
               <AccordionTrigger className="px-4 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-semibold text-foreground">🧪 Labs</span>
-                  <Badge variant="secondary" className="text-[10px]">{betaApps.length}</Badge>
                 </div>
               </AccordionTrigger>
               <AccordionContent>
