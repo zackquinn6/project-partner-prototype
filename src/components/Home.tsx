@@ -28,6 +28,7 @@ import { PersonasSection } from '@/components/landing/PersonasSection';
 import { FAQSection } from '@/components/landing/FAQSection';
 import { FinalCTASection } from '@/components/landing/FinalCTASection';
 import { Footer } from '@/components/landing/Footer';
+import { PreSignInNavigation } from '@/components/PreSignInNavigation';
 interface HomeProps {
   onViewChange: (view: 'admin' | 'user') => void;
 }
@@ -289,6 +290,9 @@ export default function Home({
        </div> :
     // Non-logged-in users see the new modern landing page
     <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      <PreSignInNavigation />
+      
       {/* Hero Section */}
       <HeroSection onOpenDemo={() => setIsKCExplainerOpen(true)} />
 
