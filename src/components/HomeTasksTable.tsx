@@ -320,7 +320,7 @@ export function HomeTasksTable({
                     Priority <SortIcon field="priority" />
                   </Button>
                 </TableHead>
-                <TableHead className="w-[80px] text-xs">
+                <TableHead className="w-[60px] text-xs">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('diy_level')} className="h-6 px-2 text-xs font-medium">
                     DIY Level <SortIcon field="diy_level" />
                   </Button>
@@ -384,7 +384,10 @@ export function HomeTasksTable({
                     </TableCell>
                     <TableCell>
                       <Badge variant={getDiyLevelColor(task.diy_level)} className="text-[10px] px-1.5 py-0">
-                        {task.diy_level}
+                        {task.diy_level === 'beginner' ? 'new' : 
+                         task.diy_level === 'intermediate' ? 'mid' : 
+                         task.diy_level === 'advanced' ? 'adv' : 
+                         task.diy_level === 'professional' ? 'pro' : task.diy_level}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs">
