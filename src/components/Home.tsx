@@ -28,9 +28,6 @@ import { PersonasSection } from '@/components/landing/PersonasSection';
 import { FAQSection } from '@/components/landing/FAQSection';
 import { FinalCTASection } from '@/components/landing/FinalCTASection';
 import { Footer } from '@/components/landing/Footer';
-import { ProblemSection } from '@/components/landing/ProblemSection';
-import { OutcomesSection } from '@/components/landing/OutcomesSection';
-import { FooterCTA } from '@/components/landing/FooterCTA';
 import { PreSignInNavigation } from '@/components/PreSignInNavigation';
 interface HomeProps {
   onViewChange: (view: 'admin' | 'user') => void;
@@ -302,17 +299,11 @@ export default function Home({
       {/* Statistics Bar */}
       <StatisticsBar />
 
-      {/* Problem Section */}
-      <ProblemSection />
-
       {/* How It Works Section */}
       <HowItWorksSection onOpenDemo={() => setIsKCExplainerOpen(true)} />
 
       {/* Features Section */}
       <FeaturesSection />
-
-      {/* Outcomes Section */}
-      <OutcomesSection />
 
       {/* Testimonials Section */}
       <TestimonialsSection />
@@ -328,9 +319,6 @@ export default function Home({
 
       {/* Footer */}
       <Footer onPricingClick={() => setIsPricingOpen(true)} />
-
-      {/* Sticky Footer CTA */}
-      <FooterCTA />
     </div>}
 
       {/* Modals */}

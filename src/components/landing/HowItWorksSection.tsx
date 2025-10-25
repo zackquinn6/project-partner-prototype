@@ -11,24 +11,24 @@ export const HowItWorksSection = ({ onOpenDemo }: HowItWorksSectionProps) => {
     {
       icon: BookOpen,
       number: 1,
-      title: "Curate",
-      description: "Aggregate best videos and expert content into categorical workflows",
+      title: "Choose Your Project",
+      description: "Browse 50+ proven templates or describe your own custom project",
       color: "bg-primary text-primary-foreground",
       badgeColor: "bg-primary text-primary-foreground"
     },
     {
       icon: Zap,
       number: 2,
-      title: "Configure",
-      description: "Personalize detail levels, size materials to your units, and set your timeline",
+      title: "Get Your Personalized Plan",
+      description: "Answer 3 quick questions about your skills, tools, and timeline",
       color: "bg-accent text-accent-foreground",
       badgeColor: "bg-accent text-accent-foreground"
     },
     {
       icon: CheckCircle,
       number: 3,
-      title: "Execute",
-      description: "Follow mobile runbooks with QA checks and evidence-backed audit trails",
+      title: "Build with Confidence",
+      description: "Follow your custom workflow with photos, videos, and expert support",
       color: "bg-green-600 text-white",
       badgeColor: "bg-green-600 text-white"
     }
