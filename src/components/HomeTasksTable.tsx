@@ -37,6 +37,7 @@ interface HomeTasksTableProps {
   onAddSubtasks: (task: HomeTask) => void;
   onLinkProject: (task: HomeTask) => void;
   onAddTask?: () => void;
+  onProjectNavigate?: () => void;
 }
 type SortField = 'title' | 'priority' | 'status' | 'diy_level' | 'due_date' | 'task_type';
 type SortDirection = 'asc' | 'desc';
@@ -46,7 +47,8 @@ export function HomeTasksTable({
   onDelete,
   onAddSubtasks,
   onLinkProject,
-  onAddTask
+  onAddTask,
+  onProjectNavigate
 }: HomeTasksTableProps) {
   const navigate = useNavigate();
   const [sortField, setSortField] = useState<SortField>('due_date');
@@ -384,7 +386,10 @@ export function HomeTasksTable({
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            onClick={() => navigate('/', { state: { view: 'user', projectRunId: task.project_run_id } })} 
+                            onClick={() => {
+                              onProjectNavigate?.();
+                              navigate('/', { state: { view: 'user', projectRunId: task.project_run_id } });
+                            }} 
                             className="h-7 px-2"
                             title="Open linked project"
                           >

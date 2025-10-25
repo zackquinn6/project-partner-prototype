@@ -533,6 +533,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                       resetForm();
                       setShowAddTask(true);
                     }}
+                    onProjectNavigate={() => onOpenChange(false)}
                   />
                 </TabsContent>
 
