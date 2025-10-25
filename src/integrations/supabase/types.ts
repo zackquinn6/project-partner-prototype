@@ -692,6 +692,9 @@ export type Database = {
       }
       home_task_people: {
         Row: {
+          availability_end_date: string | null
+          availability_mode: string | null
+          availability_start_date: string | null
           available_days: string[]
           available_hours: number
           consecutive_days: number
@@ -702,10 +705,14 @@ export type Database = {
           id: string
           name: string
           not_available_dates: string[] | null
+          specific_dates: string[] | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          availability_end_date?: string | null
+          availability_mode?: string | null
+          availability_start_date?: string | null
           available_days?: string[]
           available_hours?: number
           consecutive_days?: number
@@ -716,10 +723,14 @@ export type Database = {
           id?: string
           name: string
           not_available_dates?: string[] | null
+          specific_dates?: string[] | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          availability_end_date?: string | null
+          availability_mode?: string | null
+          availability_start_date?: string | null
           available_days?: string[]
           available_hours?: number
           consecutive_days?: number
@@ -730,6 +741,7 @@ export type Database = {
           id?: string
           name?: string
           not_available_dates?: string[] | null
+          specific_dates?: string[] | null
           updated_at?: string
           user_id?: string
         }
