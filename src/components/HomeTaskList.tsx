@@ -47,6 +47,13 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   const [selectedTask, setSelectedTask] = useState<HomeTask | null>(null);
   const [showProjectLink, setShowProjectLink] = useState(false);
   const [activeTab, setActiveTab] = useState('tasks');
+  const [subtasks, setSubtasks] = useState<Array<{ 
+    id: string; 
+    title: string; 
+    estimated_hours: number; 
+    diy_level: 'beginner' | 'intermediate' | 'advanced' | 'pro';
+    assigned_person_id: string | null;
+  }>>([]);
   
   const [formData, setFormData] = useState<{
     title: string;
@@ -139,12 +146,56 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
           .eq("id", editingTask.id);
         
         if (error) throw error;
+
+        // Delete existing subtasks and insert new ones
+        await supabase.from('home_task_subtasks').delete().eq('task_id', editingTask.id);
+        
+        if (subtasks.length > 0) {
+          const subtasksToInsert = subtasks.filter(st => st.title.trim()).map((st, idx) => ({
+            task_id: editingTask.id,
+            user_id: user.id,
+            title: st.title,
+            estimated_hours: st.estimated_hours,
+            diy_level: st.diy_level,
+            assigned_person_id: st.assigned_person_id,
+            order_index: idx
+          }));
+          
+          if (subtasksToInsert.length > 0) {
+            const { error: subtaskError } = await supabase
+              .from('home_task_subtasks')
+              .insert(subtasksToInsert);
+            if (subtaskError) throw subtaskError;
+          }
+        }
       } else {
-        const { error } = await supabase
+        const { data: newTask, error } = await supabase
           .from("home_tasks")
-          .insert([taskData]);
+          .insert([taskData])
+          .select()
+          .single();
         
         if (error) throw error;
+
+        // Insert subtasks if any
+        if (subtasks.length > 0 && newTask) {
+          const subtasksToInsert = subtasks.filter(st => st.title.trim()).map((st, idx) => ({
+            task_id: newTask.id,
+            user_id: user.id,
+            title: st.title,
+            estimated_hours: st.estimated_hours,
+            diy_level: st.diy_level,
+            assigned_person_id: st.assigned_person_id,
+            order_index: idx
+          }));
+          
+          if (subtasksToInsert.length > 0) {
+            const { error: subtaskError } = await supabase
+              .from('home_task_subtasks')
+              .insert(subtasksToInsert);
+            if (subtaskError) throw subtaskError;
+          }
+        }
       }
 
       resetForm();
@@ -176,6 +227,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
       due_date: "",
       task_type: "diy",
     });
+    setSubtasks([]);
     setEditingTask(null);
     setShowAddTask(false);
   };
@@ -192,17 +244,51 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
       task_type: task.task_type === 'general' || task.task_type === 'pre_sale' ? 'diy' : task.task_type as 'diy' | 'contractor',
     });
     
+    // Fetch existing subtasks
+    const { data: existingSubtasks } = await supabase
+      .from('home_task_subtasks')
+      .select('id, title, estimated_hours, diy_level, assigned_person_id')
+      .eq('task_id', task.id)
+      .order('order_index');
+    
+    if (existingSubtasks) {
+      setSubtasks(existingSubtasks.map(st => ({
+        id: st.id,
+        title: st.title,
+        estimated_hours: st.estimated_hours,
+        diy_level: st.diy_level as 'beginner' | 'intermediate' | 'advanced' | 'pro',
+        assigned_person_id: st.assigned_person_id
+      })));
+    }
+    
     setShowAddTask(true);
   };
 
   const handleEdit = (task: HomeTask) => {
-    setEditingTask(task);
-    setShowAddTask(true);
+    startEdit(task);
   };
 
   const handleLinkProject = (task: HomeTask) => {
     setSelectedTask(task);
     setShowProjectLink(true);
+  };
+
+  const addSubtask = () => {
+    setSubtasks([...subtasks, { 
+      id: crypto.randomUUID(), 
+      title: "", 
+      estimated_hours: 1, 
+      diy_level: "intermediate",
+      assigned_person_id: null
+    }]);
+  };
+
+  const updateSubtask = (id: string, field: string, value: any) => {
+    setSubtasks(subtasks.map(st => st.id === id ? { ...st, [field]: value } : st));
+  };
+
+  const removeSubtask = (id: string) => {
+    setSubtasks(subtasks.filter(st => st.id !== id));
   };
 
   return (
@@ -303,6 +389,81 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                           className="text-xs min-h-[60px]"
                         />
+
+                        {/* Subtasks Section - Only in edit mode */}
+                        {editingTask && (
+                          <div className="space-y-2 border-t pt-3">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs font-medium">Subtasks</label>
+                              <Button type="button" variant="outline" size="sm" onClick={addSubtask} className="h-7 text-xs">
+                                <Plus className="h-3 w-3 mr-1" />
+                                New Subtask
+                              </Button>
+                            </div>
+                            {subtasks.length > 0 && (
+                              <div className="border rounded-md overflow-hidden">
+                                <table className="w-full text-xs">
+                                  <thead className="bg-muted">
+                                    <tr>
+                                      <th className="text-left p-2 font-medium">Task Name</th>
+                                      <th className="text-left p-2 font-medium w-24">Hours</th>
+                                      <th className="text-left p-2 font-medium w-28">DIY Level</th>
+                                      <th className="w-8"></th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {subtasks.map((subtask) => (
+                                      <tr key={subtask.id} className="border-t">
+                                        <td className="p-2">
+                                          <Input
+                                            value={subtask.title}
+                                            onChange={(e) => updateSubtask(subtask.id, 'title', e.target.value)}
+                                            placeholder="Subtask name"
+                                            className="h-7 text-xs"
+                                          />
+                                        </td>
+                                        <td className="p-2">
+                                          <Input
+                                            type="number"
+                                            min="0.25"
+                                            step="0.25"
+                                            value={subtask.estimated_hours}
+                                            onChange={(e) => updateSubtask(subtask.id, 'estimated_hours', parseFloat(e.target.value))}
+                                            className="h-7 text-xs"
+                                          />
+                                        </td>
+                                        <td className="p-2">
+                                          <Select value={subtask.diy_level} onValueChange={(val) => updateSubtask(subtask.id, 'diy_level', val)}>
+                                            <SelectTrigger className="h-7 text-xs">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="beginner">Beginner</SelectItem>
+                                              <SelectItem value="intermediate">Intermediate</SelectItem>
+                                              <SelectItem value="advanced">Advanced</SelectItem>
+                                              <SelectItem value="pro">Professional</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </td>
+                                        <td className="p-2">
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => removeSubtask(subtask.id)}
+                                            className="h-6 w-6 p-0 text-destructive"
+                                          >
+                                            <X className="h-3 w-3" />
+                                          </Button>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        )}
                         <div className="flex gap-2 justify-end">
                           <Button variant="outline" onClick={resetForm} size="sm" className="h-8 text-xs">
                             Cancel
@@ -326,8 +487,6 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                     }}
                     onProjectNavigate={() => onOpenChange(false)}
                     onTaskUpdate={fetchTasks}
-                    userId={user?.id || ''}
-                    homeId={selectedHomeId === 'all' ? null : selectedHomeId}
                   />
                 </TabsContent>
 
