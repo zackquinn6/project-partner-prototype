@@ -397,6 +397,15 @@ export function HomeTasksTable({
                         <Button 
                           variant="ghost" 
                           size="sm" 
+                          onClick={() => onAddSubtasks(task)} 
+                          className="h-7 px-2"
+                          title="Manage subtasks"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
                           onClick={() => onLinkProject(task)} 
                           className="h-7 px-2"
                           title={task.project_run_id ? "Linked to project" : "Link to project"}
