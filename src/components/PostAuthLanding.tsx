@@ -96,7 +96,7 @@ export const PostAuthLanding = () => {
     fetchUserData();
   }, [user]);
 
-  // Section 1: My Work
+  // Section 1: My Work - Semantic color system
   const myWorkActions = [{
     icon: FolderOpen,
     title: "My Projects",
@@ -106,13 +106,13 @@ export const PostAuthLanding = () => {
       window.dispatchEvent(event);
       console.log('🔄 PostAuthLanding: Event dispatched');
     },
-    color: "bg-primary",
-    textColor: "text-primary-foreground"
+    color: "bg-blue-600", // Projects: Blue
+    textColor: "text-white"
   }, {
     icon: Calculator,
     title: "Rapid Assessment",
     action: () => setShowProjectPlanning(true),
-    color: "bg-blue-600",
+    color: "bg-blue-500", // Projects: Blue
     textColor: "text-white"
   }, {
     icon: Home,
@@ -122,13 +122,13 @@ export const PostAuthLanding = () => {
       const event = new CustomEvent('show-home-maintenance');
       window.dispatchEvent(event);
     },
-    color: "bg-green-600",
+    color: "bg-green-600", // Home: Green
     textColor: "text-white"
   }, {
     icon: ListChecks,
     title: "Home Task List",
     action: () => setShowHomeTaskList(true),
-    color: "bg-pink-600",
+    color: "bg-green-500", // Home: Green
     textColor: "text-white"
   }, {
     icon: Wrench,
@@ -138,40 +138,28 @@ export const PostAuthLanding = () => {
       const event = new CustomEvent('show-user-tools-materials');
       window.dispatchEvent(event);
     },
-    color: "bg-primary",
-    textColor: "text-primary-foreground"
-  }, {
-    icon: Hammer,
-    title: "Tool Rentals",
-    action: () => setShowToolRentals(true),
-    color: "bg-orange-600",
-    textColor: "text-white"
-  }, {
-    icon: Building2,
-    title: "Code & Permits",
-    action: () => setShowCodePermits(true),
-    color: "bg-purple-600",
-    textColor: "text-white"
-  }, {
-    icon: Users,
-    title: "Contractor Finder",
-    action: () => setShowContractorFinder(true),
-    color: "bg-indigo-600",
+    color: "bg-orange-600", // Tools: Orange
     textColor: "text-white"
   }];
 
   // Section 2: Explore
   const exploreActions = [{
     icon: BookOpen,
-    title: "New Project Catalog",
+    title: "Browse Project Catalog",
     action: () => navigate('/projects'),
-    color: "bg-accent",
-    textColor: "text-accent-foreground"
+    color: "bg-blue-700", // Projects: Blue
+    textColor: "text-white"
   }, {
     icon: HelpCircle,
     title: "Expert Help",
     action: () => setShowExpertHelp(true),
-    color: "bg-green-600",
+    color: "bg-purple-600", // Help: Purple
+    textColor: "text-white"
+  }, {
+    icon: Hammer,
+    title: "Tool Access",
+    action: () => setShowToolRentals(true),
+    color: "bg-orange-500", // Tools: Orange (Labs item)
     textColor: "text-white"
   }];
 
@@ -185,8 +173,8 @@ export const PostAuthLanding = () => {
       window.dispatchEvent(event);
       console.log('🔄 PostAuthLanding: Event dispatched');
     },
-    color: "bg-secondary",
-    textColor: "text-secondary-foreground"
+    color: "bg-slate-600", // Profile: Gray
+    textColor: "text-white"
   }, {
     icon: Home,
     title: "My Homes",
@@ -195,18 +183,19 @@ export const PostAuthLanding = () => {
       const event = new CustomEvent('show-home-manager');
       window.dispatchEvent(event);
     },
-    color: "bg-secondary",
-    textColor: "text-secondary-foreground"
+    color: "bg-green-700", // Home: Green
+    textColor: "text-white"
   }];
   return <div className="min-h-screen bg-background pt-16 md:pt-20 pb-8 md:pb-12">      
       <div className="container mx-auto px-2 md:px-4 max-w-6xl">
         {/* Welcome Header */}
         <div className="text-center mb-8 md:mb-12 px-4">
           <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6">
-            Your DIY Homepage
+            {userNickname ? `Welcome back, ${userNickname}!` : 'My Workshop'}
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">Your DIY journey continues here.
-Pick up where you left off or start your next winning project.</p>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
+            Continue where you left off, or start something new
+          </p>
         </div>
 
         {/* Quick Stats - Compact Bar */}
@@ -225,11 +214,11 @@ Pick up where you left off or start your next winning project.</p>
             
             {/* My Work Section */}
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4 text-center">My Work</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 sm:gap-6 justify-items-center">
+              <h3 className="text-lg font-semibold text-foreground mb-4 text-center">Start Here</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 justify-items-center">
                 {myWorkActions.map((action, index) => (
-                  <div key={index} className="flex flex-col items-center cursor-pointer group" onClick={action.action}>
-                    <div className={`w-14 h-14 md:w-16 md:h-16 ${action.color} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-110 transition-all duration-300 shadow-sm group-hover:shadow-md`}>
+                  <div key={index} className="flex flex-col items-center cursor-pointer group min-h-[88px]" onClick={action.action}>
+                    <div className={`w-14 h-14 md:w-16 md:h-16 ${action.color} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-all duration-300 shadow-sm group-hover:shadow-md`}>
                       <action.icon className={`h-6 w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 ${action.textColor}`} />
                     </div>
                     <span className="text-xs text-muted-foreground text-center leading-tight w-16 sm:w-20 group-hover:text-foreground transition-colors whitespace-normal">{action.title}</span>
@@ -242,11 +231,11 @@ Pick up where you left off or start your next winning project.</p>
             <div className="grid md:grid-cols-2 gap-6">
               {/* Explore Section */}
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4 text-center">Explore</h3>
-                <div className="grid grid-cols-2 gap-4 sm:gap-6 justify-items-center">
+                <h3 className="text-lg font-semibold text-foreground mb-4 text-center">Browse & Learn</h3>
+                <div className="grid grid-cols-3 gap-4 sm:gap-6 justify-items-center">
                   {exploreActions.map((action, index) => (
-                    <div key={index} className="flex flex-col items-center cursor-pointer group" onClick={action.action}>
-                      <div className={`w-14 h-14 md:w-16 md:h-16 ${action.color} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-110 transition-all duration-300 shadow-sm group-hover:shadow-md`}>
+                    <div key={index} className="flex flex-col items-center cursor-pointer group min-h-[88px]" onClick={action.action}>
+                      <div className={`w-14 h-14 md:w-16 md:h-16 ${action.color} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-all duration-300 shadow-sm group-hover:shadow-md`}>
                         <action.icon className={`h-6 w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 ${action.textColor}`} />
                       </div>
                       <span className="text-xs text-muted-foreground text-center leading-tight w-16 sm:w-20 group-hover:text-foreground transition-colors whitespace-normal">{action.title}</span>
@@ -260,8 +249,8 @@ Pick up where you left off or start your next winning project.</p>
                 <h3 className="text-lg font-semibold text-foreground mb-4 text-center">Account</h3>
                 <div className="grid grid-cols-2 gap-4 sm:gap-6 justify-items-center">
                   {accountActions.map((action, index) => (
-                    <div key={index} className="flex flex-col items-center cursor-pointer group" onClick={action.action}>
-                      <div className={`w-14 h-14 md:w-16 md:h-16 ${action.color} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-110 transition-all duration-300 shadow-sm group-hover:shadow-md`}>
+                    <div key={index} className="flex flex-col items-center cursor-pointer group min-h-[88px]" onClick={action.action}>
+                      <div className={`w-14 h-14 md:w-16 md:h-16 ${action.color} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-all duration-300 shadow-sm group-hover:shadow-md`}>
                         <action.icon className={`h-6 w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 ${action.textColor}`} />
                       </div>
                       <span className="text-xs text-muted-foreground text-center leading-tight w-16 sm:w-20 group-hover:text-foreground transition-colors whitespace-normal">{action.title}</span>
@@ -276,7 +265,7 @@ Pick up where you left off or start your next winning project.</p>
         {/* Motivational Footer */}
         <div className="text-center bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-6 md:p-8 mx-4 md:mx-0">
           <h3 className="text-xl md:text-2xl font-bold text-foreground mb-3 md:mb-4">
-            🔨 Time to Get Back on the Field
+            Ready to build something amazing?
           </h3>
         </div>
         

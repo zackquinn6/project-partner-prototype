@@ -55,31 +55,34 @@ export default function Home({
     }
   }, [projectRuns]);
 
-  // Sophisticated darker color palette for app icons
-  const colorPalette = ['bg-blue-700', 'bg-indigo-700', 'bg-purple-700', 'bg-violet-700', 'bg-emerald-700', 'bg-teal-700', 'bg-cyan-700', 'bg-sky-700', 'bg-orange-700', 'bg-amber-700', 'bg-red-700', 'bg-rose-700', 'bg-pink-700', 'bg-fuchsia-700', 'bg-lime-700', 'bg-green-700'];
-
-  // Function to get random color from palette
-  const getRandomColor = () => {
-    return colorPalette[Math.floor(Math.random() * colorPalette.length)];
+  // Semantic color system for app icons
+  const appColors = {
+    // Projects & Planning (Blue shades)
+    myProjects: 'bg-blue-600',
+    rapidPlan: 'bg-blue-500',
+    projectCatalog: 'bg-blue-700',
+    
+    // Home & Maintenance (Green shades)
+    homeMaintenance: 'bg-green-600',
+    homeTaskList: 'bg-green-500',
+    myHomes: 'bg-green-700',
+    
+    // Tools & Resources (Orange/Amber shades)
+    toolLibrary: 'bg-orange-600',
+    toolAccess: 'bg-orange-500',
+    
+    // Help & Learning (Purple shades)
+    expertHelp: 'bg-purple-600',
+    community: 'bg-purple-500',
+    
+    // Profile & Settings (Gray shades)
+    myProfile: 'bg-slate-600',
+    
+    // Beta/Experimental (Indigo/Pink)
+    contractorFinder: 'bg-indigo-600',
+    aiRepair: 'bg-pink-600',
+    codePermits: 'bg-indigo-500',
   };
-
-  // Generate random colors for each app (keeping consistent during component lifecycle)
-  const [appColors] = useState(() => ({
-    myProjects: getRandomColor(),
-    rapidPlan: getRandomColor(),
-    homeMaintenance: getRandomColor(),
-    homeTaskList: getRandomColor(),
-    toolLibrary: getRandomColor(),
-    toolAccess: getRandomColor(),
-    projectCatalog: getRandomColor(),
-    expertHelp: getRandomColor(),
-    myProfile: getRandomColor(),
-    community: getRandomColor(),
-    myHomes: getRandomColor(),
-    aiRepair: getRandomColor(),
-    codePermits: getRandomColor(),
-    contractorFinder: getRandomColor()
-  }));
   useEffect(() => {
     const handleOpenQuiz = () => {
       setIsDIYStyleQuizOpen(true);
@@ -108,14 +111,14 @@ export default function Home({
     <div className="container mx-auto px-6 py-8 space-y-6">
           {/* DIY Dashboard */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-4">Your DIY Homepage</h1>
+            <h1 className="text-4xl font-bold text-foreground mb-4">My Workshop</h1>
             <p className="text-lg text-muted-foreground mb-6">
-              Your DIY journey continues here. Pick up where you left off or start your next winning project.
+              Continue where you left off, or start something new
             </p>
             
-            {/* Project Scoreboard */}
+            {/* At a Glance Stats */}
             <div className="border-t border-border pt-1 mb-1">
-              <h3 className="text-sm font-medium text-muted-foreground mb-3 text-center">Project Scoreboard</h3>
+              <h3 className="text-sm font-medium text-muted-foreground mb-3 text-center">At a Glance</h3>
               <div className="flex justify-center gap-6 sm:gap-8">
                 <div className="text-center">
                   <div className="text-base font-bold text-foreground">{stats.activeProjects || 0}</div>
@@ -131,14 +134,15 @@ export default function Home({
             
             {/* Core Apps Grid */}
             <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto mb-6 px-2">
-              {/* Project Catalog - Featured Top Button spanning all 3 columns */}
+              {/* Project Catalog - Reduced Prominence */}
               <div className="col-span-3 mb-2">
                 <Button 
                   onClick={() => navigate('/projects')}
-                  className={`w-full ${appColors.projectCatalog} text-white hover:opacity-90 transition-all shadow-lg h-12 text-sm font-semibold`}
+                  variant="outline"
+                  className="w-full h-10 text-sm font-medium border-primary text-primary hover:bg-primary/10"
                 >
-                  <BookOpen className="w-5 h-5 mr-2" />
-                  Project Catalog - Get Started Today
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Explore New Projects
                 </Button>
               </div>
               
@@ -207,70 +211,24 @@ export default function Home({
               </div>
             </div>
 
-            {/* Beta Apps Section */}
+            {/* Labs - Experimental Features */}
             <div className="mb-6">
               <div className="flex items-center justify-center gap-2 mb-4">
-                <Badge className="bg-orange-500 text-white">BETA</Badge>
-                <span className="text-sm font-medium text-muted-foreground">New Features in Development</span>
+                <span className="text-lg font-semibold text-foreground">🧪 Labs</span>
+                <Badge variant="secondary" className="text-xs">Experimental</Badge>
               </div>
               
-              <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto px-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto px-2">
                 <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-community-posts'))}>
-                  <div className="relative">
-                    <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.community} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
-                      <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                    </div>
-                    <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
-                      BETA
-                    </Badge>
+                  <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.community} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-sm hover:shadow-md`}>
+                    <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
                   <span className="text-xs font-medium text-black text-center leading-tight px-1">Community</span>
                 </div>
 
-              <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-contractor-finder'))}>
-                <div className="relative">
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.contractorFinder} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
-                    <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
-                    BETA
-                  </Badge>
-                </div>
-                <span className="text-xs font-medium text-black text-center leading-tight px-1">Contractor Finder</span>
-              </div>
-
-              <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-ai-repair'))}>
-                <div className="relative">
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.aiRepair} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
-                    <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
-                    BETA
-                  </Badge>
-                </div>
-                <span className="text-xs font-medium text-black text-center leading-tight px-1">AI Repair</span>
-              </div>
-
-              <div className="flex flex-col items-center group cursor-pointer" onClick={() => setIsCodePermitsOpen(true)}>
-                <div className="relative">
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.codePermits} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
-                    <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
-                    BETA
-                  </Badge>
-                </div>
-                <span className="text-xs font-medium text-black text-center leading-tight px-1">Code & Permits</span>
-              </div>
-
               <div className="flex flex-col items-center group cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent('show-tool-rentals'))}>
-                <div className="relative">
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.toolAccess} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-lg`}>
-                    <Hammer className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full border-2 border-white">
-                    BETA
-                  </Badge>
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 ${appColors.toolAccess} rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-sm hover:shadow-md`}>
+                  <Hammer className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <span className="text-xs font-medium text-black text-center leading-tight px-1">Tool Access</span>
               </div>

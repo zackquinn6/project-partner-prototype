@@ -34,8 +34,10 @@ export function MobileOptimizedHome() {
     activeProjects: 0,
     completedProjects: 0
   });
+  
+  const [userNickname, setUserNickname] = useState<string>('');
 
-  // Calculate stats
+  // Calculate stats and fetch user nickname
   useEffect(() => {
     const active = projectRuns.filter(run => (run.progress || 0) < 100).length;
     const completed = projectRuns.filter(run => (run.progress || 0) >= 100).length;
@@ -46,13 +48,31 @@ export function MobileOptimizedHome() {
     });
   }, [projectRuns]);
 
+  // Fetch user nickname
+  useEffect(() => {
+    const fetchNickname = async () => {
+      if (!user) return;
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data } = await supabase
+        .from('profiles')
+        .select('nickname')
+        .eq('user_id', user.id)
+        .single();
+      if (data?.nickname) {
+        setUserNickname(data.nickname);
+      }
+    };
+    fetchNickname();
+  }, [user]);
+
+  // Semantic color system for apps
   const quickActions = [
     {
       id: 'my-projects',
       icon: Folder,
       title: 'My Projects',
       subtitle: 'Continue or start new',
-      color: 'bg-blue-600',
+      color: 'bg-blue-600', // Projects: Blue
       action: () => {
         console.log('🔄 MobileOptimizedHome: My Projects clicked');
         window.dispatchEvent(new CustomEvent('navigate-to-projects'));
@@ -63,7 +83,7 @@ export function MobileOptimizedHome() {
       icon: ListChecks,
       title: 'Home Task List',
       subtitle: 'Manage tasks',
-      color: 'bg-pink-600',
+      color: 'bg-green-500', // Home: Green
       action: () => window.dispatchEvent(new CustomEvent('show-home-task-list'))
     },
     {
@@ -71,7 +91,7 @@ export function MobileOptimizedHome() {
       icon: HomeIcon,
       title: 'Home Maintenance',
       subtitle: 'Schedule & track',
-      color: 'bg-purple-600',
+      color: 'bg-green-600', // Home: Green
       action: () => window.dispatchEvent(new CustomEvent('show-home-maintenance'))
     },
     {
@@ -79,7 +99,7 @@ export function MobileOptimizedHome() {
       icon: HelpCircle,
       title: 'Expert Help',
       subtitle: 'Get assistance',
-      color: 'bg-emerald-600',
+      color: 'bg-purple-600', // Help: Purple
       action: () => window.dispatchEvent(new CustomEvent('show-expert-help'))
     }
   ];
@@ -89,71 +109,50 @@ export function MobileOptimizedHome() {
       id: 'rapid-plan',
       icon: Calculator,
       title: 'Rapid Costing',
-      color: 'bg-green-600',
+      color: 'bg-blue-500', // Projects: Blue
       action: () => {
         console.log('🎯 MobileOptimizedHome: Rapid Costing clicked');
         window.dispatchEvent(new CustomEvent('show-rapid-assessment'));
       }
     },
     {
-      id: 'tool-rentals',
-      icon: Hammer,
-      title: 'Tool Access',
-      color: 'bg-indigo-600',
-      isBeta: true,
-      action: () => window.dispatchEvent(new CustomEvent('show-tool-rentals'))
-    },
-    {
       id: 'tool-library',
       icon: Wrench,
       title: 'My Tools',
-      color: 'bg-orange-600',
+      color: 'bg-orange-600', // Tools: Orange
       action: () => window.dispatchEvent(new CustomEvent('show-tools-library-grid'))
     },
     {
       id: 'profile',
       icon: User,
       title: 'My Profile',
-      color: 'bg-violet-600',
+      color: 'bg-slate-600', // Profile: Gray
       action: () => window.dispatchEvent(new CustomEvent('open-profile-manager'))
     },
     {
       id: 'my-homes',
       icon: MapPin,
       title: 'My Homes',
-      color: 'bg-slate-600',
+      color: 'bg-green-700', // Home: Green
       action: () => window.dispatchEvent(new CustomEvent('show-home-manager'))
     }
   ];
 
+  // Only show 2 most stable beta features on main page
   const betaApps = [
     {
       id: 'community',
       icon: Users,
       title: 'Community',
-      color: 'bg-pink-600',
+      color: 'bg-purple-500', // Help: Purple
       action: () => window.dispatchEvent(new CustomEvent('show-community-posts'))
     },
     {
-      id: 'contractor-finder',
-      icon: Users,
-      title: 'Contractor Finder',
-      color: 'bg-indigo-600',
-      action: () => window.dispatchEvent(new CustomEvent('show-contractor-finder'))
-    },
-    {
-      id: 'ai-repair',
-      icon: Camera,
-      title: 'AI Repair',
-      color: 'bg-red-600',
-      action: () => window.dispatchEvent(new CustomEvent('show-ai-repair'))
-    },
-    {
-      id: 'code-permits',
-      icon: Building2,
-      title: 'Code & Permits',
-      color: 'bg-amber-600',
-      action: () => {} // Add action when ready
+      id: 'tool-rentals',
+      icon: Hammer,
+      title: 'Tool Access',
+      color: 'bg-orange-500', // Tools: Orange
+      action: () => window.dispatchEvent(new CustomEvent('show-tool-rentals'))
     }
   ];
 
@@ -183,9 +182,11 @@ export function MobileOptimizedHome() {
           </div>
           
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground mb-2">Welcome Back!</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-2">
+              {userNickname ? `Welcome back, ${userNickname}!` : 'Welcome back!'}
+            </h1>
             <p className="text-muted-foreground text-sm mb-4">
-              Ready to tackle your next project?
+              Continue where you left off, or start something new
             </p>
           </div>
         </div>
@@ -224,9 +225,9 @@ export function MobileOptimizedHome() {
           </Card>
         )}
 
-        {/* Project Scoreboard */}
+        {/* At a Glance Stats */}
         <div>
-          <h2 className="text-sm font-medium text-muted-foreground mb-3 text-center">Project Scoreboard</h2>
+          <h2 className="text-sm font-medium text-muted-foreground mb-3 text-center">At a Glance</h2>
           <div className="grid grid-cols-2 gap-3">
             <Card className="gradient-card">
               <CardContent className="p-2 text-center">
@@ -245,35 +246,36 @@ export function MobileOptimizedHome() {
         </div>
 
 
-        {/* Project Catalog - Featured Button */}
+        {/* Project Catalog - Reduced Prominence */}
         <div className="mb-4">
           <Button 
             onClick={() => navigate('/projects')}
-            className="w-full bg-cyan-600 hover:bg-cyan-700 text-white h-12 text-base font-semibold shadow-lg"
+            variant="outline"
+            className="w-full h-10 text-sm font-medium border-primary text-primary hover:bg-primary/10"
           >
-            <BookOpen className="w-5 h-5 mr-2" />
-            Project Catalog - Get Started Today
+            <BookOpen className="w-4 h-4 mr-2" />
+            Explore New Projects
           </Button>
         </div>
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-lg font-semibold text-foreground mb-3">Quick Actions</h2>
-          <div className="grid grid-cols-3 gap-3">
+          <h2 className="text-lg font-semibold text-foreground mb-3">Start Here</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {quickActions.map((action) => {
               const Icon = action.icon;
               return (
                 <Card 
                   key={action.id}
-                  className="gradient-card cursor-pointer hover:shadow-card transition-smooth touch-target"
+                  className="gradient-card cursor-pointer hover:shadow-md transition-smooth shadow-sm rounded-xl"
                   onClick={action.action}
                 >
-                  <CardContent className="p-4">
-                    <div className={`w-10 h-10 ${action.color} rounded-xl flex items-center justify-center mb-3`}>
-                      <Icon className="h-5 w-5 text-white" />
+                  <CardContent className="p-4 min-h-[110px]">
+                    <div className={`w-12 h-12 ${action.color} rounded-2xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform`}>
+                      <Icon className="h-6 w-6 text-white" />
                     </div>
-                    <h3 className="font-semibold text-sm text-card-foreground mb-1">{action.title}</h3>
-                    <p className="text-xs text-muted-foreground">{action.subtitle}</p>
+                    <h3 className="font-semibold text-xs text-card-foreground mb-1">{action.title}</h3>
+                    <p className="text-[10px] text-muted-foreground leading-tight">{action.subtitle}</p>
                   </CardContent>
                 </Card>
               );
@@ -283,24 +285,21 @@ export function MobileOptimizedHome() {
 
         {/* All Apps */}
         <div>
-          <h2 className="text-lg font-semibold text-foreground mb-3">All Apps</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-3">Browse Tools</h2>
           <div className="grid grid-cols-3 gap-2">
             {utilityApps.map((app) => {
               const Icon = app.icon;
               return (
                 <Card 
                   key={app.id}
-                  className="gradient-card cursor-pointer hover:shadow-card transition-smooth touch-target"
+                  className="gradient-card cursor-pointer hover:shadow-md transition-smooth shadow-sm rounded-xl min-h-[100px]"
                   onClick={app.action}
                 >
-                  <CardContent className="p-3 text-center">
-                    <div className={`w-8 h-8 ${app.color} rounded-lg flex items-center justify-center mx-auto mb-2`}>
-                      <Icon className="h-4 w-4 text-white" />
+                  <CardContent className="p-3 text-center flex flex-col items-center justify-center h-full">
+                    <div className={`w-10 h-10 ${app.color} rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:scale-105 transition-transform`}>
+                      <Icon className="h-5 w-5 text-white" />
                     </div>
                     <p className="text-xs font-medium text-card-foreground leading-tight">{app.title}</p>
-                    {app.isBeta && (
-                      <Badge variant="secondary" className="text-[8px] px-1 py-0 mt-1">BETA</Badge>
-                    )}
                   </CardContent>
                 </Card>
               );
@@ -308,27 +307,11 @@ export function MobileOptimizedHome() {
           </div>
         </div>
 
-        {/* Key Characteristics Section */}
-        <div className="bg-gradient-subtle p-4 rounded-lg">
-          <h2 className="text-lg font-semibold text-foreground mb-2">🔑 Key Characteristics</h2>
-          <p className="text-sm text-muted-foreground mb-3">
-            KCs are how we personalize our projects to each builder. We tailor detail to skill level: first‑timers get the full play‑by‑play, while seasoned DIYers aren't stuck reading what a miter saw looks like.
-          </p>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => window.dispatchEvent(new CustomEvent('show-kc-explainer'))}
-            className="text-primary border-primary hover:bg-primary/10 text-xs px-3 py-1 h-7"
-          >
-            Learn More
-          </Button>
-        </div>
-
-        {/* Beta Apps */}
+        {/* Labs - Experimental Features */}
         <div>
           <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-            Beta Features
-            <Badge className="bg-orange-100 text-orange-700 text-xs">NEW</Badge>
+            🧪 Labs
+            <Badge variant="secondary" className="text-[10px]">Experimental</Badge>
           </h2>
           <div className="grid grid-cols-2 gap-3">
             {betaApps.map((app) => {
@@ -336,14 +319,11 @@ export function MobileOptimizedHome() {
               return (
                 <Card 
                   key={app.id}
-                  className="gradient-card cursor-pointer hover:shadow-card transition-smooth touch-target relative"
+                  className="gradient-card cursor-pointer hover:shadow-md transition-smooth shadow-sm rounded-xl relative"
                   onClick={app.action}
                 >
-                  <CardContent className="p-4">
-                    <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                      BETA
-                    </Badge>
-                    <div className={`w-10 h-10 ${app.color} rounded-xl flex items-center justify-center mb-3`}>
+                  <CardContent className="p-4 min-h-[100px]">
+                    <div className={`w-10 h-10 ${app.color} rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform`}>
                       <Icon className="h-5 w-5 text-white" />
                     </div>
                     <h3 className="font-semibold text-sm text-card-foreground">{app.title}</h3>
