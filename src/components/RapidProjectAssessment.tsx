@@ -69,10 +69,11 @@ export function RapidProjectAssessment({ taskId }: RapidProjectAssessmentProps =
   const { toast } = useToast();
   
   // View state
-  const [currentView, setCurrentView] = useState<'list' | 'edit'>('list');
+  const [currentView, setCurrentView] = useState<'list' | 'edit'>(taskId ? 'edit' : 'list');
   const [savedProjects, setSavedProjects] = useState<SavedProjectPlan[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [csrfToken, setCsrfToken] = useState<string>('');
+  const [hasLoadedTask, setHasLoadedTask] = useState(false);
 
   // Current project state
   const [project, setProject] = useState<ProjectPlan>({
@@ -94,6 +95,21 @@ export function RapidProjectAssessment({ taskId }: RapidProjectAssessmentProps =
       setCsrfToken(token);
     }
   }, [user]);
+
+  // Auto-load or create assessment when taskId is provided
+  useEffect(() => {
+    if (taskId && !hasLoadedTask && !isLoading && savedProjects !== undefined) {
+      if (savedProjects.length > 0) {
+        // If there's an existing assessment for this task, load it
+        const existingAssessment = savedProjects[0];
+        loadProject(existingAssessment);
+      } else if (savedProjects.length === 0) {
+        // If no assessment exists, start a new one
+        createNewProject();
+      }
+      setHasLoadedTask(true);
+    }
+  }, [taskId, savedProjects, isLoading, hasLoadedTask]);
 
   const loadSavedProjects = async () => {
     if (!user) return;
@@ -396,7 +412,9 @@ export function RapidProjectAssessment({ taskId }: RapidProjectAssessmentProps =
             </CardTitle>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-muted-foreground text-sm">Manage your project cost assessments</p>
+                <p className="text-muted-foreground text-sm">
+                  {taskId ? 'Cost assessments for this task' : 'Manage your project cost assessments'}
+                </p>
               </div>
               <Button onClick={createNewProject} size="sm" className="flex items-center gap-2 self-start sm:self-auto">
                 <Plus className="w-4 h-4" />
@@ -411,11 +429,17 @@ export function RapidProjectAssessment({ taskId }: RapidProjectAssessmentProps =
             ) : savedProjects.length === 0 ? (
               <div className="text-center py-12">
                 <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-                <h3 className="text-lg font-semibold mb-2">No assessments yet</h3>
-                <p className="text-muted-foreground mb-4">Create your first project cost assessment to get started.</p>
+                <h3 className="text-lg font-semibold mb-2">
+                  {taskId ? 'No assessment for this task' : 'No assessments yet'}
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  {taskId 
+                    ? 'Create a cost assessment to track materials and labor for this task.' 
+                    : 'Create your first project cost assessment to get started.'}
+                </p>
                 <Button onClick={createNewProject}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Create First Assessment
+                  Create {taskId ? '' : 'First '}Assessment
                 </Button>
               </div>
             ) : (
