@@ -555,6 +555,53 @@ export type Database = {
         }
         Relationships: []
       }
+      home_details: {
+        Row: {
+          bathrooms: number | null
+          bedrooms: number | null
+          created_at: string
+          home_age: number | null
+          home_id: string
+          id: string
+          last_synced_at: string | null
+          square_footage: number | null
+          updated_at: string
+          zillow_url: string | null
+        }
+        Insert: {
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          home_age?: number | null
+          home_id: string
+          id?: string
+          last_synced_at?: string | null
+          square_footage?: number | null
+          updated_at?: string
+          zillow_url?: string | null
+        }
+        Update: {
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          home_age?: number | null
+          home_id?: string
+          id?: string
+          last_synced_at?: string | null
+          square_footage?: number | null
+          updated_at?: string
+          zillow_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_details_home_id_fkey"
+            columns: ["home_id"]
+            isOneToOne: true
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       home_risk_mitigations: {
         Row: {
           created_at: string
@@ -631,6 +678,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      home_spaces: {
+        Row: {
+          created_at: string
+          floor_plan_image_url: string | null
+          home_id: string
+          id: string
+          notes: string | null
+          space_name: string
+          space_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          floor_plan_image_url?: string | null
+          home_id: string
+          id?: string
+          notes?: string | null
+          space_name: string
+          space_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          floor_plan_image_url?: string | null
+          home_id?: string
+          id?: string
+          notes?: string | null
+          space_name?: string
+          space_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_spaces_home_id_fkey"
+            columns: ["home_id"]
+            isOneToOne: false
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       home_task_assignments: {
         Row: {

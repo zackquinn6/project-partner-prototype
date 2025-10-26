@@ -6,10 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Home, Calendar, CheckCircle, Camera, MapPin, Star, X, AlertTriangle, Info, AlertCircle, Clock } from 'lucide-react';
+import { Home, Calendar, CheckCircle, Camera, MapPin, Star, X, AlertTriangle, Info, AlertCircle, Clock, Download, Bed, Bath, Square } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { ZillowSyncDialog } from './ZillowSyncDialog';
+import { HomeSpacesTab } from './HomeSpacesTab';
 
 interface Home {
   id: string;
@@ -87,15 +89,41 @@ export const HomeDetailsWindow: React.FC<HomeDetailsWindowProps> = ({
   const [notesValue, setNotesValue] = useState('');
   const [uploading, setUploading] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showZillowSync, setShowZillowSync] = useState(false);
+  const [homeDetails, setHomeDetails] = useState<{
+    home_age: number | null;
+    square_footage: number | null;
+    bedrooms: number | null;
+    bathrooms: number | null;
+    last_synced_at: string | null;
+  } | null>(null);
 
   useEffect(() => {
     if (open && home && user) {
       fetchHomeData();
       fetchHomeRisks();
       fetchRiskMitigations();
+      fetchHomeDetails();
       setNotesValue(home.notes || '');
     }
   }, [open, home, user, refreshTrigger]);
+
+  const fetchHomeDetails = async () => {
+    if (!home) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('home_details')
+        .select('home_age, square_footage, bedrooms, bathrooms, last_synced_at')
+        .eq('home_id', home.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      setHomeDetails(data);
+    } catch (error) {
+      console.error('Error fetching home details:', error);
+    }
+  };
 
   const fetchHomeData = async () => {
     if (!home || !user) return;
@@ -272,28 +300,6 @@ export const HomeDetailsWindow: React.FC<HomeDetailsWindowProps> = ({
     }
   };
 
-  const getRiskIcon = (level: string, isMitigated?: boolean) => {
-    if (isMitigated) return <CheckCircle className="w-4 h-4 text-green-500" />;
-    
-    switch (level) {
-      case 'critical': return <AlertCircle className="w-4 h-4 text-red-500" />;
-      case 'high': return <AlertTriangle className="w-4 h-4 text-orange-500" />;
-      case 'medium': return <Clock className="w-4 h-4 text-yellow-500" />;
-      default: return <Info className="w-4 h-4 text-blue-500" />;
-    }
-  };
-
-  const getRiskColor = (level: string, isMitigated?: boolean) => {
-    if (isMitigated) return 'bg-green-50 border-green-200';
-    
-    switch (level) {
-      case 'critical': return 'bg-red-50 border-red-200';
-      case 'high': return 'bg-orange-50 border-orange-200';
-      case 'medium': return 'bg-yellow-50 border-yellow-200';
-      default: return 'bg-blue-50 border-blue-200';
-    }
-  };
-
   const handleRiskMitigation = async (riskId: string, isMitigated: boolean, notes?: string) => {
     if (!home || !user) return;
     
@@ -329,9 +335,32 @@ export const HomeDetailsWindow: React.FC<HomeDetailsWindowProps> = ({
     }
   };
 
+  const getRiskIcon = (level: string, isMitigated?: boolean) => {
+    if (isMitigated) return <CheckCircle className="w-4 h-4 text-green-500" />;
+    
+    switch (level) {
+      case 'critical': return <AlertCircle className="w-4 h-4 text-red-500" />;
+      case 'high': return <AlertTriangle className="w-4 h-4 text-orange-500" />;
+      case 'medium': return <Clock className="w-4 h-4 text-yellow-500" />;
+      default: return <Info className="w-4 h-4 text-blue-500" />;
+    }
+  };
+
+  const getRiskColor = (level: string, isMitigated?: boolean) => {
+    if (isMitigated) return 'bg-green-50 border-green-200';
+    
+    switch (level) {
+      case 'critical': return 'bg-red-50 border-red-200';
+      case 'high': return 'bg-orange-50 border-orange-200';
+      case 'medium': return 'bg-yellow-50 border-yellow-200';
+      default: return 'bg-blue-50 border-blue-200';
+    }
+  };
+
   if (!home) return null;
 
   return (
+    <>
     <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
@@ -339,11 +368,12 @@ export const HomeDetailsWindow: React.FC<HomeDetailsWindowProps> = ({
       title={`${home.name}${home.is_primary ? ' (Primary)' : ''}`}
     >
       <Tabs defaultValue="details" className="w-full flex-1 flex flex-col min-h-0">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="details">Details & Photos</TabsTrigger>
-          <TabsTrigger value="projects">Home Projects</TabsTrigger>
-          <TabsTrigger value="maintenance">Home Maintenance</TabsTrigger>
-          <TabsTrigger value="risks">Home Risks</TabsTrigger>
+          <TabsTrigger value="spaces">Spaces</TabsTrigger>
+          <TabsTrigger value="projects">Projects</TabsTrigger>
+          <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+          <TabsTrigger value="risks">Risks</TabsTrigger>
         </TabsList>
 
         <TabsContent value="details" className="flex-1 overflow-y-auto space-y-6">
@@ -351,7 +381,19 @@ export const HomeDetailsWindow: React.FC<HomeDetailsWindowProps> = ({
             {/* Home Information Card */}
             <Card>
               <CardHeader>
-                <CardTitle>Home Information</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Home Information</CardTitle>
+                  {home.address && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowZillowSync(true)}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Sync with Zillow
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {home.address && (
@@ -390,6 +432,48 @@ export const HomeDetailsWindow: React.FC<HomeDetailsWindowProps> = ({
                     <span className="font-medium">Purchase Date: </span>
                     <span>{new Date(home.purchase_date).toLocaleDateString()}</span>
                   </div>
+                )}
+
+                {homeDetails && (
+                  <>
+                    <Separator className="my-4" />
+                    <div className="space-y-3">
+                      <h4 className="font-semibold flex items-center justify-between">
+                        <span>Zillow Data</span>
+                        {homeDetails.last_synced_at && (
+                          <span className="text-xs text-muted-foreground font-normal">
+                            Last synced: {new Date(homeDetails.last_synced_at).toLocaleDateString()}
+                          </span>
+                        )}
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        {homeDetails.bedrooms !== null && (
+                          <div className="flex items-center gap-2">
+                            <Bed className="w-4 h-4 text-muted-foreground" />
+                            <span>{homeDetails.bedrooms} bedrooms</span>
+                          </div>
+                        )}
+                        {homeDetails.bathrooms !== null && (
+                          <div className="flex items-center gap-2">
+                            <Bath className="w-4 h-4 text-muted-foreground" />
+                            <span>{homeDetails.bathrooms} bathrooms</span>
+                          </div>
+                        )}
+                        {homeDetails.square_footage !== null && (
+                          <div className="flex items-center gap-2">
+                            <Square className="w-4 h-4 text-muted-foreground" />
+                            <span>{homeDetails.square_footage.toLocaleString()} sqft</span>
+                          </div>
+                        )}
+                        {homeDetails.home_age !== null && (
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
+                            <span>{homeDetails.home_age} years old</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 <Separator className="my-4" />
@@ -516,6 +600,10 @@ export const HomeDetailsWindow: React.FC<HomeDetailsWindowProps> = ({
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="spaces" className="flex-1 overflow-y-auto">
+          {home && <HomeSpacesTab homeId={home.id} />}
         </TabsContent>
 
         <TabsContent value="projects" className="flex-1 overflow-y-auto">
@@ -658,28 +746,19 @@ export const HomeDetailsWindow: React.FC<HomeDetailsWindowProps> = ({
         </TabsContent>
       </Tabs>
     </ResponsiveDialog>
+    
+    {home && home.address && (
+      <ZillowSyncDialog
+        open={showZillowSync}
+        onOpenChange={setShowZillowSync}
+        homeId={home.id}
+        homeAddress={`${home.address}${home.city && home.state ? `, ${home.city}, ${home.state}` : ''}`}
+        onSyncComplete={() => {
+          fetchHomeDetails();
+          setRefreshTrigger(prev => prev + 1);
+        }}
+      />
+    )}
+    </>
   );
-};
-
-// Helper functions for risk display
-const getRiskIcon = (level: string, isMitigated?: boolean) => {
-  if (isMitigated) return <CheckCircle className="w-4 h-4 text-green-500" />;
-  
-  switch (level) {
-    case 'critical': return <AlertCircle className="w-4 h-4 text-red-500" />;
-    case 'high': return <AlertTriangle className="w-4 h-4 text-orange-500" />;
-    case 'medium': return <Clock className="w-4 h-4 text-yellow-500" />;
-    default: return <Info className="w-4 h-4 text-blue-500" />;
-  }
-};
-
-const getRiskColor = (level: string, isMitigated?: boolean) => {
-  if (isMitigated) return 'bg-green-50 border-green-200';
-  
-  switch (level) {
-    case 'critical': return 'bg-red-50 border-red-200';
-    case 'high': return 'bg-orange-50 border-orange-200';
-    case 'medium': return 'bg-yellow-50 border-yellow-200';
-    default: return 'bg-blue-50 border-blue-200';
-  }
 };
