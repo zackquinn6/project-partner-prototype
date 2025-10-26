@@ -283,8 +283,8 @@ export const HomeSpacesTab: React.FC<HomeSpacesTabProps> = ({ homeId }) => {
               window.dispatchEvent(new CustomEvent('open-zillow-sync', { detail: { homeId } }));
             }}
           >
-            <Upload className="w-4 h-4 mr-2" />
-            Sync with Zillow
+          <Upload className="w-4 h-4 mr-2" />
+          Add Property Details
           </Button>
           {homeDetails && (homeDetails.bedrooms || homeDetails.bathrooms) && spaces.length === 0 && (
             <Button

@@ -1,25 +1,13 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Home, MapPin, Bed, Bath, Square, Calendar, ExternalLink } from 'lucide-react';
+import { ResponsiveDialog } from '@/components/ResponsiveDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-interface ZillowMatch {
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  homeAge: number | null;
-  squareFootage: number | null;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  zillowUrl: string;
-}
-
-interface ZillowSyncDialogProps {
+interface PropertySyncDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   homeId: string;
@@ -27,280 +15,152 @@ interface ZillowSyncDialogProps {
   onSyncComplete: () => void;
 }
 
-export const ZillowSyncDialog: React.FC<ZillowSyncDialogProps> = ({
-  open,
-  onOpenChange,
-  homeId,
+export const ZillowSyncDialog = ({ 
+  open, 
+  onOpenChange, 
+  homeId, 
   homeAddress,
-  onSyncComplete
-}) => {
-  const [loading, setLoading] = useState(false);
-  const [matches, setMatches] = useState<ZillowMatch[]>([]);
-  const [showMatches, setShowMatches] = useState(false);
+  onSyncComplete 
+}: PropertySyncDialogProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [squareFootage, setSquareFootage] = useState('');
+  const [bedrooms, setBedrooms] = useState('');
+  const [bathrooms, setBathrooms] = useState('');
 
-  const handleSearch = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('scrape-zillow-data', {
-        body: { address: homeAddress }
-      });
-
-      if (error) throw error;
-
-      if (data.success && data.matches) {
-        setMatches(data.matches);
-        setShowMatches(true);
-        
-        if (data.blocked) {
-          toast.warning(data.message || 'Zillow data unavailable. Please enter details manually.');
-        } else if (data.matches.length === 1 && !data.blocked) {
-          // Auto-select if only one match and not blocked
-          await handleSelectMatch(data.matches[0]);
-        }
-      } else {
-        throw new Error(data.error || 'Failed to fetch Zillow data');
-      }
-    } catch (error) {
-      console.error('Error searching Zillow:', error);
-      toast.error('Unable to connect to Zillow. You can enter home details manually instead.');
-      // Show empty match for manual entry
-      setMatches([{
-        address: homeAddress,
-        city: '',
-        state: '',
-        zipCode: '',
-        homeAge: null,
-        squareFootage: null,
-        bedrooms: null,
-        bathrooms: null,
-        zillowUrl: '',
-      }]);
-      setShowMatches(true);
-    } finally {
-      setLoading(false);
+  const handleSubmit = async () => {
+    if (!squareFootage && !bedrooms && !bathrooms) {
+      toast.error('Please enter at least one property detail');
+      return;
     }
-  };
 
-  const handleSelectMatch = async (match: ZillowMatch) => {
+    setIsLoading(true);
     try {
-      // Check if home_details already exists
-      const { data: existing } = await supabase
+      const { data: existingDetails } = await supabase
         .from('home_details')
-        .select('id')
+        .select('*')
         .eq('home_id', homeId)
-        .single();
+        .maybeSingle();
 
-      const homeDetailsData = {
+      const detailsData = {
         home_id: homeId,
-        home_age: match.homeAge,
-        square_footage: match.squareFootage,
-        bedrooms: match.bedrooms,
-        bathrooms: match.bathrooms,
-        zillow_url: match.zillowUrl,
-        last_synced_at: new Date().toISOString()
+        square_footage: squareFootage ? parseInt(squareFootage) : null,
+        bedrooms: bedrooms ? parseInt(bedrooms) : null,
+        bathrooms: bathrooms ? parseFloat(bathrooms) : null,
       };
 
-      if (existing) {
-        // Update existing record
-        const { error } = await supabase
+      if (existingDetails) {
+        await supabase
           .from('home_details')
-          .update(homeDetailsData)
-          .eq('id', existing.id);
-
-        if (error) throw error;
+          .update(detailsData)
+          .eq('home_id', homeId);
       } else {
-        // Insert new record
-        const { error } = await supabase
+        await supabase
           .from('home_details')
-          .insert(homeDetailsData);
-
-        if (error) throw error;
+          .insert(detailsData);
       }
 
-      // Auto-create spaces from bedroom/bathroom counts
-      if (match.bedrooms || match.bathrooms) {
-        const spacesToCreate = [];
-        
-        if (match.bedrooms) {
-          for (let i = 1; i <= match.bedrooms; i++) {
-            spacesToCreate.push({
-              home_id: homeId,
-              name: `Bedroom ${i}`,
-              type: 'bedroom',
-              scale_unit: match.squareFootage ? Math.floor(match.squareFootage / (match.bedrooms + (match.bathrooms || 0))) : null
-            });
-          }
+      // Create bedroom spaces
+      if (bedrooms && parseInt(bedrooms) > 0) {
+        const bedroomCount = parseInt(bedrooms);
+        for (let i = 1; i <= bedroomCount; i++) {
+          await supabase.from('home_spaces').insert({
+            home_id: homeId,
+            space_name: `Bedroom ${i}`,
+            space_type: 'bedroom'
+          });
         }
-        
-        if (match.bathrooms) {
-          const fullBaths = Math.floor(match.bathrooms);
-          const hasHalfBath = match.bathrooms % 1 !== 0;
-          
-          for (let i = 1; i <= fullBaths; i++) {
-            spacesToCreate.push({
-              home_id: homeId,
-              name: `Bathroom ${i}`,
-              type: 'bathroom',
-              scale_unit: match.squareFootage ? Math.floor(match.squareFootage / ((match.bedrooms || 0) + match.bathrooms)) : null
-            });
-          }
-          
-          if (hasHalfBath) {
-            spacesToCreate.push({
-              home_id: homeId,
-              name: 'Half Bath',
-              type: 'bathroom',
-              scale_unit: match.squareFootage ? Math.floor(match.squareFootage / ((match.bedrooms || 0) + match.bathrooms)) : null
-            });
-          }
-        }
-
-        if (spacesToCreate.length > 0) {
-          const { error: spacesError } = await supabase
-            .from('home_spaces')
-            .insert(spacesToCreate);
-
-          if (spacesError) {
-            console.error('Error creating spaces:', spacesError);
-            toast.warning('Home details saved, but could not auto-create spaces');
-          } else {
-            toast.success(`Home data synced and ${spacesToCreate.length} spaces created!`);
-          }
-        } else {
-          toast.success('Home data synced successfully!');
-        }
-      } else {
-        toast.success('Home data synced successfully!');
       }
 
+      // Create bathroom spaces
+      if (bathrooms && parseFloat(bathrooms) > 0) {
+        const bathroomCount = Math.ceil(parseFloat(bathrooms));
+        for (let i = 1; i <= bathroomCount; i++) {
+          await supabase.from('home_spaces').insert({
+            home_id: homeId,
+            space_name: `Bathroom ${i}`,
+            space_type: 'bathroom'
+          });
+        }
+      }
+
+      toast.success('Home data saved successfully!');
       onSyncComplete();
       onOpenChange(false);
-      
-      // Trigger a data refresh
       setTimeout(() => {
         window.location.reload();
       }, 500);
     } catch (error) {
-      console.error('Error saving home details:', error);
-      toast.error('Failed to save home details');
+      console.error('Error saving home data:', error);
+      toast.error('Failed to save home data');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Sync Data with Zillow</DialogTitle>
-          <DialogDescription>
-            Search Zillow for property data including square footage, bedrooms, and bathrooms.
-          </DialogDescription>
-        </DialogHeader>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={(open) => {
+        onOpenChange(open);
+        if (!open) {
+          setSquareFootage('');
+          setBedrooms('');
+          setBathrooms('');
+        }
+      }}
+      title="Add Property Details"
+      description={`Enter details for ${homeAddress}`}
+    >
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="squareFootage">Square Footage</Label>
+          <Input
+            id="squareFootage"
+            type="number"
+            placeholder="e.g., 2000"
+            value={squareFootage}
+            onChange={(e) => setSquareFootage(e.target.value)}
+          />
+        </div>
 
-        {!showMatches ? (
-          <div className="space-y-4">
-            <div className="p-4 bg-muted rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <MapPin className="w-4 h-4 text-muted-foreground" />
-                <span className="font-medium">Searching for:</span>
-              </div>
-              <p className="text-sm">{homeAddress}</p>
-            </div>
+        <div className="space-y-2">
+          <Label htmlFor="bedrooms">Number of Bedrooms</Label>
+          <Input
+            id="bedrooms"
+            type="number"
+            placeholder="e.g., 3"
+            value={bedrooms}
+            onChange={(e) => setBedrooms(e.target.value)}
+          />
+        </div>
 
-            <Button 
-              onClick={handleSearch}
-              disabled={loading}
-              className="w-full"
-            >
-              {loading ? 'Searching Zillow...' : 'Search Zillow'}
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">
-                {matches.length > 1 ? 'Select Your Property' : 'Property Found'}
-              </h3>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setShowMatches(false)}
-              >
-                Search Again
-              </Button>
-            </div>
+        <div className="space-y-2">
+          <Label htmlFor="bathrooms">Number of Bathrooms</Label>
+          <Input
+            id="bathrooms"
+            type="number"
+            step="0.5"
+            placeholder="e.g., 2.5"
+            value={bathrooms}
+            onChange={(e) => setBathrooms(e.target.value)}
+          />
+        </div>
 
-            {matches.length > 1 && (
-              <p className="text-sm text-muted-foreground">
-                We found {matches.length} properties. Please select the correct one:
-              </p>
-            )}
-
-            <div className="space-y-3">
-              {matches.map((match, index) => (
-                <Card 
-                  key={index}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => handleSelectMatch(match)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Home className="w-4 h-4 text-primary" />
-                          <h4 className="font-medium">{match.address}</h4>
-                        </div>
-                        {match.city && match.state && (
-                          <p className="text-sm text-muted-foreground">
-                            {match.city}, {match.state} {match.zipCode}
-                          </p>
-                        )}
-                      </div>
-                      {match.zillowUrl && (
-                        <a
-                          href={match.zillowUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-primary hover:text-primary/80"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {match.bedrooms !== null && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
-                          <Bed className="w-3 h-3" />
-                          {match.bedrooms} bed
-                        </Badge>
-                      )}
-                      {match.bathrooms !== null && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
-                          <Bath className="w-3 h-3" />
-                          {match.bathrooms} bath
-                        </Badge>
-                      )}
-                      {match.squareFootage !== null && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
-                          <Square className="w-3 h-3" />
-                          {match.squareFootage.toLocaleString()} sqft
-                        </Badge>
-                      )}
-                      {match.homeAge !== null && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {match.homeAge} years old
-                        </Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+        <Button
+          onClick={handleSubmit}
+          disabled={isLoading}
+          className="w-full"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            'Save Property Details'
+          )}
+        </Button>
+      </div>
+    </ResponsiveDialog>
   );
 };
