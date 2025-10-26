@@ -235,9 +235,12 @@ export function RapidProjectAssessment({ taskId, taskTitle, taskNotes, onClose }
       const newToken = initializeCSRFProtection();
       setCsrfToken(newToken);
       
-      // If this is a task-based assessment, close the dialog
+      // If this is a task-based assessment, close the dialog after a brief delay
+      // to allow the toast to be visible
       if (taskId && onClose) {
-        onClose();
+        setTimeout(() => {
+          onClose();
+        }, 500);
       }
     } catch (error) {
       console.error('Error saving project:', error);
@@ -530,6 +533,7 @@ export function RapidProjectAssessment({ taskId, taskTitle, taskNotes, onClose }
                   disabled={isLoading} 
                   size="sm"
                   className="p-1 h-8 w-8"
+                  type="button"
                 >
                   <Save className="w-4 h-4" />
                 </Button>
