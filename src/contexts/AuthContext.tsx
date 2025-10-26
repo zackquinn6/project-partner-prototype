@@ -16,6 +16,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  signingOut: boolean;
   signUp: (email: string, password: string, guestData?: any) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
@@ -37,6 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [signingOut, setSigningOut] = useState(false);
   const { setGuestMode, transferGuestDataToUser } = useGuest();
 
   useEffect(() => {
@@ -243,9 +245,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    // Clean up session data before signing out
-    await cleanupSessionData(user?.id);
-    await supabase.auth.signOut();
+    if (signingOut) return; // Prevent multiple sign out attempts
+    
+    try {
+      setSigningOut(true);
+      // Clean up session data before signing out
+      await cleanupSessionData(user?.id);
+      await supabase.auth.signOut();
+    } catch (error: any) {
+      // Gracefully handle session_not_found errors (we're already signed out)
+      if (error?.message?.includes('session_not_found') || error?.code === 'session_not_found') {
+        console.log('Already signed out');
+      } else {
+        console.error('Sign out error:', error);
+        throw error;
+      }
+    } finally {
+      setSigningOut(false);
+    }
   };
 
   const continueAsGuest = () => {
@@ -257,6 +274,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     session,
     loading,
+    signingOut,
     signUp,
     signIn,
     signInWithGoogle,

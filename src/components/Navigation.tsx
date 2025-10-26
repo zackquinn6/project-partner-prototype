@@ -50,7 +50,7 @@ export default function Navigation({
   }
   
   const { projectRuns, currentProjectRun, setCurrentProjectRun, projects, setCurrentProject } = projectData;
-  const { signOut } = useAuth();
+  const { signOut, signingOut } = useAuth();
   const { isAdmin } = useUserRole();
   const isMobile = useIsMobile();
 
@@ -91,6 +91,8 @@ export default function Navigation({
   const activeProjectRuns = projectRuns.filter(run => run.progress && run.progress < 100);
 
   const handleSignOut = async () => {
+    if (signingOut) return; // Prevent multiple clicks
+    
     try {
       await signOut();
     } catch (error) {
@@ -232,9 +234,9 @@ export default function Navigation({
                     Admin Panel
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={handleSignOut}>
+                <DropdownMenuItem onClick={handleSignOut} disabled={signingOut}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
+                  {signingOut ? 'Signing Out...' : 'Sign Out'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
