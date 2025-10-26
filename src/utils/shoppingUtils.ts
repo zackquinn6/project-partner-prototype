@@ -1,6 +1,214 @@
 import { ProjectRun } from '@/interfaces/ProjectRun';
 import { addStandardPhasesToProjectRun } from './projectUtils';
 
+interface NeedDate {
+  itemId: string;
+  itemName: string;
+  itemType: 'material' | 'tool';
+  startDate: Date | null;
+  endDate: Date | null;
+  stepIds: string[];
+}
+
+interface ScheduleWarning {
+  itemId: string;
+  itemName: string;
+  itemType: 'material' | 'tool';
+  message: string;
+  oldStart?: Date;
+  oldEnd?: Date;
+  newStart?: Date;
+  newEnd?: Date;
+  daysChange?: number;
+}
+
+interface ScheduleSnapshot {
+  timestamp: number;
+  needDates: NeedDate[];
+}
+
+/**
+ * Extracts need-dates for all tools and materials based on scheduled events
+ */
+export function extractNeedDatesFromSchedule(projectRun: ProjectRun): NeedDate[] {
+  const scheduleEvents = projectRun.schedule_events?.events || [];
+  
+  if (!scheduleEvents || scheduleEvents.length === 0) {
+    return [];
+  }
+
+  const materialDates = new Map<string, { name: string; dates: Date[]; stepIds: string[] }>();
+  const toolDates = new Map<string, { name: string; dates: Date[]; stepIds: string[] }>();
+
+  // Process each scheduled event
+  scheduleEvents.forEach((event: any) => {
+    if (!event.stepId || !event.start) return;
+
+    const eventStart = new Date(event.start);
+    const eventEnd = event.end ? new Date(event.end) : eventStart;
+
+    // Find the step in the project phases to get its materials and tools
+    const processedPhases = addStandardPhasesToProjectRun(projectRun.phases || []);
+    
+    processedPhases.forEach((phase) => {
+      phase.operations?.forEach((operation) => {
+        operation.steps?.forEach((step) => {
+          const stepId = step.id || `step-${phase.id}-${operation.id}-${step.step}`;
+          
+          if (stepId === event.stepId) {
+            // Process materials
+            step.materials?.forEach((material) => {
+              const key = material.id || material.name;
+              if (!materialDates.has(key)) {
+                materialDates.set(key, { name: material.name, dates: [], stepIds: [] });
+              }
+              const entry = materialDates.get(key)!;
+              entry.dates.push(eventStart);
+              entry.stepIds.push(stepId);
+            });
+
+            // Process tools
+            step.tools?.forEach((tool) => {
+              const key = tool.id || tool.name;
+              if (!toolDates.has(key)) {
+                toolDates.set(key, { name: tool.name, dates: [], stepIds: [] });
+              }
+              const entry = toolDates.get(key)!;
+              entry.dates.push(eventStart, eventEnd);
+              entry.stepIds.push(stepId);
+            });
+          }
+        });
+      });
+    });
+  });
+
+  const needDates: NeedDate[] = [];
+
+  // Materials: needed by the earliest date
+  materialDates.forEach((data, itemId) => {
+    const sortedDates = data.dates.sort((a, b) => a.getTime() - b.getTime());
+    needDates.push({
+      itemId,
+      itemName: data.name,
+      itemType: 'material',
+      startDate: sortedDates[0],
+      endDate: null,
+      stepIds: [...new Set(data.stepIds)]
+    });
+  });
+
+  // Tools: need between first and last usage
+  toolDates.forEach((data, itemId) => {
+    const sortedDates = data.dates.sort((a, b) => a.getTime() - b.getTime());
+    needDates.push({
+      itemId,
+      itemName: data.name,
+      itemType: 'tool',
+      startDate: sortedDates[0],
+      endDate: sortedDates[sortedDates.length - 1],
+      stepIds: [...new Set(data.stepIds)]
+    });
+  });
+
+  return needDates;
+}
+
+/**
+ * Compares current schedule with previous snapshot and generates warnings
+ */
+export function detectScheduleChanges(
+  currentNeedDates: NeedDate[],
+  previousSnapshot: ScheduleSnapshot | null
+): ScheduleWarning[] {
+  if (!previousSnapshot || !previousSnapshot.needDates) {
+    return [];
+  }
+
+  const warnings: ScheduleWarning[] = [];
+  const previousMap = new Map(
+    previousSnapshot.needDates.map(nd => [nd.itemId, nd])
+  );
+
+  currentNeedDates.forEach(current => {
+    const previous = previousMap.get(current.itemId);
+    
+    if (!previous) return;
+
+    // Check for date changes
+    const currentStart = current.startDate?.getTime() || 0;
+    const previousStart = previous.startDate?.getTime() || 0;
+    const currentEnd = current.endDate?.getTime() || 0;
+    const previousEnd = previous.endDate?.getTime() || 0;
+
+    if (current.itemType === 'material') {
+      // Materials: check if needed date moved
+      if (currentStart !== previousStart) {
+        const daysChange = Math.round((currentStart - previousStart) / (1000 * 60 * 60 * 24));
+        const direction = daysChange > 0 ? 'later' : 'earlier';
+        
+        warnings.push({
+          itemId: current.itemId,
+          itemName: current.itemName,
+          itemType: 'material',
+          message: `${current.itemName} now needed ${Math.abs(daysChange)} day(s) ${direction}`,
+          oldStart: previous.startDate || undefined,
+          newStart: current.startDate || undefined,
+          daysChange
+        });
+      }
+    } else {
+      // Tools: check if rental period changed
+      if (currentStart !== previousStart || currentEnd !== previousEnd) {
+        const oldDuration = previousEnd - previousStart;
+        const newDuration = currentEnd - currentStart;
+        const durationChange = Math.round((newDuration - oldDuration) / (1000 * 60 * 60 * 24));
+        
+        if (durationChange !== 0) {
+          const action = durationChange > 0 ? 'extended' : 'shortened';
+          warnings.push({
+            itemId: current.itemId,
+            itemName: current.itemName,
+            itemType: 'tool',
+            message: `${current.itemName} rental needs to be ${action} by ${Math.abs(durationChange)} day(s)`,
+            oldStart: previous.startDate || undefined,
+            oldEnd: previous.endDate || undefined,
+            newStart: current.startDate || undefined,
+            newEnd: current.endDate || undefined,
+            daysChange: durationChange
+          });
+        } else if (currentStart !== previousStart) {
+          const daysChange = Math.round((currentStart - previousStart) / (1000 * 60 * 60 * 24));
+          const direction = daysChange > 0 ? 'later' : 'earlier';
+          warnings.push({
+            itemId: current.itemId,
+            itemName: current.itemName,
+            itemType: 'tool',
+            message: `${current.itemName} rental period shifted ${Math.abs(daysChange)} day(s) ${direction}`,
+            oldStart: previous.startDate || undefined,
+            oldEnd: previous.endDate || undefined,
+            newStart: current.startDate || undefined,
+            newEnd: current.endDate || undefined,
+            daysChange
+          });
+        }
+      }
+    }
+  });
+
+  return warnings;
+}
+
+/**
+ * Creates a schedule snapshot for comparison
+ */
+export function createScheduleSnapshot(needDates: NeedDate[]): ScheduleSnapshot {
+  return {
+    timestamp: Date.now(),
+    needDates: JSON.parse(JSON.stringify(needDates)) // Deep clone
+  };
+}
+
 /**
  * Determines if shopping is needed after a project replan by comparing
  * current tools/materials with what was previously needed

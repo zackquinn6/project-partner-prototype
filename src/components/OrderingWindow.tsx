@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { ResponsiveDialog } from "@/components/ResponsiveDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,16 +7,19 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, ChevronRight, ShoppingCart, Eye, EyeOff, ExternalLink, Globe, Check, Maximize, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShoppingCart, Eye, EyeOff, ExternalLink, Globe, Check, Maximize, Info, Calendar, AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Project, Material, Tool } from "@/interfaces/Project";
 import { supabase } from "@/integrations/supabase/client";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useProject } from "@/contexts/ProjectContext";
 import { toast } from "sonner";
+import { extractNeedDatesFromSchedule, detectScheduleChanges, createScheduleSnapshot } from "@/utils/shoppingUtils";
+import { format } from "date-fns";
 
 interface OrderingWindowProps {
   open: boolean;
@@ -56,6 +59,25 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
   const [userProfile, setUserProfile] = useState<any>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [itemDetailsOpen, setItemDetailsOpen] = useState(false);
+
+  // Calculate need dates and warnings
+  const needDates = useMemo(() => {
+    if (!projectRun) return [];
+    return extractNeedDatesFromSchedule(projectRun);
+  }, [projectRun]);
+
+  const isScheduled = useMemo(() => {
+    return projectRun?.schedule_events?.events && 
+           Array.isArray(projectRun.schedule_events.events) && 
+           projectRun.schedule_events.events.length > 0;
+  }, [projectRun]);
+
+  const scheduleWarnings = useMemo(() => {
+    if (!projectRun || !isScheduled) return [];
+    
+    const previousSnapshot = projectRun.shopping_checklist_data?.scheduleSnapshot || null;
+    return detectScheduleChanges(needDates, previousSnapshot);
+  }, [projectRun, isScheduled, needDates]);
 
   // Load shopping checklist data from database on mount
   useEffect(() => {
@@ -107,11 +129,15 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
 
       const allItemsOrdered = orderedItems.length >= (uniqueTools.length + uniqueMaterials.length);
       
+      // Create schedule snapshot if scheduled
+      const scheduleSnapshot = isScheduled ? createScheduleSnapshot(needDates) : null;
+      
       await updateProjectRun({
         ...projectRun,
         shopping_checklist_data: {
           orderedItems,
-          completedDate: allItemsOrdered ? new Date().toISOString() : null
+          completedDate: allItemsOrdered ? new Date().toISOString() : null,
+          scheduleSnapshot: scheduleSnapshot,
         }
       });
     } catch (error) {
@@ -379,6 +405,13 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
     setItemDetailsOpen(true);
   };
 
+  // Get need date for an item
+  const getNeedDate = (itemId: string, itemName: string, itemType: 'material' | 'tool') => {
+    return needDates.find(nd => 
+      (nd.itemId === itemId || nd.itemName === itemName) && nd.itemType === itemType
+    );
+  };
+
   // Filter items for display
   const activeTools = uniqueTools.filter(tool => !shoppedTools.has(tool.id));
   const activeMaterials = uniqueMaterials.filter(material => !shoppedMaterials.has(material.id));
@@ -420,6 +453,31 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
             : 'Shopping Checklist'
           }
         </h2>
+        
+        {/* Schedule Status */}
+        {!isScheduled && (
+          <Alert className="mb-2">
+            <Calendar className="h-4 w-4" />
+            <AlertDescription className="text-xs">
+              Project not scheduled. Generate a schedule to see when items are needed.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Schedule Warnings */}
+        {scheduleWarnings.length > 0 && (
+          <Alert variant="destructive" className="mb-2">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <div className="font-semibold text-xs mb-1">Schedule Changes Detected:</div>
+              <ul className="list-disc list-inside space-y-0.5">
+                {scheduleWarnings.map((warning, idx) => (
+                  <li key={idx} className="text-xs">{warning.message}</li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
         
         {/* Shopping Sites and Search */}
         <div className="space-y-3 p-3 border rounded-lg bg-muted/30">
@@ -512,7 +570,9 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                   ) : (
                     <>
                       {/* Active Materials */}
-                      {activeMaterials.map((material, index) => (
+                      {activeMaterials.map((material, index) => {
+                        const needDate = getNeedDate(material.id, material.name, 'material');
+                        return (
                         <div key={`active-${material.id}-${index}`} className="border rounded-lg p-1.5 hover:bg-muted/50 transition-colors">
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
@@ -528,6 +588,12 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                               <p className="text-xs text-muted-foreground mt-2 ml-7">
                                 {material.description}
                               </p>
+                              {needDate && needDate.startDate && (
+                                <div className="flex items-center gap-2 mt-2 ml-7 text-xs text-blue-700">
+                                  <Calendar className="h-3 w-3" />
+                                  <span>Needed by: {format(needDate.startDate, 'MM/dd/yyyy')}</span>
+                                </div>
+                              )}
                               {material.totalQuantity && (
                                 <Badge variant="secondary" className="text-xs mt-2 ml-7">
                                   Qty: {material.totalQuantity} {material.unit || 'pieces'}
@@ -544,7 +610,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                             </Button>
                           </div>
                         </div>
-                      ))}
+                      )})}
                       
                       {/* Shopped Materials */}
                       {showShopped && shoppedMaterialsList.length > 0 && (
@@ -600,7 +666,13 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                   ) : (
                     <>
                       {/* Active Tools */}
-                      {activeTools.map((tool, index) => (
+                      {activeTools.map((tool, index) => {
+                        const isOwned = userOwnedTools.some((ownedTool: any) => 
+                          ownedTool.tool === tool.name || 
+                          ownedTool.name === tool.name ||
+                          ownedTool === tool.name);
+                        const needDate = !isOwned ? getNeedDate(tool.id, tool.name, 'tool') : null;
+                        return (
                         <div key={`active-${tool.id}-${index}`} className="border rounded-lg p-1.5 hover:bg-muted/50 transition-colors">
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
@@ -612,16 +684,21 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                                   className="rounded w-4 h-4 flex-shrink-0"
                                 />
                                 <h4 className="font-medium text-sm">{tool.name}</h4>
-                                {userOwnedTools.some((ownedTool: any) => 
-                                  ownedTool.tool === tool.name || 
-                                  ownedTool.name === tool.name ||
-                                  ownedTool === tool.name) && (
+                                {isOwned && (
                                   <Badge variant="secondary" className="text-xs">Owned</Badge>
                                 )}
                               </div>
                               <p className="text-xs text-muted-foreground mt-2 ml-7">
                                 {tool.description}
                               </p>
+                              {needDate && needDate.startDate && needDate.endDate && (
+                                <div className="flex items-center gap-2 mt-2 ml-7 text-xs text-blue-700">
+                                  <Calendar className="h-3 w-3" />
+                                  <span>
+                                    Need between {format(needDate.startDate, 'MM/dd/yyyy')} and {format(needDate.endDate, 'MM/dd/yyyy')}
+                                  </span>
+                                </div>
+                              )}
                               {tool.maxQuantity && (
                                 <Badge variant="secondary" className="text-xs mt-2 ml-7">
                                   Qty: {tool.maxQuantity}
@@ -638,7 +715,7 @@ export function OrderingWindow({ open, onOpenChange, project, projectRun, userOw
                             </Button>
                           </div>
                         </div>
-                      ))}
+                      )})}
                       
                       {/* Shopped Tools */}
                       {showShopped && shoppedToolsList.length > 0 && (
