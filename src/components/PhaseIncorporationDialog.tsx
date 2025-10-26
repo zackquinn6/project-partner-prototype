@@ -164,9 +164,6 @@ export const PhaseIncorporationDialog: React.FC<PhaseIncorporationDialogProps> =
                   <TableHeader>
                     <TableRow>
                       <TableHead>Project Name</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead className="text-right"># Phases</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -177,15 +174,6 @@ export const PhaseIncorporationDialog: React.FC<PhaseIncorporationDialogProps> =
                         onClick={() => handleProjectSelect(project.id)}
                       >
                         <TableCell className="font-medium">{project.name}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
-                          {project.description || '-'}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {project.category ? (
-                            <Badge variant="outline">{project.category}</Badge>
-                          ) : '-'}
-                        </TableCell>
-                        <TableCell className="text-right">{project.phases?.length || 0}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
