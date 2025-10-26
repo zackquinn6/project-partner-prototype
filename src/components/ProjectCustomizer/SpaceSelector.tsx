@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Plus, Home, X, Edit2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -240,37 +241,45 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
               Add Project-Specific Space
             </Button>
           ) : (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="space-name">Space Name *</Label>
-                <Input
-                  id="space-name"
-                  value={customSpaceName}
-                  onChange={(e) => setCustomSpaceName(e.target.value)}
-                  placeholder="e.g., Guest Bathroom, Kitchen"
-                />
-              </div>
-              <div>
-                <Label htmlFor="space-type">Space Type</Label>
-                <Input
-                  id="space-type"
-                  value={customSpaceType}
-                  onChange={(e) => setCustomSpaceType(e.target.value)}
-                  placeholder="e.g., bathroom, bedroom"
-                />
-              </div>
-              <div>
-                <Label htmlFor="scale-value">Scale Value ({projectScaleUnit})</Label>
-                <Input
-                  id="scale-value"
-                  type="number"
-                  value={customScaleValue || ''}
-                  onChange={(e) => setCustomScaleValue(parseFloat(e.target.value))}
-                  placeholder={`Enter ${projectScaleUnit}`}
-                />
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <Label htmlFor="space-name" className="text-xs">Space Name *</Label>
+                  <Input
+                    id="space-name"
+                    value={customSpaceName}
+                    onChange={(e) => setCustomSpaceName(e.target.value)}
+                    placeholder="e.g., Guest Bath"
+                    className="h-8 text-sm"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="space-type" className="text-xs">Space Type</Label>
+                  <Select value={customSpaceType} onValueChange={setCustomSpaceType}>
+                    <SelectTrigger id="space-type" className="h-8 text-sm">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="bedroom">Bedroom</SelectItem>
+                      <SelectItem value="bathroom">Bathroom</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="scale-value" className="text-xs">Scale ({projectScaleUnit})</Label>
+                  <Input
+                    id="scale-value"
+                    type="number"
+                    value={customScaleValue || ''}
+                    onChange={(e) => setCustomScaleValue(parseFloat(e.target.value))}
+                    placeholder="100"
+                    className="h-8 text-sm"
+                  />
+                </div>
               </div>
               <div className="flex gap-2">
-                <Button onClick={handleAddCustomSpace} className="flex-1">
+                <Button onClick={handleAddCustomSpace} className="flex-1 h-8 text-sm">
                   Add Space
                 </Button>
                 <Button
@@ -281,6 +290,7 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
                     setCustomSpaceType('');
                     setCustomScaleValue(undefined);
                   }}
+                  className="h-8 text-sm"
                 >
                   Cancel
                 </Button>

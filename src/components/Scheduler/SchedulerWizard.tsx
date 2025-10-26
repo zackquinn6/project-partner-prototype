@@ -150,28 +150,28 @@ export const SchedulerWizard: React.FC<SchedulerWizardProps> = ({
                 variant={scheduleTempo === 'fast_track' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setScheduleTempo('fast_track')}
-                className="h-14 flex flex-col items-center justify-center gap-1 transition-all hover:scale-105"
+                className="h-10 flex items-center justify-center gap-1.5"
               >
-                <Zap className="w-4 h-4" />
-                <span className="text-xs font-semibold">Fast-Track</span>
+                <Zap className="w-3.5 h-3.5" />
+                <span className="text-xs">Fast-Track</span>
               </Button>
               <Button
                 variant={scheduleTempo === 'steady' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setScheduleTempo('steady')}
-                className="h-14 flex flex-col items-center justify-center gap-1 transition-all hover:scale-105"
+                className="h-10 flex items-center justify-center gap-1.5"
               >
-                <Clock className="w-4 h-4" />
-                <span className="text-xs font-semibold">Steady Pace</span>
+                <Clock className="w-3.5 h-3.5" />
+                <span className="text-xs">Steady</span>
               </Button>
               <Button
                 variant={scheduleTempo === 'extended' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setScheduleTempo('extended')}
-                className="h-14 flex flex-col items-center justify-center gap-1 transition-all hover:scale-105"
+                className="h-10 flex items-center justify-center gap-1.5"
               >
-                <Settings className="w-4 h-4" />
-                <span className="text-xs font-semibold">Extended</span>
+                <Settings className="w-3.5 h-3.5" />
+                <span className="text-xs">Extended</span>
               </Button>
             </div>
           </div>
@@ -347,10 +347,10 @@ export const SchedulerWizard: React.FC<SchedulerWizardProps> = ({
         <CardContent className="p-4">
           <Button 
             onClick={onGenerateSchedule} 
-            className="w-full h-10 text-sm"
+            className="w-full h-9 text-sm"
             disabled={isComputing || teamMembers.length === 0 || !targetDate}
           >
-            <Zap className="w-4 h-4 mr-2" />
+            <Zap className="w-3.5 h-3.5 mr-1.5" />
             {isComputing ? 'Computing...' : 'Generate Schedule'}
           </Button>
         </CardContent>

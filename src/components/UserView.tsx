@@ -1507,10 +1507,10 @@ export default function UserView({
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-3">
-                    <CardTitle className="text-2xl">{currentStep?.step}</CardTitle>
+                    <CardTitle className="text-xl">{currentStep?.step}</CardTitle>
                     {getStepIndicator(currentStep?.flowType)}
                   </div>
-                  {currentStep?.description && <CardDescription className="text-base">
+                  {currentStep?.description && <CardDescription className="text-sm">
                     {currentStep.description}
                   </CardDescription>}
                 </div>
@@ -1576,29 +1576,29 @@ export default function UserView({
                     const isAllCompleted = completedCount === totalCount;
                     
                     return <AccordionItem value="outputs">
-                      <AccordionTrigger className="text-lg font-semibold">
+                      <AccordionTrigger className="text-base font-semibold">
                         <div className="flex items-center gap-2">
                           <span>Outputs</span>
-                          <Badge variant={isAllCompleted ? "default" : "outline"} className={isAllCompleted ? "bg-green-500 text-white" : ""}>
+                          <Badge variant={isAllCompleted ? "default" : "outline"} className={isAllCompleted ? "bg-green-500 text-white text-xs" : "text-xs"}>
                             {completedCount}/{totalCount}
                           </Badge>
                           {isAllCompleted && <CheckCircle className="w-4 h-4 text-green-500" />}
                         </div>
                       </AccordionTrigger>
                       <AccordionContent>
-                        <div className="space-y-3 pt-2">
+                        <div className="space-y-2.5 pt-2">
                           {currentStep.outputs.map(output => (
-                            <div key={output.id} className="p-3 bg-background/50 rounded-lg">
-                              <div className="flex items-start gap-3">
+                            <div key={output.id} className="p-2.5 bg-background/50 rounded-lg">
+                              <div className="flex items-start gap-2.5">
                                 <Checkbox 
                                   id={`output-${output.id}`}
                                   checked={stepOutputs.has(output.id)}
                                   onCheckedChange={() => toggleOutputCheck(currentStep.id, output.id)}
-                                  className="mt-1"
+                                  className="mt-0.5"
                                 />
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2">
-                                    <div className="font-medium">{output.name}</div>
+                                    <div className="text-sm font-medium">{output.name}</div>
                                     <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
                                     <button
                                       onClick={() => {
@@ -1611,7 +1611,7 @@ export default function UserView({
                                       <Info className="w-3 h-3 text-muted-foreground hover:text-primary" />
                                     </button>
                                   </div>
-                                  <div className="text-sm text-muted-foreground mt-1">{output.description}</div>
+                                  <div className="text-xs text-muted-foreground mt-1">{output.description}</div>
                                 </div>
                               </div>
                             </div>
