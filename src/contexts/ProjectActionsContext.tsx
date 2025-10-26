@@ -85,6 +85,25 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
 
       if (error) throw error;
 
+      // Update the created project with additional fields not in RPC
+      if (projectId) {
+        const { error: updateError } = await supabase
+          .from('projects')
+          .update({
+            skill_level: projectData.skillLevel || null,
+            scaling_unit: projectData.scalingUnit || null,
+            diy_length_challenges: projectData.diyLengthChallenges || null,
+            estimated_time_per_unit: projectData.estimatedTimePerUnit || null
+          })
+          .eq('id', projectId);
+
+        if (updateError) {
+          console.error('Error updating additional project fields:', updateError);
+        }
+      }
+
+      if (error) throw error;
+
       console.log('✅ Project created with standard foundation:', projectId);
 
       await refetchProjects();
@@ -119,6 +138,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
           home_id: homeId || null,
           name: project.name,
           description: project.description,
+          diy_length_challenges: project.diyLengthChallenges,
           start_date: new Date().toISOString(),
           plan_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'not-started',
@@ -222,6 +242,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
         .update({
           name: project.name,
           description: project.description,
+          diy_length_challenges: project.diyLengthChallenges || null,
           image: project.image,
           start_date: project.startDate.toISOString(),
           plan_end_date: project.planEndDate.toISOString(),
