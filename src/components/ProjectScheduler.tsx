@@ -601,14 +601,21 @@ export const ProjectScheduler: React.FC<ProjectSchedulerProps> = ({
         if (assignedTasks.length === 0) continue;
 
         // Call edge function to send email
+        // Convert to format expected by send-schedule-notification edge function
+        const scheduleForEmail = assignedTasks.map((task) => ({
+          taskTitle: project.name,
+          subtaskTitle: task.title,
+          personName: member.name,
+          scheduledDate: new Date(task.startTime).toISOString(),
+          scheduledHours: task.estimatedHours
+        }));
+
         await supabase.functions.invoke('send-schedule-notification', {
           body: {
-            recipientEmail: member.email,
-            recipientName: member.name,
-            projectName: project.name,
-            tasks: assignedTasks,
-            targetDate,
-            dropDeadDate
+            schedule: scheduleForEmail,
+            startDate: new Date(targetDate).toISOString(),
+            userEmail: member.email,
+            people: [{ name: member.name, id: member.id }]
           }
         });
       }
