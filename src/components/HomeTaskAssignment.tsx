@@ -346,6 +346,23 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
 
   const totalAssignments = Object.values(assignments).reduce((sum, arr) => sum + arr.length, 0);
 
+  // Get assigned task and subtask IDs to filter them from available list
+  const assignedTaskIds = new Set<string>();
+  const assignedSubtaskIds = new Set<string>();
+  
+  Object.values(assignments).forEach(personAssignments => {
+    personAssignments.forEach(assignment => {
+      assignedTaskIds.add(assignment.taskId);
+      if (assignment.subtaskId) {
+        assignedSubtaskIds.add(assignment.subtaskId);
+      }
+    });
+  });
+
+  // Filter available tasks and subtasks
+  const availableTasks = tasks.filter(task => !assignedTaskIds.has(task.id));
+  const availableSubtasks = subtasks.filter(st => !assignedSubtaskIds.has(st.id));
+
   return (
     <div className="space-y-3 h-full flex flex-col">
       <div className="text-[10px] md:text-xs text-muted-foreground">
@@ -363,87 +380,90 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 flex-1 min-h-0">
             {/* Left: Available Tasks/Subtasks */}
-            <Droppable droppableId="available-tasks" isDropDisabled={true}>
-              {(provided) => (
-                <div 
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="space-y-3 overflow-auto border rounded-lg p-3 bg-muted/30"
-                >
-                  <div className="text-xs font-semibold">Available Tasks</div>
-                  
-                  {tasks.length === 0 ? (
-                    <p className="text-[10px] md:text-xs text-muted-foreground text-center py-8">
-                      No open tasks available
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {tasks.map((task, index) => {
-                        const taskSubtasks = subtasks.filter(st => st.task_id === task.id);
-                        
-                        return (
-                          <Draggable key={task.id} draggableId={`task-${task.id}`} index={index}>
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                className={`border rounded-lg bg-background ${snapshot.isDragging ? 'shadow-lg' : ''}`}
-                              >
-                                <div 
-                                  {...provided.dragHandleProps}
-                                  className="p-2 flex items-center justify-between gap-2"
-                                >
-                                  <span className="text-[10px] md:text-xs font-medium flex-1">{task.title}</span>
-                                  <Badge variant={getDiyLevelColor(task.diy_level)} className="text-[9px] md:text-[10px]">
-                                    {task.diy_level}
-                                  </Badge>
-                                </div>
-                                
-                                {taskSubtasks.length > 0 && (
-                                  <Accordion type="single" collapsible className="border-t">
-                                    <AccordionItem value="subtasks" className="border-0">
-                                      <AccordionTrigger className="px-2 py-1 text-[9px] text-muted-foreground hover:no-underline">
-                                        {taskSubtasks.length} subtask{taskSubtasks.length !== 1 ? 's' : ''}
-                                      </AccordionTrigger>
-                                      <AccordionContent className="px-2 pb-2 space-y-1">
-                                        {taskSubtasks.map((subtask, subIndex) => (
-                                          <Draggable 
-                                            key={subtask.id} 
-                                            draggableId={`subtask-${subtask.id}`} 
-                                            index={tasks.length + subIndex}
-                                          >
-                                            {(subProvided, subSnapshot) => (
-                                              <div
-                                                ref={subProvided.innerRef}
-                                                {...subProvided.draggableProps}
-                                                {...subProvided.dragHandleProps}
-                                                className={`border rounded p-1.5 bg-muted/30 ${subSnapshot.isDragging ? 'shadow-lg' : ''}`}
-                                              >
-                                                <div className="flex items-center justify-between gap-2">
-                                                  <span className="text-[9px] md:text-[10px] flex-1">{subtask.title}</span>
-                                                  <Badge variant={getDiyLevelColor(subtask.diy_level)} className="text-[8px] md:text-[9px] py-0 px-1">
-                                                    {subtask.diy_level}
-                                                  </Badge>
-                                                </div>
-                                              </div>
-                                            )}
-                                          </Draggable>
-                                        ))}
-                                      </AccordionContent>
-                                    </AccordionItem>
-                                  </Accordion>
+            <div className="space-y-3 overflow-auto border rounded-lg p-3 bg-muted/30">
+              <div className="text-xs font-semibold">Available Tasks</div>
+              
+              {availableTasks.length === 0 ? (
+                <p className="text-[10px] md:text-xs text-muted-foreground text-center py-8">
+                  No open tasks available
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {availableTasks.map((task, index) => {
+                    const taskSubtasks = availableSubtasks.filter(st => st.task_id === task.id);
+                    
+                    return (
+                      <div key={task.id} className="border rounded-lg bg-background">
+                        <Droppable droppableId={`task-container-${task.id}`} isDropDisabled={true}>
+                          {(provided) => (
+                            <div ref={provided.innerRef} {...provided.droppableProps}>
+                              <Draggable draggableId={`task-${task.id}`} index={index}>
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    className={`p-2 flex items-center justify-between gap-2 cursor-move ${snapshot.isDragging ? 'opacity-50' : ''}`}
+                                  >
+                                    <span className="text-[10px] md:text-xs font-medium flex-1">{task.title}</span>
+                                    <Badge variant={getDiyLevelColor(task.diy_level)} className="text-[9px] md:text-[10px]">
+                                      {task.diy_level}
+                                    </Badge>
+                                  </div>
                                 )}
-                              </div>
-                            )}
-                          </Draggable>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {provided.placeholder}
+                              </Draggable>
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                        
+                        {taskSubtasks.length > 0 && (
+                          <Accordion type="single" collapsible className="border-t">
+                            <AccordionItem value="subtasks" className="border-0">
+                              <AccordionTrigger className="px-2 py-1 text-[9px] text-muted-foreground hover:no-underline">
+                                {taskSubtasks.length} subtask{taskSubtasks.length !== 1 ? 's' : ''}
+                              </AccordionTrigger>
+                              <AccordionContent className="px-2 pb-2">
+                                <Droppable droppableId={`subtasks-${task.id}`} isDropDisabled={true}>
+                                  {(provided) => (
+                                    <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-1">
+                                      {taskSubtasks.map((subtask, subIndex) => (
+                                        <Draggable 
+                                          key={subtask.id} 
+                                          draggableId={`subtask-${subtask.id}`} 
+                                          index={subIndex}
+                                        >
+                                          {(subProvided, subSnapshot) => (
+                                            <div
+                                              ref={subProvided.innerRef}
+                                              {...subProvided.draggableProps}
+                                              {...subProvided.dragHandleProps}
+                                              className={`border rounded p-1.5 bg-muted/30 cursor-move ${subSnapshot.isDragging ? 'opacity-50' : ''}`}
+                                            >
+                                              <div className="flex items-center justify-between gap-2">
+                                                <span className="text-[9px] md:text-[10px] flex-1">{subtask.title}</span>
+                                                <Badge variant={getDiyLevelColor(subtask.diy_level)} className="text-[8px] md:text-[9px] py-0 px-1">
+                                                  {subtask.diy_level}
+                                                </Badge>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </Draggable>
+                                      ))}
+                                      {provided.placeholder}
+                                    </div>
+                                  )}
+                                </Droppable>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
-            </Droppable>
+            </div>
 
             {/* Right: Team Members with Assignments */}
             <div className="space-y-3 overflow-auto border rounded-lg p-3">
