@@ -265,8 +265,10 @@ export function HomeTasksTable({
         <div className="flex flex-wrap gap-2 flex-1 items-center">
           <Input placeholder="Search tasks..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="max-w-xs text-xs h-8" />
           <Select value={filterPriority} onValueChange={setFilterPriority}>
-            <SelectTrigger className="w-24 sm:w-32 text-xs h-8">
-              <SelectValue placeholder="Priority" />
+            <SelectTrigger className="w-20 sm:w-32 text-xs h-8">
+              <SelectValue>
+                {isMobile ? (filterPriority === 'all' ? 'Priority' : filterPriority.charAt(0).toUpperCase() + filterPriority.slice(1)) : (filterPriority === 'all' ? 'All Priority' : filterPriority.charAt(0).toUpperCase() + filterPriority.slice(1))}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Priority</SelectItem>
@@ -276,8 +278,10 @@ export function HomeTasksTable({
             </SelectContent>
           </Select>
           <Select value={filterDiyLevel} onValueChange={setFilterDiyLevel}>
-            <SelectTrigger className="w-24 sm:w-32 text-xs h-8">
-              <SelectValue placeholder="DIY Level" />
+            <SelectTrigger className="w-20 sm:w-32 text-xs h-8">
+              <SelectValue>
+                {isMobile ? (filterDiyLevel === 'all' ? 'DIY' : filterDiyLevel === 'beginner' ? 'Beg' : filterDiyLevel === 'intermediate' ? 'Int' : filterDiyLevel === 'advanced' ? 'Adv' : 'Pro') : (filterDiyLevel === 'all' ? 'All Levels' : filterDiyLevel.charAt(0).toUpperCase() + filterDiyLevel.slice(1))}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Levels</SelectItem>
@@ -309,13 +313,13 @@ export function HomeTasksTable({
               </label>
             </div>
           )}
+          {onAddTask && (
+            <Button onClick={onAddTask} size="sm" className="h-8 w-8 p-0 sm:w-auto sm:px-3 flex-shrink-0" title="Add Task">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline ml-1">Add Task</span>
+            </Button>
+          )}
         </div>
-        {onAddTask && (
-          <Button onClick={onAddTask} size="sm" className="h-8 w-8 p-0 sm:w-auto sm:px-3 flex-shrink-0" title="Add Task">
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline ml-1">Add Task</span>
-          </Button>
-        )}
       </div>
 
       {/* Table */}
@@ -325,7 +329,7 @@ export function HomeTasksTable({
             <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
                 {!isMobile && <TableHead className="w-8 text-xs"></TableHead>}
-                <TableHead className="min-w-[375px] md:w-[375px] text-xs">
+                <TableHead className="min-w-[281px] md:w-[281px] text-xs">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('title')} className="h-6 px-2 text-xs font-medium">
                     Task <SortIcon field="title" />
                   </Button>
