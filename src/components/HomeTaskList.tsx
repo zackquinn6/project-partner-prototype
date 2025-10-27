@@ -397,6 +397,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
               <SelectContent>
                 <SelectItem value="beginner">Beginner</SelectItem>
                 <SelectItem value="intermediate">Intermediate</SelectItem>
+                <SelectItem value="advanced">Advanced</SelectItem>
                 <SelectItem value="pro">Professional</SelectItem>
               </SelectContent>
             </Select>
@@ -491,6 +492,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                                                   <SelectContent>
                                                     <SelectItem value="beginner">Beginner</SelectItem>
                                                     <SelectItem value="intermediate">Intermediate</SelectItem>
+                                                    <SelectItem value="advanced">Advanced</SelectItem>
                                                     <SelectItem value="pro">Professional</SelectItem>
                                                   </SelectContent>
                                                 </Select>
