@@ -260,14 +260,14 @@ export function HomeTasksTable({
     }
   };
   return <div className="space-y-3">
-      {/* Filters and Add Task Button */}
-      <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between">
+      {/* Desktop filters and controls */}
+      <div className="hidden md:flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between">
         <div className="flex flex-wrap gap-2 flex-1 items-center">
           <Input placeholder="Search tasks..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="max-w-xs text-xs h-8" />
           <Select value={filterPriority} onValueChange={setFilterPriority}>
             <SelectTrigger className="w-20 sm:w-32 text-xs h-8">
               <SelectValue>
-                {isMobile ? (filterPriority === 'all' ? 'Priority' : filterPriority.charAt(0).toUpperCase() + filterPriority.slice(1)) : (filterPriority === 'all' ? 'All Priority' : filterPriority.charAt(0).toUpperCase() + filterPriority.slice(1))}
+                {filterPriority === 'all' ? 'All Priority' : filterPriority.charAt(0).toUpperCase() + filterPriority.slice(1)}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -280,7 +280,7 @@ export function HomeTasksTable({
           <Select value={filterDiyLevel} onValueChange={setFilterDiyLevel}>
             <SelectTrigger className="w-20 sm:w-32 text-xs h-8">
               <SelectValue>
-                {isMobile ? (filterDiyLevel === 'all' ? 'DIY' : filterDiyLevel === 'beginner' ? 'Beg' : filterDiyLevel === 'intermediate' ? 'Int' : filterDiyLevel === 'advanced' ? 'Adv' : 'Pro') : (filterDiyLevel === 'all' ? 'All Levels' : filterDiyLevel.charAt(0).toUpperCase() + filterDiyLevel.slice(1))}
+                {filterDiyLevel === 'all' ? 'All Levels' : filterDiyLevel.charAt(0).toUpperCase() + filterDiyLevel.slice(1)}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -291,34 +291,86 @@ export function HomeTasksTable({
               <SelectItem value="pro">Professional</SelectItem>
             </SelectContent>
           </Select>
-          {isMobile ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowCompleted(!showCompleted)}
-              className="h-8 px-2 text-xs border"
-            >
-              {showCompleted ? "Hide done" : "Show done"}
-            </Button>
-          ) : (
-            <div className="flex items-center gap-1">
-              <Checkbox 
-                id="show-completed" 
-                checked={showCompleted}
-                onCheckedChange={(checked) => setShowCompleted(checked as boolean)}
-                className="h-3 w-3"
-              />
-              <label htmlFor="show-completed" className="text-[10px] sm:text-xs cursor-pointer whitespace-nowrap">
-                Show completed
-              </label>
-            </div>
-          )}
+          <div className="flex items-center gap-1">
+            <Checkbox 
+              id="show-completed" 
+              checked={showCompleted}
+              onCheckedChange={(checked) => setShowCompleted(checked as boolean)}
+              className="h-3 w-3"
+            />
+            <label htmlFor="show-completed" className="text-[10px] sm:text-xs cursor-pointer whitespace-nowrap">
+              Show completed
+            </label>
+          </div>
           {onAddTask && (
             <Button onClick={onAddTask} size="sm" className="h-8 w-8 p-0 sm:w-auto sm:px-3 flex-shrink-0" title="Add Task">
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline ml-1">Add Task</span>
             </Button>
           )}
+        </div>
+      </div>
+
+      {/* Mobile filters and controls */}
+      <div className="flex md:hidden flex-col gap-2 mb-3">
+        <Input
+          placeholder="Search tasks..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="text-sm h-7 w-full"
+        />
+        
+        <div className="flex flex-col gap-2">
+          <Select value={filterPriority} onValueChange={setFilterPriority}>
+            <SelectTrigger className="h-7 text-xs w-full">
+              <SelectValue>
+                {filterPriority === 'all' ? 'Priority' : filterPriority === 'high' ? 'High' : filterPriority === 'medium' ? 'Med' : 'Low'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Priorities</SelectItem>
+              <SelectItem value="high">High Priority</SelectItem>
+              <SelectItem value="medium">Medium Priority</SelectItem>
+              <SelectItem value="low">Low Priority</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filterDiyLevel} onValueChange={setFilterDiyLevel}>
+            <SelectTrigger className="h-7 text-xs w-full">
+              <SelectValue>
+                {filterDiyLevel === 'all' ? 'DIY' : filterDiyLevel === 'beginner' ? 'Beg' : filterDiyLevel === 'intermediate' ? 'Int' : filterDiyLevel === 'advanced' ? 'Adv' : 'Pro'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Levels</SelectItem>
+              <SelectItem value="beginner">Beginner</SelectItem>
+              <SelectItem value="intermediate">Intermediate</SelectItem>
+              <SelectItem value="advanced">Advanced</SelectItem>
+              <SelectItem value="pro">Professional</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowCompleted(!showCompleted)}
+              className="h-7 text-xs whitespace-nowrap px-3 border flex-1"
+            >
+              {showCompleted ? 'Hide' : 'Show'} Done
+            </Button>
+            
+            {onAddTask && (
+              <Button 
+                onClick={onAddTask} 
+                size="sm"
+                className="h-7 px-3 flex-1"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                <span className="text-xs">Add Task</span>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -459,12 +511,12 @@ export function HomeTasksTable({
                   </TableRow>
                    {expandedRows.has(task.id) && subtasks[task.id]?.length > 0 && (
                     <TableRow key={`${task.id}-subtasks`}>
-                      <TableCell colSpan={isMobile ? 6 : 7} className="bg-muted/50 p-4">
+                      <TableCell colSpan={isMobile ? 6 : 7} className="bg-muted/30 p-3 md:p-4 border-l-4 border-l-primary/20">
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <div className="text-sm font-medium">Subtasks (read-only)</div>
-                            <Badge variant="outline" className="text-xs">
-                              Edit task to manage subtasks
+                            <div className="text-sm font-semibold text-primary">Subtasks</div>
+                            <Badge variant="outline" className="text-xs bg-background">
+                              Edit task to manage
                             </Badge>
                           </div>
 
@@ -472,7 +524,7 @@ export function HomeTasksTable({
                             {subtasks[task.id].map((subtask, index) => (
                               <div
                                 key={subtask.id}
-                                className={`flex items-center gap-2 p-2 border rounded bg-background ${
+                                className={`flex items-center gap-2 p-2.5 border rounded-lg bg-background shadow-sm ${
                                   subtask.completed ? 'opacity-60' : ''
                                 }`}
                               >

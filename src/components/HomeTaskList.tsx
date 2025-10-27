@@ -314,8 +314,8 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-full max-w-full md:max-w-[90vw] h-[98vh] p-0 overflow-hidden flex flex-col [&>button]:hidden">
-          <DialogHeader className="px-2 md:px-4 pt-3 pb-2 border-b flex-shrink-0">
+        <DialogContent className="w-full max-w-full md:max-w-[90vw] h-screen p-0 overflow-hidden flex flex-col [&>button]:hidden">
+          <DialogHeader className="px-2 md:px-4 py-1.5 md:py-2 border-b flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
               <DialogTitle className="text-xs md:text-sm font-semibold">Task Manager</DialogTitle>
               <div className="flex gap-1.5 items-center">
@@ -355,10 +355,10 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
 
           <div className="flex-1 overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="mx-2 md:mx-4 mt-2 mb-3 w-auto grid grid-cols-3 text-[10px] md:text-xs h-auto md:h-9 flex-shrink-0 p-0 md:p-1 gap-0.5 bg-transparent md:bg-muted">
-                <TabsTrigger value="tasks" className="text-[10px] md:text-xs px-2 md:px-3 py-1 md:py-1.5 rounded-md">Tasks</TabsTrigger>
-                <TabsTrigger value="people" className="text-[10px] md:text-xs px-2 md:px-3 py-1 md:py-1.5 rounded-md">Team</TabsTrigger>
-                <TabsTrigger value="schedule" className="text-[10px] md:text-xs px-2 md:px-3 py-1 md:py-1.5 rounded-md">Schedule</TabsTrigger>
+              <TabsList className="mx-2 md:mx-4 mt-1 mb-2 w-auto grid grid-cols-3 text-[10px] md:text-xs h-auto md:h-9 flex-shrink-0 p-1 gap-0.5 bg-muted/50 rounded-lg">
+                <TabsTrigger value="tasks" className="text-[10px] md:text-xs px-2 md:px-3 py-1.5 md:py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Tasks</TabsTrigger>
+                <TabsTrigger value="people" className="text-[10px] md:text-xs px-2 md:px-3 py-1.5 md:py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Team</TabsTrigger>
+                <TabsTrigger value="schedule" className="text-[10px] md:text-xs px-2 md:px-3 py-1.5 md:py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Schedule</TabsTrigger>
               </TabsList>
 
               <div className="flex-1 overflow-auto px-2 md:px-4 pb-1 min-h-0">

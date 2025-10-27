@@ -184,7 +184,6 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
             
             {/* Ordered/Non-ordered toggle */}
             <div className="flex items-center gap-2">
-              <label className="text-xs text-muted-foreground">Order matters:</label>
               <div className="flex gap-1">
                 <Button
                   size="sm"
@@ -192,7 +191,7 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
                   onClick={() => onOrderedChange(false)}
                   className="h-7 px-2 text-xs"
                 >
-                  No
+                  No Order
                 </Button>
                 <Button
                   size="sm"
@@ -200,7 +199,7 @@ export function HomeTaskSubtasks({ open, onOpenChange, taskId, taskTitle, userId
                   onClick={() => onOrderedChange(true)}
                   className="h-7 px-2 text-xs"
                 >
-                  Yes
+                  Ordered
                 </Button>
               </div>
             </div>
