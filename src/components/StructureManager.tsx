@@ -36,10 +36,10 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     currentProject,
     updateProject
   } = useProject();
-  
+
   // Detect if editing Standard Project Foundation
   const isEditingStandardProject = currentProject?.id === '00000000-0000-0000-0000-000000000001' || currentProject?.isStandardTemplate;
-  
+
   // Helper to check if a phase is standard by name
   const isStandardPhase = (phaseName: string) => {
     return ['Kickoff', 'Planning', 'Ordering', 'Close Project'].includes(phaseName);
@@ -76,10 +76,9 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
   // One-time correction for phase ordering and duplicate IDs
   useEffect(() => {
     if (!currentProject || oneTimeCorrectionApplied) return;
-    
     let needsCorrection = false;
     const phases = currentProject.phases;
-    
+
     // Check for duplicate IDs
     const seenIds = new Set<string>();
     const duplicateIds = phases.filter(phase => {
@@ -87,34 +86,28 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       seenIds.add(phase.id);
       return false;
     });
-    
     if (duplicateIds.length > 0) {
       console.log('🔧 One-time correction: Found duplicate phase IDs:', duplicateIds.map(p => p.id));
       needsCorrection = true;
     }
-    
+
     // Check phase ordering
     const standardPhases = phases.filter(p => ['Kickoff', 'Planning', 'Ordering', 'Close Project'].includes(p.name) && !p.isLinked);
     const kickoff = standardPhases.find(p => p.name === 'Kickoff');
-    const planning = standardPhases.find(p => p.name === 'Planning'); 
+    const planning = standardPhases.find(p => p.name === 'Planning');
     const ordering = standardPhases.find(p => p.name === 'Ordering');
     const closeProject = standardPhases.find(p => p.name === 'Close Project');
-    
     const kickoffIndex = kickoff ? phases.findIndex(p => p.id === kickoff.id) : -1;
     const planningIndex = planning ? phases.findIndex(p => p.id === planning.id) : -1;
     const orderingIndex = ordering ? phases.findIndex(p => p.id === ordering.id) : -1;
     const closeProjectIndex = closeProject ? phases.findIndex(p => p.id === closeProject.id) : -1;
-    
-    if ((kickoffIndex > planningIndex && planningIndex !== -1) || 
-        (planningIndex > orderingIndex && orderingIndex !== -1) ||
-        (closeProjectIndex !== -1 && closeProjectIndex !== phases.length - 1)) {
+    if (kickoffIndex > planningIndex && planningIndex !== -1 || planningIndex > orderingIndex && orderingIndex !== -1 || closeProjectIndex !== -1 && closeProjectIndex !== phases.length - 1) {
       console.log('🔧 One-time correction: Found phases out of order');
       needsCorrection = true;
     }
-    
     if (needsCorrection) {
       console.log('🔧 Applying one-time correction to phase structure...');
-      
+
       // Fix duplicate IDs by regenerating them
       const correctedPhases = phases.map((phase, index) => {
         const duplicateCount = phases.slice(0, index).filter(p => p.id === phase.id).length;
@@ -126,23 +119,19 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
         }
         return phase;
       });
-      
+
       // Apply standard phase ordering
       const orderedPhases = enforceStandardPhaseOrdering(correctedPhases);
-      
       const updatedProject = {
         ...currentProject,
         phases: orderedPhases,
         updatedAt: new Date()
       };
-      
       updateProject(updatedProject);
       toast.success('Phase structure corrected - standard phases are now properly ordered');
     }
-    
     setOneTimeCorrectionApplied(true);
   }, [currentProject, oneTimeCorrectionApplied, updateProject]);
-  
   if (!currentProject) {
     return <div>No project selected</div>;
   }
@@ -205,22 +194,20 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     if (source.index === destination.index && source.droppableId === destination.droppableId) {
       return;
     }
-
     if (type === 'phases') {
       // If editing Standard Project, don't allow any phase reordering
       if (isEditingStandardProject) {
         toast.error('Cannot reorder phases in Standard Project. Use position rules to control phase positioning.');
         return;
       }
-      
+
       // Get phase being moved
       const sourcePhase = displayPhases[source.index];
       const destinationPhase = displayPhases[destination.index];
-      
       const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
       const isSourceStandard = standardPhaseNames.includes(sourcePhase?.name || '') && !sourcePhase?.isLinked;
       const isDestinationStandard = standardPhaseNames.includes(destinationPhase?.name || '') && !destinationPhase?.isLinked;
-      
+
       // Prevent moving standard phases or moving phases to standard phase positions
       if (isSourceStandard) {
         toast.error(`Cannot move standard phase "${sourcePhase.name}". Standard phases must remain in their fixed positions.`);
@@ -241,18 +228,20 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       }
 
       // Only allow reordering of non-standard phases
-      const updatedProject = { ...currentProject };
+      const updatedProject = {
+        ...currentProject
+      };
       const newPhases = Array.from(updatedProject.phases);
       const [removed] = newPhases.splice(source.index, 1);
       newPhases.splice(destination.index, 0, removed);
-      
+
       // Verify the result maintains standard phase ordering
       const finalPhases = newPhases;
       const finalKickoffIndex = finalPhases.findIndex(p => p.name === 'Kickoff' && !p.isLinked);
       const finalPlanningIndex = finalPhases.findIndex(p => p.name === 'Planning' && !p.isLinked);
       const finalOrderingIndex = finalPhases.findIndex(p => p.name === 'Ordering' && !p.isLinked);
       const finalCloseProjectIndex = finalPhases.findIndex(p => p.name === 'Close Project' && !p.isLinked);
-      
+
       // Validate ordering
       if (finalKickoffIndex !== -1 && finalPlanningIndex !== -1 && finalKickoffIndex > finalPlanningIndex) {
         toast.error('Invalid ordering: Kickoff must come before Planning');
@@ -269,19 +258,19 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
           return;
         }
       }
-
       updatedProject.phases = newPhases;
       updateProject(updatedProject);
       toast.success('Phase reordered successfully');
-
     } else if (type === 'operations') {
       const phaseId = source.droppableId.split('-')[1];
       const phase = displayPhases.find(p => p.id === phaseId);
-      
+
       // Allow reordering operations (including custom operations in standard phases)
       // Standard operations remain locked by their isStandard flag
-      
-      const updatedProject = { ...currentProject };
+
+      const updatedProject = {
+        ...currentProject
+      };
       const phaseIndex = currentProject.phases.findIndex(p => p.id === phaseId);
       if (phaseIndex !== -1) {
         const operations = Array.from(currentProject.phases[phaseIndex].operations);
@@ -295,8 +284,10 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       const [phaseId, operationId] = source.droppableId.split('-').slice(1);
       // Allow reordering steps (including custom steps in standard phases)
       // Standard steps remain locked by their isStandard flag
-      
-      const updatedProject = { ...currentProject };
+
+      const updatedProject = {
+        ...currentProject
+      };
       const phaseIndex = currentProject.phases.findIndex(p => p.id === phaseId);
       if (phaseIndex !== -1) {
         const operationIndex = currentProject.phases[phaseIndex].operations.findIndex(o => o.id === operationId);
@@ -374,11 +365,10 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       operations: [],
       isLinked: false
     };
-    
+
     // Add new phase and enforce standard phase ordering
     const phasesWithNew = [...currentProject.phases, newPhase];
     const orderedPhases = enforceStandardPhaseOrdering(phasesWithNew);
-    
     const updatedProject = {
       ...currentProject,
       phases: orderedPhases,
@@ -386,10 +376,12 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     };
     updateProject(updatedProject);
   };
-
-  const handleIncorporatePhase = (incorporatedPhase: Phase & { sourceProjectId: string; sourceProjectName: string; incorporatedRevision: number }) => {
+  const handleIncorporatePhase = (incorporatedPhase: Phase & {
+    sourceProjectId: string;
+    sourceProjectName: string;
+    incorporatedRevision: number;
+  }) => {
     if (!currentProject) return;
-
     console.log('🔍 Incorporating phase:', incorporatedPhase);
     console.log('🔍 Current project phases:', currentProject.phases.length);
 
@@ -406,30 +398,26 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
     // Generate new ID to avoid conflicts
     const newPhaseId = `linked-phase-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
     const linkedPhase: Phase = {
       ...incorporatedPhase,
-      id: newPhaseId, // Use new ID to avoid conflicts
+      id: newPhaseId,
+      // Use new ID to avoid conflicts
       isLinked: true,
       sourceProjectId: incorporatedPhase.sourceProjectId,
       sourceProjectName: incorporatedPhase.sourceProjectName,
       incorporatedRevision: incorporatedPhase.incorporatedRevision
     };
-
     console.log('🔍 Created linked phase:', linkedPhase);
 
     // Add linked phase and enforce standard phase ordering
     const phasesWithLinked = [...currentProject.phases, linkedPhase];
     const orderedPhases = enforceStandardPhaseOrdering(phasesWithLinked);
-
     const updatedProject = {
       ...currentProject,
       phases: orderedPhases,
       updatedAt: new Date()
     };
-
     console.log('🔍 Updated project phases count:', updatedProject.phases.length);
-
     updateProject(updatedProject);
   };
   const addOperation = (phaseId: string) => {
@@ -437,7 +425,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
     // Check if this is a standard phase
     const phase = displayPhases.find(p => p.id === phaseId);
-    
+
     // Allow adding custom operations to standard phases in project templates
     // (Standard Project itself still restricts, but individual templates can add custom work)
     const newOperation: Operation = {
@@ -456,16 +444,14 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       updatedAt: new Date()
     };
     updateProject(updatedProject);
-    toast.success(phase?.isStandard 
-      ? 'Custom operation added to standard phase' 
-      : 'Operation added successfully');
+    toast.success(phase?.isStandard ? 'Custom operation added to standard phase' : 'Operation added successfully');
   };
   const addStep = (phaseId: string, operationId: string) => {
     if (!currentProject) return;
-    
+
     // Check if this is a standard phase
     const phase = displayPhases.find(p => p.id === phaseId);
-    
+
     // Allow adding custom steps to standard phases in project templates
     const newStep: WorkflowStep = {
       id: `step-${Date.now()}`,
@@ -492,9 +478,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       updatedAt: new Date()
     };
     updateProject(updatedProject);
-    toast.success(phase?.isStandard 
-      ? 'Custom step added to standard phase' 
-      : 'Step added successfully');
+    toast.success(phase?.isStandard ? 'Custom step added to standard phase' : 'Step added successfully');
   };
 
   // Delete operations
@@ -503,7 +487,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
     // Check if this is a standard phase
     const phase = displayPhases.find(p => p.id === phaseId);
-    
+
     // Prevent deleting standard phases in non-standard projects
     if (!isEditingStandardProject && phase?.isStandard) {
       toast.error('Cannot delete standard phases. Standard phases are read-only in this project.');
@@ -519,16 +503,14 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
   };
   const deleteOperation = (phaseId: string, operationId: string) => {
     if (!currentProject) return;
-    
     const phase = currentProject.phases.find(p => p.id === phaseId);
     const operation = phase?.operations.find(op => op.id === operationId);
-    
+
     // Prevent deleting standard operations (but allow deleting custom operations in standard phases)
     if (!isEditingStandardProject && operation?.isStandard) {
       toast.error('Cannot delete standard operations. Only custom operations can be deleted.');
       return;
     }
-    
     const updatedProject = {
       ...currentProject,
       phases: currentProject.phases.map(phase => phase.id === phaseId ? {
@@ -542,17 +524,15 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
   };
   const deleteStep = (phaseId: string, operationId: string, stepId: string) => {
     if (!currentProject) return;
-    
     const phase = currentProject.phases.find(p => p.id === phaseId);
     const operation = phase?.operations.find(op => op.id === operationId);
     const step = operation?.steps.find(s => s.id === stepId);
-    
+
     // Prevent deleting standard steps (but allow deleting custom steps in standard phases)
     if (!isEditingStandardProject && step?.isStandard) {
       toast.error('Cannot delete standard steps. Only custom steps can be deleted.');
       return;
     }
-    
     const updatedProject = {
       ...currentProject,
       phases: currentProject.phases.map(phase => phase.id === phaseId ? {
@@ -592,7 +572,6 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
         }
       }
     }
-    
     setEditingItem({
       type,
       id,
@@ -753,14 +732,12 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                 {displayPhases.map((phase, phaseIndex) => {
                 const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
                 // Check if editing Standard Project Foundation OR if this is a standard phase in any project
-                const isStandardPhase = (standardPhaseNames.includes(phase.name) && !phase.isLinked) || 
-                                       (isEditingStandardProject && standardPhaseNames.includes(phase.name));
+                const isStandardPhase = standardPhaseNames.includes(phase.name) && !phase.isLinked || isEditingStandardProject && standardPhaseNames.includes(phase.name);
                 const isLinkedPhase = phase.isLinked;
                 const isEditing = editingItem?.type === 'phase' && editingItem.id === phase.id;
-                
+
                 // Prevent dragging of standard phases
                 const isDragDisabled = isStandardPhase;
-                
                 return <Draggable key={phase.id} draggableId={phase.id} index={phaseIndex} isDragDisabled={isDragDisabled}>
                       {(provided, snapshot) => <Card ref={provided.innerRef} {...provided.draggableProps} className={`border-2 ${snapshot.isDragging ? 'shadow-lg' : ''} ${isStandardPhase ? 'bg-blue-50 border-blue-200' : isLinkedPhase ? 'bg-purple-50 border-purple-200' : ''}`}>
                           <CardHeader className="py-1 px-2">
@@ -794,19 +771,15 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                         {isStandardPhase && <span className="mr-1">🔒</span>}
                                         {phase.name}
                                         {isStandardPhase && <span className="text-xs text-blue-600 ml-1">(Standard - Locked)</span>}
-                                        {isLinkedPhase && (
-                                          <div className="flex items-center gap-1 ml-1">
+                                        {isLinkedPhase && <div className="flex items-center gap-1 ml-1">
                                             <Link className="w-3 h-3 text-purple-600" />
                                             <span className="text-xs text-purple-600">Linked</span>
-                                          </div>
-                                        )}
+                                          </div>}
                                       </CardTitle>
                                      <p className="text-muted-foreground text-xs">{phase.description}</p>
-                                     {isLinkedPhase && (
-                                       <p className="text-xs text-purple-600">
+                                     {isLinkedPhase && <p className="text-xs text-purple-600">
                                          From: {phase.sourceProjectName} (Rev {phase.incorporatedRevision})
-                                       </p>
-                                     )}
+                                       </p>}
                                    </div>}
                               </div>
                               
@@ -888,12 +861,8 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                            {expandedOperations.has(operation.id) ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                                                          </Button>
                                                          {operation.name}
-                                                         {operation.isStandard && !isEditingStandardProject && (
-                                                           <Badge variant="secondary" className="text-xs">Standard 🔒</Badge>
-                                                         )}
-                                                         {!operation.isStandard && phase.isStandard && (
-                                                           <Badge variant="outline" className="text-xs bg-blue-50">Custom</Badge>
-                                                         )}
+                                                         {operation.isStandard && !isEditingStandardProject && <Badge variant="secondary" className="text-xs">Standard 🔒</Badge>}
+                                                         {!operation.isStandard && phase.isStandard && <Badge variant="outline" className="text-xs bg-blue-50">Custom</Badge>}
                                                        </h4>
                                                        <p className="text-muted-foreground text-xs">{operation.description}</p>
                                                      </div>}
@@ -984,12 +953,8 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                                          <div className="flex items-center gap-2">
                                                                            <p className="font-medium text-xs">{step.step}</p>
                                                                            {getFlowTypeBadge(step.flowType)}
-                                                                           {step.isStandard && !isEditingStandardProject && (
-                                                                             <Badge variant="secondary" className="text-xs">Standard 🔒</Badge>
-                                                                           )}
-                                                                           {!step.isStandard && phase.isStandard && (
-                                                                             <Badge variant="outline" className="text-xs bg-blue-50">Custom</Badge>
-                                                                           )}
+                                                                           {step.isStandard && !isEditingStandardProject && <Badge variant="secondary" className="text-xs">Standard 🔒</Badge>}
+                                                                           {!step.isStandard && phase.isStandard && <Badge variant="outline" className="text-xs bg-blue-50">Custom</Badge>}
                                                                          </div>
                                                                          <p className="text-muted-foreground text-xs">{step.description}</p>
                                                                        </div>}
@@ -1019,11 +984,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                               <X className="w-3 h-3" />
                                                             </Button>
                                                           </> : <>
-                                                            <Button size="sm" variant="ghost" onClick={() => setShowDecisionEditor({
-                                                               step
-                                                             })} title="Configure decision point">
-                                                              🔀
-                                                            </Button>
+                                                            
                                                             <Button size="sm" variant="ghost" onClick={() => startEdit('step', step.id, step)} disabled={step.isStandard && !isEditingStandardProject}>
                                                               <Edit className="w-3 h-3" />
                                                             </Button>
@@ -1033,9 +994,9 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                             </Button>
                                                             
                                                             {clipboard?.type === 'step' && <Button size="sm" variant="ghost" onClick={() => pasteItem('step', {
-                                                               phaseId: phase.id,
-                                                               operationId: operation.id
-                                                             })}>
+                                                              phaseId: phase.id,
+                                                              operationId: operation.id
+                                                            })}>
                                                                 <Clipboard className="w-3 h-3" />
                                                               </Button>}
                                                             
@@ -1108,18 +1069,10 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       {showDecisionEditor && <DecisionPointEditor open={!!showDecisionEditor} onOpenChange={() => setShowDecisionEditor(null)} step={showDecisionEditor.step} availableSteps={getAllAvailableSteps()} onSave={handleDecisionEditorSave} />}
       
       {/* Phase Incorporation Dialog */}
-      <PhaseIncorporationDialog
-        open={showIncorporationDialog}
-        onOpenChange={setShowIncorporationDialog}
-        onIncorporatePhase={handleIncorporatePhase}
-      />
+      <PhaseIncorporationDialog open={showIncorporationDialog} onOpenChange={setShowIncorporationDialog} onIncorporatePhase={handleIncorporatePhase} />
 
       {/* Decision Tree Manager */}
-      <DecisionTreeManager
-        open={showDecisionTreeManager}
-        onOpenChange={setShowDecisionTreeManager}
-        currentProject={currentProject}
-      />
+      <DecisionTreeManager open={showDecisionTreeManager} onOpenChange={setShowDecisionTreeManager} currentProject={currentProject} />
     </div>
     </div>;
 };
