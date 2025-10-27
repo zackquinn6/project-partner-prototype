@@ -9,11 +9,63 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Maximum photo size: 10MB (after base64 decoding)
+const MAX_PHOTO_SIZE_BYTES = 10 * 1024 * 1024;
+
 // Input validation schema
 const requestSchema = z.object({
   photos: z.array(z.string()).min(1).max(5), // Base64 image strings
   description: z.string().max(1000).optional()
 });
+
+/**
+ * Validate base64 image format and size
+ */
+function validateBase64Image(base64String: string): { valid: boolean; error?: string } {
+  try {
+    // Check if it's a valid base64 image format
+    const base64Pattern = /^data:image\/(jpeg|jpg|png|gif|webp);base64,/;
+    if (!base64Pattern.test(base64String)) {
+      return { valid: false, error: 'Invalid image format. Must be JPEG, PNG, GIF, or WebP' };
+    }
+
+    // Extract the base64 data (remove data:image/...;base64, prefix)
+    const base64Data = base64String.split(',')[1];
+    if (!base64Data) {
+      return { valid: false, error: 'Invalid base64 data' };
+    }
+
+    // Calculate decoded size (base64 is ~1.33x larger than original)
+    const decodedSize = (base64Data.length * 3) / 4;
+    
+    // Account for padding
+    const padding = (base64Data.match(/=/g) || []).length;
+    const actualSize = decodedSize - padding;
+
+    if (actualSize > MAX_PHOTO_SIZE_BYTES) {
+      return { 
+        valid: false, 
+        error: `Image size exceeds maximum of ${MAX_PHOTO_SIZE_BYTES / (1024 * 1024)}MB` 
+      };
+    }
+
+    return { valid: true };
+  } catch (error) {
+    return { valid: false, error: 'Failed to validate image format' };
+  }
+}
+
+/**
+ * Log security event for audit trail
+ */
+async function logAuditEvent(userId: string, photosCount: number, success: boolean) {
+  try {
+    // Log to console for edge function logs
+    console.log(`AI Repair Analysis Request: user=${userId}, photos=${photosCount}, success=${success}, timestamp=${new Date().toISOString()}`);
+  } catch (error) {
+    console.error('Failed to log audit event:', error);
+  }
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -30,6 +82,18 @@ serve(async (req) => {
     // Parse and validate request body
     const body = await req.json();
     const validatedData = requestSchema.parse(body);
+    
+    // Validate each photo for format and size
+    for (let i = 0; i < validatedData.photos.length; i++) {
+      const validation = validateBase64Image(validatedData.photos[i]);
+      if (!validation.valid) {
+        await logAuditEvent(user.id, validatedData.photos.length, false);
+        return new Response(
+          JSON.stringify({ error: `Photo ${i + 1}: ${validation.error}` }), 
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
     
     // Sanitize description if provided
     const sanitizedDescription = validatedData.description ? sanitizeInput(validatedData.description) : '';
@@ -149,6 +213,9 @@ Please analyze these home repair photos. ${sanitizedDescription ? `Additional co
     }
 
     console.log('Analysis completed successfully');
+
+    // Log successful request for audit trail
+    await logAuditEvent(user.id, validatedData.photos.length, true);
 
     return new Response(JSON.stringify(analysisResult), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
