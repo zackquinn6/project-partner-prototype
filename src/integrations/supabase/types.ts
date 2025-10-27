@@ -2053,6 +2053,7 @@ export type Database = {
           archived_at: string | null
           beta_released_at: string | null
           category: string | null
+          cover_image: string | null
           created_at: string
           created_by: string | null
           created_from_revision: number | null
@@ -2065,6 +2066,7 @@ export type Database = {
           estimated_time_per_unit: number | null
           id: string
           image: string | null
+          images: string[] | null
           is_current_version: boolean | null
           is_standard_template: boolean | null
           name: string
@@ -2087,6 +2089,7 @@ export type Database = {
           archived_at?: string | null
           beta_released_at?: string | null
           category?: string | null
+          cover_image?: string | null
           created_at?: string
           created_by?: string | null
           created_from_revision?: number | null
@@ -2099,6 +2102,7 @@ export type Database = {
           estimated_time_per_unit?: number | null
           id?: string
           image?: string | null
+          images?: string[] | null
           is_current_version?: boolean | null
           is_standard_template?: boolean | null
           name: string
@@ -2121,6 +2125,7 @@ export type Database = {
           archived_at?: string | null
           beta_released_at?: string | null
           category?: string | null
+          cover_image?: string | null
           created_at?: string
           created_by?: string | null
           created_from_revision?: number | null
@@ -2133,6 +2138,7 @@ export type Database = {
           estimated_time_per_unit?: number | null
           id?: string
           image?: string | null
+          images?: string[] | null
           is_current_version?: boolean | null
           is_standard_template?: boolean | null
           name?: string

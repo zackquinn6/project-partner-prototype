@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, Layers, AlertTriangle } from 'lucide-react';
@@ -23,11 +23,22 @@ export const MemoizedProjectCard = React.memo<MemoizedProjectCardProps>(({
   const IconComponent = getIconForCategory(project.category || '');
   const difficulty = (project as any).difficulty || 'Beginner'; // Temporary type assertion
   
-  // Count only non-standard phases
-  const nonStandardPhaseCount = project.phases?.filter(phase => !phase.isStandard).length || 0;
+  // Count only non-standard phases (exclude phases where isStandard === true)
+  const nonStandardPhaseCount = project.phases?.filter(phase => phase.isStandard !== true).length || 0;
   
   return (
     <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105">
+      {/* Cover Image */}
+      {(project as any).cover_image && (
+        <div className="w-full h-40 overflow-hidden">
+          <img 
+            src={(project as any).cover_image} 
+            alt={project.name}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          />
+        </div>
+      )}
+      
       <CardHeader className="relative">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
@@ -60,10 +71,6 @@ export const MemoizedProjectCard = React.memo<MemoizedProjectCardProps>(({
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <CardDescription className="line-clamp-2">
-          {project.description}
-        </CardDescription>
-        
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center space-x-1">
             <Clock className="w-4 h-4" />

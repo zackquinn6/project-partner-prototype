@@ -189,6 +189,8 @@ export interface Project {
   description: string;
   diyLengthChallenges?: string; // Admin-defined field explaining most difficult aspects
   image?: string;
+  images?: string[]; // Array of image URLs
+  cover_image?: string | null; // URL of cover image for display
   createdAt: Date;
   updatedAt: Date;
   startDate: Date;

@@ -202,7 +202,7 @@ export function MobileProjectCard({ project, onSelect, variant = 'project', onDe
                     </>
                   )}
                   {!isProjectRun && project.phases && (
-                    <span>{project.phases.filter(phase => !phase.isStandard).length} phases</span>
+                    <span>{project.phases.filter(phase => phase.isStandard !== true).length} phases</span>
                   )}
                 </div>
                 <ActionButton status={status} progress={progress} onSelect={onSelect} />
