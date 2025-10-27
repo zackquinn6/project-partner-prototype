@@ -155,14 +155,31 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination, draggableId } = result;
 
-    if (!destination) return;
+    console.log('Drag ended:', { source, destination, draggableId });
+
+    if (!destination) {
+      console.log('No destination - drag cancelled');
+      return;
+    }
+
+    // Don't allow dropping back to available tasks
+    if (destination.droppableId === 'available-tasks') {
+      console.log('Cannot drop back to available tasks');
+      return;
+    }
 
     // Parse the draggableId to determine if it's a task or subtask
     const [type, id] = draggableId.split('-');
+    console.log('Parsed drag item:', { type, id });
 
     if (type === 'task') {
       const task = tasks.find(t => t.id === id);
-      if (!task) return;
+      if (!task) {
+        console.log('Task not found:', id);
+        return;
+      }
+
+      console.log('Assigning task:', task.title, 'to person:', destination.droppableId);
 
       // Get all subtasks for this task
       const taskSubtasks = subtasks.filter(st => st.task_id === task.id);
@@ -187,13 +204,22 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
         });
       });
 
-      setAssignments(prev => ({
-        ...prev,
-        [destination.droppableId]: [...(prev[destination.droppableId] || []), ...newAssignments]
-      }));
+      setAssignments(prev => {
+        const updated = {
+          ...prev,
+          [destination.droppableId]: [...(prev[destination.droppableId] || []), ...newAssignments]
+        };
+        console.log('Updated assignments:', updated);
+        return updated;
+      });
     } else if (type === 'subtask') {
       const subtask = subtasks.find(st => st.id === id);
-      if (!subtask) return;
+      if (!subtask) {
+        console.log('Subtask not found:', id);
+        return;
+      }
+
+      console.log('Assigning subtask:', subtask.title, 'to person:', destination.droppableId);
 
       const newAssignment: Assignment = {
         taskId: subtask.task_id,
@@ -203,10 +229,14 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
         taskTitle: subtask.task_title
       };
 
-      setAssignments(prev => ({
-        ...prev,
-        [destination.droppableId]: [...(prev[destination.droppableId] || []), newAssignment]
-      }));
+      setAssignments(prev => {
+        const updated = {
+          ...prev,
+          [destination.droppableId]: [...(prev[destination.droppableId] || []), newAssignment]
+        };
+        console.log('Updated assignments:', updated);
+        return updated;
+      });
     }
   };
 
@@ -400,10 +430,22 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={`border rounded-lg bg-background ${snapshot.isDragging ? 'shadow-lg' : ''}`}
+                                className={`border rounded-lg bg-background ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-primary' : ''}`}
                               >
-                                <div className="p-2 flex items-center justify-between gap-2">
+                                <div 
+                                  {...provided.dragHandleProps}
+                                  className="p-2 flex items-center gap-2 cursor-grab active:cursor-grabbing"
+                                >
+                                  <div className="flex-shrink-0 text-muted-foreground">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                                      <circle cx="3" cy="3" r="1" />
+                                      <circle cx="3" cy="6" r="1" />
+                                      <circle cx="3" cy="9" r="1" />
+                                      <circle cx="9" cy="3" r="1" />
+                                      <circle cx="9" cy="6" r="1" />
+                                      <circle cx="9" cy="9" r="1" />
+                                    </svg>
+                                  </div>
                                   <span className="text-[10px] md:text-xs font-medium flex-1">{task.title}</span>
                                   <Badge variant={getDiyLevelColor(task.diy_level)} className="text-[9px] md:text-[10px]">
                                     {task.diy_level}
@@ -427,10 +469,22 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
                                               <div
                                                 ref={subProvided.innerRef}
                                                 {...subProvided.draggableProps}
-                                                {...subProvided.dragHandleProps}
-                                                className={`border rounded p-1.5 bg-muted/30 ${subSnapshot.isDragging ? 'shadow-lg' : ''}`}
+                                                className={`border rounded p-1.5 bg-muted/30 ${subSnapshot.isDragging ? 'shadow-lg ring-2 ring-primary' : ''}`}
                                               >
-                                                <div className="flex items-center justify-between gap-2">
+                                                <div 
+                                                  {...subProvided.dragHandleProps}
+                                                  className="flex items-center gap-2 cursor-grab active:cursor-grabbing"
+                                                >
+                                                  <div className="flex-shrink-0 text-muted-foreground">
+                                                    <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor">
+                                                      <circle cx="3" cy="3" r="1" />
+                                                      <circle cx="3" cy="6" r="1" />
+                                                      <circle cx="3" cy="9" r="1" />
+                                                      <circle cx="9" cy="3" r="1" />
+                                                      <circle cx="9" cy="6" r="1" />
+                                                      <circle cx="9" cy="9" r="1" />
+                                                    </svg>
+                                                  </div>
                                                   <span className="text-[9px] md:text-[10px] flex-1">{subtask.title}</span>
                                                   <Badge variant={getDiyLevelColor(subtask.diy_level)} className="text-[8px] md:text-[9px] py-0 px-1">
                                                     {subtask.diy_level}
@@ -474,7 +528,7 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`border rounded-lg p-2 ${snapshot.isDraggingOver ? 'bg-primary/10 border-primary' : 'bg-background'}`}
+                        className={`border rounded-lg p-2 min-h-[80px] ${snapshot.isDraggingOver ? 'bg-primary/10 border-primary ring-2 ring-primary' : 'bg-background'}`}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
