@@ -441,17 +441,17 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                               </Button>
                             </div>
                           </div>
-                            {subtasks.length > 0 && (
-                              <DragDropContext onDragEnd={handleDragEnd}>
-                                <div className="border rounded-md overflow-hidden">
-                                  <div className="grid grid-cols-[32px_auto_100px_120px_32px] md:grid-cols-[32px_48px_auto_100px_120px_32px] gap-2 p-2 bg-muted text-xs font-medium">
-                                    <div></div>
-                                    {subtasksOrdered && <div>#</div>}
-                                    <div>Task Name</div>
-                                    <div>Hours</div>
-                                    <div>DIY Level</div>
-                                    <div></div>
-                                  </div>
+                          {subtasks.length > 0 && (
+                            <DragDropContext onDragEnd={handleDragEnd}>
+                              <div className="border rounded-md overflow-hidden">
+                                <div className={`grid grid-cols-[32px_auto_100px_120px_32px] ${subtasksOrdered ? 'md:grid-cols-[32px_48px_auto_100px_120px_32px]' : ''} gap-2 p-2 bg-muted text-xs font-medium`}>
+                                  <div></div>
+                                  {subtasksOrdered && <div>#</div>}
+                                  <div>Task Name</div>
+                                  <div>Hours</div>
+                                  <div>DIY Level</div>
+                                  <div></div>
+                                </div>
                                   <Droppable droppableId="subtasks">
                                     {(provided) => (
                                       <div {...provided.droppableProps} ref={provided.innerRef}>
