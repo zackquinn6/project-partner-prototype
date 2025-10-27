@@ -435,12 +435,10 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
-                                className={`border rounded-lg bg-background ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-primary' : ''}`}
+                                {...provided.dragHandleProps}
+                                className={`border rounded-lg bg-background p-2 cursor-grab active:cursor-grabbing ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-primary' : ''}`}
                               >
-                                <div 
-                                  {...provided.dragHandleProps}
-                                  className="p-2 flex items-center gap-2 cursor-grab active:cursor-grabbing"
-                                >
+                                <div className="flex items-center gap-2">
                                   <div className="flex-shrink-0 text-muted-foreground">
                                     <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
                                       <circle cx="3" cy="3" r="1" />
@@ -465,7 +463,7 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
                                       </AccordionTrigger>
                                       <AccordionContent className="px-2 pb-2 space-y-1">
                                         {taskSubtasks.map((subtask, subIndex) => (
-                                          <Draggable 
+                                           <Draggable 
                                             key={subtask.id} 
                                             draggableId={`subtask-${subtask.id}`} 
                                             index={availableTasks.length + subIndex}
@@ -474,12 +472,10 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
                                               <div
                                                 ref={subProvided.innerRef}
                                                 {...subProvided.draggableProps}
-                                                className={`border rounded p-1.5 bg-muted/30 ${subSnapshot.isDragging ? 'shadow-lg ring-2 ring-primary' : ''}`}
+                                                {...subProvided.dragHandleProps}
+                                                className={`border rounded p-1.5 bg-muted/30 cursor-grab active:cursor-grabbing ${subSnapshot.isDragging ? 'shadow-lg ring-2 ring-primary' : ''}`}
                                               >
-                                                <div 
-                                                  {...subProvided.dragHandleProps}
-                                                  className="flex items-center gap-2 cursor-grab active:cursor-grabbing"
-                                                >
+                                                <div className="flex items-center gap-2">
                                                   <div className="flex-shrink-0 text-muted-foreground">
                                                     <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor">
                                                       <circle cx="3" cy="3" r="1" />
