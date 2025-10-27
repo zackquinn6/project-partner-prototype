@@ -152,6 +152,17 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
     }
   }, [userId, homeId, fetchPeople, fetchTasks, fetchSubtasks]);
 
+  // Helper to compare DIY levels
+  const diyLevelValue = (level: string): number => {
+    switch (level) {
+      case 'beginner': return 1;
+      case 'intermediate': return 2;
+      case 'advanced': return 3;
+      case 'pro': return 4;
+      default: return 0;
+    }
+  };
+
   const handleDragEnd = (result: DropResult) => {
     const { source, destination, draggableId } = result;
 
@@ -176,6 +187,13 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
     
     console.log('Parsed drag item:', { type, id });
 
+    // Get the person being assigned to
+    const targetPerson = people.find(p => p.id === destination.droppableId);
+    if (!targetPerson) {
+      console.log('Target person not found');
+      return;
+    }
+
     if (type === 'task') {
       const task = tasks.find(t => t.id === id);
       if (!task) {
@@ -183,10 +201,26 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
         return;
       }
 
-      console.log('Assigning task:', task.title, 'to person:', destination.droppableId);
-
       // Get all subtasks for this task
       const taskSubtasks = subtasks.filter(st => st.task_id === task.id);
+
+      // Check DIY level for the task and all its subtasks
+      const itemsToCheck = taskSubtasks.length > 0 ? taskSubtasks : [task];
+      const personLevel = diyLevelValue(targetPerson.diy_level);
+      
+      for (const item of itemsToCheck) {
+        const itemLevel = diyLevelValue(item.diy_level);
+        if (itemLevel > personLevel) {
+          toast({
+            title: "DIY Level Mismatch",
+            description: `${targetPerson.name} (${targetPerson.diy_level}) cannot be assigned ${taskSubtasks.length > 0 ? 'this task' : task.title} which requires ${item.diy_level} level.`,
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      console.log('Assigning task:', task.title, 'to person:', destination.droppableId);
 
       const newAssignments: Assignment[] = [];
 
@@ -223,6 +257,19 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
       const subtask = subtasks.find(st => st.id === id);
       if (!subtask) {
         console.log('Subtask not found:', id);
+        return;
+      }
+
+      // Check DIY level for the subtask
+      const personLevel = diyLevelValue(targetPerson.diy_level);
+      const subtaskLevel = diyLevelValue(subtask.diy_level);
+      
+      if (subtaskLevel > personLevel) {
+        toast({
+          title: "DIY Level Mismatch",
+          description: `${targetPerson.name} (${targetPerson.diy_level}) cannot be assigned ${subtask.title} which requires ${subtask.diy_level} level.`,
+          variant: "destructive"
+        });
         return;
       }
 
@@ -381,14 +428,6 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
     }
   };
 
-  // Helper to properly merge drag styles
-  const getDragStyle = (isDragging: boolean, draggableStyle: any) => ({
-    ...draggableStyle,
-    ...(isDragging && {
-      cursor: 'grabbing'
-    })
-  });
-
   const totalAssignments = Object.values(assignments).reduce((sum, arr) => sum + arr.length, 0);
 
   // Get assigned task and subtask IDs to filter them from available list
@@ -405,6 +444,17 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
         assignedSubtaskIds.add(assignment.subtaskId);
       }
     });
+  });
+
+  // Check if all subtasks of a parent task are assigned, and if so, hide the parent
+  tasks.forEach(task => {
+    const taskSubtasks = subtasks.filter(st => st.task_id === task.id);
+    if (taskSubtasks.length > 0) {
+      const allSubtasksAssigned = taskSubtasks.every(st => assignedSubtaskIds.has(st.id));
+      if (allSubtasksAssigned) {
+        assignedTaskIds.add(task.id);
+      }
+    }
   });
 
   // Filter available tasks and subtasks
@@ -454,6 +504,7 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
+                                style={provided.draggableProps.style}
                                 className={`border rounded-lg bg-background p-2 cursor-grab active:cursor-grabbing ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-primary' : ''}`}
                               >
                                 <div className="flex items-center gap-2">
@@ -491,6 +542,7 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
                                                 ref={subProvided.innerRef}
                                                 {...subProvided.draggableProps}
                                                 {...subProvided.dragHandleProps}
+                                                style={subProvided.draggableProps.style}
                                                 className={`border rounded p-1.5 bg-muted/30 cursor-grab active:cursor-grabbing ${subSnapshot.isDragging ? 'shadow-lg ring-2 ring-primary' : ''}`}
                                               >
                                                 <div className="flex items-center gap-2">
