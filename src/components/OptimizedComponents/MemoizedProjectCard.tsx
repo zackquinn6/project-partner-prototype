@@ -23,6 +23,9 @@ export const MemoizedProjectCard = React.memo<MemoizedProjectCardProps>(({
   const IconComponent = getIconForCategory(project.category || '');
   const difficulty = (project as any).difficulty || 'Beginner'; // Temporary type assertion
   
+  // Count only non-standard phases
+  const nonStandardPhaseCount = project.phases?.filter(phase => !phase.isStandard).length || 0;
+  
   return (
     <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105">
       <CardHeader className="relative">
@@ -68,7 +71,7 @@ export const MemoizedProjectCard = React.memo<MemoizedProjectCardProps>(({
           </div>
           <div className="flex items-center space-x-1">
             <Layers className="w-4 h-4" />
-            <span>{project.phases?.length || 0} phases</span>
+            <span>{nonStandardPhaseCount} phases</span>
           </div>
         </div>
         

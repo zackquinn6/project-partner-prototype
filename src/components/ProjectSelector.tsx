@@ -404,9 +404,9 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ isAdminMode = 
                            </div>
                          )}
                        </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {currentProject.phases.length} phases
-                      </p>
+                       <p className="text-xs text-muted-foreground mt-2">
+                         {currentProject.phases.filter(phase => !phase.isStandard).length} phases
+                       </p>
                      </div>
                  </div>
                </div>
