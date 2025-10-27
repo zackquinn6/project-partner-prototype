@@ -378,6 +378,14 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
     }
   };
 
+  // Helper to properly merge drag styles
+  const getDragStyle = (isDragging: boolean, draggableStyle: any) => ({
+    ...draggableStyle,
+    ...(isDragging && {
+      cursor: 'grabbing'
+    })
+  });
+
   const totalAssignments = Object.values(assignments).reduce((sum, arr) => sum + arr.length, 0);
 
   // Get assigned task and subtask IDs to filter them from available list
@@ -398,7 +406,7 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
   const availableSubtasks = subtasks.filter(st => !assignedSubtaskIds.has(st.id));
 
   return (
-    <div className="space-y-3 h-full flex flex-col">
+    <div className="space-y-3 h-full flex flex-col" style={{ transform: 'translateZ(0)' }}>
       <div className="text-[10px] md:text-xs text-muted-foreground">
         Drag tasks and subtasks to team members to assign work
       </div>
@@ -435,6 +443,7 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
+                                style={getDragStyle(snapshot.isDragging, provided.draggableProps.style)}
                                 className={`border rounded-lg bg-background p-2 cursor-grab active:cursor-grabbing ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-primary' : ''}`}
                               >
                                 <div className="flex items-center gap-2">
@@ -472,6 +481,7 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
                                                 ref={subProvided.innerRef}
                                                 {...subProvided.draggableProps}
                                                 {...subProvided.dragHandleProps}
+                                                style={getDragStyle(subSnapshot.isDragging, subProvided.draggableProps.style)}
                                                 className={`border rounded p-1.5 bg-muted/30 cursor-grab active:cursor-grabbing ${subSnapshot.isDragging ? 'shadow-lg ring-2 ring-primary' : ''}`}
                                               >
                                                 <div className="flex items-center gap-2">
