@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -52,15 +52,7 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
   const [assignments, setAssignments] = useState<Record<string, Assignment[]>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    if (userId) {
-      fetchPeople();
-      fetchTasks();
-      fetchSubtasks();
-    }
-  }, [userId, homeId]);
-
-  const fetchPeople = async () => {
+  const fetchPeople = useCallback(async () => {
     let query = supabase
       .from('home_task_people')
       .select('id, name, email, phone, diy_level')
@@ -81,9 +73,9 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
       });
       setAssignments(initialAssignments);
     }
-  };
+  }, [userId, homeId]);
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     let query = supabase
       .from('home_tasks')
       .select('id, title, diy_level')
@@ -99,9 +91,9 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
     if (!error && data) {
       setTasks(data as Task[]);
     }
-  };
+  }, [userId, homeId]);
 
-  const fetchSubtasks = async () => {
+  const fetchSubtasks = useCallback(async () => {
     let taskQuery = supabase
       .from('home_tasks')
       .select('id')
@@ -149,7 +141,15 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
 
       setSubtasks(subtasksWithTaskTitle as Subtask[]);
     }
-  };
+  }, [userId, homeId]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchPeople();
+      fetchTasks();
+      fetchSubtasks();
+    }
+  }, [userId, homeId, fetchPeople, fetchTasks, fetchSubtasks]);
 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination, draggableId } = result;
