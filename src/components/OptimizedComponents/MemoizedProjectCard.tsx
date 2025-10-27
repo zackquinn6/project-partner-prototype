@@ -20,7 +20,9 @@ export const MemoizedProjectCard = React.memo<MemoizedProjectCardProps>(({
   getIconForCategory,
   isAdminMode = false
 }) => {
-  const IconComponent = getIconForCategory(project.category || '');
+  const IconComponent = getIconForCategory(
+    Array.isArray(project.category) ? project.category[0] || '' : project.category || ''
+  );
   const difficulty = (project as any).difficulty || 'Beginner'; // Temporary type assertion
   
   // Count only non-standard phases (exclude phases where isStandard === true)

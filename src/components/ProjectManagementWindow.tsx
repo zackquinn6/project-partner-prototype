@@ -615,9 +615,10 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
               <div>
                 <label className="text-sm font-medium">Category</label>
                 <Input 
-                  value={currentProject.category || ''} 
-                  onChange={(e) => updateProjectData({...currentProject, category: e.target.value})}
+                  value={Array.isArray(currentProject.category) ? currentProject.category.join(', ') : (currentProject.category || '')} 
+                  onChange={(e) => updateProjectData({...currentProject, category: e.target.value ? e.target.value.split(',').map(c => c.trim()) : []})}
                   className="mt-1"
+                  placeholder="Enter categories separated by commas"
                 />
               </div>
             </div>

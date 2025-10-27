@@ -25,7 +25,7 @@ interface PublishedProject {
   description: string;
   phases: any; // Will be parsed as Phase[] after fetching
   revision_number: number;
-  category?: string;
+  category?: string[];
 }
 export const PhaseIncorporationDialog: React.FC<PhaseIncorporationDialogProps> = ({
   open,

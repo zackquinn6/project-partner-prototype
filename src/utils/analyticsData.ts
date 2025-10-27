@@ -69,7 +69,12 @@ export function calculateRealAnalytics(
   }
 
   if (selectedCategory && selectedCategory !== 'all') {
-    filteredRuns = filteredRuns.filter(run => run.category === selectedCategory);
+    filteredRuns = filteredRuns.filter(run => {
+      if (Array.isArray(run.category)) {
+        return run.category.includes(selectedCategory);
+      }
+      return run.category === selectedCategory;
+    });
   }
 
   if (dateRange?.from && dateRange?.to) {

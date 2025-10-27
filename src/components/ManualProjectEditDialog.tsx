@@ -67,7 +67,7 @@ export function ManualProjectEditDialog({ open, onOpenChange, projectRun, onProj
       setFormData({
         name: projectRun.customProjectName || projectRun.name || '',
         description: projectRun.description || '',
-        category: projectRun.category || '',
+        category: Array.isArray(projectRun.category) ? projectRun.category.join(', ') : (projectRun.category || ''),
         status: projectRun.status || 'complete',
         progress: projectRun.progress || 100,
         estimatedTime: projectRun.estimatedTime || '',

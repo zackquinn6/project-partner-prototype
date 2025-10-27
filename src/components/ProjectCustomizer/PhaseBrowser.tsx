@@ -97,7 +97,7 @@ export const PhaseBrowser: React.FC<PhaseBrowserProps> = ({
         ...phase,
         projectName: project.name,
         projectId: project.id,
-        category: project.category || 'Other'
+        category: Array.isArray(project.category) ? project.category[0] || 'Other' : (project.category || 'Other')
       });
     });
     
@@ -110,15 +110,23 @@ export const PhaseBrowser: React.FC<PhaseBrowserProps> = ({
     
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(project => 
-        project.name.toLowerCase().includes(searchLower) ||
-        project.description?.toLowerCase().includes(searchLower) ||
-        project.category?.toLowerCase().includes(searchLower)
-      );
+      filtered = filtered.filter(project => {
+        const categoryStr = Array.isArray(project.category) 
+          ? project.category.join(' ') 
+          : (project.category || '');
+        return project.name.toLowerCase().includes(searchLower) ||
+          project.description?.toLowerCase().includes(searchLower) ||
+          categoryStr.toLowerCase().includes(searchLower);
+      });
     }
     
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(project => project.category === selectedCategory);
+      filtered = filtered.filter(project => {
+        if (Array.isArray(project.category)) {
+          return project.category.includes(selectedCategory);
+        }
+        return project.category === selectedCategory;
+      });
     }
     
     return filtered;
@@ -126,7 +134,14 @@ export const PhaseBrowser: React.FC<PhaseBrowserProps> = ({
 
   // Get unique categories
   const categories = useMemo(() => {
-    const cats = new Set(availableProjectsList.map(p => p.category || 'Other'));
+    const cats = new Set<string>();
+    availableProjectsList.forEach(p => {
+      if (Array.isArray(p.category)) {
+        p.category.forEach(cat => cats.add(cat));
+      } else if (p.category) {
+        cats.add(p.category);
+      }
+    });
     return Array.from(cats).sort();
   }, [availableProjectsList]);
 

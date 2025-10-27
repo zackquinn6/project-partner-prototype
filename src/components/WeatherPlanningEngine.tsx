@@ -175,7 +175,7 @@ export const WeatherPlanningEngine: React.FC<WeatherPlanningEngineProps> = ({
     const currentSeason = getCurrentSeason();
     
     // Seasonal recommendations
-    const projectCategory = projectRun.category || 'general';
+    const projectCategory = Array.isArray(projectRun.category) ? projectRun.category[0] : (projectRun.category || 'general');
     const relevantSeasonalProject = seasonalProjects.find(p => 
       p.name.toLowerCase().includes(projectCategory.toLowerCase()) ||
       projectCategory.toLowerCase().includes(p.name.toLowerCase().split(' ')[0])

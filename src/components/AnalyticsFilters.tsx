@@ -18,7 +18,11 @@ interface AnalyticsFiltersProps {
   demoMode: boolean;
   onDemoModeToggle: () => void;
   onExport: () => void;
-  projects: Array<{ id: string; name: string; category?: string }>;
+  projects: Array<{
+    id: string;
+    name: string;
+    category?: string[];
+  }>;
 }
 
 export function AnalyticsFilters({
@@ -33,7 +37,11 @@ export function AnalyticsFilters({
   onExport,
   projects
 }: AnalyticsFiltersProps) {
-  const categories = Array.from(new Set(projects.map(p => p.category).filter(Boolean)));
+  const categories = Array.from(
+    new Set(
+      projects.flatMap(p => Array.isArray(p.category) ? p.category : (p.category ? [p.category] : []))
+    )
+  ).filter(Boolean);
 
   return (
     <div className="flex flex-wrap items-center gap-4 p-4 bg-secondary/30 rounded-lg">

@@ -10,13 +10,41 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   GitBranch, Plus, Edit, Archive, Eye, CheckCircle, Clock, 
-  ArrowRight, AlertTriangle, Settings, Save, X, RefreshCw, Lock, Trash2 
+  ArrowRight, AlertTriangle, Settings, Save, X, RefreshCw, Lock, Trash2, ChevronDown 
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+
+// Alphabetically sorted project categories
+const PROJECT_CATEGORIES = [
+  'Bathroom',
+  'Ceilings',
+  'Decks & Patios',
+  'Doors & Windows',
+  'Exterior Carpentry',
+  'Flooring',
+  'General Repairs & Maintenance',
+  'HVAC & Ventilation',
+  'Insulation & Weatherproofing',
+  'Interior Carpentry',
+  'Kitchen',
+  'Landscaping & Outdoor Projects',
+  'Lighting & Electrical',
+  'Masonry & Concrete',
+  'Painting & Finishing',
+  'Plumbing',
+  'Roofing',
+  'Safety & Security',
+  'Smart Home & Technology',
+  'Storage & Organization',
+  'Tile',
+  'Walls & Drywall',
+];
 
 interface Project {
   id: string;
@@ -33,7 +61,7 @@ interface Project {
   release_notes: string | null;
   revision_notes: string | null;
   is_current_version: boolean;
-  category: string | null;
+  category: string[] | null;
   effort_level: string | null;
   skill_level: string | null;
   estimated_time: string | null;
@@ -67,7 +95,7 @@ export function UnifiedProjectManagement() {
   const [newProject, setNewProject] = useState<{
     name: string;
     description: string;
-    category: string;
+    categories: string[];
     effort_level: string;
     skill_level: string;
     estimated_time: string;
@@ -75,7 +103,7 @@ export function UnifiedProjectManagement() {
   }>({
     name: '',
     description: '',
-    category: '',
+    categories: [],
     effort_level: 'Medium',
     skill_level: 'Intermediate',
     estimated_time: '',
@@ -371,7 +399,7 @@ export function UnifiedProjectManagement() {
         .rpc('create_project_with_standard_foundation', {
           p_project_name: newProject.name,
           p_description: newProject.description || null,
-          p_category: newProject.category || null,
+          p_categories: newProject.categories.length > 0 ? newProject.categories : null,
           p_difficulty: null,
           p_effort_level: newProject.effort_level || 'Medium',
           p_skill_level: newProject.skill_level || 'Intermediate',
@@ -392,7 +420,7 @@ export function UnifiedProjectManagement() {
       setNewProject({
         name: '',
         description: '',
-        category: '',
+        categories: [],
         effort_level: 'Medium',
         skill_level: 'Intermediate',
         estimated_time: '',
@@ -578,15 +606,48 @@ export function UnifiedProjectManagement() {
                           </div>
 
                           <div className="space-y-1">
-                            <Label className="text-sm">Category</Label>
+                            <Label className="text-sm">Categories</Label>
                             {editingProject ? (
-                              <Input
-                                value={editedProject.category || ''}
-                                onChange={(e) => setEditedProject(prev => ({ ...prev, category: e.target.value }))}
-                                className="text-sm"
-                              />
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="outline" className="w-full justify-between text-sm h-auto min-h-[40px] py-2">
+                                    <span className="text-left">
+                                      {editedProject.category && editedProject.category.length > 0
+                                        ? editedProject.category.join(', ')
+                                        : 'Select categories...'}
+                                    </span>
+                                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[400px] p-0 bg-background" align="start">
+                                  <div className="max-h-[300px] overflow-y-auto p-4 space-y-2">
+                                    {PROJECT_CATEGORIES.map((cat) => (
+                                      <div key={cat} className="flex items-center space-x-2">
+                                        <Checkbox
+                                          id={`edit-cat-${cat}`}
+                                          checked={editedProject.category?.includes(cat) || false}
+                                          onCheckedChange={(checked) => {
+                                            const currentCategories = editedProject.category || [];
+                                            const newCategories = checked
+                                              ? [...currentCategories, cat]
+                                              : currentCategories.filter(c => c !== cat);
+                                            setEditedProject(prev => ({ ...prev, category: newCategories }));
+                                          }}
+                                        />
+                                        <label htmlFor={`edit-cat-${cat}`} className="text-sm cursor-pointer">
+                                          {cat}
+                                        </label>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
                             ) : (
-                              <div className="p-2 bg-muted rounded text-sm">{selectedProject.category || 'Not specified'}</div>
+                              <div className="p-2 bg-muted rounded text-sm">
+                                {selectedProject.category && selectedProject.category.length > 0
+                                  ? selectedProject.category.join(', ')
+                                  : 'Not specified'}
+                              </div>
                             )}
                           </div>
 
@@ -1127,13 +1188,40 @@ export function UnifiedProjectManagement() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="project-category">Category</Label>
-                <Input
-                  id="project-category"
-                  placeholder="e.g., Home Improvement"
-                  value={newProject.category || ''}
-                  onChange={(e) => setNewProject(prev => ({ ...prev, category: e.target.value }))}
-                />
+                <Label htmlFor="project-categories">Categories</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between h-auto min-h-[40px] py-2">
+                      <span className="text-left text-sm">
+                        {newProject.categories.length > 0
+                          ? newProject.categories.join(', ')
+                          : 'Select categories...'}
+                      </span>
+                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[400px] p-0 bg-background" align="start">
+                    <div className="max-h-[300px] overflow-y-auto p-4 space-y-2">
+                      {PROJECT_CATEGORIES.map((cat) => (
+                        <div key={cat} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`new-cat-${cat}`}
+                            checked={newProject.categories.includes(cat)}
+                            onCheckedChange={(checked) => {
+                              const newCategories = checked
+                                ? [...newProject.categories, cat]
+                                : newProject.categories.filter(c => c !== cat);
+                              setNewProject(prev => ({ ...prev, categories: newCategories }));
+                            }}
+                          />
+                          <label htmlFor={`new-cat-${cat}`} className="text-sm cursor-pointer">
+                            {cat}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
             <div className="grid grid-cols-2 gap-4">

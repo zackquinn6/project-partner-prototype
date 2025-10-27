@@ -2052,7 +2052,7 @@ export type Database = {
         Row: {
           archived_at: string | null
           beta_released_at: string | null
-          category: string | null
+          category: string[] | null
           cover_image: string | null
           created_at: string
           created_by: string | null
@@ -2088,7 +2088,7 @@ export type Database = {
         Insert: {
           archived_at?: string | null
           beta_released_at?: string | null
-          category?: string | null
+          category?: string[] | null
           cover_image?: string | null
           created_at?: string
           created_by?: string | null
@@ -2124,7 +2124,7 @@ export type Database = {
         Update: {
           archived_at?: string | null
           beta_released_at?: string | null
-          category?: string | null
+          category?: string[] | null
           cover_image?: string | null
           created_at?: string
           created_by?: string | null
@@ -2979,6 +2979,21 @@ export type Database = {
         | {
             Args: {
               p_category?: string
+              p_description?: string
+              p_difficulty?: string
+              p_diy_length_challenges?: string
+              p_effort_level?: string
+              p_estimated_time?: string
+              p_image?: string
+              p_project_name: string
+              p_scaling_unit?: string
+              p_skill_level?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_categories?: string[]
               p_description?: string
               p_difficulty?: string
               p_diy_length_challenges?: string

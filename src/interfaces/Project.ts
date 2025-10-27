@@ -198,7 +198,7 @@ export interface Project {
   endDate?: Date;
   status: 'not-started' | 'in-progress' | 'complete';
   publishStatus?: 'draft' | 'published' | 'beta-testing' | 'archived';
-  category?: string;
+  category?: string[];
   effortLevel?: 'Low' | 'Medium' | 'High';
   skillLevel?: 'Beginner' | 'Intermediate' | 'Advanced';
   estimatedTime?: string;

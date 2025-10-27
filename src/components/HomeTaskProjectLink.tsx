@@ -28,7 +28,7 @@ interface ProjectTemplate {
   id: string;
   name: string;
   description: string | null;
-  category: string | null;
+  category: string[] | null;
   difficulty: string | null;
   estimated_time: string | null;
 }

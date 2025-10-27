@@ -76,10 +76,13 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
         .rpc('create_project_with_standard_foundation', {
           p_project_name: projectData.name,
           p_description: projectData.description || null,
-          p_category: projectData.category || null,
+          p_categories: projectData.category || null,
           p_difficulty: null,
           p_effort_level: projectData.effortLevel || null,
+          p_skill_level: projectData.skillLevel || null,
           p_estimated_time: projectData.estimatedTime || null,
+          p_scaling_unit: projectData.scalingUnit || null,
+          p_diy_length_challenges: projectData.diyLengthChallenges || null,
           p_image: projectData.image || null
         });
 
@@ -146,7 +149,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
           completed_steps: JSON.stringify([]),
           progress: 0,
           phases: JSON.stringify(phasesWithStandard),
-          category: project.category,
+          category: Array.isArray(project.category) ? project.category.join(', ') : project.category,
           effort_level: project.effortLevel,
           skill_level: project.skillLevel,
           estimated_time: project.estimatedTime
@@ -338,7 +341,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
             completed_steps: JSON.stringify(projectRun.completedSteps),
             progress: safeProgress,
             phases: JSON.stringify(projectRun.phases),
-            category: projectRun.category,
+            category: Array.isArray(projectRun.category) ? projectRun.category.join(', ') : projectRun.category,
             effort_level: projectRun.effortLevel,
             skill_level: projectRun.skillLevel,
             estimated_time: projectRun.estimatedTime,

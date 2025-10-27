@@ -1032,7 +1032,7 @@ export const createFallbackTileProject = (): Project => {
     description: 'Complete floor tile installation with professional techniques and materials. Includes surface preparation, layout planning, tile setting, grouting, and finishing.',
     diyLengthChallenges: 'The most challenging aspects of tile installation include: achieving perfectly level surfaces during preparation (critical for professional results), maintaining straight layout lines over large areas, making precise cuts around obstacles and door jambs, and achieving consistent grout lines. Proper waterproofing and underlayment installation requires attention to detail to prevent future failures.',
     image: '/placeholder.svg',
-    category: 'Flooring',
+    category: ['Flooring'],
     effortLevel: 'Medium',
     skillLevel: 'Intermediate',
     estimatedTime: '2-4 days',
