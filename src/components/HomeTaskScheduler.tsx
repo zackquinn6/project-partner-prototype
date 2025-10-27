@@ -24,10 +24,42 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isEmailing, setIsEmailing] = useState(false);
   const [currentScheduleId, setCurrentScheduleId] = useState<string | null>(null);
+  const [existingAssignments, setExistingAssignments] = useState<any[]>([]);
 
   useEffect(() => {
     loadLatestSchedule();
+    loadExistingAssignments();
   }, [userId, homeId]);
+
+  const loadExistingAssignments = async () => {
+    try {
+      let query = supabase
+        .from('home_task_assignments')
+        .select('task_id, subtask_id, person_id, scheduled_date, scheduled_hours')
+        .eq('user_id', userId);
+
+      if (homeId) {
+        // Get tasks for this home first
+        const { data: homeTasks } = await supabase
+          .from('home_tasks')
+          .select('id')
+          .eq('home_id', homeId);
+        
+        if (homeTasks && homeTasks.length > 0) {
+          const taskIds = homeTasks.map(t => t.id);
+          query = query.in('task_id', taskIds);
+        }
+      }
+
+      const { data, error } = await query;
+      
+      if (!error && data) {
+        setExistingAssignments(data);
+      }
+    } catch (error) {
+      console.error('Error loading existing assignments:', error);
+    }
+  };
 
   const loadLatestSchedule = async () => {
     try {
@@ -94,6 +126,15 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
 
       if (subtasksError) throw subtasksError;
 
+      // Fetch existing manual assignments
+      const { data: existingAssignments, error: assignmentsError } = await supabase
+        .from('home_task_assignments')
+        .select('task_id, subtask_id, person_id, scheduled_date, scheduled_hours')
+        .in('task_id', taskIds)
+        .eq('user_id', userId);
+
+      if (assignmentsError) throw assignmentsError;
+
       // Fetch people
       let peopleQuery = supabase
         .from('home_task_people')
@@ -113,11 +154,12 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
         subtasks: subtasks?.filter(st => st.task_id === task.id) || []
       })) || [];
 
-      // Generate schedule
+      // Generate schedule with existing assignments
       const result = scheduleHomeTasksOptimized(
         tasksWithSubtasks as any,
         people as any,
-        startDate
+        startDate,
+        existingAssignments as any
       );
 
       setSchedule(result);
@@ -270,6 +312,15 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
 
   return (
     <div className="space-y-3">
+      {existingAssignments && existingAssignments.length > 0 && (
+        <Alert>
+          <Info className="h-3 w-3 md:h-4 md:w-4" />
+          <AlertDescription className="text-[10px] md:text-xs">
+            Using {existingAssignments.length} manual assignment(s) from the Assign tab. Remaining work will be auto-assigned.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="space-y-2">
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2">
           <div className="flex-1">

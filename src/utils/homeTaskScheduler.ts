@@ -56,6 +56,14 @@ function getSkillMatchScore(person: Person, taskDiyLevel: 'beginner' | 'intermed
   return Math.max(0, 4 - gap);
 }
 
+interface ExistingAssignment {
+  task_id: string;
+  subtask_id: string | null;
+  person_id: string;
+  scheduled_date: string;
+  scheduled_hours: number;
+}
+
 export function scheduleHomeTasksOptimized(
   tasks: Task[],
   people: Person[],
@@ -64,7 +72,8 @@ export function scheduleHomeTasksOptimized(
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(0, 0, 0, 0);
     return tomorrow;
-  })()
+  })(),
+  existingAssignments: ExistingAssignment[] = []
 ): ScheduleResult {
   const assignments: Assignment[] = [];
   const unassigned: Array<{ taskId: string; taskTitle: string; subtaskId: string | null; reason: string }> = [];
@@ -73,6 +82,39 @@ export function scheduleHomeTasksOptimized(
   if (people.length === 0) {
     warnings.push('No team members available. Add people to enable scheduling.');
     return { assignments: [], unassigned: [], warnings };
+  }
+
+  // Create a map of existing assignments by subtask/task
+  const manualAssignments = new Map<string, ExistingAssignment>();
+  for (const assignment of existingAssignments) {
+    const key = assignment.subtask_id || assignment.task_id;
+    manualAssignments.set(key, assignment);
+  }
+
+  // Convert existing manual assignments to Assignment format
+  for (const [key, manualAssignment] of manualAssignments) {
+    const task = tasks.find(t => t.id === manualAssignment.task_id);
+    if (!task) continue;
+
+    const person = people.find(p => p.id === manualAssignment.person_id);
+    if (!person) continue;
+
+    let subtaskTitle = task.title;
+    if (manualAssignment.subtask_id) {
+      const subtask = task.subtasks.find(st => st.id === manualAssignment.subtask_id);
+      if (subtask) subtaskTitle = subtask.title;
+    }
+
+    assignments.push({
+      taskId: manualAssignment.task_id,
+      taskTitle: task.title,
+      subtaskId: manualAssignment.subtask_id,
+      subtaskTitle,
+      personId: person.id,
+      personName: person.name,
+      scheduledDate: new Date(manualAssignment.scheduled_date),
+      scheduledHours: manualAssignment.scheduled_hours
+    });
   }
 
   // Flatten tasks into work units
@@ -100,6 +142,9 @@ export function scheduleHomeTasksOptimized(
         const subtask = task.subtasks[i];
         const prevSubtask = i > 0 ? task.subtasks[i - 1] : null;
         
+        // Skip if manually assigned
+        if (manualAssignments.has(subtask.id)) continue;
+        
         workUnits.push({
           taskId: task.id,
           taskTitle: task.title,
@@ -114,6 +159,9 @@ export function scheduleHomeTasksOptimized(
         });
       }
     } else {
+      // Task with no subtasks - check if manually assigned
+      if (manualAssignments.has(task.id)) continue;
+      
       // Task with no subtasks - estimate as 1 hour task
       workUnits.push({
         taskId: task.id,
