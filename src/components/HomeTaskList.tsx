@@ -314,7 +314,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-full max-w-full md:max-w-[90vw] h-screen p-0 overflow-hidden flex flex-col [&>button]:hidden">
+        <DialogContent className="w-full max-w-full md:max-w-[98vw] h-screen md:h-[98vh] p-0 overflow-hidden flex flex-col [&>button]:hidden">
           <DialogHeader className="px-2 md:px-4 py-1.5 md:py-2 border-b flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
               <DialogTitle className="text-xs md:text-sm font-semibold">Task Manager</DialogTitle>
@@ -355,7 +355,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
 
           <div className="flex-1 overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="mx-2 md:mx-4 mt-1 mb-2 w-auto grid grid-cols-3 text-[10px] md:text-xs h-7 md:h-9 flex-shrink-0 p-0.5 gap-0.5 bg-muted/50 rounded-lg">
+              <TabsList className="mx-2 md:mx-4 mt-1 mb-2 md:mb-4 w-auto grid grid-cols-3 text-[10px] md:text-xs h-7 md:h-9 flex-shrink-0 p-0.5 gap-0.5 bg-muted/50 rounded-lg">
                 <TabsTrigger value="tasks" className="text-[10px] md:text-xs px-2 md:px-3 py-1 md:py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Tasks</TabsTrigger>
                 <TabsTrigger value="people" className="text-[10px] md:text-xs px-2 md:px-3 py-1 md:py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Team</TabsTrigger>
                 <TabsTrigger value="schedule" className="text-[10px] md:text-xs px-2 md:px-3 py-1 md:py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Schedule</TabsTrigger>

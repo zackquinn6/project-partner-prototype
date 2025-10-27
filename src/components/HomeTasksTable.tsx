@@ -259,7 +259,7 @@ export function HomeTasksTable({
         return 'default';
     }
   };
-  return <div className="space-y-3">
+  return <div className="space-y-3 flex flex-col h-full">
       {/* Desktop filters and controls */}
       <div className="hidden md:flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between">
         <div className="flex flex-wrap gap-2 flex-1 items-center">
@@ -291,7 +291,7 @@ export function HomeTasksTable({
               <SelectItem value="pro">Professional</SelectItem>
             </SelectContent>
           </Select>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 mr-3">
             <Checkbox 
               id="show-completed" 
               checked={showCompleted}
@@ -327,7 +327,7 @@ export function HomeTasksTable({
                 {filterPriority === 'all' ? 'Priority' : filterPriority === 'high' ? 'High' : filterPriority === 'medium' ? 'Med' : 'Low'}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background border shadow-lg z-[100]">
               <SelectItem value="all">All Priorities</SelectItem>
               <SelectItem value="high">High Priority</SelectItem>
               <SelectItem value="medium">Medium Priority</SelectItem>
@@ -341,7 +341,7 @@ export function HomeTasksTable({
                 {filterDiyLevel === 'all' ? 'DIY' : filterDiyLevel === 'beginner' ? 'Beg' : filterDiyLevel === 'intermediate' ? 'Int' : filterDiyLevel === 'advanced' ? 'Adv' : 'Pro'}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background border shadow-lg z-[100]">
               <SelectItem value="all">All Levels</SelectItem>
               <SelectItem value="beginner">Beginner</SelectItem>
               <SelectItem value="intermediate">Intermediate</SelectItem>
@@ -373,8 +373,8 @@ export function HomeTasksTable({
       </div>
 
       {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
-        <div className="overflow-auto max-h-[50vh]">
+      <div className="border rounded-lg overflow-hidden flex-1">
+        <div className="overflow-auto h-full">
           <Table>
             <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
@@ -385,17 +385,17 @@ export function HomeTasksTable({
                   </Button>
                 </TableHead>
                 <TableHead className="w-[180px] text-xs">Notes</TableHead>
-                <TableHead className="w-[60px] text-xs">
+                <TableHead className="w-24 md:w-20 text-xs">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('priority')} className="h-6 px-2 text-xs font-medium">
                     Priority <SortIcon field="priority" />
                   </Button>
                 </TableHead>
-                <TableHead className="w-[60px] text-xs">
+                <TableHead className="w-24 md:w-20 text-xs">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('diy_level')} className="h-6 px-2 text-xs font-medium">
                     DIY Level <SortIcon field="diy_level" />
                   </Button>
                 </TableHead>
-                <TableHead className="w-[100px] text-xs">
+                <TableHead className="w-32 md:w-24 text-xs">
                   <Button variant="ghost" size="sm" onClick={() => handleSort('due_date')} className="h-6 px-2 text-xs font-medium">
                     Due Date <SortIcon field="due_date" />
                   </Button>
