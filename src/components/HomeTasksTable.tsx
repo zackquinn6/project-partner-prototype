@@ -320,9 +320,9 @@ export function HomeTasksTable({
           className="text-sm h-7 w-full"
         />
         
-        <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
           <Select value={filterPriority} onValueChange={setFilterPriority}>
-            <SelectTrigger className="h-7 text-xs w-full">
+            <SelectTrigger className="h-7 text-xs flex-1">
               <SelectValue>
                 {filterPriority === 'all' ? 'Priority' : filterPriority === 'high' ? 'High' : filterPriority === 'medium' ? 'Med' : 'Low'}
               </SelectValue>
@@ -336,7 +336,7 @@ export function HomeTasksTable({
           </Select>
 
           <Select value={filterDiyLevel} onValueChange={setFilterDiyLevel}>
-            <SelectTrigger className="h-7 text-xs w-full">
+            <SelectTrigger className="h-7 text-xs flex-1">
               <SelectValue>
                 {filterDiyLevel === 'all' ? 'DIY' : filterDiyLevel === 'beginner' ? 'Beg' : filterDiyLevel === 'intermediate' ? 'Int' : filterDiyLevel === 'advanced' ? 'Adv' : 'Pro'}
               </SelectValue>
@@ -350,27 +350,25 @@ export function HomeTasksTable({
             </SelectContent>
           </Select>
           
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowCompleted(!showCompleted)}
+            className="h-7 text-[10px] whitespace-nowrap px-2 border"
+          >
+            {showCompleted ? 'Hide' : 'Show'} Done
+          </Button>
+          
+          {onAddTask && (
+            <Button 
+              onClick={onAddTask} 
               size="sm"
-              onClick={() => setShowCompleted(!showCompleted)}
-              className="h-7 text-xs whitespace-nowrap px-3 border flex-1"
+              className="h-7 w-7 p-0"
+              title="Add Task"
             >
-              {showCompleted ? 'Hide' : 'Show'} Done
+              <Plus className="h-4 w-4" />
             </Button>
-            
-            {onAddTask && (
-              <Button 
-                onClick={onAddTask} 
-                size="sm"
-                className="h-7 px-3 flex-1"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                <span className="text-xs">Add Task</span>
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
