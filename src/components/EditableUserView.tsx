@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Edit, Save, X, Upload, Info, ChevronDown, ChevronUp, FileText, ShoppingCart } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, CheckCircle, ExternalLink, Image, Video, AlertTriangle, Edit, Save, X, Upload, Info, ChevronDown, ChevronUp, FileText, ShoppingCart, Lock } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useProject } from '@/contexts/ProjectContext';
 import { WorkflowStep, Output } from '@/interfaces/Project';
@@ -23,6 +23,7 @@ import { OrderingWindow } from './OrderingWindow';
 import { SignatureCapture } from './SignatureCapture';
 import { StepCompletionTracker } from './StepCompletionTracker';
 import { EnhancedProjectPlanning } from './EnhancedProjectPlanning';
+import { toast } from "@/hooks/use-toast";
 
 interface EditableUserViewProps {
   onBackToAdmin: () => void;
@@ -188,6 +189,29 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
       }
       return { ...prev, [stepId]: newSet };
     });
+  };
+
+  // Check if prerequisites are met for a step
+  const arePrerequisitesMet = (step: WorkflowStep | (typeof currentStep)) => {
+    if (!step || !currentProject) return true;
+    
+    // Find the operation containing this step
+    const operation = currentProject.phases
+      .flatMap(p => p.operations)
+      .find(op => op.steps.some(s => s.id === step.id));
+    
+    if (!operation?.dependentOn) return true;
+    
+    // Find all steps in the dependent operation
+    const dependentOperation = currentProject.phases
+      .flatMap(p => p.operations)
+      .find(op => op.id === operation.dependentOn);
+    
+    if (!dependentOperation) return true;
+    
+    // Check if all steps in the dependent operation are completed
+    const dependentSteps = dependentOperation.steps.map(s => s.id);
+    return dependentSteps.every(stepId => completedSteps.has(stepId));
   };
 
   // Check if all outputs are completed (required for step completion)
@@ -575,6 +599,7 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                               const completionPercentage = stepCompletionPercentages[step.id] || 0;
                               const isInProgress = completionPercentage > 0 && completionPercentage < 100;
                               const isCompleted = completedSteps.has(step.id);
+                              const hasUnmetPrerequisites = !arePrerequisitesMet(step);
                               
                               return (
                                  <div 
@@ -583,10 +608,33 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                                      step.id === currentStep?.id ? 'bg-primary/10 text-primary border border-primary/20' : 
                                      isCompleted ? 'bg-green-50 text-green-700 border border-green-200' : 
                                      isInProgress ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
+                                     hasUnmetPrerequisites ? 'bg-orange-50 text-orange-700 border border-orange-200' :
                                      'hover:bg-muted/50 border border-transparent hover:border-muted-foreground/20'
                                    }`} 
                                     onClick={() => {
                                       if (stepIndex >= 0) {
+                                        // Check prerequisites before navigation
+                                        if (hasUnmetPrerequisites && !isAdminEditing) {
+                                          // Find the dependent operation name for better messaging
+                                          const dependentOp = currentProject?.phases
+                                            .flatMap(p => p.operations)
+                                            .find(op => op.steps.some(s => s.id === step.id))
+                                            ?.dependentOn;
+                                          
+                                          const dependentOpName = currentProject?.phases
+                                            .flatMap(p => p.operations)
+                                            .find(op => op.id === dependentOp)?.name;
+                                          
+                                          toast({
+                                            title: "Prerequisites Not Met",
+                                            description: dependentOpName 
+                                              ? `You must complete "${dependentOpName}" before accessing this step.`
+                                              : "You must complete prerequisite steps before accessing this step.",
+                                            variant: "destructive",
+                                          });
+                                          return;
+                                        }
+                                        
                                         setCurrentStepIndex(stepIndex);
                                         window.scrollTo({ top: 0, behavior: 'smooth' });
                                       }
@@ -594,15 +642,23 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                                  >
                                   <div className="flex items-center gap-2 justify-between">
                                     <div className="flex items-center gap-2">
+                                      {hasUnmetPrerequisites && !isCompleted && <Lock className="w-4 h-4 text-orange-500" />}
                                       {isCompleted && <CheckCircle className="w-4 h-4" />}
                                       {isInProgress && <div className="w-4 h-4 rounded-full bg-yellow-400 border-2 border-yellow-600" />}
                                       <span className="truncate">{step.step}</span>
                                     </div>
-                                    {isInProgress && (
-                                      <span className="text-xs font-medium text-yellow-600">
-                                        {completionPercentage}%
-                                      </span>
-                                    )}
+                                    <div className="flex items-center gap-1">
+                                      {hasUnmetPrerequisites && !isCompleted && (
+                                        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 bg-orange-100 text-orange-700 border-orange-300">
+                                          Locked
+                                        </Badge>
+                                      )}
+                                      {isInProgress && (
+                                        <span className="text-xs font-medium text-yellow-600">
+                                          {completionPercentage}%
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               );
@@ -696,6 +752,20 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
           {/* Content */}
           <Card className="gradient-card border-0 shadow-card">
             <CardContent className="p-8">
+              {/* Prerequisite Warning Banner */}
+              {currentStep && !arePrerequisitesMet(currentStep) && !isAdminEditing && (
+                <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-orange-900 mb-1">Prerequisites Required</h4>
+                    <p className="text-sm text-orange-800">
+                      This step requires completion of previous operations before you can proceed. 
+                      Complete the prerequisite steps first to unlock this content.
+                    </p>
+                  </div>
+                </div>
+              )}
+              
               {/* Show Enhanced Project Planning for Planning phase steps */}
               {currentStep?.phaseName === 'Planning' && (
                 currentStep.step.includes('Project Work Scope') || 

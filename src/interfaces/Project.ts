@@ -161,6 +161,7 @@ export interface Operation {
   name: string;
   description: string;
   steps: WorkflowStep[];
+  dependentOn?: string; // ID of operation that must be completed first
   // Standard content flag - marks operations from Standard Project Foundation
   isStandard?: boolean;
 }
