@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Upload, Image as ImageIcon, X } from 'lucide-react';
+import { Upload, Image as ImageIcon, X, Check } from 'lucide-react';
 
 interface ProjectImageManagerProps {
   projectId?: string;
@@ -16,20 +17,21 @@ export const ProjectImageManager = ({ projectId, onImageUpdated }: ProjectImageM
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [uploading, setUploading] = useState(false);
-  const [currentImage, setCurrentImage] = useState<string>('');
+  const [images, setImages] = useState<string[]>([]);
+  const [coverImage, setCoverImage] = useState<string>('');
 
   useEffect(() => {
     if (projectId) {
-      fetchProjectImage();
+      fetchProjectImages();
     }
   }, [projectId]);
 
-  const fetchProjectImage = async () => {
+  const fetchProjectImages = async () => {
     if (!projectId) return;
 
     const { data, error } = await supabase
       .from('projects')
-      .select('cover_image')
+      .select('images, cover_image')
       .eq('id', projectId)
       .single();
 
@@ -38,9 +40,8 @@ export const ProjectImageManager = ({ projectId, onImageUpdated }: ProjectImageM
       return;
     }
 
-    if (data?.cover_image) {
-      setCurrentImage(data.cover_image);
-    }
+    setImages(data?.images || []);
+    setCoverImage(data?.cover_image || '');
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,10 +93,19 @@ export const ProjectImageManager = ({ projectId, onImageUpdated }: ProjectImageM
         .from('project-images')
         .getPublicUrl(filePath);
 
-      // Update project with image URL
+      // Add to images array
+      const newImages = [...images, publicUrl];
+      
+      // If this is the first image, set it as cover
+      const newCoverImage = images.length === 0 ? publicUrl : coverImage;
+
+      // Update project with new images array and cover image
       const { error: updateError } = await supabase
         .from('projects')
-        .update({ cover_image: publicUrl })
+        .update({ 
+          images: newImages,
+          cover_image: newCoverImage
+        })
         .eq('id', projectId);
 
       if (updateError) throw updateError;
@@ -105,7 +115,8 @@ export const ProjectImageManager = ({ projectId, onImageUpdated }: ProjectImageM
       // Reset form
       setSelectedFile(null);
       setPreviewUrl('');
-      setCurrentImage(publicUrl);
+      setImages(newImages);
+      setCoverImage(newCoverImage);
       
       // Notify parent
       if (onImageUpdated) {
@@ -120,29 +131,61 @@ export const ProjectImageManager = ({ projectId, onImageUpdated }: ProjectImageM
     }
   };
 
-  const handleRemoveImage = async () => {
+  const handleSetCover = async (imageUrl: string) => {
     if (!projectId) return;
 
     try {
       const { error } = await supabase
         .from('projects')
-        .update({ cover_image: null })
+        .update({ cover_image: imageUrl })
         .eq('id', projectId);
 
       if (error) throw error;
 
-      toast.success('Image removed');
-      setCurrentImage('');
+      toast.success('Cover image updated');
+      setCoverImage(imageUrl);
       
       if (onImageUpdated) {
         onImageUpdated();
       }
 
     } catch (error: any) {
-      console.error('Remove error:', error);
-      toast.error('Failed to remove image');
+      console.error('Set cover error:', error);
+      toast.error('Failed to set cover image');
     }
   };
+
+  const handleDeleteImage = async (imageUrl: string) => {
+    if (!projectId) return;
+
+    try {
+      const newImages = images.filter(img => img !== imageUrl);
+      const newCoverImage = coverImage === imageUrl ? (newImages[0] || null) : coverImage;
+
+      const { error } = await supabase
+        .from('projects')
+        .update({ 
+          images: newImages,
+          cover_image: newCoverImage
+        })
+        .eq('id', projectId);
+
+      if (error) throw error;
+
+      toast.success('Image deleted');
+      setImages(newImages);
+      setCoverImage(newCoverImage || '');
+      
+      if (onImageUpdated) {
+        onImageUpdated();
+      }
+
+    } catch (error: any) {
+      console.error('Delete error:', error);
+      toast.error('Failed to delete image');
+    }
+  };
+
 
   const clearSelection = () => {
     setSelectedFile(null);
@@ -154,32 +197,65 @@ export const ProjectImageManager = ({ projectId, onImageUpdated }: ProjectImageM
 
   return (
     <div className="space-y-4">
-      {/* Current Image Display */}
-      {currentImage && (
+      {/* Uploaded Images Gallery */}
+      {images.length > 0 && (
         <div className="space-y-2">
-          <Label className="text-sm">Current Cover Image</Label>
-          <div className="relative border rounded-lg p-2">
-            <img 
-              src={currentImage} 
-              alt="Current project image" 
-              className="w-full h-48 object-cover rounded"
-            />
-            <Button
-              variant="destructive"
-              size="sm"
-              className="absolute top-4 right-4"
-              onClick={handleRemoveImage}
-            >
-              <X className="h-4 w-4 mr-1" />
-              Remove
-            </Button>
+          <Label className="text-sm font-medium">Project Images ({images.length})</Label>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {images.map((img, idx) => (
+              <div key={idx} className="relative group border rounded-lg overflow-hidden">
+                <img 
+                  src={img} 
+                  alt={`Project image ${idx + 1}`}
+                  className="w-full h-32 object-cover"
+                />
+                {/* Overlay on hover */}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={coverImage === img ? "default" : "secondary"}
+                    onClick={() => handleSetCover(img)}
+                    className="text-xs"
+                  >
+                    {coverImage === img ? (
+                      <>
+                        <Check className="h-3 w-3 mr-1" />
+                        Cover
+                      </>
+                    ) : (
+                      'Set as Cover'
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleDeleteImage(img)}
+                    className="text-xs"
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+                {/* Cover badge */}
+                {coverImage === img && (
+                  <Badge className="absolute top-2 left-2 bg-primary text-xs">
+                    <Check className="h-3 w-3 mr-1" />
+                    Cover
+                  </Badge>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
 
       {/* File Upload */}
       <div className="space-y-2">
-        <Label className="text-sm">Upload New Cover Image</Label>
+        <Label className="text-sm font-medium">
+          {images.length === 0 ? 'Upload First Image' : 'Add More Images'}
+        </Label>
         <div className="flex items-center gap-2">
           <Input
             type="file"
@@ -199,7 +275,8 @@ export const ProjectImageManager = ({ projectId, onImageUpdated }: ProjectImageM
           )}
         </div>
         <p className="text-xs text-muted-foreground">
-          Max size: 5MB. Formats: JPG, PNG, WebP
+          Max size: 5MB per image. Formats: JPG, PNG, WebP
+          {images.length === 0 && ' • First image will be set as cover'}
         </p>
       </div>
 
@@ -226,7 +303,7 @@ export const ProjectImageManager = ({ projectId, onImageUpdated }: ProjectImageM
         ) : (
           <>
             <Upload className="h-4 w-4 mr-2" />
-            Upload Cover Image
+            {images.length === 0 ? 'Upload First Image' : 'Add Image'}
           </>
         )}
       </Button>

@@ -846,7 +846,7 @@ export function UnifiedProjectManagement() {
 
                           {/* Image Management Section */}
                           <div className="space-y-3">
-                            <Label className="text-sm font-semibold">Project Cover Image</Label>
+                            <Label className="text-sm font-semibold">Project Images</Label>
                             {editingProject ? (
                               <ProjectImageManager 
                                 projectId={selectedProject.id}
@@ -857,18 +857,31 @@ export function UnifiedProjectManagement() {
                               />
                             ) : (
                               <div>
-                                {selectedProject.cover_image ? (
-                                  <div className="relative border rounded-lg p-2">
-                                    <img 
-                                      src={selectedProject.cover_image} 
-                                      alt="Project cover"
-                                      className="w-full h-48 object-cover rounded"
-                                    />
-                                    <Badge className="absolute top-4 left-4 bg-primary">Cover Image</Badge>
+                                {(selectedProject.images && selectedProject.images.length > 0) ? (
+                                  <div className="space-y-2">
+                                    <div className="text-xs text-muted-foreground">
+                                      {selectedProject.images.length} image{selectedProject.images.length !== 1 ? 's' : ''} uploaded
+                                    </div>
+                                    <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                                      {selectedProject.images.map((img: string, idx: number) => (
+                                        <div key={idx} className="relative border rounded-lg overflow-hidden">
+                                          <img 
+                                            src={img} 
+                                            alt={`Project image ${idx + 1}`}
+                                            className="w-full h-24 object-cover"
+                                          />
+                                          {selectedProject.cover_image === img && (
+                                            <Badge className="absolute top-1 left-1 bg-primary text-xs">
+                                              Cover
+                                            </Badge>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
                                   </div>
                                 ) : (
                                   <div className="p-4 bg-muted rounded text-sm text-muted-foreground">
-                                    No cover image uploaded
+                                    No images uploaded
                                   </div>
                                 )}
                               </div>
