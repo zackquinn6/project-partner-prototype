@@ -42,8 +42,11 @@ export const HowItWorksSection = ({ onOpenDemo }: HowItWorksSectionProps) => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-            Designed to run one great project - not a career of building
+            How It Works
           </h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Designed to run one great project - not a career of building
+          </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto mb-12">

@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import founderPhoto from '@/assets/zack-quinn-founder.png';
 
 interface FounderInfoDialogProps {
   open: boolean;
@@ -22,7 +23,7 @@ export const FounderInfoDialog = ({ open, onOpenChange }: FounderInfoDialogProps
           
           <div className="space-y-3">
             <img 
-              src="/lovable-uploads/ced88968-ca61-4fed-bee4-d2ea417c247c.png" 
+              src={founderPhoto} 
               alt="Zack Quinn, Co-Founder of Toolio" 
               className="w-full rounded-lg shadow-lg"
             />
