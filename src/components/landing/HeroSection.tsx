@@ -1,15 +1,21 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, PlayCircle, Star } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import { FounderInfoDialog } from './FounderInfoDialog';
+
 interface HeroSectionProps {
   onOpenDemo?: () => void;
 }
-export const HeroSection = ({
-  onOpenDemo
-}: HeroSectionProps) => {
+
+export const HeroSection = ({ onOpenDemo }: HeroSectionProps) => {
   const navigate = useNavigate();
-  return <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-background to-muted">
+  const [isFounderDialogOpen, setIsFounderDialogOpen] = useState(false);
+  
+  return (
+    <>
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-background to-muted">
       {/* Floating animated background elements */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-20 left-10 animate-float">
@@ -39,22 +45,26 @@ export const HeroSection = ({
               Unlike generic project or workflow apps, Project Partner comes pre-populated for home improvement on day 1
             </p>
 
-            <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
-              Run one great project - not training a career builder
-            </p>
-
             
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button size="xl" className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300" onClick={() => navigate('/auth?mode=signup')}>
+              <Button 
+                size="xl" 
+                className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300" 
+                onClick={() => navigate('/auth?mode=signup')}
+              >
                 Start Your First Project Free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
 
-              <Button variant="outline" size="xl" className="border-2 hover:bg-muted" onClick={onOpenDemo}>
-                <PlayCircle className="mr-2 h-5 w-5" />
-                See How It Works
+              <Button 
+                variant="outline" 
+                size="xl" 
+                className="border-2 hover:bg-muted" 
+                onClick={() => setIsFounderDialogOpen(true)}
+              >
+                Learn More
               </Button>
             </div>
 
@@ -68,19 +78,15 @@ export const HeroSection = ({
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-border hover-lift">
               <img src="/lovable-uploads/dd8a6549-c627-436d-954c-e8c38a53fbee.png" alt="Project Partner Workflow Interface" className="w-full h-auto" />
             </div>
-
-            {/* Floating success metrics */}
-            <div className="absolute -top-4 -right-4 bg-card border border-border rounded-xl px-4 py-3 shadow-lg animate-float hidden md:block">
-              <div className="text-2xl font-bold text-accent">15 hrs</div>
-              <div className="text-xs text-muted-foreground">Time Saved</div>
-            </div>
-
-            <div className="absolute -bottom-4 -left-4 bg-card border border-border rounded-xl px-4 py-3 shadow-lg animate-float-delayed hidden md:block">
-              <div className="text-2xl font-bold text-primary">94%</div>
-              <div className="text-xs text-muted-foreground">Success Rate</div>
-            </div>
           </div>
         </div>
       </div>
-    </section>;
+      </section>
+      
+      <FounderInfoDialog 
+        open={isFounderDialogOpen} 
+        onOpenChange={setIsFounderDialogOpen} 
+      />
+    </>
+  );
 };

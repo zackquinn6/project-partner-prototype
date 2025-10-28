@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Zap, CheckCircle, PlayCircle, ArrowRight } from 'lucide-react';
+import { BookOpen, Zap, CheckCircle, ArrowRight } from 'lucide-react';
+import { FounderInfoDialog } from './FounderInfoDialog';
 
 interface HowItWorksSectionProps {
   onOpenDemo?: () => void;
 }
 
 export const HowItWorksSection = ({ onOpenDemo }: HowItWorksSectionProps) => {
+  const [isFounderDialogOpen, setIsFounderDialogOpen] = useState(false);
   const steps = [
     {
       icon: BookOpen,
@@ -39,11 +42,8 @@ export const HowItWorksSection = ({ onOpenDemo }: HowItWorksSectionProps) => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-            How It Works
+            Designed to run one great project - not a career of building
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Get from "I want to do this" to "I did it!" in three simple steps
-          </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto mb-12">
@@ -82,13 +82,17 @@ export const HowItWorksSection = ({ onOpenDemo }: HowItWorksSectionProps) => {
             variant="outline"
             size="lg"
             className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-            onClick={onOpenDemo}
+            onClick={() => setIsFounderDialogOpen(true)}
           >
-            <PlayCircle className="mr-2 h-5 w-5" />
-            Watch 30-Second Demo
+            Learn More
           </Button>
         </div>
       </div>
+      
+      <FounderInfoDialog 
+        open={isFounderDialogOpen} 
+        onOpenChange={setIsFounderDialogOpen} 
+      />
     </section>
   );
 };
