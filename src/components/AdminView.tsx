@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UnifiedProjectManagement } from '@/components/UnifiedProjectManagement';
 import { ProjectAnalyticsWindow } from '@/components/ProjectAnalyticsWindow';
 import { UsersSecurityWindow } from '@/components/UsersSecurityWindow';
 import { ToolsMaterialsWindow } from '@/components/ToolsMaterialsWindow';
 import { HomeRiskManager } from '@/components/HomeRiskManager';
 import { AdminActionCenter } from '@/components/AdminActionCenter';
+import EditWorkflowView from '@/components/EditWorkflowView';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,6 +26,7 @@ export const AdminView: React.FC = () => {
   const [usersSecurityOpen, setUsersSecurityOpen] = useState(false);
   const [toolsMaterialsOpen, setToolsMaterialsOpen] = useState(false);
   const [homeRiskManagerOpen, setHomeRiskManagerOpen] = useState(false);
+  const [editWorkflowOpen, setEditWorkflowOpen] = useState(false);
   
   const [processDesignOpen, setProcessDesignOpen] = useState(false);
   const [roadmapManagerOpen, setRoadmapManagerOpen] = useState(false);
@@ -33,6 +35,19 @@ export const AdminView: React.FC = () => {
   const [dataRefreshOpen, setDataRefreshOpen] = useState(false);
   const [actionCenterOpen, setActionCenterOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'admin' | 'structure-manager'>('admin');
+
+  // Listen for edit workflow navigation event
+  useEffect(() => {
+    const handleEditWorkflowNavigation = () => {
+      setEditWorkflowOpen(true);
+    };
+
+    window.addEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
+    
+    return () => {
+      window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
+    };
+  }, []);
 
   if (currentView === 'structure-manager') {
     return <StructureManager onBack={() => setCurrentView('admin')} />;
@@ -285,6 +300,12 @@ export const AdminView: React.FC = () => {
           open={actionCenterOpen} 
           onOpenChange={setActionCenterOpen}
         />
+
+        <Dialog open={editWorkflowOpen} onOpenChange={setEditWorkflowOpen}>
+          <DialogContent className="max-w-[98vw] max-h-[98vh] p-0">
+            <EditWorkflowView onBackToAdmin={() => setEditWorkflowOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

@@ -1028,8 +1028,8 @@ export function UnifiedProjectManagement() {
                               phases: parsedPhases
                             });
                             
-                            // Navigate to editor
-                            navigate('/', { state: { view: 'editWorkflow' } });
+                            // Dispatch event to open edit workflow view without closing this window
+                            window.dispatchEvent(new Event('navigate-to-edit-workflow'));
                           }}
                           className="flex items-center gap-1"
                         >
