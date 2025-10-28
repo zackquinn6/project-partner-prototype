@@ -950,13 +950,15 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                                    stepType: value
                                                                  }
                                                                })} />
-                                                                            <FlowTypeSelector value={editingItem.data.flowType} onValueChange={value => setEditingItem({
-                                                                 ...editingItem,
-                                                                 data: {
-                                                                   ...editingItem.data,
-                                                                   flowType: value
-                                                                 }
-                                                               })} />
+                                                                            <div className="p-2 bg-muted/50 rounded-md text-xs">
+                                                                              <div className="flex items-center justify-between">
+                                                                                <span className="text-muted-foreground">Flow Type:</span>
+                                                                                {getFlowTypeBadge(editingItem.data.flowType)}
+                                                                              </div>
+                                                                              <p className="text-[10px] text-muted-foreground mt-1">
+                                                                                Edit flow type in Decision Tree Manager
+                                                                              </p>
+                                                                            </div>
                                                                           </div>
                                                                         </div> : <div className="flex-1">
                                                                           <div className="flex items-center gap-2">
