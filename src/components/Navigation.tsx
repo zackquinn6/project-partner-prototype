@@ -201,7 +201,7 @@ export default function Navigation({
               size="sm"
             >
               <Headphones className="h-4 w-4 mr-0 sm:mr-2" />
-              <span className="hidden sm:inline">Get Expert Help</span>
+              <span className="hidden sm:inline">Call the Trades</span>
             </Button>
             
             {/* Settings Dropdown - Always visible */}
