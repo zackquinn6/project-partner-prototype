@@ -8,7 +8,8 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { GuestProvider } from '@/contexts/GuestContext';
 import { SecurityMaintenanceProvider } from '@/components/SecurityMaintenanceProvider';
 import { SecurityHeadersProvider } from '@/components/SecurityHeadersProvider';
-import { EnhancedSecurityProvider } from '@/components/EnhancedSecurityProvider';
+// Temporarily disabled due to initialization order issues
+// import { EnhancedSecurityProvider } from '@/components/EnhancedSecurityProvider';
 import { TempQuizProvider } from '@/contexts/TempQuizContext';
 
 import Index from "./pages/Index";
@@ -25,28 +26,26 @@ const App: React.FC = () => {
       <SecurityHeadersProvider>
         <GuestProvider>
           <AuthProvider>
-            <EnhancedSecurityProvider>
-              <SecurityMaintenanceProvider>
-                <TempQuizProvider>
-                  <ProjectDataProvider>
-                    <ProjectActionsProvider>
-                      <ProjectProvider>
-                      <BrowserRouter>
-                        <Routes>
-                          <Route path="/" element={<Index />} />
-                          <Route path="/auth" element={<Auth />} />
-                          <Route path="/projects" element={<ProjectCatalogPage />} />
-                          <Route path="/import-tile-content" element={<ImportTileContent />} />
-                          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </BrowserRouter>
-                      </ProjectProvider>
-                    </ProjectActionsProvider>
-                  </ProjectDataProvider>
-                </TempQuizProvider>
-              </SecurityMaintenanceProvider>
-            </EnhancedSecurityProvider>
+            <SecurityMaintenanceProvider>
+              <TempQuizProvider>
+                <ProjectDataProvider>
+                  <ProjectActionsProvider>
+                    <ProjectProvider>
+                    <BrowserRouter>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/auth" element={<Auth />} />
+                        <Route path="/projects" element={<ProjectCatalogPage />} />
+                        <Route path="/import-tile-content" element={<ImportTileContent />} />
+                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </BrowserRouter>
+                    </ProjectProvider>
+                  </ProjectActionsProvider>
+                </ProjectDataProvider>
+              </TempQuizProvider>
+            </SecurityMaintenanceProvider>
           </AuthProvider>
         </GuestProvider>
       </SecurityHeadersProvider>
