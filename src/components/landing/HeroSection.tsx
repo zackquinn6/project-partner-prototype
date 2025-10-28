@@ -33,7 +33,7 @@ export const HeroSection = ({
 
             <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight">
               Stop Guessing.<br />
-              <span className="gradient-text">Start Building</span> with Confidence.
+              <span className="gradient-text"></span> with Confidence.
             </h1>
 
             <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-2xl mx-auto lg:mx-0">
