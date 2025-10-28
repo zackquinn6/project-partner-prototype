@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Copy, Trash2, Edit, Check, X, GripVertical, FileOutput, Wrench, Package, Clipboard, ClipboardCheck, Save, ChevronDown, ChevronRight, Link, ExternalLink, ArrowLeft, GitBranch, MoreVertical } from 'lucide-react';
 import { FlowTypeSelector, getFlowTypeBadge } from './FlowTypeSelector';
+import { StepTypeSelector, getStepTypeIcon } from './StepTypeSelector';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -940,25 +941,41 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                                 ...editingItem.data,
                                                                 description: e.target.value
                                                               }
-                                                            })} placeholder="Step description" rows={1} className="text-xs" />
-                                                                         <div className="text-xs">
-                                                                           <FlowTypeSelector value={editingItem.data.flowType} onValueChange={value => setEditingItem({
-                                                                ...editingItem,
-                                                                data: {
-                                                                  ...editingItem.data,
-                                                                  flowType: value
-                                                                }
-                                                              })} />
-                                                                         </div>
-                                                                       </div> : <div className="flex-1">
-                                                                         <div className="flex items-center gap-2">
-                                                                           <p className="font-medium text-xs">{step.step}</p>
-                                                                           {getFlowTypeBadge(step.flowType)}
-                                                                           {step.isStandard && !isEditingStandardProject && <Badge variant="secondary" className="text-xs">Standard 🔒</Badge>}
-                                                                           {!step.isStandard && phase.isStandard && <Badge variant="outline" className="text-xs bg-blue-50">Custom</Badge>}
-                                                                         </div>
-                                                                         <p className="text-muted-foreground text-xs">{step.description}</p>
-                                                                       </div>}
+                                                             })} placeholder="Step description" rows={1} className="text-xs" />
+                                                                          <div className="text-xs space-y-2">
+                                                                            <StepTypeSelector value={editingItem.data.stepType} onValueChange={value => setEditingItem({
+                                                                 ...editingItem,
+                                                                 data: {
+                                                                   ...editingItem.data,
+                                                                   stepType: value
+                                                                 }
+                                                               })} />
+                                                                            <FlowTypeSelector value={editingItem.data.flowType} onValueChange={value => setEditingItem({
+                                                                 ...editingItem,
+                                                                 data: {
+                                                                   ...editingItem.data,
+                                                                   flowType: value
+                                                                 }
+                                                               })} />
+                                                                          </div>
+                                                                        </div> : <div className="flex-1">
+                                                                          <div className="flex items-center gap-2">
+                                                                            <p className="font-medium text-xs">{step.step}</p>
+                                                                            {step.stepType && (() => {
+                                                                              const typeInfo = getStepTypeIcon(step.stepType);
+                                                                              return typeInfo ? (
+                                                                                <Badge variant="outline" className="text-xs flex items-center gap-1">
+                                                                                  <div className={`w-2 h-2 rounded-full ${typeInfo.color}`} />
+                                                                                  {typeInfo.label}
+                                                                                </Badge>
+                                                                              ) : null;
+                                                                            })()}
+                                                                            {getFlowTypeBadge(step.flowType)}
+                                                                            {step.isStandard && !isEditingStandardProject && <Badge variant="secondary" className="text-xs">Standard 🔒</Badge>}
+                                                                            {!step.isStandard && phase.isStandard && <Badge variant="outline" className="text-xs bg-blue-50">Custom</Badge>}
+                                                                          </div>
+                                                                          <p className="text-muted-foreground text-xs">{step.description}</p>
+                                                                        </div>}
                                                                   </div>
                                                                   
                                                                    <div className="flex items-center gap-1">
