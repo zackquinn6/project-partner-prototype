@@ -349,12 +349,7 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
         description: "Task assignments have been saved successfully.",
       });
 
-      // Clear assignments after save
-      const clearedAssignments: Record<string, Assignment[]> = {};
-      people.forEach(person => {
-        clearedAssignments[person.id] = [];
-      });
-      setAssignments(clearedAssignments);
+      // Keep assignments visible after save - they're now in the database
       
     } catch (error) {
       console.error("Error saving assignments:", error);
