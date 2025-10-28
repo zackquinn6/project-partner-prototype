@@ -1,25 +1,37 @@
 export const StatisticsBar = () => {
-  const stats = [
-    { value: "10,000+", label: "Projects Completed" },
-    { value: "500+", label: "5-Star Reviews" },
-    { value: "15hrs", label: "Average Time Saved", highlight: true },
-    { value: "94%", label: "Success Rate" }
-  ];
-
   return (
-    <section className="py-8 bg-card/50 backdrop-blur-sm border-y border-border">
+    <section className="py-12 bg-card/50 backdrop-blur-sm border-y border-border">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-          {stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className={`text-3xl md:text-4xl font-bold mb-2 ${stat.highlight ? 'text-accent' : 'text-primary'}`}>
-                {stat.value}
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+            {/* YouTube Failure Rate */}
+            <div className="text-center">
+              <div className="text-5xl md:text-6xl font-bold text-destructive mb-3">
+                50%
               </div>
-              <div className="text-sm text-muted-foreground">
-                {stat.label}
+              <div className="text-sm md:text-base text-muted-foreground font-medium">
+                YouTube-led failure rate
               </div>
             </div>
-          ))}
+
+            {/* Arrow or separator */}
+            <div className="hidden md:block text-4xl text-muted-foreground">→</div>
+
+            {/* Project Partner Success Rate */}
+            <div className="text-center">
+              <div className="text-5xl md:text-6xl font-bold text-accent mb-3">
+                90%+
+              </div>
+              <div className="text-sm md:text-base text-muted-foreground font-medium">
+                Project Partner Success Rate
+              </div>
+            </div>
+          </div>
+          
+          {/* Source citation */}
+          <p className="text-xs text-muted-foreground text-center mt-6">
+            Initial project study, Aug 2025
+          </p>
         </div>
       </div>
     </section>

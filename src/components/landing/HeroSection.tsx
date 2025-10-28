@@ -28,7 +28,7 @@ export const HeroSection = ({
           {/* Left Column - Copy */}
           <div className="text-center lg:text-left space-y-6">
             <Badge className="bg-accent hover:bg-accent text-accent-foreground mb-4 text-sm px-4 py-2">
-              🎉 Free 7-Day Trial • No Credit Card Required
+              The app built for DIY projects
             </Badge>
 
             <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight">
@@ -39,15 +39,7 @@ export const HeroSection = ({
               Get step-by-step guidance tailored to <strong className="text-foreground">YOUR skill level</strong>, <strong className="text-foreground">YOUR timeline</strong>, and <strong className="text-foreground">YOUR available tools</strong>.
             </p>
 
-            <p className="text-base text-muted-foreground">Join DIYers who've successfully completed projects they thought were impossible</p>
-
-            {/* Trust badge */}
-            <div className="flex items-center justify-center lg:justify-start gap-2 mb-8">
-              <div className="flex text-accent">
-                {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 fill-current" />)}
-              </div>
-              <span className="text-sm text-muted-foreground font-medium">4.8/5 from 500+ DIYers</span>
-            </div>
+            <p className="text-base text-muted-foreground">Join DIYers who use Project Partner to get better project results</p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -63,7 +55,7 @@ export const HeroSection = ({
             </div>
 
             <p className="text-xs text-muted-foreground mt-4">
-              ✓ No credit card required • ✓ 7-day free trial • ✓ Cancel anytime
+              ✓ 7-day free trial • ✓ Cancel anytime
             </p>
           </div>
 

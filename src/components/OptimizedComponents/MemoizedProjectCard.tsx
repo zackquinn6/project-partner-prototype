@@ -31,10 +31,10 @@ export const MemoizedProjectCard = React.memo<MemoizedProjectCardProps>(({
   return (
     <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105">
       {/* Cover Image */}
-      {(project as any).cover_image && (
+      {((project as any).cover_image || project.image) && (
         <div className="w-full h-40 overflow-hidden">
           <img 
-            src={(project as any).cover_image} 
+            src={(project as any).cover_image || project.image} 
             alt={project.name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
           />
@@ -55,11 +55,6 @@ export const MemoizedProjectCard = React.memo<MemoizedProjectCardProps>(({
                 <Badge variant="outline" className={getDifficultyColor(difficulty)}>
                   {difficulty}
                 </Badge>
-                {project.category && (
-                  <Badge variant="secondary">
-                    {project.category}
-                  </Badge>
-                )}
               </div>
             </div>
           </div>

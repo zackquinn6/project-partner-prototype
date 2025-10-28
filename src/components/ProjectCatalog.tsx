@@ -913,9 +913,9 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
                     <div className="flex items-center gap-0">
                       {/* Cover Image or Icon */}
                       <div className="flex-shrink-0 w-24 h-24">
-                        {(project as any).cover_image ? (
+                        {((project as any).cover_image || project.image) ? (
                           <img 
-                            src={(project as any).cover_image} 
+                            src={(project as any).cover_image || project.image} 
                             alt={project.name}
                             className="w-full h-full object-cover"
                           />
@@ -957,20 +957,15 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
                     }}
                   >
                     {/* Cover Image or Gradient Header */}
-                    {(project as any).cover_image ? (
+                    {((project as any).cover_image || project.image) ? (
                       <div className="h-48 relative overflow-hidden">
                         <img 
-                          src={(project as any).cover_image} 
+                          src={(project as any).cover_image || project.image} 
                           alt={project.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                         <div className="absolute top-4 right-4 flex gap-2">
-                          {project.category && (
-                            <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
-                              {project.category}
-                            </Badge>
-                          )}
                           {project.publishStatus === 'beta-testing' && (
                             <Badge variant="secondary" className="bg-orange-500/20 text-orange-200 border-orange-300/30 backdrop-blur-sm">
                               <AlertTriangle className="w-3 h-3 mr-1" />
@@ -991,11 +986,6 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
                           <IconComponent className="w-16 h-16 text-white/80" />
                         </div>
                         <div className="absolute top-4 right-4 flex gap-2">
-                          {project.category && (
-                            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                              {project.category}
-                            </Badge>
-                          )}
                           {project.publishStatus === 'beta-testing' && (
                             <Badge variant="secondary" className="bg-orange-500/20 text-orange-200 border-orange-300/30">
                               <AlertTriangle className="w-3 h-3 mr-1" />
