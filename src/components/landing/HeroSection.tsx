@@ -36,11 +36,11 @@ export const HeroSection = ({
             </h1>
 
             <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              Unlike generic project or workflow tools, Project Partner comes pre‑populated and tailored for home improvement, giving you structure from day one.
+              Unlike generic project or workflow apps, Project Partner comes pre-populated for home improvement on day 1
             </p>
 
             <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
-              We're helping you run one great project at a time, not building pro contractors.
+              Run one great project - not training a career builder
             </p>
 
             <p className="text-base text-muted-foreground">Join DIYers who use Project Partner to get better project results</p>

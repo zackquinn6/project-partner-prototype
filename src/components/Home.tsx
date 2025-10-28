@@ -21,7 +21,6 @@ import { ArrowRight, Home as HomeIcon, Wrench, BookOpen, Calendar, ShoppingCart,
 import heroDIYPerson from '@/assets/hero-diy-person.png';
 import { HeroSection } from './landing/HeroSection';
 import { StatisticsBar } from './landing/StatisticsBar';
-import { CoreFeaturesSection } from './landing/CoreFeaturesSection';
 import { TestimonialsSection } from './landing/TestimonialsSection';
 import { HowItWorksSection } from './landing/HowItWorksSection';
 import { FeaturesSection } from './landing/FeaturesSection';
@@ -285,9 +284,6 @@ export default function Home({
 
       {/* Statistics Bar */}
       <StatisticsBar />
-
-      {/* Core Features Section */}
-      <CoreFeaturesSection />
 
       {/* How It Works Section */}
       <HowItWorksSection onOpenDemo={() => setIsKCExplainerOpen(true)} />
