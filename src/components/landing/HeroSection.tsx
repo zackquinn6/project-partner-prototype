@@ -42,7 +42,7 @@ export const HeroSection = ({ onOpenDemo }: HeroSectionProps) => {
             </h1>
 
             <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              Unlike generic project or workflow apps, Project Partner comes pre-populated for home improvement on day 1
+              Unlike generic project apps, Project Partner ships pre-filled for home improvement
             </p>
 
             
