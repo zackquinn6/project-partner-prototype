@@ -202,6 +202,7 @@ export function UnifiedProjectManagement() {
 
     try {
       // Only send editable database columns (not computed or joined fields)
+      // Note: images and cover_image are managed separately by ProjectImageManager
       const updateData: any = {
         name: editedProject.name || selectedProject.name,
         description: editedProject.description !== undefined ? editedProject.description : selectedProject.description,
@@ -211,8 +212,6 @@ export function UnifiedProjectManagement() {
         estimated_time: editedProject.estimated_time !== undefined ? editedProject.estimated_time : selectedProject.estimated_time,
         scaling_unit: editedProject.scaling_unit !== undefined ? editedProject.scaling_unit : selectedProject.scaling_unit,
         diy_length_challenges: editedProject.diy_length_challenges !== undefined ? editedProject.diy_length_challenges : selectedProject.diy_length_challenges,
-        images: editedProject.images !== undefined ? editedProject.images : selectedProject.images,
-        cover_image: editedProject.cover_image !== undefined ? editedProject.cover_image : selectedProject.cover_image,
         updated_at: new Date().toISOString(),
       };
 
