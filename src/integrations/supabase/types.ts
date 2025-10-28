@@ -2654,7 +2654,6 @@ export type Database = {
           created_at: string | null
           description: string | null
           display_order: number
-          estimated_time_minutes: number | null
           flow_type: string | null
           id: string
           materials: Json | null
@@ -2662,6 +2661,7 @@ export type Database = {
           outputs: Json | null
           step_number: number
           step_title: string
+          step_type: string | null
           tools: Json | null
           updated_at: string | null
         }
@@ -2671,7 +2671,6 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number
-          estimated_time_minutes?: number | null
           flow_type?: string | null
           id?: string
           materials?: Json | null
@@ -2679,6 +2678,7 @@ export type Database = {
           outputs?: Json | null
           step_number: number
           step_title: string
+          step_type?: string | null
           tools?: Json | null
           updated_at?: string | null
         }
@@ -2688,7 +2688,6 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number
-          estimated_time_minutes?: number | null
           flow_type?: string | null
           id?: string
           materials?: Json | null
@@ -2696,6 +2695,7 @@ export type Database = {
           outputs?: Json | null
           step_number?: number
           step_title?: string
+          step_type?: string | null
           tools?: Json | null
           updated_at?: string | null
         }

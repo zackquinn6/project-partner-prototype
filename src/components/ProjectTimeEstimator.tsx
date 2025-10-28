@@ -14,14 +14,12 @@ interface ProjectTimeEstimatorProps {
 
 interface TimeEstimate {
   workTime: number; // in hours
-  lagTime: number; // in hours
   total: string; // formatted string
 }
 
 interface PhaseEstimate {
   phaseName: string;
   workTime: number;
-  lagTime: number;
   stepCount: number;
 }
 
@@ -38,11 +36,9 @@ export const ProjectTimeEstimator: React.FC<ProjectTimeEstimatorProps> = ({
   const timeEstimates = useMemo(() => {
     const phases: PhaseEstimate[] = [];
     let totalWorkTime = 0;
-    let totalLagTime = 0;
 
     project.phases.forEach(phase => {
       let phaseWorkTime = 0;
-      let phaseLagTime = 0;
       let stepCount = 0;
 
       phase.operations.forEach(operation => {
@@ -51,33 +47,27 @@ export const ProjectTimeEstimator: React.FC<ProjectTimeEstimatorProps> = ({
           
           // Get time estimates for this scenario
           const workTime = step.timeEstimation?.variableTime?.[scenario] || 0;
-          const lagTime = step.timeEstimation?.lagTime?.[scenario] || 0;
 
           // Calculate scaled work time (work time scales with project size)
           const scaledWorkTime = workTime * projectSize * scalingFactor * skillMultiplier;
           
-          // Lag time doesn't scale with project size - it's fixed per step
           phaseWorkTime += scaledWorkTime;
-          phaseLagTime += lagTime;
         });
       });
 
       phases.push({
         phaseName: phase.name,
         workTime: phaseWorkTime,
-        lagTime: phaseLagTime,
         stepCount
       });
 
       totalWorkTime += phaseWorkTime;
-      totalLagTime += phaseLagTime;
     });
 
     return {
       phases,
       totalWorkTime,
-      totalLagTime,
-      totalProjectTime: totalWorkTime + totalLagTime
+      totalProjectTime: totalWorkTime
     };
   }, [project, projectSize, scalingFactor, skillMultiplier, scenario]);
 
@@ -173,16 +163,6 @@ export const ProjectTimeEstimator: React.FC<ProjectTimeEstimatorProps> = ({
           
           <Card>
             <CardContent className="p-4 text-center">
-              <TrendingUp className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">Wait Time</p>
-              <p className="text-2xl font-bold text-yellow-600">
-                {formatTime(timeEstimates.totalLagTime)}
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4 text-center">
               <Calculator className="w-8 h-8 text-primary mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">Total Time</p>
               <p className="text-2xl font-bold text-primary">
@@ -213,23 +193,9 @@ export const ProjectTimeEstimator: React.FC<ProjectTimeEstimatorProps> = ({
                 
                 <div className="flex items-center gap-6 text-sm">
                   <div className="text-center">
-                    <p className="text-muted-foreground">Work</p>
+                    <p className="text-muted-foreground">Work Time</p>
                     <p className="font-semibold text-blue-600">
                       {formatTime(phase.workTime)}
-                    </p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <p className="text-muted-foreground">Wait</p>
-                    <p className="font-semibold text-yellow-600">
-                      {formatTime(phase.lagTime)}
-                    </p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <p className="text-muted-foreground">Total</p>
-                    <p className="font-bold">
-                      {formatTime(phase.workTime + phase.lagTime)}
                     </p>
                   </div>
                 </div>

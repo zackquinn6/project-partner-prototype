@@ -138,7 +138,8 @@ export interface WorkflowStep {
   inputs?: StepInput[]; // Admin-defined inputs for this step
   contentSections?: ContentSection[];
   apps?: AppReference[]; // Interactive apps for this step
-  flowType?: 'prime' | 'repeat' | 'inspection' | 'alternate' | 'if-necessary';
+  flowType?: 'prime' | 'alternate' | 'if-necessary'; // Decision tree branching
+  stepType?: 'prime' | 'scaled' | 'quality_control'; // Step execution type
   // Decision tree fields
   isDecisionPoint?: boolean;
   decisionPoint?: DecisionPoint;
@@ -146,12 +147,7 @@ export interface WorkflowStep {
   condition?: string; // Condition that must be met for this step to be executed
   timeEstimation?: {
     variableTime?: {
-      low: number; // hours per scaling unit
-      medium: number;
-      high: number;
-    };
-    lagTime?: {
-      low: number; // hours
+      low: number; // hours (for prime/quality_control) or hours per unit (for scaled)
       medium: number;
       high: number;
     };
@@ -174,11 +170,13 @@ export interface Phase {
   name: string;
   description: string;
   operations: Operation[];
+  flowType?: 'prime' | 'alternate' | 'if-necessary'; // Decision tree branching at phase level
   // Linked phase properties
   isLinked?: boolean;
   sourceProjectId?: string;
   sourceProjectName?: string;
   incorporatedRevision?: number;
+  sourceScalingUnit?: string; // Original project's scaling unit for incorporated phases
   // Standard phase flag - marks phases that shouldn't be edited in non-standard projects
   isStandard?: boolean;
 }

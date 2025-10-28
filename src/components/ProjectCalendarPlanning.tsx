@@ -26,7 +26,6 @@ interface PhaseScheduleItem {
   phaseId: string;
   phaseName: string;
   workTime: number; // hours
-  lagTime: number; // hours
   totalTime: number;
   stepCount: number;
 }
@@ -65,7 +64,6 @@ export const ProjectCalendarPlanning: React.FC<ProjectCalendarPlanningProps> = (
 
     project.phases.forEach(phase => {
       let phaseWorkTime = 0;
-      let phaseLagTime = 0;
       let stepCount = 0;
 
       phase.operations.forEach(operation => {
@@ -73,7 +71,6 @@ export const ProjectCalendarPlanning: React.FC<ProjectCalendarPlanningProps> = (
           stepCount++;
           
           const workTime = step.timeEstimation?.variableTime?.[scenario] || 0;
-          const lagTime = step.timeEstimation?.lagTime?.[scenario] || 0;
 
           // Apply scaling factors
           const projectSize = parseFloat(projectRun.projectSize || '1') || 1;
@@ -83,7 +80,6 @@ export const ProjectCalendarPlanning: React.FC<ProjectCalendarPlanningProps> = (
           const scaledWorkTime = workTime * projectSize * scalingFactor * skillMultiplier;
           
           phaseWorkTime += scaledWorkTime;
-          phaseLagTime += lagTime;
         });
       });
 
@@ -91,8 +87,7 @@ export const ProjectCalendarPlanning: React.FC<ProjectCalendarPlanningProps> = (
         phaseId: phase.id || phase.name,
         phaseName: phase.name,
         workTime: phaseWorkTime,
-        lagTime: phaseLagTime,
-        totalTime: phaseWorkTime + phaseLagTime,
+        totalTime: phaseWorkTime,
         stepCount
       });
     });
@@ -264,11 +259,6 @@ export const ProjectCalendarPlanning: React.FC<ProjectCalendarPlanningProps> = (
         currentDate = addDays(currentDate, 1);
         dayCount++;
       }
-
-      // Add lag time if needed
-      if (phase.lagTime > 0) {
-        currentDate = addDays(currentDate, Math.ceil(phase.lagTime / 24));
-      }
     });
 
     setScheduledSessions(sessions);
@@ -295,17 +285,11 @@ export const ProjectCalendarPlanning: React.FC<ProjectCalendarPlanningProps> = (
         
         <CardContent className="space-y-6">
           {/* Planning Summary */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Total Work Time</p>
               <p className="font-semibold text-blue-600">
                 {formatTime(phaseEstimates.reduce((total, phase) => total + phase.workTime, 0))}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Wait Time</p>
-              <p className="font-semibold text-yellow-600">
-                {formatTime(phaseEstimates.reduce((total, phase) => total + phase.lagTime, 0))}
               </p>
             </div>
             <div className="text-center">

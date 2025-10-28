@@ -714,7 +714,10 @@ export default function EditWorkflowView({
                         <Textarea id="step-description" value={editingStep.description || ''} onChange={e => updateEditingStep('description', e.target.value)} placeholder="Step description..." className="mt-2" rows={3} />
                       </div>
                       <div>
-                        <StepTypeSelector value={editingStep.flowType} onValueChange={value => updateEditingStep('flowType', value)} />
+                        <StepTypeSelector 
+                          value={editingStep.stepType} 
+                          onValueChange={value => updateEditingStep('stepType', value)} 
+                        />
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">

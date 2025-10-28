@@ -38,17 +38,6 @@ export const StepTimeEstimation: React.FC<StepTimeEstimationProps> = ({
     });
   };
 
-  const handleLagTimeChange = (level: 'low' | 'medium' | 'high', value: string) => {
-    const numValue = parseFloat(value) || 0;
-    onChange({
-      ...step.timeEstimation,
-      lagTime: {
-        ...step.timeEstimation?.lagTime,
-        [level]: numValue
-      }
-    });
-  };
-
   return (
     <Card className="w-full">
       <CardHeader>
@@ -115,65 +104,6 @@ export const StepTimeEstimation: React.FC<StepTimeEstimationProps> = ({
           
           <p className="text-xs text-muted-foreground">
             Active work time required per {getScalingUnitDisplay()}
-          </p>
-        </div>
-
-        {/* Lag Time */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Pause className="w-4 h-4 text-primary" />
-            <Label className="text-base font-semibold">Wait Time (hours total)</Label>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="lag-low" className="text-sm font-medium text-green-700">
-                Best Case
-              </Label>
-              <Input
-                id="lag-low"
-                type="number"
-                step="0.5"
-                min="0"
-                placeholder="0.0"
-                value={step.timeEstimation?.lagTime?.low || ''}
-                onChange={(e) => handleLagTimeChange('low', e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="lag-medium" className="text-sm font-medium text-blue-700">
-                Typical
-              </Label>
-              <Input
-                id="lag-medium"
-                type="number"
-                step="0.5"
-                min="0"
-                placeholder="0.0"
-                value={step.timeEstimation?.lagTime?.medium || ''}
-                onChange={(e) => handleLagTimeChange('medium', e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="lag-high" className="text-sm font-medium text-red-700">
-                Worst Case
-              </Label>
-              <Input
-                id="lag-high"
-                type="number"
-                step="0.5"
-                min="0"
-                placeholder="0.0"
-                value={step.timeEstimation?.lagTime?.high || ''}
-                onChange={(e) => handleLagTimeChange('high', e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <p className="text-xs text-muted-foreground">
-            Wait time (drying, curing, delivery, etc.) - independent of project size
           </p>
         </div>
       </CardContent>

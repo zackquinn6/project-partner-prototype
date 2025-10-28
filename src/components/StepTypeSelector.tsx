@@ -12,24 +12,24 @@ interface StepTypeSelectorProps {
 const stepTypes = [
   {
     value: 'prime',
-    label: 'One-time',
+    label: 'Prime',
     icon: CheckCircle,
     color: 'bg-green-500',
-    description: 'Required, one-time step that must be fully completed before moving on'
+    description: 'One-time step with fixed time estimates regardless of project scale'
   },
   {
-    value: 'repeat',
-    label: 'Per Unit', 
+    value: 'scaled',
+    label: 'Scaled', 
     icon: RotateCcw,
     color: 'bg-blue-500',
-    description: 'Step that is repeated for each unit or item being worked on'
+    description: 'Step that scales based on project size - time estimates multiply by scaling unit'
   },
   {
-    value: 'inspection',
-    label: 'Quality Check',
+    value: 'quality_control',
+    label: 'Quality Control',
     icon: Search,
     color: 'bg-orange-500', 
-    description: 'Quality check or verification step that ensures standards are met'
+    description: 'Quality check or verification step to ensure standards are met'
   }
 ];
 

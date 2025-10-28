@@ -37,17 +37,6 @@ export function CompactTimeEstimation({
     });
   };
 
-  const handleLagTimeChange = (level: 'low' | 'medium' | 'high', value: string) => {
-    const numValue = parseFloat(value) || 0;
-    onChange({
-      ...step.timeEstimation,
-      lagTime: {
-        ...step.timeEstimation?.lagTime,
-        [level]: numValue
-      }
-    });
-  };
-
   return (
     <div className="space-y-4 border rounded-md p-4">
       <h3 className="text-sm font-medium flex items-center gap-2">
@@ -99,53 +88,6 @@ export function CompactTimeEstimation({
         
         <p className="text-[10px] text-muted-foreground">
           Active work time per {getScalingUnitDisplay()}
-        </p>
-      </div>
-
-      {/* Wait Time Section */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Pause className="w-3 h-3 text-primary" />
-          <Label className="text-xs font-medium">Wait Time (hours total)</Label>
-        </div>
-        
-        <div className="grid grid-cols-6 gap-2 items-center text-xs">
-          <Label className="text-green-700 font-medium">Best</Label>
-          <Input
-            type="number"
-            step="0.5"
-            min="0"
-            placeholder="0.0"
-            value={step.timeEstimation?.lagTime?.low || ''}
-            onChange={(e) => handleLagTimeChange('low', e.target.value)}
-            className="h-6 text-xs"
-          />
-          
-          <Label className="text-blue-700 font-medium">Typical</Label>
-          <Input
-            type="number"
-            step="0.5"
-            min="0"
-            placeholder="0.0"
-            value={step.timeEstimation?.lagTime?.medium || ''}
-            onChange={(e) => handleLagTimeChange('medium', e.target.value)}
-            className="h-6 text-xs"
-          />
-          
-          <Label className="text-red-700 font-medium">Worst</Label>
-          <Input
-            type="number"
-            step="0.5"
-            min="0"
-            placeholder="0.0"
-            value={step.timeEstimation?.lagTime?.high || ''}
-            onChange={(e) => handleLagTimeChange('high', e.target.value)}
-            className="h-6 text-xs"
-          />
-        </div>
-        
-        <p className="text-[10px] text-muted-foreground">
-          Wait time (drying, curing, delivery, etc.) - independent of project size
         </p>
       </div>
     </div>
