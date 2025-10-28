@@ -1886,6 +1886,38 @@ export type Database = {
           },
         ]
       }
+      project_owners: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_owners_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_plans: {
         Row: {
           contingency_percent: number
@@ -3242,7 +3274,7 @@ export type Database = {
       has_project_owner_role: { Args: { _user_id: string }; Returns: boolean }
       is_admin: { Args: { user_id: string }; Returns: boolean }
       is_project_owner: {
-        Args: { _project_id: string; _user_id: string }
+        Args: { project_id_param: string; user_id_param: string }
         Returns: boolean
       }
       log_comprehensive_security_event: {

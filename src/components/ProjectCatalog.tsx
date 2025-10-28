@@ -913,9 +913,9 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
                     <div className="flex items-center gap-0">
                       {/* Cover Image or Icon */}
                       <div className="flex-shrink-0 w-24 h-24">
-                        {((project as any).cover_image || project.image) ? (
+                        {((project as any).cover_image || project.image || (project as any).images?.[0]) ? (
                           <img 
-                            src={(project as any).cover_image || project.image} 
+                            src={(project as any).cover_image || project.image || (project as any).images?.[0]} 
                             alt={project.name}
                             className="w-full h-full object-cover"
                           />
@@ -957,10 +957,10 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
                     }}
                   >
                     {/* Cover Image or Gradient Header */}
-                    {((project as any).cover_image || project.image) ? (
+                    {((project as any).cover_image || project.image || (project as any).images?.[0]) ? (
                       <div className="h-48 relative overflow-hidden">
                         <img 
-                          src={(project as any).cover_image || project.image} 
+                          src={(project as any).cover_image || project.image || (project as any).images?.[0]} 
                           alt={project.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />

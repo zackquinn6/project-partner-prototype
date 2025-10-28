@@ -28,13 +28,16 @@ export const MemoizedProjectCard = React.memo<MemoizedProjectCardProps>(({
   // Count only non-standard phases (exclude phases where isStandard === true)
   const nonStandardPhaseCount = project.phases?.filter(phase => phase.isStandard !== true).length || 0;
   
+  // Get the cover image - check multiple possible fields
+  const coverImage = (project as any).cover_image || project.image || (project as any).images?.[0];
+  
   return (
     <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105">
       {/* Cover Image */}
-      {((project as any).cover_image || project.image) && (
+      {coverImage && (
         <div className="w-full h-40 overflow-hidden">
           <img 
-            src={(project as any).cover_image || project.image} 
+            src={coverImage} 
             alt={project.name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
           />

@@ -837,8 +837,9 @@ export function UnifiedProjectManagement() {
                          <Separator className="my-4" />
                          <ProjectOwnershipSelector
                            projectId={selectedProject.id}
-                           currentOwnerId={selectedProject.owner_id}
-                           onOwnerChange={(ownerId) => setSelectedProject(prev => prev ? {...prev, owner_id: ownerId} : null)}
+                           onOwnersChange={() => {
+                             // Optionally refresh project data
+                           }}
                            disabled={editingProject}
                          />
 
