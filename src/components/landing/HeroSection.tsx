@@ -43,7 +43,7 @@ export const HeroSection = ({
               Run one great project - not training a career builder
             </p>
 
-            <p className="text-base text-muted-foreground">Join DIYers who use Project Partner to get better project results</p>
+            
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
