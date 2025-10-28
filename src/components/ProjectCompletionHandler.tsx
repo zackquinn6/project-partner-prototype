@@ -1,22 +1,91 @@
-import { useEffect } from 'react';
-import { useAchievements } from '@/hooks/useAchievements';
+import { useEffect, useRef } from 'react';
+import { useEnhancedAchievements } from '@/hooks/useEnhancedAchievements';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProjectCompletionHandlerProps {
   projectRunId?: string;
   status?: string;
+  currentPhaseId?: string;
+  completedSteps?: Set<string>;
 }
 
-export function ProjectCompletionHandler({ projectRunId, status }: ProjectCompletionHandlerProps) {
+export function ProjectCompletionHandler({ 
+  projectRunId, 
+  status, 
+  currentPhaseId,
+  completedSteps 
+}: ProjectCompletionHandlerProps) {
   const { user } = useAuth();
-  const { checkAndUnlockAchievements } = useAchievements(user?.id);
+  const { checkAndUnlockAchievements, awardXP, calculateXPForProject } = useEnhancedAchievements(user?.id);
+  const lastPhaseRef = useRef<string>('');
+  const lastProjectStatusRef = useRef<string>('');
 
+  // Award XP when phase is completed
   useEffect(() => {
-    if (status === 'completed' && projectRunId && user) {
-      // Check achievements when project is completed
-      checkAndUnlockAchievements({ projectRunId });
-    }
-  }, [status, projectRunId, user, checkAndUnlockAchievements]);
+    if (!user || !projectRunId || !currentPhaseId) return;
+
+    const handlePhaseCompletion = async () => {
+      if (lastPhaseRef.current !== currentPhaseId) {
+        lastPhaseRef.current = currentPhaseId;
+
+        // Fetch project data
+        const { data: projectRun } = await supabase
+          .from('project_runs')
+          .select('*')
+          .eq('id', projectRunId)
+          .single();
+
+        if (projectRun) {
+          // Calculate XP based on completed steps in this phase
+          const phaseSteps = completedSteps?.size || 0;
+          const xpAmount = Math.floor(phaseSteps * 50 * 1.2); // Bonus for phase completion
+
+          await awardXP(
+            xpAmount,
+            `Phase completed: ${currentPhaseId}`,
+            projectRunId,
+            currentPhaseId
+          );
+        }
+      }
+    };
+
+    handlePhaseCompletion();
+  }, [currentPhaseId, projectRunId, user, awardXP, completedSteps]);
+
+  // Check achievements when project is completed
+  useEffect(() => {
+    if (!user || !projectRunId || !status) return;
+
+    const handleProjectCompletion = async () => {
+      if (status === 'completed' && lastProjectStatusRef.current !== 'completed') {
+        lastProjectStatusRef.current = 'completed';
+
+        // Fetch project data
+        const { data: projectRun } = await supabase
+          .from('project_runs')
+          .select('*')
+          .eq('id', projectRunId)
+          .single();
+
+        if (projectRun) {
+          // Award completion XP
+          const completionXP = calculateXPForProject(projectRun);
+          await awardXP(
+            completionXP,
+            `Project completed: ${projectRun.name}`,
+            projectRunId
+          );
+
+          // Check and unlock achievements
+          await checkAndUnlockAchievements(projectRun);
+        }
+      }
+    };
+
+    handleProjectCompletion();
+  }, [status, projectRunId, user, checkAndUnlockAchievements, awardXP, calculateXPForProject]);
 
   return null;
 }

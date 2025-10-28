@@ -14,8 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievement_notifications: {
+        Row: {
+          achievement_id: string
+          created_at: string
+          id: string
+          is_read: boolean | null
+          project_run_id: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          project_run_id?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          project_run_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievement_notifications_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievement_notifications_project_run_id_fkey"
+            columns: ["project_run_id"]
+            isOneToOne: false
+            referencedRelation: "project_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       achievements: {
         Row: {
+          base_xp: number | null
           category: string
           created_at: string
           criteria: Json
@@ -24,9 +67,11 @@ export type Database = {
           id: string
           name: string
           points: number | null
+          scales_with_project_size: boolean | null
           updated_at: string
         }
         Insert: {
+          base_xp?: number | null
           category: string
           created_at?: string
           criteria?: Json
@@ -35,9 +80,11 @@ export type Database = {
           id?: string
           name: string
           points?: number | null
+          scales_with_project_size?: boolean | null
           updated_at?: string
         }
         Update: {
+          base_xp?: number | null
           category?: string
           created_at?: string
           criteria?: Json
@@ -46,6 +93,7 @@ export type Database = {
           id?: string
           name?: string
           points?: number | null
+          scales_with_project_size?: boolean | null
           updated_at?: string
         }
         Relationships: []
@@ -1842,6 +1890,41 @@ export type Database = {
           },
         ]
       }
+      project_certificates: {
+        Row: {
+          certificate_data: Json
+          generated_at: string
+          id: string
+          project_run_id: string
+          shared_via_email: boolean | null
+          user_id: string
+        }
+        Insert: {
+          certificate_data: Json
+          generated_at?: string
+          id?: string
+          project_run_id: string
+          shared_via_email?: boolean | null
+          user_id: string
+        }
+        Update: {
+          certificate_data?: Json
+          generated_at?: string
+          id?: string
+          project_run_id?: string
+          shared_via_email?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_certificates_project_run_id_fkey"
+            columns: ["project_run_id"]
+            isOneToOne: false
+            referencedRelation: "project_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_owner_invitations: {
         Row: {
           created_at: string
@@ -2707,23 +2790,29 @@ export type Database = {
         Row: {
           achievement_id: string
           id: string
+          notification_sent: boolean | null
           progress: Json | null
           unlocked_at: string
           user_id: string
+          xp_earned: number | null
         }
         Insert: {
           achievement_id: string
           id?: string
+          notification_sent?: boolean | null
           progress?: Json | null
           unlocked_at?: string
           user_id: string
+          xp_earned?: number | null
         }
         Update: {
           achievement_id?: string
           id?: string
+          notification_sent?: boolean | null
           progress?: Json | null
           unlocked_at?: string
           user_id?: string
+          xp_earned?: number | null
         }
         Relationships: [
           {
@@ -2844,6 +2933,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_xp_history: {
+        Row: {
+          created_at: string
+          id: string
+          phase_name: string | null
+          project_run_id: string | null
+          reason: string
+          user_id: string
+          xp_amount: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          phase_name?: string | null
+          project_run_id?: string | null
+          reason: string
+          user_id: string
+          xp_amount: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          phase_name?: string | null
+          project_run_id?: string | null
+          reason?: string
+          user_id?: string
+          xp_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_xp_history_project_run_id_fkey"
+            columns: ["project_run_id"]
+            isOneToOne: false
+            referencedRelation: "project_runs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       variation_attribute_values: {
         Row: {

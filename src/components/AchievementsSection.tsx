@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAchievements } from '@/hooks/useAchievements';
+import { useEnhancedAchievements } from '@/hooks/useEnhancedAchievements';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -19,7 +19,16 @@ const iconMap: Record<string, any> = {
 
 export function AchievementsSection() {
   const { user } = useAuth();
-  const { achievements, userAchievements, loading, totalPoints } = useAchievements(user?.id);
+  const { 
+    achievements, 
+    userAchievements, 
+    xpHistory,
+    loading, 
+    totalXP,
+    totalPoints,
+    level,
+    xpForNextLevel
+  } = useEnhancedAchievements(user?.id);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const categories = [
@@ -69,23 +78,34 @@ export function AchievementsSection() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Total Points</p>
-              <p className="text-3xl font-bold text-primary">{totalPoints}</p>
+              <p className="text-sm text-muted-foreground">Level</p>
+              <p className="text-3xl font-bold text-primary">{level}</p>
             </div>
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Unlocked</p>
+              <p className="text-sm text-muted-foreground">Total XP</p>
+              <p className="text-3xl font-bold text-accent">{totalXP.toLocaleString()}</p>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">
+                  {xpForNextLevel - totalXP} XP to level {level + 1}
+                </p>
+                <Progress 
+                  value={((totalXP % xpForNextLevel) / xpForNextLevel) * 100} 
+                  className="h-2" 
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Points</p>
+              <p className="text-3xl font-bold">{totalPoints}</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Achievements</p>
               <p className="text-3xl font-bold">
                 {unlockedCount} / {totalCount}
               </p>
-            </div>
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Completion</p>
-              <div className="space-y-1">
-                <p className="text-3xl font-bold">{completionPercentage.toFixed(0)}%</p>
-                <Progress value={completionPercentage} className="h-2" />
-              </div>
+              <Progress value={completionPercentage} className="h-2" />
             </div>
           </div>
         </CardContent>

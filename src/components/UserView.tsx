@@ -49,6 +49,7 @@ import { isKickoffPhaseComplete } from '@/utils/projectUtils';
 import { markOrderingStepIncompleteIfNeeded, extractProjectToolsAndMaterials } from '@/utils/shoppingUtils';
 import { MobileDIYDropdown } from './MobileDIYDropdown';
 import { ProjectCompletionHandler } from './ProjectCompletionHandler';
+import { ProjectCertificateDialog } from './ProjectCertificateDialog';
 interface UserViewProps {
   resetToListing?: boolean;
   forceListingMode?: boolean;
@@ -1162,10 +1163,12 @@ export default function UserView({
     
   return (
     <div className="min-h-screen">
-      {/* Achievement tracking component */}
+      {/* Achievement tracking component - pass current phase and steps */}
       <ProjectCompletionHandler 
         projectRunId={currentProjectRun?.id} 
-        status={currentProjectRun?.status} 
+        status={currentProjectRun?.status}
+        currentPhaseId={currentProjectRun?.currentPhaseId}
+        completedSteps={completedSteps}
       />
       
       {(

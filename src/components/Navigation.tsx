@@ -12,6 +12,7 @@ import { FeatureRoadmapWindow } from './FeatureRoadmapWindow';
 import { AppDocumentationWindow } from './AppDocumentationWindow';
 import { ToolsMaterialsWindow } from './ToolsMaterialsWindow';
 import { ExpertHelpWindow } from './ExpertHelpWindow';
+import { AchievementNotificationCenter } from './AchievementNotificationCenter';
 
 interface NavigationProps {
   currentView: 'home' | 'admin' | 'user' | 'editWorkflow';
@@ -203,6 +204,9 @@ export default function Navigation({
               <Headphones className="h-4 w-4 mr-0 sm:mr-2" />
               <span className="hidden sm:inline">Call the Trades</span>
             </Button>
+            
+            {/* Achievement Notification Center */}
+            <AchievementNotificationCenter />
             
             {/* Settings Dropdown - Always visible */}
             <DropdownMenu>
