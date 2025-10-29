@@ -385,20 +385,23 @@ export default function EditWorkflowView({
         const { error } = await supabase
           .from('template_steps')
           .update({
-            apps: editingStep.apps || [] as any,
+            step_title: editingStep.step,
+            step_number: (editingStep as any).stepNumber || 0,
+            description: editingStep.description,
+            content_sections: (editingStep.contentSections || editingStep.content) as any,
             materials: editingStep.materials || [] as any,
             tools: editingStep.tools || [] as any,
             outputs: editingStep.outputs || [] as any,
-            content_sections: (editingStep.contentSections || editingStep.content) as any,
-            description: editingStep.description,
+            apps: editingStep.apps || [] as any,
             estimated_time_minutes: (editingStep as any).estimated_time || 0,
+            flow_type: (editingStep as any).flowType || null,
             updated_at: new Date().toISOString()
           })
           .eq('id', editingStep.id);
         
         if (error) {
           console.error('SaveEdit: Error updating template_steps:', error);
-          toast.error("Warning: Step saved to project but failed to sync to template. Apps may not appear in new projects.");
+          toast.error("Warning: Step saved to project but failed to sync to template. Changes may not appear in new projects.");
         } else {
           console.log('SaveEdit: Successfully synced to template_steps');
         }
