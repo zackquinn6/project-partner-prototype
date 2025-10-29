@@ -213,7 +213,7 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
                   ...prev,
                   description: e.target.value
                 }))}
-                placeholder="Add any personal notes, goals, or special considerations for your project"
+                placeholder=""
                 rows={3}
               />
             </div>
