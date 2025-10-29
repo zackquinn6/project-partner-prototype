@@ -152,38 +152,16 @@ export default function Navigation({
                 Home
               </Button>
               
-              <Button
-                variant={currentView === 'user' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => {
-                  console.log('🔄 Navigation: My Projects clicked - checking access');
-                  
-                  // Check if user has access to paid features
-                  if (!canAccessPaidFeatures) {
-                    console.log('🔒 Navigation: Access denied - showing upgrade prompt');
-                    setShowUpgradePrompt(true);
-                    return;
-                  }
-                  
-                  console.log('✅ Navigation: Access granted - clearing current project');
-                  setCurrentProjectRun(null);
-                  setCurrentProject(null);
-                  onViewChange('user');
-                  onProjectsView?.();
-                }}
-                className="text-xs"
-              >
-                <FolderOpen className="h-4 w-4 mr-2" />
-                Progress Board
-              </Button>
-            </div>
-            
-            {/* Project selector dropdown - only show on desktop */}
-            {!isMobile && (
+              {/* Combined Progress Board / Project Selector Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-sm max-w-64 truncate">
-                    {currentProjectRun ? currentProjectRun.name : "Select Project"}
+                  <Button
+                    variant={currentView === 'user' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="text-xs"
+                  >
+                    <FolderOpen className="h-4 w-4 mr-2" />
+                    {currentProjectRun ? currentProjectRun.name : "Progress Board"}
                     <ChevronDown className="h-4 w-4 ml-2" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -192,6 +170,33 @@ export default function Navigation({
                   className="w-80 z-50 bg-background border shadow-lg"
                   sideOffset={8}
                 >
+                  {/* My Projects Link at top */}
+                  <DropdownMenuItem
+                    onClick={() => {
+                      console.log('🔄 Navigation: My Projects clicked - checking access');
+                      
+                      if (!canAccessPaidFeatures) {
+                        console.log('🔒 Navigation: Access denied - showing upgrade prompt');
+                        setShowUpgradePrompt(true);
+                        return;
+                      }
+                      
+                      console.log('✅ Navigation: Access granted - clearing current project');
+                      setCurrentProjectRun(null);
+                      setCurrentProject(null);
+                      onViewChange('user');
+                      onProjectsView?.();
+                    }}
+                    className="font-semibold text-primary hover:text-primary hover:bg-primary/10 py-3"
+                  >
+                    <FolderOpen className="h-4 w-4 mr-2" />
+                    My Projects
+                  </DropdownMenuItem>
+                  
+                  {/* Divider */}
+                  <div className="h-px bg-border my-1" />
+                  
+                  {/* Active Projects List */}
                   {activeProjectRuns.length > 0 ? (
                     activeProjectRuns.map((run) => (
                       <DropdownMenuItem
@@ -206,13 +211,13 @@ export default function Navigation({
                       </DropdownMenuItem>
                     ))
                   ) : (
-                    <DropdownMenuItem disabled>
+                    <DropdownMenuItem disabled className="text-muted-foreground italic">
                       No active projects
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
