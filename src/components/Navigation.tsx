@@ -354,8 +354,6 @@ export default function Navigation({
            open={isMembershipOpen}
            onOpenChange={setIsMembershipOpen}
          />
-         
-         <AchievementNotificationCenter />
     </>
   );
 }
