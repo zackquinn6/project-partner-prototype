@@ -6,6 +6,7 @@ import { ProjectDataProvider } from '@/contexts/ProjectDataContext';
 import { ProjectActionsProvider } from '@/contexts/ProjectActionsContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { GuestProvider } from '@/contexts/GuestContext';
+import { MembershipProvider } from '@/contexts/MembershipContext';
 import { SecurityMaintenanceProvider } from '@/components/SecurityMaintenanceProvider';
 import { SecurityHeadersProvider } from '@/components/SecurityHeadersProvider';
 // Temporarily disabled due to initialization order issues
@@ -26,11 +27,12 @@ const App: React.FC = () => {
       <SecurityHeadersProvider>
         <GuestProvider>
           <AuthProvider>
-            <SecurityMaintenanceProvider>
-              <TempQuizProvider>
-                <ProjectDataProvider>
-                  <ProjectActionsProvider>
-                    <ProjectProvider>
+            <MembershipProvider>
+              <SecurityMaintenanceProvider>
+                <TempQuizProvider>
+                  <ProjectDataProvider>
+                    <ProjectActionsProvider>
+                      <ProjectProvider>
                     <BrowserRouter>
                       <Routes>
                         <Route path="/" element={<Index />} />
@@ -41,11 +43,12 @@ const App: React.FC = () => {
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </BrowserRouter>
-                    </ProjectProvider>
-                  </ProjectActionsProvider>
-                </ProjectDataProvider>
-              </TempQuizProvider>
-            </SecurityMaintenanceProvider>
+                      </ProjectProvider>
+                    </ProjectActionsProvider>
+                  </ProjectDataProvider>
+                </TempQuizProvider>
+              </SecurityMaintenanceProvider>
+            </MembershipProvider>
           </AuthProvider>
         </GuestProvider>
       </SecurityHeadersProvider>
