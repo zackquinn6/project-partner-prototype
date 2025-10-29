@@ -320,24 +320,6 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
       <div className="min-h-96">
         {renderCurrentStep()}
       </div>
-
-      {/* Completion Message */}
-      {allKickoffStepsComplete && (
-        <Card className="border-green-200 bg-green-50">
-          <CardContent className="p-6 text-center">
-            <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-green-800 mb-2">
-              Kickoff Complete! 🎉
-            </h3>
-            <p className="text-green-700 mb-4">
-              Nice work — you've wrapped up all your kickoff steps! Your full project workflow is ready and waiting for you to dive in.
-            </p>
-            <Button onClick={onKickoffComplete} className="bg-green-600 hover:bg-green-700">
-              Start Project Workflow
-            </Button>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
