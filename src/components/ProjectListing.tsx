@@ -232,7 +232,7 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Project {projectRun.isManualEntry ? 'Entry' : 'Run'}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete "{projectRun.customProjectName || projectRun.name}"? 
+                                Are you sure you want to delete this project?
                                 {projectRun.isManualEntry 
                                   ? ' This will permanently delete your manual project entry.'
                                   : ' This will only delete your personal project instance, not the original template.'
@@ -382,7 +382,7 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete Project {projectRun.isManualEntry ? 'Entry' : 'Run'}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete "{projectRun.customProjectName || projectRun.name}"? 
+                                  Are you sure you want to delete this project? 
                                   {projectRun.isManualEntry 
                                     ? ' This will permanently delete your manual project entry.'
                                     : ' This will only delete your personal project instance, not the original template.'
