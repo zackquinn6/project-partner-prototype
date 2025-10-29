@@ -1812,6 +1812,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          agreement_signed_at: string | null
           avatar_url: string | null
           avoid_projects: string[] | null
           created_at: string
@@ -1828,6 +1829,7 @@ export type Database = {
           owned_tools: Json | null
           physical_capability: string | null
           preferred_learning_methods: string[] | null
+          signed_agreement: Json | null
           skill_level: string | null
           space_type: string | null
           survey_completed_at: string | null
@@ -1835,6 +1837,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          agreement_signed_at?: string | null
           avatar_url?: string | null
           avoid_projects?: string[] | null
           created_at?: string
@@ -1851,6 +1854,7 @@ export type Database = {
           owned_tools?: Json | null
           physical_capability?: string | null
           preferred_learning_methods?: string[] | null
+          signed_agreement?: Json | null
           skill_level?: string | null
           space_type?: string | null
           survey_completed_at?: string | null
@@ -1858,6 +1862,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          agreement_signed_at?: string | null
           avatar_url?: string | null
           avoid_projects?: string[] | null
           created_at?: string
@@ -1874,6 +1879,7 @@ export type Database = {
           owned_tools?: Json | null
           physical_capability?: string | null
           preferred_learning_methods?: string[] | null
+          signed_agreement?: Json | null
           skill_level?: string | null
           space_type?: string | null
           survey_completed_at?: string | null

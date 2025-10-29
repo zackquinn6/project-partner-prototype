@@ -47,21 +47,6 @@ export const createKickoffPhase = (): Phase => {
         description: 'Project profile configured and saved',
         type: 'none' as const
       }]
-    },
-    {
-      id: 'kickoff-step-4',
-      step: 'Service Terms',
-      description: 'Review and sign the service terms',
-      contentType: 'text' as const,
-      content: 'Please review the service terms and provide your digital signature to proceed.',
-      materials: [],
-      tools: [],
-      outputs: [{
-        id: 'agreement-output',
-        name: 'Signed Agreement',
-        description: 'Service terms signed and documented',
-        type: 'none' as const
-      }]
     }
   ];
 

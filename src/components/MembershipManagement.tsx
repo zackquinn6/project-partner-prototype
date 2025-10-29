@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useMembership } from '@/contexts/MembershipContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { CreditCard, Clock, Gift, Crown } from 'lucide-react';
 import { format } from 'date-fns';
+import { MembershipAgreementDialog } from './MembershipAgreementDialog';
 
 export const MembershipManagement: React.FC = () => {
   const {
@@ -20,9 +23,28 @@ export const MembershipManagement: React.FC = () => {
     redeemCoupon,
     trialDaysRemaining,
   } = useMembership();
-
+  
+  const { user } = useAuth();
   const [couponCode, setCouponCode] = useState('');
   const [redeeming, setRedeeming] = useState(false);
+  const [showAgreementDialog, setShowAgreementDialog] = useState(false);
+  const [hasSignedAgreement, setHasSignedAgreement] = useState(false);
+
+  useEffect(() => {
+    const checkAgreement = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('signed_agreement')
+        .eq('user_id', user.id)
+        .single();
+      
+      setHasSignedAgreement(!!data?.signed_agreement);
+    };
+    
+    checkAgreement();
+  }, [user]);
 
   const handleRedeemCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -30,6 +52,19 @@ export const MembershipManagement: React.FC = () => {
     await redeemCoupon(couponCode);
     setCouponCode('');
     setRedeeming(false);
+  };
+
+  const handleSubscribeClick = () => {
+    if (!hasSignedAgreement) {
+      setShowAgreementDialog(true);
+    } else {
+      createCheckout();
+    }
+  };
+
+  const handleAgreementSigned = () => {
+    setHasSignedAgreement(true);
+    createCheckout();
   };
 
   if (loading) {
@@ -105,7 +140,7 @@ export const MembershipManagement: React.FC = () => {
                 <p className="text-sm text-muted-foreground">
                   Upgrade to unlock the Project Catalog and Project Workflows for just $25/year.
                 </p>
-                <Button onClick={createCheckout} className="w-full">
+                <Button onClick={handleSubscribeClick} className="w-full">
                   Subscribe Now - $25/year
                 </Button>
               </div>
@@ -195,6 +230,12 @@ export const MembershipManagement: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <MembershipAgreementDialog
+        open={showAgreementDialog}
+        onOpenChange={setShowAgreementDialog}
+        onAgreementSigned={handleAgreementSigned}
+      />
     </div>
   );
 };

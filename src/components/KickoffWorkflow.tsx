@@ -7,7 +7,6 @@ import { useProject } from '@/contexts/ProjectContext';
 import { DIYProfileStep } from './KickoffSteps/DIYProfileStep';
 import { ProjectOverviewStep } from './KickoffSteps/ProjectOverviewStep';
 import { ProjectProfileStep } from './KickoffSteps/ProjectProfileStep';
-import { ProjectAgreementStep } from './KickoffSteps/ProjectAgreementStep';
 
 interface KickoffWorkflowProps {
   onKickoffComplete: () => void;
@@ -35,18 +34,13 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
       id: 'kickoff-step-3',
       title: 'Project Profile',
       description: 'Set up your project team and home selection'
-    },
-    {
-      id: 'kickoff-step-4', 
-      title: 'Service Terms',
-      description: 'Review and sign the service terms'
     }
   ];
 
   // Initialize completed steps from project run data
   useEffect(() => {
     if (currentProjectRun?.completedSteps) {
-      const kickoffStepIds = ['kickoff-step-1', 'kickoff-step-2', 'kickoff-step-3', 'kickoff-step-4'];
+      const kickoffStepIds = ['kickoff-step-1', 'kickoff-step-2', 'kickoff-step-3'];
       const completedIndices = new Set<number>();
       
       console.log("KickoffWorkflow - Initializing from project run:", {
@@ -74,7 +68,7 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
         setCurrentKickoffStep(firstIncomplete);
       } else {
         console.log("KickoffWorkflow - All steps complete, showing last step");
-        setCurrentKickoffStep(3); // All complete, show last step (index 3 for 4 steps)
+        setCurrentKickoffStep(2); // All complete, show last step (index 2 for 3 steps)
       }
     }
   }, [currentProjectRun]);
@@ -226,8 +220,6 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
         return <ProjectOverviewStep {...stepProps} />;
       case 2:
         return <ProjectProfileStep {...stepProps} />;
-      case 3:
-        return <ProjectAgreementStep {...stepProps} />;
       default:
         return null;
     }
