@@ -274,11 +274,22 @@ export default function UserView({
   ) : [];
   
   // Initialize completed steps from project run data
+  // CRITICAL: Re-initialize whenever currentProjectRun changes, not just completedSteps
   useEffect(() => {
     if (currentProjectRun?.completedSteps) {
+      console.log("🔄 UserView: Initializing completed steps from project run:", {
+        projectRunId: currentProjectRun.id,
+        projectName: currentProjectRun.name,
+        completedStepsCount: currentProjectRun.completedSteps.length,
+        completedSteps: currentProjectRun.completedSteps
+      });
       setCompletedSteps(new Set(currentProjectRun.completedSteps));
+    } else if (currentProjectRun) {
+      // Clear completed steps if project run has no completed steps
+      console.log("🔄 UserView: Clearing completed steps for new project run");
+      setCompletedSteps(new Set());
     }
-  }, [currentProjectRun?.completedSteps]);
+  }, [currentProjectRun?.id, currentProjectRun?.completedSteps]);
   
   // Navigate to first incomplete step when workflow opens - ENHANCED DEBUG VERSION
   useEffect(() => {
@@ -422,6 +433,15 @@ export default function UserView({
     allSteps.some(step => step.id === stepId)
   );
   const progress = allSteps.length > 0 ? (workflowCompletedSteps.length / allSteps.length) * 100 : 0;
+  
+  console.log('📊 Progress Calculation:', {
+    totalSteps: allSteps.length,
+    workflowCompletedSteps: workflowCompletedSteps.length,
+    completedStepsFromState: completedSteps.size,
+    calculatedProgress: progress,
+    projectRunProgress: currentProjectRun?.progress,
+    projectRunCompletedSteps: currentProjectRun?.completedSteps?.length
+  });
   
   // Debug current step to identify materials/tools/apps issue
   console.log('🔧 Current step debug:', {

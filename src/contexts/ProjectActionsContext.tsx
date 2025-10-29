@@ -421,7 +421,17 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
       clearTimeout(updateTimeoutRef.current);
     }
 
-    // Debounce updates to prevent rapid-fire calls
+    // IMMEDIATE optimistic cache update - no debounce for step completion
+    const safeProgress = Math.round(projectRun.progress || 0);
+    const updatedProjectRun = { ...projectRun, progress: safeProgress };
+    const updatedProjectRuns = projectRuns.map(run => run.id === projectRun.id ? updatedProjectRun : run);
+    updateProjectRunsCache(updatedProjectRuns);
+    
+    if (currentProjectRun?.id === projectRun.id) {
+      setCurrentProjectRun(updatedProjectRun);
+    }
+
+    // Debounce the database write (but cache is already updated)
     updateTimeoutRef.current = setTimeout(async () => {
       // Prevent concurrent updates
       if (updateInProgressRef.current) {
@@ -434,8 +444,6 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
       lastUpdateRef.current = updateKey;
 
       try {
-        const safeProgress = Math.round(projectRun.progress || 0);
-
         const { error } = await supabase
           .from('project_runs')
           .update({
@@ -467,16 +475,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
 
         if (error) throw error;
 
-        // Optimistically update cache
-        const updatedProjectRun = { ...projectRun, progress: safeProgress };
-        const updatedProjectRuns = projectRuns.map(run => run.id === projectRun.id ? updatedProjectRun : run);
-        updateProjectRunsCache(updatedProjectRuns);
-        
-        if (currentProjectRun?.id === projectRun.id) {
-          setCurrentProjectRun(updatedProjectRun);
-        }
-
-        console.log("✅ ProjectActions - Project run updated successfully");
+        console.log("✅ ProjectActions - Project run updated successfully in database");
         
       } catch (error) {
         console.error('❌ Error updating project run:', error);
@@ -488,7 +487,7 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
       } finally {
         updateInProgressRef.current = false;
       }
-    }, 300); // 300ms debounce
+    }, 300); // 300ms debounce for DB write only
   }, [isGuest, updateGuestProjectRun, user, projectRuns, updateProjectRunsCache, currentProjectRun, setCurrentProjectRun]);
 
   const deleteProject = useCallback(async (projectId: string) => {

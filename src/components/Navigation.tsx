@@ -115,7 +115,12 @@ export default function Navigation({
   const handleProjectSelect = (projectRunId: string) => {
     const selectedRun = projectRuns.find(run => run.id === projectRunId);
     if (selectedRun) {
-      console.log('🎯 Navigation: Project selected from dropdown:', selectedRun.name);
+      console.log('🎯 Navigation: Project selected from dropdown:', {
+        name: selectedRun.name,
+        progress: selectedRun.progress,
+        completedStepsCount: selectedRun.completedSteps?.length || 0,
+        completedSteps: selectedRun.completedSteps
+      });
       setCurrentProjectRun(selectedRun);
       onViewChange('user');
       onProjectSelected?.();
