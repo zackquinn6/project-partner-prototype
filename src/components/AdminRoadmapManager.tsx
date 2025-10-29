@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Plus, Edit, Trash2, Calendar, CheckCircle, Clock, AlertCircle, Star, MessageSquare } from 'lucide-react';
 import { AdminFeatureRequestManager } from './AdminFeatureRequestManager';
+import { ResponsiveDialog } from '@/components/ResponsiveDialog';
 
 interface RoadmapItem {
   id: string;
@@ -170,24 +171,25 @@ export const AdminRoadmapManager: React.FC<AdminRoadmapManagerProps> = ({
 
   if (loading) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <div className="flex justify-center py-8">Loading roadmap...</div>
-        </DialogContent>
-      </Dialog>
+      <ResponsiveDialog 
+        open={open} 
+        onOpenChange={onOpenChange}
+        size="content-large"
+        title="Roadmap & Feature Request Management"
+      >
+        <div className="flex justify-center py-8">Loading roadmap...</div>
+      </ResponsiveDialog>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            Roadmap & Feature Request Management
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-6">
+    <ResponsiveDialog 
+      open={open} 
+      onOpenChange={onOpenChange}
+      size="content-large"
+      title="Roadmap & Feature Request Management"
+    >
+      <div className="space-y-6">
           <Tabs defaultValue="roadmap" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="roadmap">Roadmap Items</TabsTrigger>
@@ -309,117 +311,116 @@ export const AdminRoadmapManager: React.FC<AdminRoadmapManagerProps> = ({
                 />
               </div>
             </TabsContent>
-          </Tabs>
-        </div>
+        </Tabs>
+      </div>
 
-        {/* Add/Edit Form */}
-        <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingItem ? 'Edit Roadmap Item' : 'Add Roadmap Item'}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
+      {/* Add/Edit Form */}
+      <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingItem ? 'Edit Roadmap Item' : 'Add Roadmap Item'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                value={roadmapForm.title}
+                onChange={(e) => setRoadmapForm({ ...roadmapForm, title: e.target.value })}
+                placeholder="Feature title"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={roadmapForm.description}
+                onChange={(e) => setRoadmapForm({ ...roadmapForm, description: e.target.value })}
+                placeholder="Feature description"
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  value={roadmapForm.title}
-                  onChange={(e) => setRoadmapForm({ ...roadmapForm, title: e.target.value })}
-                  placeholder="Feature title"
-                />
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={roadmapForm.status}
+                  onValueChange={(value: any) => setRoadmapForm({ ...roadmapForm, status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="planned">Planned</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              
+
               <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={roadmapForm.description}
-                  onChange={(e) => setRoadmapForm({ ...roadmapForm, description: e.target.value })}
-                  placeholder="Feature description"
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={roadmapForm.status}
-                    onValueChange={(value: any) => setRoadmapForm({ ...roadmapForm, status: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="planned">Planned</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="priority">Priority</Label>
-                  <Select
-                    value={roadmapForm.priority}
-                    onValueChange={(value: any) => setRoadmapForm({ ...roadmapForm, priority: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="critical">Critical</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={roadmapForm.category}
-                    onValueChange={(value: any) => setRoadmapForm({ ...roadmapForm, category: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="feature">Feature</SelectItem>
-                      <SelectItem value="improvement">Improvement</SelectItem>
-                      <SelectItem value="bugfix">Bug Fix</SelectItem>
-                      <SelectItem value="integration">Integration</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="target_date">Target Date</Label>
-                  <Input
-                    id="target_date"
-                    type="date"
-                    value={roadmapForm.target_date}
-                    onChange={(e) => setRoadmapForm({ ...roadmapForm, target_date: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowAddForm(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveItem}>
-                  {editingItem ? 'Update Item' : 'Add Item'}
-                </Button>
+                <Label htmlFor="priority">Priority</Label>
+                <Select
+                  value={roadmapForm.priority}
+                  onValueChange={(value: any) => setRoadmapForm({ ...roadmapForm, priority: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      </DialogContent>
-    </Dialog>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={roadmapForm.category}
+                  onValueChange={(value: any) => setRoadmapForm({ ...roadmapForm, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="feature">Feature</SelectItem>
+                    <SelectItem value="improvement">Improvement</SelectItem>
+                    <SelectItem value="bugfix">Bug Fix</SelectItem>
+                    <SelectItem value="integration">Integration</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="target_date">Target Date</Label>
+                <Input
+                  id="target_date"
+                  type="date"
+                  value={roadmapForm.target_date}
+                  onChange={(e) => setRoadmapForm({ ...roadmapForm, target_date: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAddForm(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveItem}>
+                {editingItem ? 'Update Item' : 'Add Item'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </ResponsiveDialog>
   );
 };

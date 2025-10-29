@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 import { MessageSquare, Trash2, Star, Eye, Edit } from 'lucide-react';
+import { ResponsiveDialog } from '@/components/ResponsiveDialog';
 
 interface FeatureRequest {
   id: string;
@@ -145,25 +146,25 @@ export const AdminFeatureRequestManager: React.FC<AdminFeatureRequestManagerProp
 
   if (loading) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <div className="flex justify-center py-8">Loading feature requests...</div>
-        </DialogContent>
-      </Dialog>
+      <ResponsiveDialog 
+        open={open} 
+        onOpenChange={onOpenChange}
+        size="content-large"
+        title="Feature Request Management"
+      >
+        <div className="flex justify-center py-8">Loading feature requests...</div>
+      </ResponsiveDialog>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Star className="w-5 h-5 text-primary" />
-            Feature Request Management
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-6">
+    <ResponsiveDialog 
+      open={open} 
+      onOpenChange={onOpenChange}
+      size="content-large"
+      title="Feature Request Management"
+    >
+      <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Feature Requests ({featureRequests.length})</CardTitle>
@@ -245,83 +246,82 @@ export const AdminFeatureRequestManager: React.FC<AdminFeatureRequestManagerProp
                 </TableBody>
               </Table>
             </CardContent>
-          </Card>
-        </div>
+        </Card>
+      </div>
 
-        {/* Response Form Dialog */}
-        {showResponseForm && selectedRequest && (
-          <Dialog open={showResponseForm} onOpenChange={setShowResponseForm}>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Respond to Feature Request</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                {/* Request Details */}
-                <div className="p-4 bg-muted rounded-lg">
-                  <h3 className="font-semibold">{selectedRequest.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{selectedRequest.description}</p>
-                  <div className="flex gap-2 mt-2">
-                    <Badge variant="outline">{selectedRequest.category}</Badge>
-                    <Badge variant={getPriorityColor(selectedRequest.priority_request) as any}>
-                      {selectedRequest.priority_request}
-                    </Badge>
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={responseForm.status}
-                    onValueChange={(value: any) => setResponseForm({ ...responseForm, status: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="submitted">Submitted</SelectItem>
-                      <SelectItem value="under-review">Under Review</SelectItem>
-                      <SelectItem value="approved">Approved</SelectItem>
-                      <SelectItem value="rejected">Rejected</SelectItem>
-                      <SelectItem value="implemented">Implemented</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="admin_response">Public Response (visible to users)</Label>
-                  <Textarea
-                    id="admin_response"
-                    value={responseForm.admin_response}
-                    onChange={(e) => setResponseForm({ ...responseForm, admin_response: e.target.value })}
-                    placeholder="Enter your response to the user (optional)"
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="admin_notes">Private Notes (admin only)</Label>
-                  <Textarea
-                    id="admin_notes"
-                    value={responseForm.admin_notes}
-                    onChange={(e) => setResponseForm({ ...responseForm, admin_notes: e.target.value })}
-                    placeholder="Internal notes for admin reference (optional)"
-                    rows={2}
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setShowResponseForm(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleSaveResponse}>
-                    Save Response
-                  </Button>
+      {/* Response Form Dialog */}
+      {showResponseForm && selectedRequest && (
+        <Dialog open={showResponseForm} onOpenChange={setShowResponseForm}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Respond to Feature Request</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {/* Request Details */}
+              <div className="p-4 bg-muted rounded-lg">
+                <h3 className="font-semibold">{selectedRequest.title}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{selectedRequest.description}</p>
+                <div className="flex gap-2 mt-2">
+                  <Badge variant="outline">{selectedRequest.category}</Badge>
+                  <Badge variant={getPriorityColor(selectedRequest.priority_request) as any}>
+                    {selectedRequest.priority_request}
+                  </Badge>
                 </div>
               </div>
-            </DialogContent>
-          </Dialog>
-        )}
-      </DialogContent>
-    </Dialog>
+
+              <div>
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={responseForm.status}
+                  onValueChange={(value: any) => setResponseForm({ ...responseForm, status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="submitted">Submitted</SelectItem>
+                    <SelectItem value="under-review">Under Review</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="implemented">Implemented</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="admin_response">Public Response (visible to users)</Label>
+                <Textarea
+                  id="admin_response"
+                  value={responseForm.admin_response}
+                  onChange={(e) => setResponseForm({ ...responseForm, admin_response: e.target.value })}
+                  placeholder="Enter your response to the user (optional)"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="admin_notes">Private Notes (admin only)</Label>
+                <Textarea
+                  id="admin_notes"
+                  value={responseForm.admin_notes}
+                  onChange={(e) => setResponseForm({ ...responseForm, admin_notes: e.target.value })}
+                  placeholder="Internal notes for admin reference (optional)"
+                  rows={2}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowResponseForm(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveResponse}>
+                  Save Response
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </ResponsiveDialog>
   );
 };
