@@ -129,15 +129,21 @@ Deno.serve(async (req) => {
 
         // For each standard operation, copy steps to template
         for (const standardOp of standardOps || []) {
-          // Find matching operation in template (by standard_phase_id)
+          // Find matching operation in template (by standard_phase_id AND name)
           const { data: templateOp, error: templateOpError } = await supabase
             .from('template_operations')
             .select('id')
             .eq('project_id', template.id)
             .eq('standard_phase_id', standardOp.standard_phase_id)
-            .single();
+            .eq('name', standardOp.name)
+            .maybeSingle();
 
-          if (templateOpError || !templateOp) {
+          if (templateOpError) {
+            console.error(`SYNC: Error finding operation "${standardOp.name}":`, templateOpError);
+            continue;
+          }
+
+          if (!templateOp) {
             console.warn(`SYNC: No matching operation in template for ${standardOp.name}`);
             continue;
           }
