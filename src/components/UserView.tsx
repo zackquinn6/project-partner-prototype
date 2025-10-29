@@ -50,6 +50,8 @@ import { markOrderingStepIncompleteIfNeeded, extractProjectToolsAndMaterials } f
 import { MobileDIYDropdown } from './MobileDIYDropdown';
 import { ProjectCompletionHandler } from './ProjectCompletionHandler';
 import { ProjectCertificateDialog } from './ProjectCertificateDialog';
+import { ProjectBudgetingWindow } from './ProjectBudgetingWindow';
+import { ProjectPerformanceWindow } from './ProjectPerformanceWindow';
 interface UserViewProps {
   resetToListing?: boolean;
   forceListingMode?: boolean;
@@ -135,6 +137,8 @@ export default function UserView({
   const [toolsWindowOpen, setToolsWindowOpen] = useState(false);
   const [toolRentalsOpen, setToolRentalsOpen] = useState(false);
   const [homeManagerOpen, setHomeManagerOpen] = useState(false);
+  const [projectBudgetingOpen, setProjectBudgetingOpen] = useState(false);
+  const [projectPerformanceOpen, setProjectPerformanceOpen] = useState(false);
   const [selectedMaterialsForShopping, setSelectedMaterialsForShopping] = useState<{
     materials: any[];
     tools: any[];
@@ -894,6 +898,14 @@ export default function UserView({
       case 'tool-access':
         console.log('🛠️ Launching Tool Access app');
         setToolRentalsOpen(true);
+        break;
+      case 'project-budgeting':
+        console.log('💰 Launching Project Budgeting app');
+        setProjectBudgetingOpen(true);
+        break;
+      case 'project-performance':
+        console.log('📊 Launching Project Performance app');
+        setProjectPerformanceOpen(true);
         break;
       default:
         console.warn('Unknown app action:', app.actionKey);
@@ -2167,6 +2179,18 @@ export default function UserView({
       <HomeManager
         open={homeManagerOpen}
         onOpenChange={setHomeManagerOpen}
+      />
+
+      {/* Project Budgeting Window */}
+      <ProjectBudgetingWindow
+        open={projectBudgetingOpen}
+        onOpenChange={setProjectBudgetingOpen}
+      />
+
+      {/* Project Performance Window */}
+      <ProjectPerformanceWindow
+        open={projectPerformanceOpen}
+        onOpenChange={setProjectPerformanceOpen}
       />
     </>
   );

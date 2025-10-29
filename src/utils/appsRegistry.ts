@@ -57,6 +57,22 @@ export const NATIVE_APPS: Record<string, Omit<AppReference, 'id'>> = {
     actionKey: 'tool-access',
     displayOrder: 7,
     isBeta: true
+  },
+  'project-budgeting': {
+    appName: 'Project Budgeting',
+    appType: 'native',
+    icon: 'DollarSign',
+    description: 'Set budgets and track actual spending',
+    actionKey: 'project-budgeting',
+    displayOrder: 8
+  },
+  'project-performance': {
+    appName: 'Project Performance',
+    appType: 'native',
+    icon: 'TrendingUp',
+    description: 'View project performance dashboard',
+    actionKey: 'project-performance',
+    displayOrder: 9
   }
 };
 

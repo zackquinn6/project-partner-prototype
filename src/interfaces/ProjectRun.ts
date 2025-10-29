@@ -35,6 +35,30 @@ export interface ProjectRun {
   skillLevel?: Project['skillLevel'];
   estimatedTime?: string;
   
+  // Budget tracking data
+  budget_data?: {
+    lineItems: Array<{
+      id: string;
+      section: string;
+      item: string;
+      budgetedAmount: number;
+      actualAmount: number;
+      category: 'material' | 'labor' | 'other';
+      notes?: string;
+    }>;
+    actualEntries: Array<{
+      id: string;
+      lineItemId?: string;
+      description: string;
+      amount: number;
+      date: string;
+      category: 'material' | 'labor' | 'other';
+      receiptUrl?: string;
+      notes?: string;
+    }>;
+    lastUpdated: string;
+  };
+  
   // Analytics data
   phase_ratings?: Array<{
     phaseId: string;
