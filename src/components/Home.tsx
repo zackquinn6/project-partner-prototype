@@ -31,6 +31,7 @@ import { FinalCTASection } from './landing/FinalCTASection';
 import { Footer } from './landing/Footer';
 import { PreSignInNavigation } from '@/components/PreSignInNavigation';
 import { TrialBanner } from '@/components/TrialBanner';
+import { MembershipStatusCard } from '@/components/MembershipStatusCard';
 interface HomeProps {
   onViewChange: (view: 'admin' | 'user') => void;
 }
@@ -140,14 +141,17 @@ export default function Home({
             {/* At a Glance Stats */}
             <div className="border-t border-border pt-1 mb-1">
               <h3 className="text-sm font-medium text-muted-foreground mb-3 text-center">At a Glance</h3>
-              <div className="flex justify-center gap-6 sm:gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                 <div className="text-center">
                   <div className="text-base font-bold text-foreground">{stats.activeProjects || 0}</div>
-                  <div className="text-xs text-muted-foreground">active</div>
+                  <div className="text-xs text-muted-foreground">active projects</div>
                 </div>
                 <div className="text-center">
                   <div className="text-base font-bold text-foreground">{stats.completedProjects || 0}</div>
-                  <div className="text-xs text-muted-foreground">completed</div>
+                  <div className="text-xs text-muted-foreground">completed projects</div>
+                </div>
+                <div className="md:row-span-2">
+                  <MembershipStatusCard />
                 </div>
               </div>
             </div>

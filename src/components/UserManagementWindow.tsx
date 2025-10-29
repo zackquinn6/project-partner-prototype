@@ -2,6 +2,7 @@ import React from 'react';
 import { UserRoleManager } from '@/components/UserRoleManager';
 import { ProjectAgreementsList } from '@/components/ProjectAgreementsList';
 import { ProjectOwnerInvitationsList } from '@/components/ProjectOwnerInvitationsList';
+import { AdminMembershipManager } from '@/components/AdminMembershipManager';
 import { ResponsiveDialog } from '@/components/ResponsiveDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -16,17 +17,22 @@ export const UserManagementWindow: React.FC<UserManagementWindowProps> = ({ open
       open={open}
       onOpenChange={onOpenChange}
       size="content-large"
-      title="User Management"
+      title="User & Membership Management"
     >
       <Tabs defaultValue="roles" className="w-full flex-1 flex flex-col min-h-0">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
           <TabsTrigger value="roles">User Roles</TabsTrigger>
-          <TabsTrigger value="invitations">Project Owner Invitations</TabsTrigger>
-          <TabsTrigger value="agreements">Project Agreements</TabsTrigger>
+          <TabsTrigger value="membership">Membership</TabsTrigger>
+          <TabsTrigger value="invitations">Invitations</TabsTrigger>
+          <TabsTrigger value="agreements">Agreements</TabsTrigger>
         </TabsList>
         
         <TabsContent value="roles" className="flex-1 overflow-y-auto">
           <UserRoleManager />
+        </TabsContent>
+
+        <TabsContent value="membership" className="flex-1 overflow-y-auto">
+          <AdminMembershipManager />
         </TabsContent>
 
         <TabsContent value="invitations" className="flex-1 overflow-y-auto">

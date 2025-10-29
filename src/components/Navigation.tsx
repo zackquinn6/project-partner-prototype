@@ -4,8 +4,10 @@ import { Home, FolderOpen, ChevronDown, Settings, LogOut, User, Users, TrendingU
 import { useProject } from '@/contexts/ProjectContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useMembership } from '@/contexts/MembershipContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { FeedbackDialog } from './FeedbackDialog';
+import { UpgradePrompt } from './UpgradePrompt';
 import { useState, useEffect } from "react";
 import { DataPrivacyManager } from './DataPrivacyManager';
 import { FeatureRoadmapWindow } from './FeatureRoadmapWindow';
@@ -35,6 +37,7 @@ export default function Navigation({
   const [isToolsLibraryOpen, setIsToolsLibraryOpen] = useState(false);
   const [isExpertHelpOpen, setIsExpertHelpOpen] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   
   // Add error boundary for useProject hook
   let projectData;
@@ -53,6 +56,7 @@ export default function Navigation({
   const { projectRuns, currentProjectRun, setCurrentProjectRun, projects, setCurrentProject } = projectData;
   const { signOut, signingOut } = useAuth();
   const { isAdmin } = useUserRole();
+  const { canAccessPaidFeatures } = useMembership();
   const isMobile = useIsMobile();
 
   // Listen for user documentation request from admin guide
@@ -74,8 +78,17 @@ export default function Navigation({
     };
 
     const handleNavigateToProjectsEvent = (event: Event) => {
-      console.log('🔄 Navigation: My Projects event - showing projects listing');
+      console.log('🔄 Navigation: My Projects event - checking access');
       event.stopPropagation();
+      
+      // Check if user has access to paid features
+      if (!canAccessPaidFeatures) {
+        console.log('🔒 Navigation: Access denied - showing upgrade prompt');
+        setShowUpgradePrompt(true);
+        return;
+      }
+      
+      console.log('✅ Navigation: Access granted - showing projects listing');
       onViewChange('user');
       onProjectsView?.();
     };
@@ -141,7 +154,16 @@ export default function Navigation({
                 variant={currentView === 'user' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => {
-                  console.log('🔄 Navigation: My Projects clicked - clearing current project');
+                  console.log('🔄 Navigation: My Projects clicked - checking access');
+                  
+                  // Check if user has access to paid features
+                  if (!canAccessPaidFeatures) {
+                    console.log('🔒 Navigation: Access denied - showing upgrade prompt');
+                    setShowUpgradePrompt(true);
+                    return;
+                  }
+                  
+                  console.log('✅ Navigation: Access granted - clearing current project');
                   setCurrentProjectRun(null);
                   setCurrentProject(null);
                   onViewChange('user');
@@ -309,6 +331,14 @@ export default function Navigation({
           isOpen={isExpertHelpOpen}
           onClose={() => setIsExpertHelpOpen(false)}
         />
+        
+        <UpgradePrompt
+          open={showUpgradePrompt}
+          onOpenChange={setShowUpgradePrompt}
+          feature="Project Catalog & Workflows"
+        />
+        
+        <AchievementNotificationCenter />
     </>
   );
 }
