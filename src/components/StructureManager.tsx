@@ -688,17 +688,16 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                 const isLinkedPhase = phase.isLinked;
                 const isEditing = editingItem?.type === 'phase' && editingItem.id === phase.id;
 
-                // Prevent dragging of standard phases
-                const isDragDisabled = isStandardPhase;
+                // Prevent dragging of standard phases (unless in Edit Standard mode)
+                const isDragDisabled = isStandardPhase && !isEditingStandardProject;
                 return <Draggable key={phase.id} draggableId={phase.id} index={phaseIndex} isDragDisabled={isDragDisabled}>
                       {(provided, snapshot) => <Card ref={provided.innerRef} {...provided.draggableProps} className={`border-2 ${snapshot.isDragging ? 'shadow-lg' : ''} ${isStandardPhase ? 'bg-blue-50 border-blue-200' : isLinkedPhase ? 'bg-purple-50 border-purple-200' : ''}`}>
                           <CardHeader className="py-1 px-2">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1 flex-1">
-                                {!isStandardPhase && <div {...provided.dragHandleProps}>
+                                {!isStandardPhase || isEditingStandardProject ? <div {...provided.dragHandleProps}>
                                     <GripVertical className="w-3 h-3 text-muted-foreground cursor-grab" />
-                                  </div>}
-                                {isStandardPhase && <div className="w-3" />}
+                                  </div> : <div className="w-3" />}
                                 
                                 {isEditing ? <div className="flex-1 space-y-1">
                                     <Input value={editingItem.data.name} onChange={e => setEditingItem({
@@ -735,49 +734,36 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                    </div>}
                               </div>
                               
-                                <div className="flex items-center gap-2">
-                                 <Badge variant="outline">{phase.operations.length} operations</Badge>
-                                 
-                                 {!isStandardPhase && !isLinkedPhase && <>
-                                     <Button size="sm" variant="ghost" onClick={() => copyItem('phase', phase)}>
-                                       <Copy className="w-4 h-4" />
-                                     </Button>
-                                     
-                                     {clipboard?.type === 'phase' && <Button size="sm" variant="ghost" onClick={() => pasteItem('phase')}>
-                                         <Clipboard className="w-4 h-4" />
-                                       </Button>}
-                                     
-                                     {isEditing ? <>
-                                         <Button size="sm" onClick={saveEdit}>
-                                           <Check className="w-4 h-4" />
-                                         </Button>
-                                         <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)}>
-                                           <X className="w-4 h-4" />
-                                         </Button>
-                                       </> : <>
-                                         <Button size="sm" variant="ghost" onClick={() => startEdit('phase', phase.id, phase)}>
-                                           <Edit className="w-4 h-4" />
-                                         </Button>
-                                         
-                                         <Button size="sm" variant="ghost" onClick={() => deletePhase(phase.id)}>
-                                           <Trash2 className="w-4 h-4" />
-                                         </Button>
-                                       </>}
-                                   </>}
-                                 
-                                 {/* Admin-only delete button for standard phases when editing Standard Project */}
-                                 {isEditingStandardProject && isStandardPhase && !isLinkedPhase && !isEditing && (
-                                   <Button 
-                                     size="sm" 
-                                     variant="ghost" 
-                                     onClick={() => deletePhase(phase.id)}
-                                     className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                     title="Admin only: Delete standard phase"
-                                   >
-                                     <Trash2 className="w-4 h-4" />
-                                   </Button>
-                                 )}
-                               </div>
+                                 <div className="flex items-center gap-2">
+                                  <Badge variant="outline">{phase.operations.length} operations</Badge>
+                                  
+                                  {(!isStandardPhase || isEditingStandardProject) && !isLinkedPhase && <>
+                                      {!isStandardPhase && <Button size="sm" variant="ghost" onClick={() => copyItem('phase', phase)}>
+                                        <Copy className="w-4 h-4" />
+                                      </Button>}
+                                      
+                                      {clipboard?.type === 'phase' && !isStandardPhase && <Button size="sm" variant="ghost" onClick={() => pasteItem('phase')}>
+                                          <Clipboard className="w-4 h-4" />
+                                        </Button>}
+                                      
+                                      {isEditing ? <>
+                                          <Button size="sm" onClick={saveEdit}>
+                                            <Check className="w-4 h-4" />
+                                          </Button>
+                                          <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)}>
+                                            <X className="w-4 h-4" />
+                                          </Button>
+                                        </> : <>
+                                          <Button size="sm" variant="ghost" onClick={() => startEdit('phase', phase.id, phase)}>
+                                            <Edit className="w-4 h-4" />
+                                          </Button>
+                                          
+                                          <Button size="sm" variant="ghost" onClick={() => deletePhase(phase.id)}>
+                                            <Trash2 className="w-4 h-4" />
+                                          </Button>
+                                        </>}
+                                    </>}
+                                </div>
                             </div>
                            </CardHeader>
                            
@@ -795,14 +781,14 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                               {provided => <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
                                   {phase.operations.map((operation, operationIndex) => {
                                 const isOperationEditing = editingItem?.type === 'operation' && editingItem.id === operation.id;
-                                return <Draggable key={operation.id} draggableId={operation.id} index={operationIndex} isDragDisabled={isStandardPhase || phase.name === 'Close Project'}>
+                                return <Draggable key={operation.id} draggableId={operation.id} index={operationIndex} isDragDisabled={(isStandardPhase && !isEditingStandardProject) || phase.name === 'Close Project'}>
                                         {(provided, snapshot) => <Card ref={provided.innerRef} {...provided.draggableProps} className={`ml-6 ${snapshot.isDragging ? 'shadow-lg' : ''} ${isStandardPhase ? 'bg-muted/20' : ''}`}>
                                             <CardHeader className="pb-3">
                                               <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3 flex-1">
-                                                  {!isStandardPhase && phase.name !== 'Close Project' && <div {...provided.dragHandleProps}>
+                                                  {(!isStandardPhase || isEditingStandardProject) && phase.name !== 'Close Project' ? <div {...provided.dragHandleProps}>
                                                       <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
-                                                    </div>}
+                                                    </div> : <div className="w-4" />}
                                                   
                                                   {isOperationEditing ? <div className="flex-1 space-y-2">
                                                       <Input value={editingItem.data.name} onChange={e => setEditingItem({
@@ -832,37 +818,37 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                      </div>}
                                                 </div>
                                                 
-                                                <div className="flex items-center gap-1">
-                                                  <Badge variant="outline" className="text-xs">{operation.steps.length} steps</Badge>
-                                                  
-                                                  {!isStandardPhase && phase.name !== 'Close Project' && <>
-                                                      <Button size="sm" variant="ghost" onClick={() => copyItem('operation', operation)}>
-                                                        <Copy className="w-3 h-3" />
-                                                      </Button>
-                                                      
-                                                      {clipboard?.type === 'operation' && <Button size="sm" variant="ghost" onClick={() => pasteItem('operation', {
-                                              phaseId: phase.id
-                                            })}>
-                                                          <Clipboard className="w-3 h-3" />
-                                                        </Button>}
-                                                      
-                                                      {isOperationEditing ? <>
-                                                          <Button size="sm" onClick={saveEdit}>
-                                                            <Check className="w-3 h-3" />
-                                                          </Button>
-                                                          <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)}>
-                                                            <X className="w-3 h-3" />
-                                                          </Button>
-                                                        </> : <>
-                                                          <Button size="sm" variant="ghost" onClick={() => startEdit('operation', operation.id, operation)} disabled={operation.isStandard && !isEditingStandardProject}>
-                                                            <Edit className="w-3 h-3" />
-                                                          </Button>
-                                                          {phase.name !== 'Close Project' && <Button size="sm" variant="ghost" onClick={() => deleteOperation(phase.id, operation.id)} disabled={operation.isStandard && !isEditingStandardProject}>
-                                                              <Trash2 className="w-3 h-3" />
-                                                            </Button>}
-                                                        </>}
-                                                    </>}
-                                                </div>
+                                                 <div className="flex items-center gap-1">
+                                                   <Badge variant="outline" className="text-xs">{operation.steps.length} steps</Badge>
+                                                   
+                                                   {((!isStandardPhase && !operation.isStandard) || isEditingStandardProject) && phase.name !== 'Close Project' && <>
+                                                       {!operation.isStandard && <Button size="sm" variant="ghost" onClick={() => copyItem('operation', operation)}>
+                                                         <Copy className="w-3 h-3" />
+                                                       </Button>}
+                                                       
+                                                       {clipboard?.type === 'operation' && !operation.isStandard && <Button size="sm" variant="ghost" onClick={() => pasteItem('operation', {
+                                               phaseId: phase.id
+                                             })}>
+                                                           <Clipboard className="w-3 h-3" />
+                                                         </Button>}
+                                                       
+                                                       {isOperationEditing ? <>
+                                                           <Button size="sm" onClick={saveEdit}>
+                                                             <Check className="w-3 h-3" />
+                                                           </Button>
+                                                           <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)}>
+                                                             <X className="w-3 h-3" />
+                                                           </Button>
+                                                         </> : <>
+                                                           <Button size="sm" variant="ghost" onClick={() => startEdit('operation', operation.id, operation)}>
+                                                             <Edit className="w-3 h-3" />
+                                                           </Button>
+                                                           {phase.name !== 'Close Project' && <Button size="sm" variant="ghost" onClick={() => deleteOperation(phase.id, operation.id)}>
+                                                               <Trash2 className="w-3 h-3" />
+                                                             </Button>}
+                                                         </>}
+                                                     </>}
+                                                 </div>
                                               </div>
                                              </CardHeader>
                                              
@@ -880,14 +866,14 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                 {provided => <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
                                                     {operation.steps.map((step, stepIndex) => {
                                                 const isStepEditing = editingItem?.type === 'step' && editingItem.id === step.id;
-                                                return <Draggable key={step.id} draggableId={step.id} index={stepIndex} isDragDisabled={isStandardPhase || phase.name === 'Close Project'}>
+                                                return <Draggable key={step.id} draggableId={step.id} index={stepIndex} isDragDisabled={(isStandardPhase && !isEditingStandardProject) || phase.name === 'Close Project'}>
                                                           {(provided, snapshot) => <Card ref={provided.innerRef} {...provided.draggableProps} className={`ml-4 ${snapshot.isDragging ? 'shadow-lg' : ''} ${isStandardPhase ? 'bg-muted/10' : ''}`}>
                                                               <CardContent className="p-3">
                                                                 <div className="flex items-center justify-between">
                                                                   <div className="flex items-center gap-2 flex-1">
-                                                                    {!isStandardPhase && phase.name !== 'Close Project' && <div {...provided.dragHandleProps}>
+                                                                    {(!isStandardPhase || isEditingStandardProject) && phase.name !== 'Close Project' ? <div {...provided.dragHandleProps}>
                                                                         <GripVertical className="w-3 h-3 text-muted-foreground cursor-grab" />
-                                                                      </div>}
+                                                                      </div> : <div className="w-3" />}
                                                                     
                                                                      {isStepEditing ? <div className="flex-1 space-y-2">
                                                                          <Input value={editingItem.data.step} onChange={e => setEditingItem({
@@ -958,31 +944,31 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
                                                                          </Badge>}
                                                                      </div>
                                                      
-                                                       {isStepEditing ? <>
-                                                            <Button size="sm" onClick={saveEdit}>
-                                                              <Check className="w-3 h-3" />
-                                                            </Button>
-                                                            <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)}>
-                                                              <X className="w-3 h-3" />
-                                                            </Button>
-                                                           </> : <>
-                                                             
-                                                             <Button size="sm" variant="ghost" onClick={() => startEdit('step', step.id, step)} disabled={step.isStandard && !isEditingStandardProject}>
-                                                               <Edit className="w-3 h-3" />
+                                                        {isStepEditing ? <>
+                                                             <Button size="sm" onClick={saveEdit}>
+                                                               <Check className="w-3 h-3" />
                                                              </Button>
-                                                             
-                                                             <Button size="sm" variant="ghost" onClick={() => copyItem('step', step)}>
-                                                               <Copy className="w-3 h-3" />
+                                                             <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)}>
+                                                               <X className="w-3 h-3" />
                                                              </Button>
-                                                             
-                                                             {clipboard?.type === 'step' && <Button size="sm" variant="ghost" onClick={() => pasteItem('step', {
-                                                               phaseId: phase.id,
-                                                               operationId: operation.id
-                                                             })}>
-                                                                 <Clipboard className="w-3 h-3" />
-                                                               </Button>}
-                                                             
-                                                             <Button size="sm" variant="ghost" onClick={() => deleteStep(phase.id, operation.id, step.id)} disabled={step.isStandard && !isEditingStandardProject}>
+                                                            </> : <>
+                                                              
+                                                              <Button size="sm" variant="ghost" onClick={() => startEdit('step', step.id, step)}>
+                                                                <Edit className="w-3 h-3" />
+                                                              </Button>
+                                                              
+                                                              {!step.isStandard && <Button size="sm" variant="ghost" onClick={() => copyItem('step', step)}>
+                                                                <Copy className="w-3 h-3" />
+                                                              </Button>}
+                                                              
+                                                              {clipboard?.type === 'step' && !step.isStandard && <Button size="sm" variant="ghost" onClick={() => pasteItem('step', {
+                                                                phaseId: phase.id,
+                                                                operationId: operation.id
+                                                              })}>
+                                                                  <Clipboard className="w-3 h-3" />
+                                                                </Button>}
+                                                              
+                                                              <Button size="sm" variant="ghost" onClick={() => deleteStep(phase.id, operation.id, step.id)}>
                                                                  <Trash2 className="w-3 h-3" />
                                                                </Button>
                                                            </>}
