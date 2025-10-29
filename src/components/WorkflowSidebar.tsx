@@ -86,19 +86,18 @@ export function WorkflowSidebar({
                   </div>
                   <Select value={instructionLevel} onValueChange={onInstructionLevelChange}>
                     <SelectTrigger className="w-full text-xs">
-                      <SelectValue />
+                      <SelectValue>
+                        {instructionLevel === 'new_user' && 'New DIY'}
+                        {instructionLevel === 'detailed' && 'Mid-level DIY'}
+                        {instructionLevel === 'quick' && 'Advanced DIY'}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="quick" className="text-xs">Quick Overview</SelectItem>
-                      <SelectItem value="detailed" className="text-xs">Detailed (Default)</SelectItem>
-                      <SelectItem value="new_user" className="text-xs">New User</SelectItem>
+                      <SelectItem value="new_user" className="text-xs">New DIY: Extra guidance</SelectItem>
+                      <SelectItem value="detailed" className="text-xs">Mid-level DIY — Step-by-step</SelectItem>
+                      <SelectItem value="quick" className="text-xs">Advanced DIY: Quick content</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">
-                    {instructionLevel === 'quick' && 'Short content for experienced DIY'}
-                    {instructionLevel === 'detailed' && 'Step-by-step instructions'}
-                    {instructionLevel === 'new_user' && 'Extra guidance for first-time DIY'}
-                  </p>
                 </div>
 
                 {/* DIY Tools Section */}
