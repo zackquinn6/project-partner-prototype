@@ -3,12 +3,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from '@/contexts/AuthContext';
 import { useProject } from '@/contexts/ProjectContext';
 import { PricingWindow } from '@/components/PricingWindow';
@@ -79,27 +74,22 @@ export default function Home({
     myProjects: 'bg-blue-600',
     rapidPlan: 'bg-blue-500',
     projectCatalog: 'bg-blue-700',
-    
     // Home & Maintenance (Green shades)
     homeMaintenance: 'bg-green-600',
     homeTaskList: 'bg-green-500',
     myHomes: 'bg-green-700',
-    
     // Tools & Resources (Orange/Amber shades)
     toolLibrary: 'bg-orange-600',
     toolAccess: 'bg-orange-500',
-    
     // Help & Learning (Purple shades)
     expertHelp: 'bg-purple-600',
     community: 'bg-purple-500',
-    
     // Profile & Settings (Gray shades)
     myProfile: 'bg-slate-600',
-    
     // Beta/Experimental (Indigo/Pink)
     contractorFinder: 'bg-indigo-600',
     aiRepair: 'bg-pink-600',
-    codePermits: 'bg-indigo-500',
+    codePermits: 'bg-indigo-500'
   };
   useEffect(() => {
     const handleOpenQuiz = () => {
@@ -157,11 +147,7 @@ export default function Home({
             <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto mb-6 px-2">
               {/* Project Catalog - Reduced Prominence */}
               <div className="col-span-3 mb-2">
-                <Button 
-                  onClick={() => navigate('/projects')}
-                  variant="outline"
-                  className="w-full h-10 text-sm font-medium border-primary text-primary hover:bg-primary/10"
-                >
+                <Button onClick={() => navigate('/projects')} variant="outline" className="w-full h-10 text-sm font-medium border-primary text-primary hover:bg-primary/10">
                   <BookOpen className="w-4 h-4 mr-2" />
                   Explore New Projects
                 </Button>
@@ -224,7 +210,7 @@ export default function Home({
                 <AccordionItem value="labs" className="border rounded-xl shadow-sm max-w-md mx-auto">
                   <AccordionTrigger className="px-4 sm:px-6 hover:no-underline">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg font-semibold text-foreground">🧪 Labs</span>
+                      <span className="font-semibold text-foreground text-sm">🧪 Labs</span>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
