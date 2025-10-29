@@ -60,13 +60,13 @@ export function WorkflowSidebar({
       
       <SidebarContent className="pt-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="px-4 text-xs">{projectName || 'Project Progress'}</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-4 text-sm font-semibold">{projectName || 'Project Progress'}</SidebarGroupLabel>
           <SidebarGroupContent>
             {!collapsed && (
               <div className="space-y-4 p-2">
                 {/* Progress Header */}
                 <div className="space-y-2">
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-xs text-muted-foreground">
                     Step {currentStepIndex + 1} of {allSteps.length}
                   </div>
                   <div className="space-y-1">

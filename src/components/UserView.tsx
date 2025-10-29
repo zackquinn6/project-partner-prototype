@@ -1343,9 +1343,19 @@ export default function UserView({
             if (currentProjectRun && updateProjectRun) {
              // Ensure ALL kickoff steps are marked complete (prevent duplicates)
              const existingSteps = currentProjectRun.completedSteps || [];
-             const uniqueSteps = [...new Set([...existingSteps, ...kickoffStepIds])];
              
-             console.log("✅ Marking all kickoff steps complete:", uniqueSteps);
+             // Find all actual Kickoff phase operation steps to mark complete
+             const kickoffPhase = currentProjectRun.phases.find(p => p.name === 'Kickoff');
+             const allKickoffStepIds: string[] = kickoffPhase 
+               ? kickoffPhase.operations.flatMap(op => op.steps.map(s => s.id))
+               : [];
+             
+             console.log("🎯 Found Kickoff phase step IDs:", allKickoffStepIds);
+             
+             // Combine kickoff UI step IDs and actual workflow step IDs
+             const uniqueSteps = [...new Set([...existingSteps, ...kickoffStepIds, ...allKickoffStepIds])];
+             
+             console.log("✅ Marking all kickoff steps complete (UI + workflow):", uniqueSteps);
             
             // Automatically mark kickoff outputs as complete
             console.log("📝 Marking kickoff outputs as complete...");
@@ -1361,19 +1371,23 @@ export default function UserView({
               return newOutputs;
             });
             
-            // Mark individual completed steps for the main workflow tracking
-            setCompletedSteps(prev => {
-              const newCompletedSteps = new Set(prev);
-              kickoffStepIds.forEach(stepId => {
-                newCompletedSteps.add(stepId);
-              });
-              console.log("✅ Kickoff steps marked in completedSteps state:", newCompletedSteps);
-              return newCompletedSteps;
-            });
+             // Mark individual completed steps for the main workflow tracking
+             setCompletedSteps(prev => {
+               const newCompletedSteps = new Set(prev);
+               // Mark UI kickoff steps
+               kickoffStepIds.forEach(stepId => {
+                 newCompletedSteps.add(stepId);
+               });
+               // Mark actual workflow kickoff steps
+               allKickoffStepIds.forEach(stepId => {
+                 newCompletedSteps.add(stepId);
+               });
+               console.log("✅ Kickoff steps marked in completedSteps state:", newCompletedSteps);
+               return newCompletedSteps;
+             });
             
             // Mark the entire kickoff phase as complete
             console.log("🎯 Marking kickoff phase as complete...");
-            const kickoffPhase = currentProjectRun.phases.find(phase => phase.name === 'Kickoff');
             if (kickoffPhase) {
               // CRITICAL FIX: Store completed phase for popup
               setCompletedPhase(kickoffPhase);
