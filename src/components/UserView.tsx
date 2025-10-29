@@ -276,20 +276,29 @@ export default function UserView({
   // Initialize completed steps from project run data
   // CRITICAL: Re-initialize whenever currentProjectRun changes, not just completedSteps
   useEffect(() => {
-    if (currentProjectRun?.completedSteps) {
+    if (currentProjectRun?.completedSteps && Array.isArray(currentProjectRun.completedSteps)) {
       console.log("🔄 UserView: Initializing completed steps from project run:", {
         projectRunId: currentProjectRun.id,
         projectName: currentProjectRun.name,
         completedStepsCount: currentProjectRun.completedSteps.length,
-        completedSteps: currentProjectRun.completedSteps
+        completedSteps: currentProjectRun.completedSteps,
+        allStepsCount: allSteps.length
       });
-      setCompletedSteps(new Set(currentProjectRun.completedSteps));
+      
+      // Force a fresh Set to ensure React detects the change
+      const newCompletedSteps = new Set(currentProjectRun.completedSteps);
+      setCompletedSteps(newCompletedSteps);
+      
+      console.log("✅ UserView: Completed steps SET updated:", {
+        setSize: newCompletedSteps.size,
+        setContents: Array.from(newCompletedSteps)
+      });
     } else if (currentProjectRun) {
       // Clear completed steps if project run has no completed steps
       console.log("🔄 UserView: Clearing completed steps for new project run");
       setCompletedSteps(new Set());
     }
-  }, [currentProjectRun?.id, currentProjectRun?.completedSteps]);
+  }, [currentProjectRun?.id, currentProjectRun?.completedSteps, allSteps.length]);
   
   // Navigate to first incomplete step when workflow opens - ENHANCED DEBUG VERSION
   useEffect(() => {
@@ -427,20 +436,24 @@ export default function UserView({
   
   const currentStep = allSteps[currentStepIndex];
   
-  // CRITICAL FIX: Exclude kickoff UI steps from progress calculation
-  // Only count actual workflow steps (those in allSteps array)
+  // CRITICAL FIX: Calculate progress from actual workflow steps
   const workflowCompletedSteps = Array.from(completedSteps).filter(stepId => 
     allSteps.some(step => step.id === stepId)
   );
   const progress = allSteps.length > 0 ? (workflowCompletedSteps.length / allSteps.length) * 100 : 0;
   
-  console.log('📊 Progress Calculation:', {
+  console.log('📊 Progress Calculation (DETAILED):', {
+    totalPhases: activeProject?.phases?.length || 0,
+    phasesWithSteps: activeProject?.phases?.filter(p => p.operations?.some(o => o.steps?.length > 0)).length || 0,
     totalSteps: allSteps.length,
+    allStepsPreview: allSteps.slice(0, 5).map(s => ({ id: s.id, phase: s.phaseName, operation: s.operationName, step: s.step })),
     workflowCompletedSteps: workflowCompletedSteps.length,
     completedStepsFromState: completedSteps.size,
+    completedStepsArray: Array.from(completedSteps),
     calculatedProgress: progress,
     projectRunProgress: currentProjectRun?.progress,
-    projectRunCompletedSteps: currentProjectRun?.completedSteps?.length
+    projectRunCompletedSteps: currentProjectRun?.completedSteps?.length,
+    projectRunCompletedStepsPreview: currentProjectRun?.completedSteps?.slice(0, 10) || []
   });
   
   // Debug current step to identify materials/tools/apps issue

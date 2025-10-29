@@ -17,6 +17,8 @@ import { AppDocumentationWindow } from './AppDocumentationWindow';
 import { ToolsMaterialsWindow } from './ToolsMaterialsWindow';
 import { ExpertHelpWindow } from './ExpertHelpWindow';
 import { AchievementNotificationCenter } from './AchievementNotificationCenter';
+import { supabase } from '@/integrations/supabase/client';
+import { ProjectRun } from '@/interfaces/ProjectRun';
 interface NavigationProps {
   currentView: 'home' | 'admin' | 'user' | 'editWorkflow';
   onViewChange: (view: 'home' | 'admin' | 'user' | 'editWorkflow') => void;
@@ -112,19 +114,78 @@ export default function Navigation({
       console.error('Error signing out:', error);
     }
   };
-  const handleProjectSelect = (projectRunId: string) => {
-    const selectedRun = projectRuns.find(run => run.id === projectRunId);
-    if (selectedRun) {
-      console.log('🎯 Navigation: Project selected from dropdown:', {
-        name: selectedRun.name,
-        progress: selectedRun.progress,
-        completedStepsCount: selectedRun.completedSteps?.length || 0,
-        completedSteps: selectedRun.completedSteps
-      });
-      setCurrentProjectRun(selectedRun);
-      onViewChange('user');
-      onProjectSelected?.();
+  const handleProjectSelect = async (projectRunId: string) => {
+    console.log('🎯 Navigation: Fetching fresh project data from database for:', projectRunId);
+    
+    // Fetch fresh data from database to ensure we have latest completedSteps
+    const { data: freshRun, error } = await supabase
+      .from('project_runs')
+      .select('*')
+      .eq('id', projectRunId)
+      .single();
+    
+    if (error) {
+      console.error('❌ Error fetching fresh project run:', error);
+      // Fallback to cached data
+      const selectedRun = projectRuns.find(run => run.id === projectRunId);
+      if (selectedRun) {
+        setCurrentProjectRun(selectedRun);
+        onViewChange('user');
+        onProjectSelected?.();
+      }
+      return;
     }
+    
+    // Transform database data to ProjectRun format
+    const projectRun: ProjectRun = {
+      id: freshRun.id,
+      templateId: freshRun.template_id,
+      name: freshRun.name,
+      description: freshRun.description || '',
+      diyLengthChallenges: freshRun.diy_length_challenges,
+      isManualEntry: freshRun.is_manual_entry || false,
+      createdAt: new Date(freshRun.created_at),
+      updatedAt: new Date(freshRun.updated_at),
+      startDate: new Date(freshRun.start_date),
+      planEndDate: new Date(freshRun.plan_end_date),
+      endDate: freshRun.end_date ? new Date(freshRun.end_date) : undefined,
+      status: freshRun.status as 'not-started' | 'in-progress' | 'complete',
+      projectLeader: freshRun.project_leader,
+      accountabilityPartner: freshRun.accountability_partner,
+      customProjectName: freshRun.custom_project_name,
+      currentPhaseId: freshRun.current_phase_id,
+      currentOperationId: freshRun.current_operation_id,
+      currentStepId: freshRun.current_step_id,
+      completedSteps: typeof freshRun.completed_steps === 'string' 
+        ? JSON.parse(freshRun.completed_steps) 
+        : (freshRun.completed_steps || []),
+      progress: freshRun.progress,
+      phases: typeof freshRun.phases === 'string' 
+        ? JSON.parse(freshRun.phases) 
+        : (freshRun.phases || []),
+      category: Array.isArray(freshRun.category) ? freshRun.category : (freshRun.category ? [freshRun.category] : []),
+      effortLevel: freshRun.effort_level as 'Low' | 'Medium' | 'High',
+      skillLevel: freshRun.skill_level as 'Beginner' | 'Intermediate' | 'Advanced',
+      estimatedTime: freshRun.estimated_time,
+      customization_decisions: freshRun.customization_decisions 
+        ? (typeof freshRun.customization_decisions === 'string' 
+          ? JSON.parse(freshRun.customization_decisions) 
+          : freshRun.customization_decisions)
+        : undefined,
+      instruction_level_preference: (freshRun.instruction_level_preference as 'quick' | 'detailed' | 'new_user') || 'detailed'
+    };
+    
+    console.log('✅ Navigation: Fresh project data loaded:', {
+      name: projectRun.name,
+      progress: projectRun.progress,
+      completedStepsCount: projectRun.completedSteps.length,
+      completedSteps: projectRun.completedSteps,
+      phasesCount: projectRun.phases.length
+    });
+    
+    setCurrentProjectRun(projectRun);
+    onViewChange('user');
+    onProjectSelected?.();
   };
   console.log('🔧 Navigation rendering with mobile:', isMobile, 'buttons should be visible');
   return <>

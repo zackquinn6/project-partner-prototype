@@ -69,14 +69,17 @@ export const AdminView: React.FC = () => {
         // Dismiss loading toast
         toast.dismiss('sync-phases');
         
-        // Show success toast
-        toast.success(
-          `Standard phases synced successfully!`,
-          {
-            description: `Updated ${result.templatesUpdated} template(s). ${result.templatesFailed > 0 ? `${result.templatesFailed} failed.` : 'All templates updated.'}`,
-            duration: 6000,
-          }
-        );
+        // Wait a brief moment to ensure loading toast is dismissed
+        setTimeout(() => {
+          // Show prominent success toast with longer duration
+          toast.success(
+            `✅ Standard Phases Synced Successfully!`,
+            {
+              description: `${result.templatesUpdated} template(s) updated with latest standard phases. ${result.templatesFailed > 0 ? `⚠️ ${result.templatesFailed} failed.` : '✨ All templates updated successfully!'}`,
+              duration: 10000, // 10 seconds
+            }
+          );
+        }, 100);
 
         // Show detailed results in console
         console.log('Standard Phase Sync Results:', result.details.join('\n'));
