@@ -44,9 +44,8 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
       if (error) throw error;
       
       toast.success('Project cancelled');
-      // Navigate to home and trigger view change to catalog
-      navigate('/', { state: { view: 'catalog' } });
-      window.dispatchEvent(new CustomEvent('view-change', { detail: { view: 'catalog' } }));
+      // Directly navigate to catalog
+      navigate('/catalog');
     } catch (error) {
       console.error('Error cancelling project:', error);
       toast.error('Failed to cancel project');

@@ -240,29 +240,81 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
     }
 
     try {
-      const { error } = await supabase
-        .from('projects')
-        .update({
-          name: project.name,
-          description: project.description,
-          diy_length_challenges: project.diyLengthChallenges || null,
-          image: project.image,
-          start_date: project.startDate.toISOString(),
-          plan_end_date: project.planEndDate.toISOString(),
-          end_date: project.endDate?.toISOString(),
-          status: project.status,
-          publish_status: project.publishStatus,
-          category: project.category || null,
-          effort_level: project.effortLevel || null,
-          skill_level: project.skillLevel || null,
-          estimated_time: project.estimatedTime || null,
-          estimated_time_per_unit: project.estimatedTimePerUnit || null,
-          scaling_unit: project.scalingUnit || null,
-          phases: JSON.stringify(project.phases)
-        })
-        .eq('id', project.id);
+      // Check if this is the Standard Project Foundation
+      const isStandardProject = project.id === '00000000-0000-0000-0000-000000000001' || project.isStandardTemplate;
+      
+      if (isStandardProject) {
+        // For Standard Project, we need to update both the phases JSON AND the template tables
+        // First update the phases JSON
+        const { error: phasesError } = await supabase
+          .from('projects')
+          .update({
+            phases: JSON.stringify(project.phases)
+          })
+          .eq('id', project.id);
 
-      if (error) throw error;
+        if (phasesError) throw phasesError;
+
+        // Then update display_order of template_operations to match phase order
+        for (let phaseIndex = 0; phaseIndex < project.phases.length; phaseIndex++) {
+          const phase = project.phases[phaseIndex];
+          
+          // Update operations within this phase
+          for (let opIndex = 0; opIndex < phase.operations.length; opIndex++) {
+            const operation = phase.operations[opIndex];
+            
+            const { error: opError } = await supabase
+              .from('template_operations')
+              .update({ display_order: opIndex })
+              .eq('id', operation.id)
+              .eq('project_id', project.id);
+            
+            if (opError) {
+              console.error('Error updating operation display_order:', opError);
+            }
+
+            // Update steps within this operation
+            for (let stepIndex = 0; stepIndex < operation.steps.length; stepIndex++) {
+              const step = operation.steps[stepIndex];
+              
+              const { error: stepError } = await supabase
+                .from('template_steps')
+                .update({ display_order: stepIndex })
+                .eq('id', step.id)
+                .eq('operation_id', operation.id);
+              
+              if (stepError) {
+                console.error('Error updating step display_order:', stepError);
+              }
+            }
+          }
+        }
+      } else {
+        // For regular projects, just update the phases JSON
+        const { error } = await supabase
+          .from('projects')
+          .update({
+            name: project.name,
+            description: project.description,
+            diy_length_challenges: project.diyLengthChallenges || null,
+            image: project.image,
+            start_date: project.startDate.toISOString(),
+            plan_end_date: project.planEndDate.toISOString(),
+            end_date: project.endDate?.toISOString(),
+            status: project.status,
+            publish_status: project.publishStatus,
+            category: project.category || null,
+            effort_level: project.effortLevel || null,
+            skill_level: project.skillLevel || null,
+            estimated_time: project.estimatedTime || null,
+            estimated_time_per_unit: project.estimatedTimePerUnit || null,
+            scaling_unit: project.scalingUnit || null,
+            phases: JSON.stringify(project.phases)
+          })
+          .eq('id', project.id);
+
+        if (error) throw error;
+      }
 
       // Optimistically update cache
       const updatedProjects = projects.map(p => p.id === project.id ? project : p);
@@ -270,6 +322,13 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
       
       if (currentProject?.id === project.id) {
         setCurrentProject(project);
+      }
+      
+      if (isStandardProject) {
+        toast({
+          title: "Success",
+          description: "Standard Project updated successfully",
+        });
       }
     } catch (error) {
       console.error('Error updating project:', error);
