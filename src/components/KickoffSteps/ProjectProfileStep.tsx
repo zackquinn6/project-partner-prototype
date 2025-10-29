@@ -55,7 +55,7 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
         customProjectName: currentProjectRun.customProjectName || currentProjectRun.name || '',
         projectLeader: currentProjectRun.projectLeader || '',
         accountabilityPartner: currentProjectRun.accountabilityPartner || '',
-        description: currentProjectRun.description || '' // No default text
+        description: '' // Always start with blank notes field
       });
       
       if (currentProjectRun.home_id) {
