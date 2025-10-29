@@ -22,13 +22,13 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
   const kickoffSteps = [
     {
       id: 'kickoff-step-1',
-      title: 'DIY Profile',
-      description: 'Complete your DIY profile for personalized guidance'
+      title: 'Project Overview',
+      description: 'Review and customize your project details'
     },
     {
       id: 'kickoff-step-2',
-      title: 'Project Overview',
-      description: 'Review and customize your project details'
+      title: 'DIY Profile',
+      description: 'Complete your DIY profile for personalized guidance'
     },
     {
       id: 'kickoff-step-3',
@@ -215,9 +215,9 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
 
     switch (currentKickoffStep) {
       case 0:
-        return <DIYProfileStep {...stepProps} />;
-      case 1:
         return <ProjectOverviewStep {...stepProps} />;
+      case 1:
+        return <DIYProfileStep {...stepProps} />;
       case 2:
         return <ProjectProfileStep {...stepProps} />;
       default:

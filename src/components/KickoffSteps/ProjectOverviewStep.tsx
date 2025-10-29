@@ -5,8 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Edit3, Save, X, Target } from 'lucide-react';
+import { CheckCircle, Edit3, Save, X, Target, XCircle } from 'lucide-react';
 import { useProject } from '@/contexts/ProjectContext';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface ProjectOverviewStepProps {
   onComplete: () => void;
@@ -22,11 +25,31 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
   onOutputToggle
 }) => {
   const { currentProjectRun, updateProjectRun, currentProject } = useProject();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     name: currentProjectRun?.name || '',
     description: currentProjectRun?.description || ''
   });
+
+  const handleCancelProject = async () => {
+    if (!currentProjectRun) return;
+    
+    try {
+      const { error } = await supabase
+        .from('project_runs')
+        .update({ status: 'cancelled' })
+        .eq('id', currentProjectRun.id);
+      
+      if (error) throw error;
+      
+      toast.success('Project cancelled');
+      navigate('/');
+    } catch (error) {
+      console.error('Error cancelling project:', error);
+      toast.error('Failed to cancel project');
+    }
+  };
 
   const handleSave = async () => {
     if (!currentProjectRun) return;
@@ -67,10 +90,7 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
 
       <Card>
         <CardHeader>
-          <CardTitle>Project Details</CardTitle>
-          <CardDescription>
-            Review and customize your project information
-          </CardDescription>
+          <CardTitle>Make sure this project is right for you</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -145,10 +165,20 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
 
           <div className="sticky bottom-0 bg-background pt-4 border-t mt-4">
             {!isCompleted && (
-              <Button onClick={onComplete} className="w-full bg-green-600 hover:bg-green-700">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                I'm Ready, Let's Go
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleCancelProject} 
+                  variant="outline"
+                  className="w-1/4 border-red-300 text-red-700 hover:bg-red-50"
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  This isn't a good match
+                </Button>
+                <Button onClick={onComplete} className="flex-1 bg-green-600 hover:bg-green-700">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Let's Go - Continue
+                </Button>
+              </div>
             )}
             
             {isCompleted && (

@@ -55,7 +55,7 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
         customProjectName: currentProjectRun.customProjectName || currentProjectRun.name || '',
         projectLeader: currentProjectRun.projectLeader || '',
         accountabilityPartner: currentProjectRun.accountabilityPartner || '',
-        description: currentProjectRun.description || ''
+        description: currentProjectRun.description || '' // No default text
       });
       
       if (currentProjectRun.home_id) {
@@ -153,28 +153,36 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Home className="w-5 h-5" />
-            Project Profile
-            {isCompleted && <Badge variant="secondary">Complete</Badge>}
-          </CardTitle>
-          <CardDescription>
-            Set up your project details and team
-          </CardDescription>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Home className="w-5 h-5" />
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  Project Profile
+                  {isCompleted && <Badge variant="secondary">Complete</Badge>}
+                </CardTitle>
+                <CardDescription>
+                  Set up your project details and team
+                </CardDescription>
+              </div>
+            </div>
+            <div className="bg-muted/50 px-4 py-2 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1">
+                <strong>Project Template:</strong>
+              </p>
+              <p className="text-xs font-medium">
+                {currentProjectRun.name}
+              </p>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="bg-muted/50 p-4 rounded-lg">
-            <p className="text-sm text-muted-foreground mb-2">
-              <strong>Project Template:</strong>
-            </p>
-            <p className="text-sm font-medium">
-              {currentProjectRun.name}
-            </p>
-          </div>
-
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Name your project</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium">Name your project</label>
+                <span className="text-xs text-muted-foreground">1 of 5</span>
+              </div>
               <Input
                 value={projectForm.customProjectName}
                 onChange={(e) => setProjectForm(prev => ({
@@ -186,7 +194,10 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Describe your project</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium">Describe your project</label>
+                <span className="text-xs text-muted-foreground">2 of 5</span>
+              </div>
               <p className="text-xs text-muted-foreground mb-2">A short summary of your unique project</p>
               <Textarea
                 value={projectForm.description}
@@ -199,32 +210,43 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
               />
             </div>
 
-            <div>
-              <label className="text-sm font-medium mb-2 block">Project Leader</label>
-              <Input
-                value={projectForm.projectLeader}
-                onChange={(e) => setProjectForm(prev => ({
-                  ...prev,
-                  projectLeader: e.target.value
-                }))}
-                placeholder="Who's leading this project?"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium">Project Leader</label>
+                  <span className="text-xs text-muted-foreground">3 of 5</span>
+                </div>
+                <Input
+                  value={projectForm.projectLeader}
+                  onChange={(e) => setProjectForm(prev => ({
+                    ...prev,
+                    projectLeader: e.target.value
+                  }))}
+                  placeholder="Who's leading?"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium">Accountability Partner</label>
+                  <span className="text-xs text-muted-foreground">4 of 5</span>
+                </div>
+                <Input
+                  value={projectForm.accountabilityPartner}
+                  onChange={(e) => setProjectForm(prev => ({
+                    ...prev,
+                    accountabilityPartner: e.target.value
+                  }))}
+                  placeholder="Who'll keep you on track?"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Accountability Partner</label>
-              <Input
-                value={projectForm.accountabilityPartner}
-                onChange={(e) => setProjectForm(prev => ({
-                  ...prev,
-                  accountabilityPartner: e.target.value
-                }))}
-                placeholder="Who will help keep you on track?"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Select Home</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium">Select Home</label>
+                <span className="text-xs text-muted-foreground">5 of 5</span>
+              </div>
               {loading ? (
                 <div className="text-sm text-muted-foreground">Loading homes...</div>
               ) : homes.length === 0 ? (
