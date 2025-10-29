@@ -11,7 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollableDialog } from '@/components/ScrollableDialog';
-import { Settings, BarChart3, Shield, Wrench, AlertTriangle, RefreshCw, Bell, FileText, MapPin, Cog } from 'lucide-react';
+import { Settings, BarChart3, Shield, Wrench, AlertTriangle, RefreshCw, Bell, FileText, MapPin, Cog, RefreshCcw } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { StructureManager } from './StructureManager';
 import { AdminRoadmapManager } from './AdminRoadmapManager';
 import { AdminFeatureRequestManager } from './AdminFeatureRequestManager';
@@ -36,6 +38,54 @@ export const AdminView: React.FC = () => {
   const [dataRefreshOpen, setDataRefreshOpen] = useState(false);
   const [actionCenterOpen, setActionCenterOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'admin' | 'structure-manager'>('admin');
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncStandardPhases = async () => {
+    setIsSyncing(true);
+    const toastId = toast.loading('Syncing standard phases to all project templates...');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-standard-phases', {
+        method: 'POST',
+      });
+
+      if (error) throw error;
+
+      const result = data as {
+        success: boolean;
+        templatesUpdated: number;
+        templatesFailed: number;
+        details: string[];
+      };
+
+      if (result.success) {
+        toast.success(
+          `Standard phases synced! Updated ${result.templatesUpdated} template(s)`,
+          {
+            id: toastId,
+            description: result.templatesFailed > 0 
+              ? `${result.templatesFailed} template(s) failed to update`
+              : 'All templates updated successfully',
+            duration: 5000,
+          }
+        );
+
+        // Show detailed results in console
+        console.log('Standard Phase Sync Results:', result.details.join('\n'));
+      } else {
+        throw new Error('Sync failed');
+      }
+    } catch (error) {
+      console.error('Failed to sync standard phases:', error);
+      toast.error('Failed to sync standard phases', {
+        id: toastId,
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+        duration: 5000,
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Listen for edit workflow navigation event
   useEffect(() => {
@@ -68,6 +118,16 @@ export const AdminView: React.FC = () => {
             >
               <FileText className="w-4 h-4 mr-2" />
               Admin Guide
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSyncStandardPhases}
+              disabled={isSyncing}
+              className="text-xs"
+            >
+              <RefreshCcw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+              Sync Standard Phases
             </Button>
           </div>
           <p className="text-lg text-muted-foreground">Manage projects, analytics, and user permissions</p>

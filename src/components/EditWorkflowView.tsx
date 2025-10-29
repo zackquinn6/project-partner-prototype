@@ -404,9 +404,41 @@ export default function EditWorkflowView({
           toast.error("Warning: Step saved to project but failed to sync to template. Changes may not appear in new projects.");
         } else {
           console.log('SaveEdit: Successfully synced to template_steps');
+          
+          // Automatically cascade changes to all project templates
+          console.log('💾 SaveEdit: Cascading Standard Project changes to all templates...');
+          toast.loading('Syncing standard phases to all project templates...', { id: 'cascade-sync' });
+          
+          const { data: syncResult, error: syncError } = await supabase.functions.invoke('sync-standard-phases', {
+            method: 'POST',
+          });
+          
+          if (syncError) {
+            console.error('SaveEdit: Error cascading to templates:', syncError);
+            toast.error('Standard Project saved but cascade to templates failed', { 
+              id: 'cascade-sync',
+              description: 'Click "Sync Standard Phases" button to manually sync'
+            });
+          } else {
+            const result = syncResult as {
+              success: boolean;
+              templatesUpdated: number;
+              templatesFailed: number;
+            };
+            
+            console.log('SaveEdit: Cascade completed:', result);
+            toast.success(
+              `Changes cascaded to ${result.templatesUpdated} template(s)`,
+              { 
+                id: 'cascade-sync',
+                description: 'All project templates now have your latest standard phase changes'
+              }
+            );
+          }
         }
       } catch (err) {
         console.error('SaveEdit: Exception updating template_steps:', err);
+        toast.error('Failed to save standard project changes');
       }
     }
     
