@@ -682,7 +682,16 @@ export default function EditWorkflowView({
       <div className="sticky top-0 z-10 bg-background border-b">
         <div className="w-full px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold">Workflow Editor: {currentProject?.name || 'Untitled Project'}</h1>
+            <div>
+              <h1 className="text-xl font-bold">
+                {isEditingStandardProject ? '🔒 Standard Project Foundation Editor' : `Project Template: ${currentProject?.name || 'Untitled Project'}`}
+              </h1>
+              {isEditingStandardProject && (
+                <p className="text-sm text-orange-600 dark:text-orange-400 font-medium mt-1">
+                  ⚠️ Editing Standard Foundation - Changes will cascade to new projects
+                </p>
+              )}
+            </div>
             <div className="flex items-center gap-4">
               {editMode && <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                   Editing: {currentStep?.step}
