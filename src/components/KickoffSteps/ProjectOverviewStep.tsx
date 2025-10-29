@@ -44,7 +44,9 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
       if (error) throw error;
       
       toast.success('Project cancelled');
-      navigate('/');
+      // Navigate to home and trigger view change to catalog
+      navigate('/', { state: { view: 'catalog' } });
+      window.dispatchEvent(new CustomEvent('view-change', { detail: { view: 'catalog' } }));
     } catch (error) {
       console.error('Error cancelling project:', error);
       toast.error('Failed to cancel project');
@@ -103,7 +105,7 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
           </div>
           <div>
             <Label>DIY Challenges</Label>
-            <p className="mt-1 text-muted-foreground">
+            <p className="mt-1 text-muted-foreground whitespace-pre-line">
               {currentProjectRun?.diyLengthChallenges || currentProject?.diyLengthChallenges || 'None specified'}
             </p>
           </div>
@@ -111,10 +113,27 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
           <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t">
             <div>
               <Label>Category</Label>
-              <div className="mt-2">
-                <Badge variant="outline" className="text-sm">
-                  {currentProjectRun?.category || currentProject?.category || 'Not specified'}
-                </Badge>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(() => {
+                  const categories: any = currentProjectRun?.category || currentProject?.category;
+                  if (!categories) return <Badge variant="outline" className="text-sm">Not specified</Badge>;
+                  
+                  // Handle array or string format
+                  let categoryArray: string[] = [];
+                  if (Array.isArray(categories)) {
+                    categoryArray = categories;
+                  } else if (typeof categories === 'string') {
+                    categoryArray = categories.split(',').map((c: string) => c.trim()).filter(Boolean);
+                  } else {
+                    categoryArray = [String(categories)];
+                  }
+                  
+                  return categoryArray.map((cat, idx) => (
+                    <Badge key={idx} variant="outline" className="text-xs">
+                      {cat}
+                    </Badge>
+                  ));
+                })()}
               </div>
             </div>
             <div>

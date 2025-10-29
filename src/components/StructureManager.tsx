@@ -46,6 +46,11 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
   const isStandardPhase = (phaseName: string) => {
     return ['Kickoff', 'Planning', 'Ordering', 'Close Project'].includes(phaseName);
   };
+
+  // Helper to check if item can be edited/deleted in Edit Standard mode
+  const canEditInStandardMode = (isStandard: boolean) => {
+    return isEditingStandardProject; // In Edit Standard mode, all items including standard ones can be edited
+  };
   const [editingItem, setEditingItem] = useState<{
     type: 'phase' | 'operation' | 'step';
     id: string;
@@ -197,39 +202,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       return;
     }
     if (type === 'phases') {
-      // If editing Standard Project, don't allow any phase reordering
-      if (isEditingStandardProject) {
-        toast.error('Cannot reorder phases in Standard Project. Use position rules to control phase positioning.');
-        return;
-      }
-
-      // Get phase being moved
-      const sourcePhase = displayPhases[source.index];
-      const destinationPhase = displayPhases[destination.index];
-      const standardPhaseNames = ['Kickoff', 'Planning', 'Ordering', 'Close Project'];
-      const isSourceStandard = standardPhaseNames.includes(sourcePhase?.name || '') && !sourcePhase?.isLinked;
-      const isDestinationStandard = standardPhaseNames.includes(destinationPhase?.name || '') && !destinationPhase?.isLinked;
-
-      // Prevent moving standard phases or moving phases to standard phase positions
-      if (isSourceStandard) {
-        toast.error(`Cannot move standard phase "${sourcePhase.name}". Standard phases must remain in their fixed positions.`);
-        return;
-      }
-
-      // Define required positions for standard phases
-      const kickoffIndex = displayPhases.findIndex(p => p.name === 'Kickoff' && !p.isLinked);
-      const planningIndex = displayPhases.findIndex(p => p.name === 'Planning' && !p.isLinked);
-      const orderingIndex = displayPhases.findIndex(p => p.name === 'Ordering' && !p.isLinked);
-      const closeProjectIndex = displayPhases.findIndex(p => p.name === 'Close Project' && !p.isLinked);
-
-      // Prevent moving non-standard phases into standard phase positions
-      const standardPositions = [kickoffIndex, planningIndex, orderingIndex, closeProjectIndex].filter(i => i !== -1);
-      if (standardPositions.includes(destination.index)) {
-        toast.error('Cannot move phases into standard phase positions. Standard phases must remain in order: Kickoff → Planning → Ordering → [Custom Phases] → Close Project');
-        return;
-      }
-
-      // Only allow reordering of non-standard phases
+      // Allow reordering phases in Edit Standard mode
       const updatedProject = {
         ...currentProject
       };
@@ -237,29 +210,6 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       const [removed] = newPhases.splice(source.index, 1);
       newPhases.splice(destination.index, 0, removed);
 
-      // Verify the result maintains standard phase ordering
-      const finalPhases = newPhases;
-      const finalKickoffIndex = finalPhases.findIndex(p => p.name === 'Kickoff' && !p.isLinked);
-      const finalPlanningIndex = finalPhases.findIndex(p => p.name === 'Planning' && !p.isLinked);
-      const finalOrderingIndex = finalPhases.findIndex(p => p.name === 'Ordering' && !p.isLinked);
-      const finalCloseProjectIndex = finalPhases.findIndex(p => p.name === 'Close Project' && !p.isLinked);
-
-      // Validate ordering
-      if (finalKickoffIndex !== -1 && finalPlanningIndex !== -1 && finalKickoffIndex > finalPlanningIndex) {
-        toast.error('Invalid ordering: Kickoff must come before Planning');
-        return;
-      }
-      if (finalPlanningIndex !== -1 && finalOrderingIndex !== -1 && finalPlanningIndex > finalOrderingIndex) {
-        toast.error('Invalid ordering: Planning must come before Ordering');
-        return;
-      }
-      if (finalCloseProjectIndex !== -1) {
-        const hasPhaseAfterClose = finalPhases.slice(finalCloseProjectIndex + 1).some(p => true);
-        if (hasPhaseAfterClose) {
-          toast.error('Invalid ordering: Close Project must be the last phase');
-          return;
-        }
-      }
       updatedProject.phases = newPhases;
       updateProject(updatedProject);
       toast.success('Phase reordered successfully');
@@ -483,16 +433,16 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     toast.success(phase?.isStandard ? 'Custom step added to standard phase' : 'Step added successfully');
   };
 
-  // Delete operations
+  // Delete operations - Allow deleting in Edit Standard mode
   const deletePhase = (phaseId: string) => {
     if (!currentProject) return;
 
     // Check if this is a standard phase
     const phase = displayPhases.find(p => p.id === phaseId);
 
-    // Prevent deleting standard phases in non-standard projects
+    // In Edit Standard mode, allow deleting even standard phases
     if (!isEditingStandardProject && phase?.isStandard) {
-      toast.error('Cannot delete standard phases. Standard phases are read-only in this project.');
+      toast.error('Cannot delete standard phases. Use Edit Standard to modify standard phases.');
       return;
     }
     const updatedProject = {
@@ -508,9 +458,9 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     const phase = currentProject.phases.find(p => p.id === phaseId);
     const operation = phase?.operations.find(op => op.id === operationId);
 
-    // Prevent deleting standard operations (but allow deleting custom operations in standard phases)
+    // In Edit Standard mode, allow deleting even standard operations
     if (!isEditingStandardProject && operation?.isStandard) {
-      toast.error('Cannot delete standard operations. Only custom operations can be deleted.');
+      toast.error('Cannot delete standard operations. Use Edit Standard to modify standard phases.');
       return;
     }
     const updatedProject = {
@@ -530,9 +480,9 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     const operation = phase?.operations.find(op => op.id === operationId);
     const step = operation?.steps.find(s => s.id === stepId);
 
-    // Prevent deleting standard steps (but allow deleting custom steps in standard phases)
+    // In Edit Standard mode, allow deleting even standard steps
     if (!isEditingStandardProject && step?.isStandard) {
-      toast.error('Cannot delete standard steps. Only custom steps can be deleted.');
+      toast.error('Cannot delete standard steps. Use Edit Standard to modify standard phases.');
       return;
     }
     const updatedProject = {
@@ -550,26 +500,26 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     toast.success('Step deleted');
   };
 
-  // Edit operations
+  // Edit operations - Allow editing in Edit Standard mode
   const startEdit = (type: 'phase' | 'operation' | 'step', id: string, data: any) => {
-    // Check if trying to edit standard content
+    // In Edit Standard mode, allow editing all items including standard ones
     if (!isEditingStandardProject) {
       if (type === 'phase') {
         const phase = displayPhases.find(p => p.id === id);
         if (phase?.isStandard) {
-          toast.error('Cannot edit standard phases. Standard phases are read-only in this project.');
+          toast.error('Cannot edit standard phases. Use Edit Standard to modify standard phases.');
           return;
         }
       } else if (type === 'operation') {
         // Check if this operation is marked as standard
         if (data?.isStandard) {
-          toast.error('Cannot edit standard operations. Only custom operations can be edited.');
+          toast.error('Cannot edit standard operations. Use Edit Standard to modify standard phases.');
           return;
         }
       } else if (type === 'step') {
         // Check if this step is marked as standard
         if (data?.isStandard) {
-          toast.error('Cannot edit standard steps. Only custom steps can be edited.');
+          toast.error('Cannot edit standard steps. Use Edit Standard to modify standard phases.');
           return;
         }
       }
