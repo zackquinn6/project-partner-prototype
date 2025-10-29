@@ -21,6 +21,7 @@ import ImportTileContent from "./pages/ImportTileContent";
 
 const queryClient = new QueryClient();
 
+// Main application component with authentication and membership providers
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
