@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +30,13 @@ export const AppsLibraryDialog = ({
 }: AppsLibraryDialogProps) => {
   const [tempSelected, setTempSelected] = useState<AppReference[]>(selectedApps);
   const nativeApps = getAllNativeApps();
+  
+  // Reset temp selection when dialog opens or selectedApps changes
+  useEffect(() => {
+    if (open) {
+      setTempSelected(selectedApps);
+    }
+  }, [open, selectedApps]);
   
   // External app form state
   const [externalAppName, setExternalAppName] = useState('');
