@@ -47,6 +47,8 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'complete':
         return 'bg-green-100 text-green-800 border-green-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -144,7 +146,7 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
         <CardContent>
           {/* Mobile: Stack layout */}
           <div className="md:hidden space-y-4">
-            {projectRuns.length === 0 ? (
+            {projectRuns.filter(run => run.status !== 'cancelled').length === 0 ? (
               <div className="h-24 flex flex-col items-center justify-center space-y-2 text-center">
                 <p className="text-muted-foreground">No projects yet.</p>
                 <Button 
@@ -157,7 +159,9 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                 </Button>
               </div>
             ) : (
-              projectRuns.map((projectRun) => {
+              projectRuns
+                .filter(run => run.status !== 'cancelled')
+                .map((projectRun) => {
                 const progress = calculateProgress(projectRun);
                 return (
                   <Card key={projectRun.id} className="p-4">
@@ -266,7 +270,7 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                 </TableRow>
               </TableHeader>
             <TableBody>
-              {projectRuns.length === 0 ? (
+              {projectRuns.filter(run => run.status !== 'cancelled').length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
@@ -283,7 +287,9 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
                   </TableCell>
                 </TableRow>
               ) : (
-                projectRuns.map((projectRun) => {
+                projectRuns
+                  .filter(run => run.status !== 'cancelled')
+                  .map((projectRun) => {
                   const progress = calculateProgress(projectRun);
                   
                   return (
