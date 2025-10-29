@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
     // Step 1: Rebuild Standard Project phases
     result.details.push('Rebuilding Standard Project phases...');
     const { error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_templates', {
-      project_id_param: standardProjectId
+      p_project_id: standardProjectId
     });
 
     if (rebuildError) {
@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
         
         // Rebuild this template's phases
         const { error: templateRebuildError } = await supabase.rpc('rebuild_phases_json_from_templates', {
-          project_id_param: template.id
+          p_project_id: template.id
         });
 
         if (templateRebuildError) {
