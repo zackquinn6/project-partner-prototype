@@ -16,6 +16,7 @@ import { Project } from '@/interfaces/Project';
 import { ProjectRun } from '@/interfaces/ProjectRun';
 import { useProject } from '@/contexts/ProjectContext';
 import { useButtonTracker } from '@/hooks/useButtonTracker';
+import { calculateProjectProgress } from '@/utils/progressCalculation';
 
 interface MobileProjectCardProps {
   project: Project | ProjectRun;
@@ -36,7 +37,7 @@ export function MobileProjectCard({ project, onSelect, variant = 'project', onDe
   
   const isProjectRun = variant === 'run' || 'progress' in project;
   const projectRunData = isProjectRun ? (project as ProjectRun) : null;
-  const progress = projectRunData ? Math.round(projectRunData.progress || 0) : 0;
+  const progress = projectRunData ? calculateProjectProgress(projectRunData) : 0;
   const status = isProjectRun ? getProjectRunStatus(project as ProjectRun) : 'template';
   
   // Only allow swipe to delete for project runs (not templates)

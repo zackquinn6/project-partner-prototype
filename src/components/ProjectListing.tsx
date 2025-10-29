@@ -18,6 +18,7 @@ import { useButtonTracker } from '@/hooks/useButtonTracker';
 import { CommunityPostsWindow } from '@/components/CommunityPostsWindow';
 import { ManualProjectDialog } from '@/components/ManualProjectDialog';
 import { ManualProjectEditDialog } from '@/components/ManualProjectEditDialog';
+import { calculateProjectProgress } from '@/utils/progressCalculation';
 
 interface ProjectListingProps {
   onProjectSelect?: (project: Project | null | 'workflow') => void;
@@ -36,7 +37,7 @@ export default function ProjectListing({ onProjectSelect }: ProjectListingProps)
   const [editingProjectRun, setEditingProjectRun] = useState<ProjectRun | null>(null);
 
   const calculateProgress = (projectRun: ProjectRun) => {
-    return Math.round(projectRun.progress || 0);
+    return calculateProjectProgress(projectRun);
   };
 
   const getStatusColor = (status: ProjectRun['status']) => {

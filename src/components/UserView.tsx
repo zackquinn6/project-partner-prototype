@@ -21,6 +21,7 @@ import ProjectListing from './ProjectListing';
 import { MobileProjectListing } from './MobileProjectListing';
 import { MobileWorkflowView } from './MobileWorkflowView';
 import { OutputDetailPopup } from './OutputDetailPopup';
+import { calculateProjectProgress, getWorkflowStepsCount } from '@/utils/progressCalculation';
 import { AccountabilityMessagePopup } from './AccountabilityMessagePopup';
 import { PhaseRatingPopup } from './PhaseRatingPopup';
 import { ExpertHelpWindow } from './ExpertHelpWindow';
@@ -436,20 +437,19 @@ export default function UserView({
   
   const currentStep = allSteps[currentStepIndex];
   
-  // CRITICAL FIX: Calculate progress from actual workflow steps
-  const workflowCompletedSteps = Array.from(completedSteps).filter(stepId => 
-    allSteps.some(step => step.id === stepId)
-  );
-  const progress = allSteps.length > 0 ? (workflowCompletedSteps.length / allSteps.length) * 100 : 0;
+  // CRITICAL FIX: Calculate progress from actual workflow steps using unified utility
+  const { total: totalSteps, completed: completedStepsCount } = currentProjectRun 
+    ? getWorkflowStepsCount(currentProjectRun) 
+    : { total: 0, completed: 0 };
+  const progress = totalSteps > 0 ? (completedStepsCount / totalSteps) * 100 : 0;
   
   console.log('📊 Progress Calculation (DETAILED):', {
     totalPhases: activeProject?.phases?.length || 0,
     phasesWithSteps: activeProject?.phases?.filter(p => p.operations?.some(o => o.steps?.length > 0)).length || 0,
-    totalSteps: allSteps.length,
-    allStepsPreview: allSteps.slice(0, 5).map(s => ({ id: s.id, phase: s.phaseName, operation: s.operationName, step: s.step })),
-    workflowCompletedSteps: workflowCompletedSteps.length,
+    totalSteps: totalSteps,
+    workflowCompletedSteps: completedStepsCount,
     completedStepsFromState: completedSteps.size,
-    completedStepsArray: Array.from(completedSteps),
+    completedStepsArray: Array.from(completedSteps).slice(0, 10),
     calculatedProgress: progress,
     projectRunProgress: currentProjectRun?.progress,
     projectRunCompletedSteps: currentProjectRun?.completedSteps?.length,
