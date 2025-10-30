@@ -327,7 +327,8 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       name: 'New Phase',
       description: 'Phase description',
       operations: [],
-      isLinked: false
+      isLinked: false,
+      isStandard: false // Mark as custom phase
     };
 
     // Add new phase and enforce standard phase ordering
@@ -339,6 +340,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       updatedAt: new Date()
     };
     updateProject(updatedProject);
+    toast.success('Custom phase added successfully');
   };
   const handleIncorporatePhase = (incorporatedPhase: Phase & {
     sourceProjectId: string;

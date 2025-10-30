@@ -1007,10 +1007,18 @@ export function UnifiedProjectManagement() {
                               }
                               parsedPhases = phases || [];
                               
-                              console.log('Setting current project for edit:', {
+                              console.log('🔍 Setting current project for edit:', {
                                 revisionId: revision.id,
+                                revisionName: revision.name,
                                 revisionNumber: revision.revision_number,
                                 phaseCount: Array.isArray(parsedPhases) ? parsedPhases.length : 0,
+                                phases: parsedPhases.map((p: any) => ({
+                                  id: p.id,
+                                  name: p.name,
+                                  isStandard: p.isStandard,
+                                  isLinked: p.isLinked,
+                                  operationCount: p.operations?.length || 0
+                                }))
                               });
                             } catch (e) {
                               console.error('Failed to parse phases for revision:', revision.id, e);

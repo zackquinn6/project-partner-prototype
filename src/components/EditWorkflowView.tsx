@@ -653,7 +653,7 @@ export default function EditWorkflowView({
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold">
-                {isEditingStandardProject ? '🔒 Standard Project Foundation Editor' : `Project Template: ${currentProject?.name || 'Untitled Project'}`}
+                {isEditingStandardProject ? '🔒 Standard Project Foundation Editor' : `Workflow Editor: ${currentProject?.name || 'Untitled Project'}`}
               </h1>
               {isEditingStandardProject && (
                 <>
