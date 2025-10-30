@@ -120,6 +120,9 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
       };
 
       await updateProjectRun(updatedProjectRun);
+      
+      // CRITICAL FIX: Call onComplete to mark step 3 as complete
+      console.log('🎯 ProjectProfileStep: Calling onComplete after save');
       onComplete();
     } catch (error) {
       console.error('Error saving project profile:', error);
