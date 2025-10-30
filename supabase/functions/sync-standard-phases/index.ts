@@ -101,14 +101,36 @@ Deno.serve(async (req) => {
     }
 
     result.details.push(`Found ${templates?.length || 0} templates to update (including all revisions)`);
+    
+    // SAFETY CHECK: Verify Standard Project has data to cascade
+    const { data: standardOpsCheck, error: standardOpsCheckError } = await supabase
+      .from('template_operations')
+      .select('id, standard_phase_id, name')
+      .eq('project_id', standardProjectId)
+      .not('standard_phase_id', 'is', null);
+    
+    if (standardOpsCheckError) {
+      throw new Error(`Failed to verify standard operations: ${standardOpsCheckError.message}`);
+    }
+    
+    if (!standardOpsCheck || standardOpsCheck.length === 0) {
+      throw new Error('No standard operations found in Standard Project - cannot cascade');
+    }
+    
+    console.log(`SYNC: Standard Project has ${standardOpsCheck.length} standard operations to cascade`);
+    result.details.push(`✓ Verified Standard Project has ${standardOpsCheck.length} operations to cascade`);
 
     // Step 3: Update each template (including revisions)
     for (const template of templates || []) {
+      // Declare revisionLabel ONCE at the start of the loop
+      const revisionLabel = template.revision_number 
+        ? ` [Rev ${template.revision_number}${template.is_current_version ? ' ⭐CURRENT' : ''}]`
+        : '';
+      
       try {
-        const revisionLabel = template.revision_number 
-          ? ` [Rev ${template.revision_number}${template.is_current_version ? ' ⭐CURRENT' : ''}]`
-          : '';
         console.log(`SYNC: Updating template "${template.name}"${revisionLabel} (${template.id})`);
+        let stepsUpdatedCount = 0;
+        let stepsMissingCount = 0;
         
         // Get all standard operations from Standard Project
         const { data: standardOps, error: standardOpsError } = await supabase
@@ -172,10 +194,9 @@ Deno.serve(async (req) => {
             );
 
             if (matchingTemplateStep) {
-              // Log apps data for debugging
-              console.log(`SYNC: Updating step "${standardStep.step_title}" - Apps data:`, {
-                standardStepApps: standardStep.apps,
-                hasApps: !!standardStep.apps && Array.isArray(standardStep.apps) && standardStep.apps.length > 0,
+              const appsCount = standardStep.apps && Array.isArray(standardStep.apps) ? standardStep.apps.length : 0;
+              console.log(`SYNC: Updating step "${standardStep.step_title}" in "${template.name}"${revisionLabel}`, {
+                appsCount,
                 templateStepId: matchingTemplateStep.id
               });
               
@@ -199,28 +220,51 @@ Deno.serve(async (req) => {
                 .eq('id', matchingTemplateStep.id);
 
               if (updateStepError) {
-                console.error(`SYNC: Failed to update step "${standardStep.step_title}":`, updateStepError);
+                console.error(`SYNC: ✗ Failed to update step "${standardStep.step_title}":`, updateStepError);
+                stepsMissingCount++;
               } else {
-                console.log(`SYNC: ✓ Step "${standardStep.step_title}" updated successfully`);
+                console.log(`SYNC: ✓ Step "${standardStep.step_title}" updated (${appsCount} apps)`);
+                stepsUpdatedCount++;
               }
             } else {
-              console.warn(`SYNC: No matching template step found for "${standardStep.step_title}" in template "${template.name}"`);
+              console.warn(`SYNC: ✗ No matching step found for "${standardStep.step_title}" in "${template.name}"${revisionLabel}`);
+              stepsMissingCount++;
             }
           }
         }
 
         // Rebuild this template's phases JSON to reflect changes
-        console.log(`SYNC: Rebuilding phases JSON for template "${template.name}" (${template.id})`);
+        console.log(`SYNC: Rebuilding phases JSON for "${template.name}"${revisionLabel}`);
         const { error: templateRebuildError } = await supabase.rpc('rebuild_phases_json_from_templates', {
           p_project_id: template.id
         });
 
         if (templateRebuildError) {
-          console.error(`SYNC: Rebuild failed for "${template.name}":`, templateRebuildError);
+          console.error(`SYNC: Rebuild failed for "${template.name}"${revisionLabel}:`, templateRebuildError);
           throw new Error(templateRebuildError.message);
         }
         
-        console.log(`SYNC: ✓ Phases JSON rebuilt for "${template.name}"`);
+        console.log(`SYNC: ✓ Phases JSON rebuilt for "${template.name}"${revisionLabel}`);
+
+        // VERIFICATION: Check that updates actually worked
+        const { data: verifyStep, error: verifyError } = await supabase
+          .from('template_steps')
+          .select('step_title, apps')
+          .eq('operation_id', await supabase
+            .from('template_operations')
+            .select('id')
+            .eq('project_id', template.id)
+            .limit(1)
+            .single()
+            .then(res => res.data?.id)
+          )
+          .ilike('step_title', '%timeline%')
+          .maybeSingle();
+        
+        if (verifyStep) {
+          const appsCount = verifyStep.apps && Array.isArray(verifyStep.apps) ? verifyStep.apps.length : 0;
+          console.log(`SYNC: VERIFICATION - "${template.name}"${revisionLabel} "Set Project Timeline" has ${appsCount} apps`);
+        }
 
         // Update the template's updated_at timestamp
         const { error: updateError } = await supabase
@@ -233,24 +277,18 @@ Deno.serve(async (req) => {
         }
 
         result.templatesUpdated++;
-        const revisionLabel = template.revision_number 
-          ? ` [Rev ${template.revision_number}${template.is_current_version ? ' ⭐CURRENT' : ''}]`
-          : '';
-        result.details.push(`✓ Updated: ${template.name}${revisionLabel}`);
-        console.log(`SYNC: Successfully updated "${template.name}"${revisionLabel}`);
+        result.details.push(`✓ Updated: ${template.name}${revisionLabel} (${stepsUpdatedCount} steps updated, ${stepsMissingCount} steps missing)`);
+        console.log(`SYNC: ✓ Successfully updated "${template.name}"${revisionLabel} - ${stepsUpdatedCount} steps updated`);
       } catch (error) {
         result.templatesFailed++;
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const revisionLabel = template.revision_number 
-          ? ` [Rev ${template.revision_number}]`
-          : '';
         result.failedTemplates.push({
           name: `${template.name}${revisionLabel}`,
           id: template.id,
           error: errorMessage,
         });
         result.details.push(`✗ Failed: ${template.name}${revisionLabel} - ${errorMessage}`);
-        console.error(`SYNC: Failed to update "${template.name}":`, error);
+        console.error(`SYNC: ✗ Failed to update "${template.name}"${revisionLabel}:`, error);
       }
     }
 
