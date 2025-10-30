@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useProject } from '@/contexts/ProjectContext';
+import { useProjectData } from '@/contexts/ProjectDataContext';
 import { WorkflowStep, Material, Tool, Output, Phase, Operation, Project } from '@/interfaces/Project';
 import { ProjectSelector } from '@/components/ProjectSelector';
 import ProjectRollup from '@/components/ProjectRollup';
@@ -48,6 +49,8 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
     setCurrentProject,
     fetchProjects
   } = useProject();
+  
+  const { updateProjectsCache } = useProjectData();
   
   const [currentView, setCurrentView] = useState<'table' | 'editWorkflow' | 'dragdrop'>('table');
   const [editing, setEditing] = useState<EditingState>({
@@ -478,8 +481,21 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
       // Set the new revision as current project immediately
       setCurrentProject(newRevisionProject);
       
-      // Refresh projects list in background
-      await fetchProjects();
+      // Optimistically update projects cache to avoid race conditions
+      const updatedProjects = projects.map(p => 
+        p.id === currentProject.id 
+          ? { ...p, is_current_version: false }
+          : p
+      ).concat([newRevisionProject]);
+      updateProjectsCache(updatedProjects);
+
+      console.log('✅ Projects cache updated optimistically with new revision');
+
+      // Deferred refetch to sync with server (non-blocking, allows UI to update first)
+      setTimeout(() => {
+        console.log('🔄 Syncing projects from server...');
+        fetchProjects();
+      }, 500);
 
       toast.success(`Revision ${newRevisionNumber} created successfully`);
       
