@@ -72,10 +72,22 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
     e.preventDefault();
     if (!user) return;
 
+    // Validate status-progress alignment
+    const progress = Number(formData.progress);
+    let validatedStatus = formData.status;
+    
+    if (progress === 100) {
+      validatedStatus = 'complete';
+    } else if (progress === 0) {
+      validatedStatus = 'not-started';
+    } else if (progress > 0 && progress < 100) {
+      validatedStatus = 'in-progress';
+    }
+
     setIsSubmitting(true);
     try {
       // Auto-set end_date to today if complete and no end date provided
-      const shouldAutoSetEndDate = (formData.status === 'complete' || formData.progress === 100) && !formData.endDate;
+      const shouldAutoSetEndDate = (validatedStatus === 'complete' || progress === 100) && !formData.endDate;
       const finalEndDate = shouldAutoSetEndDate ? new Date().toISOString().split('T')[0] : formData.endDate;
       
       const projectData = {
@@ -84,8 +96,8 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
         name: formData.name,
         description: formData.description || null,
         category: formData.category || null,
-        status: formData.status,
-        progress: Number(formData.progress),
+        status: validatedStatus,
+        progress: progress,
         estimated_time: formData.estimatedTime || null,
         project_leader: formData.projectLeader || null,
         start_date: formData.startDate ? new Date(formData.startDate).toISOString() : new Date().toISOString(),
@@ -233,6 +245,8 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
                   max="100"
                   value={formData.progress}
                   onChange={(e) => handleInputChange('progress', parseInt(e.target.value) || 0)}
+                  disabled={formData.status === 'complete'}
+                  className={formData.status === 'complete' ? 'opacity-50 cursor-not-allowed' : ''}
                 />
               </div>
             </div>
