@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useProject } from '@/contexts/ProjectContext';
-import { WorkflowStep, Material, Tool, Output, Phase, Operation } from '@/interfaces/Project';
+import { WorkflowStep, Material, Tool, Output, Phase, Operation, Project } from '@/interfaces/Project';
 import { ProjectSelector } from '@/components/ProjectSelector';
 import ProjectRollup from '@/components/ProjectRollup';
 import EditWorkflowView from '@/components/EditWorkflowView';
@@ -408,22 +408,59 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
         throw insertError;
       }
 
+      // Parse phases from the returned data
+      let parsedPhases = [];
+      try {
+        parsedPhases = typeof newRevisionData.phases === 'string' 
+          ? JSON.parse(newRevisionData.phases) 
+          : newRevisionData.phases;
+      } catch (e) {
+        console.error('Failed to parse phases:', e);
+        parsedPhases = [];
+      }
+
       console.log('✅ New revision created:', {
         newId: newRevisionData.id,
         revisionNumber: newRevisionNumber,
-        phasesPreserved: typeof newRevisionData.phases === 'string' 
-          ? JSON.parse(newRevisionData.phases).length 
-          : Array.isArray(newRevisionData.phases) ? newRevisionData.phases.length : 0
+        phasesPreserved: parsedPhases.length,
+        phaseNames: parsedPhases.map((p: any) => p.name)
       });
 
-      // Step 3: Refresh projects and set new revision as current
-      await fetchProjects();
+      // Step 3: Manually construct the new project object from returned data
+      const newRevisionProject: Project = {
+        id: newRevisionData.id,
+        name: newRevisionData.name,
+        description: newRevisionData.description || '',
+        diyLengthChallenges: newRevisionData.diy_length_challenges,
+        image: newRevisionData.image,
+        images: newRevisionData.images,
+        cover_image: newRevisionData.cover_image,
+        createdAt: new Date(newRevisionData.created_at),
+        updatedAt: new Date(newRevisionData.updated_at),
+        startDate: new Date(newRevisionData.start_date),
+        planEndDate: new Date(newRevisionData.plan_end_date),
+        endDate: newRevisionData.end_date ? new Date(newRevisionData.end_date) : undefined,
+        status: newRevisionData.status as 'not-started' | 'in-progress' | 'complete',
+        publishStatus: newRevisionData.publish_status as 'draft' | 'published' | 'beta-testing' | 'archived',
+        category: newRevisionData.category,
+        effortLevel: newRevisionData.effort_level as Project['effortLevel'],
+        skillLevel: newRevisionData.skill_level as Project['skillLevel'],
+        estimatedTime: newRevisionData.estimated_time,
+        estimatedTimePerUnit: newRevisionData.estimated_time_per_unit,
+        scalingUnit: newRevisionData.scaling_unit as Project['scalingUnit'],
+        phases: parsedPhases,
+        parentProjectId: newRevisionData.parent_project_id,
+        revisionNumber: newRevisionData.revision_number,
+        revisionNotes: newRevisionData.revision_notes,
+        createdFromRevision: newRevisionData.created_from_revision,
+        isStandardTemplate: newRevisionData.is_standard_template
+      };
+
+      // Set the new revision as current project immediately
+      setCurrentProject(newRevisionProject);
       
-      // Find the new revision in the refreshed projects list
-      const newRevision = projects.find(p => p.id === newRevisionData.id);
-      if (newRevision) {
-        setCurrentProject(newRevision);
-      }
+      // Refresh projects list in background
+      await fetchProjects();
 
       toast.success(`Revision ${newRevisionNumber} created successfully`);
       
