@@ -111,7 +111,9 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
         const { data, error } = await supabase
           .from('projects')
           .select('*')
-          .in('publish_status', ['published', 'beta-testing']);
+          .in('publish_status', ['published', 'beta-testing'])
+          .eq('is_current_version', true)
+          .order('updated_at', { ascending: false });
         
         if (data && !error) {
           setPublicProjects(data);
