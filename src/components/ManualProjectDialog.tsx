@@ -74,6 +74,10 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
 
     setIsSubmitting(true);
     try {
+      // Auto-set end_date to today if complete and no end date provided
+      const shouldAutoSetEndDate = (formData.status === 'complete' || formData.progress === 100) && !formData.endDate;
+      const finalEndDate = shouldAutoSetEndDate ? new Date().toISOString().split('T')[0] : formData.endDate;
+      
       const projectData = {
         user_id: user.id,
         template_id: null, // Manual projects don't need a template
@@ -81,12 +85,12 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
         description: formData.description || null,
         category: formData.category || null,
         status: formData.status,
-        progress: formData.progress,
+        progress: Number(formData.progress),
         estimated_time: formData.estimatedTime || null,
         project_leader: formData.projectLeader || null,
         start_date: formData.startDate ? new Date(formData.startDate).toISOString() : new Date().toISOString(),
-        end_date: formData.endDate ? new Date(formData.endDate).toISOString() : null,
-        plan_end_date: formData.endDate ? new Date(formData.endDate).toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        end_date: finalEndDate ? new Date(finalEndDate).toISOString() : null,
+        plan_end_date: finalEndDate ? new Date(finalEndDate).toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         is_manual_entry: true,
         phases: [],
         completed_steps: []
@@ -241,6 +245,7 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
                   type="date"
                   value={formData.startDate}
                   onChange={(e) => handleInputChange('startDate', e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
                 />
               </div>
 
@@ -251,6 +256,7 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
                   type="date"
                   value={formData.endDate}
                   onChange={(e) => handleInputChange('endDate', e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
                 />
               </div>
             </div>
