@@ -118,6 +118,9 @@ export default function Navigation({
   const handleProjectSelect = async (projectRunId: string) => {
     console.log('🎯 Navigation: Fetching fresh project data from database for:', projectRunId);
     
+    // CRITICAL: Clear currentProject to prevent edit workflow from opening
+    setCurrentProject(null);
+    
     // Fetch fresh data from database to ensure we have latest completedSteps
     const { data: freshRun, error } = await supabase
       .from('project_runs')

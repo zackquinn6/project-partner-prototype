@@ -274,7 +274,15 @@ const Index = () => {
   // Listen for edit workflow navigation event
   useEffect(() => {
     const handleEditWorkflowNavigation = () => {
-      setCurrentView('editWorkflow');
+      console.log('📝 Index: Edit workflow navigation requested');
+      // Only switch to edit workflow view if we're in admin mode
+      // This prevents accidental triggering when opening project runs
+      if (currentView === 'admin' || isAdmin) {
+        console.log('✅ Index: Switching to editWorkflow view');
+        setCurrentView('editWorkflow');
+      } else {
+        console.warn('⚠️ Index: Ignoring edit workflow navigation (not in admin mode)');
+      }
     };
 
     const handleKickoffNavigation = (event: CustomEvent) => {
@@ -345,7 +353,7 @@ const Index = () => {
       // Clean up mobile-specific listeners
       window.removeEventListener('show-kc-explainer', handleShowKCExplainer);
     };
-  }, [isMobile, navigate, currentProjectRun]);
+  }, [isMobile, navigate, currentProjectRun, currentView, isAdmin]);
 
   // Define functions BEFORE they are used in useEffect
   const handleProjectsView = () => {

@@ -495,7 +495,20 @@ export const isKickoffPhaseComplete = (completedSteps: string[]): boolean => {
     'kickoff-step-3'
   ];
   
-  return kickoffStepIds.every(stepId => completedSteps.includes(stepId));
+  // Check if all UI kickoff step IDs are completed
+  const uiStepsComplete = kickoffStepIds.every(stepId => completedSteps.includes(stepId));
+  
+  // Also check if actual workflow Kickoff phase steps are marked complete
+  // This handles cases where steps were completed through the workflow rather than kickoff UI
+  const kickoffPhaseSteps = completedSteps.filter(stepId => {
+    // Kickoff phase steps typically start with specific IDs from the workflow
+    // Include any step that looks like a workflow step ID (UUID format or specific patterns)
+    return stepId.length > 20 || stepId.includes('-'); // Broader check for actual workflow steps
+  });
+  
+  // If either the UI steps are all complete OR there are workflow steps completed,
+  // consider kickoff as complete
+  return uiStepsComplete || kickoffPhaseSteps.length >= 3;
 };
 
 export const getKickoffStepIndex = (stepId: string): number => {
