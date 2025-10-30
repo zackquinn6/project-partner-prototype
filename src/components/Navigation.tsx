@@ -217,7 +217,7 @@ export default function Navigation({
                 <DropdownMenuTrigger asChild>
                   <Button variant={currentView === 'user' ? 'default' : 'ghost'} size="sm" className="text-xs">
                     <FolderOpen className="h-4 w-4 mr-2" />
-                    {currentProjectRun ? currentProjectRun.name : "Progress Board"}
+                    Progress Board
                     <ChevronDown className="h-4 w-4 ml-2" />
                   </Button>
                 </DropdownMenuTrigger>

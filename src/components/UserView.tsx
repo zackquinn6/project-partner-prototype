@@ -677,10 +677,14 @@ export default function UserView({
           const tempProjectRun = { ...currentProjectRun, completedSteps: uniqueCompletedSteps };
           const calculatedProgress = calculateProjectProgress(tempProjectRun);
           
+          // Set status to 'complete' if progress is 100%
+          const newStatus = calculatedProgress >= 100 ? 'complete' : currentProjectRun.status;
+          
           const updatedProjectRun = {
             ...currentProjectRun,
             completedSteps: uniqueCompletedSteps,
             progress: Math.round(calculatedProgress),
+            status: newStatus,
             updatedAt: new Date()
           };
           
