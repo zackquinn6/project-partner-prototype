@@ -1,8 +1,33 @@
 import { ProjectRun } from '@/interfaces/ProjectRun';
 
 /**
- * UNIFIED PROGRESS CALCULATION UTILITY
+ * STEP WEIGHT CONSTANTS
+ * These weights are used for progress calculation:
+ * - Scaled steps: 1.0 point (main work that scales with project size)
+ * - Prime steps: 0.1 points (one-time setup/prep steps)
+ * - Quality Control steps: 0.1 points (verification/inspection steps)
+ */
+export const STEP_WEIGHTS = {
+  scaled: 1.0,
+  prime: 0.1,
+  quality_control: 0.1
+} as const;
+
+/**
+ * Get the weight for a step based on its type
+ */
+export function getStepWeight(stepType?: string): number {
+  if (!stepType) return STEP_WEIGHTS.prime; // Default to prime weight
+  return STEP_WEIGHTS[stepType as keyof typeof STEP_WEIGHTS] ?? STEP_WEIGHTS.prime;
+}
+
+/**
+ * UNIFIED WEIGHTED PROGRESS CALCULATION UTILITY
  * Single source of truth for calculating project progress
+ * 
+ * Uses weighted progress where:
+ * - Scaled steps are worth 1 point each
+ * - Prime and Quality Control steps are worth 0.1 points each
  * 
  * IMPORTANT: Counts ALL steps including standard phases (Kickoff, Planning, Ordering, Close Project)
  */
@@ -11,41 +36,71 @@ export function calculateProjectProgress(projectRun: ProjectRun): number {
     return 0;
   }
   
-  // Count total steps in ALL phases
-  const totalSteps = projectRun.phases.reduce((sum, phase) => 
-    sum + (phase.operations?.reduce((opSum, op) => 
-      opSum + (op.steps?.length || 0), 0) || 0), 0);
+  let totalWeight = 0;
+  let completedWeight = 0;
+  const completedStepIds = new Set(projectRun.completedSteps || []);
   
-  if (totalSteps === 0) {
+  // Calculate weighted progress for ALL phases
+  projectRun.phases.forEach(phase => {
+    phase.operations?.forEach(op => {
+      op.steps?.forEach(step => {
+        const weight = getStepWeight(step.stepType);
+        totalWeight += weight;
+        
+        if (completedStepIds.has(step.id)) {
+          completedWeight += weight;
+        }
+      });
+    });
+  });
+  
+  if (totalWeight === 0) {
     return 0;
   }
   
-  // Count completed steps in ALL phases
-  const completedStepIds = new Set(projectRun.completedSteps || []);
-  const completedSteps = projectRun.phases.reduce((sum, phase) => 
-    sum + (phase.operations?.reduce((opSum, op) => 
-      opSum + (op.steps?.filter(step => completedStepIds.has(step.id)).length || 0), 0) || 0), 0);
-  
-  return Math.round((completedSteps / totalSteps) * 100);
+  return Math.round((completedWeight / totalWeight) * 100);
 }
 
 /**
- * Get all steps count (INCLUDING all phases - kickoff and standard phases)
+ * Get weighted steps count (INCLUDING all phases - kickoff and standard phases)
+ * Returns both raw counts and weighted values
  */
-export function getWorkflowStepsCount(projectRun: ProjectRun): { total: number; completed: number } {
+export function getWorkflowStepsCount(projectRun: ProjectRun): { 
+  total: number; 
+  completed: number;
+  totalWeight: number;
+  completedWeight: number;
+} {
   if (!projectRun.phases || projectRun.phases.length === 0) {
-    return { total: 0, completed: 0 };
+    return { total: 0, completed: 0, totalWeight: 0, completedWeight: 0 };
   }
   
-  // Count ALL phases including standard phases
-  const total = projectRun.phases.reduce((sum, phase) => 
-    sum + (phase.operations?.reduce((opSum, op) => 
-      opSum + (op.steps?.length || 0), 0) || 0), 0);
-  
+  let totalSteps = 0;
+  let completedSteps = 0;
+  let totalWeight = 0;
+  let completedWeight = 0;
   const completedStepIds = new Set(projectRun.completedSteps || []);
-  const completed = projectRun.phases.reduce((sum, phase) => 
-    sum + (phase.operations?.reduce((opSum, op) => 
-      opSum + (op.steps?.filter(step => completedStepIds.has(step.id)).length || 0), 0) || 0), 0);
   
-  return { total, completed };
+  // Count ALL phases including standard phases with weights
+  projectRun.phases.forEach(phase => {
+    phase.operations?.forEach(op => {
+      op.steps?.forEach(step => {
+        totalSteps++;
+        const weight = getStepWeight(step.stepType);
+        totalWeight += weight;
+        
+        if (completedStepIds.has(step.id)) {
+          completedSteps++;
+          completedWeight += weight;
+        }
+      });
+    });
+  });
+  
+  return { 
+    total: totalSteps, 
+    completed: completedSteps,
+    totalWeight,
+    completedWeight
+  };
 }

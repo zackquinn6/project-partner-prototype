@@ -2,6 +2,33 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, RotateCcw, Search, GitBranch, HelpCircle, Info } from 'lucide-react';
 
+const stepTypes = [
+  {
+    value: 'prime',
+    label: 'Prime',
+    icon: CheckCircle,
+    color: 'bg-green-500',
+    description: 'Occurs once and is not scaled',
+    weight: 0.1
+  },
+  {
+    value: 'scaled',
+    label: 'Scaled',
+    icon: RotateCcw,
+    color: 'bg-blue-500',
+    description: 'Time estimates scale with project sizing and intermediate progress can be reported',
+    weight: 1.0
+  },
+  {
+    value: 'quality_control',
+    label: 'Quality Check',
+    icon: Search,
+    color: 'bg-orange-500',
+    description: 'A non-work step that evaluates previously completed work',
+    weight: 0.1
+  }
+];
+
 const flowTypes = [
   {
     value: 'prime',
@@ -48,16 +75,20 @@ const flowTypes = [
 interface FlowTypeLegendProps {
   compact?: boolean;
   showDescriptions?: boolean;
+  showOnlyStepTypes?: boolean;
 }
 
 export const FlowTypeLegend: React.FC<FlowTypeLegendProps> = ({ 
   compact = false, 
-  showDescriptions = true 
+  showDescriptions = true,
+  showOnlyStepTypes = false
 }) => {
+  const typesToShow = showOnlyStepTypes ? stepTypes : flowTypes;
+  
   if (compact) {
     return (
       <div className="flex flex-wrap gap-2">
-        {flowTypes.map((type) => (
+        {typesToShow.map((type) => (
           <div key={type.value} className="flex items-center gap-1 text-xs" title={type.description}>
             <div className={`w-2 h-2 rounded-full ${type.color}`} />
             <type.icon className="w-3 h-3" />
@@ -73,12 +104,12 @@ export const FlowTypeLegend: React.FC<FlowTypeLegendProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Info className="w-4 h-4" />
-          Workflow Step Types
+          {showOnlyStepTypes ? 'Step Types' : 'Workflow Step Types'}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {flowTypes.map((type) => (
-          <div key={type.value} className="flex items-start gap-3 p-2 rounded-md bg-muted/30">
+        {typesToShow.map((type) => (
+          <div key={type.value} className="flex items-start gap-3 p-3 rounded-md bg-muted/30 border border-muted">
             <div className="flex items-center gap-2 min-w-0">
               <div className={`w-3 h-3 rounded-full ${type.color} flex-shrink-0`} />
               <type.icon className="w-4 h-4 flex-shrink-0" />
@@ -88,35 +119,54 @@ export const FlowTypeLegend: React.FC<FlowTypeLegendProps> = ({
             {showDescriptions && (
               <div className="flex-1 min-w-0">
                 <div className="text-sm text-muted-foreground">{type.description}</div>
-                <div className="text-xs text-muted-foreground mt-1 opacity-75">
-                  <strong>Progress:</strong> {type.progress}
-                </div>
+                {!showOnlyStepTypes && 'progress' in type && (
+                  <div className="text-xs text-muted-foreground mt-1 opacity-75">
+                    <strong>Progress:</strong> {type.progress}
+                  </div>
+                )}
+                {showOnlyStepTypes && 'weight' in type && (
+                  <div className="text-xs text-muted-foreground mt-1 opacity-75">
+                    <strong>Progress Weight:</strong> {type.weight === 1 ? '1 point' : '0.1 points'}
+                  </div>
+                )}
               </div>
             )}
           </div>
         ))}
         
-        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-800">
-          <div className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>💡 Why this matters:</strong> Step types help you understand the workflow logic, 
-            track progress accurately, and identify potential process improvements.
+        {showOnlyStepTypes && (
+          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-800">
+            <div className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>💡 Progress Weighting:</strong> Scaled steps contribute more to overall progress (1 point each) 
+              since they represent the bulk of work. Prime and Quality Check steps contribute less (0.1 points each) 
+              as they are quick verification or setup steps.
+            </div>
           </div>
-        </div>
+        )}
+        
+        {!showOnlyStepTypes && (
+          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-800">
+            <div className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>💡 Why this matters:</strong> Step types help you understand the workflow logic, 
+              track progress accurately, and identify potential process improvements.
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 };
 
-export const getStepIcon = (flowType?: string, className: string = "w-4 h-4") => {
-  const type = flowTypes.find(t => t.value === flowType);
+export const getStepIcon = (stepType?: string, className: string = "w-4 h-4") => {
+  const type = stepTypes.find(t => t.value === stepType) || flowTypes.find(t => t.value === stepType);
   if (!type) return null;
   
   const IconComponent = type.icon;
   return <IconComponent className={className} />;
 };
 
-export const getStepIndicator = (flowType?: string) => {
-  const type = flowTypes.find(t => t.value === flowType);
+export const getStepIndicator = (stepType?: string) => {
+  const type = stepTypes.find(t => t.value === stepType) || flowTypes.find(t => t.value === stepType);
   if (!type) return null;
   
   return (
@@ -125,4 +175,13 @@ export const getStepIndicator = (flowType?: string) => {
       <type.icon className="w-3 h-3" />
     </div>
   );
+};
+
+/**
+ * Get step weight for progress calculation
+ * Scaled steps = 1 point, Prime and Quality Control = 0.1 points
+ */
+export const getStepWeight = (stepType?: string): number => {
+  const type = stepTypes.find(t => t.value === stepType);
+  return type?.weight ?? 0.1; // Default to 0.1 if not found (prime behavior)
 };

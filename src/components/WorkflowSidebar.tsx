@@ -166,7 +166,7 @@ export function WorkflowSidebar({
                                 }}
                               >
                                 <div className="flex items-center gap-2">
-                                  {getStepIndicator(step.flowType)}
+                                  {getStepIndicator(step.stepType || 'prime')}
                                   {completedSteps.has(step.id) && <CheckCircle className="w-3 h-3" />}
                                   <span className="truncate">{step.step}</span>
                                 </div>
@@ -199,10 +199,10 @@ export function WorkflowSidebar({
       <Dialog open={showStepTypesInfo} onOpenChange={setShowStepTypesInfo}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Workflow Step Types</DialogTitle>
+            <DialogTitle>Step Types</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <FlowTypeLegend compact={false} showDescriptions={true} />
+            <FlowTypeLegend compact={false} showDescriptions={true} showOnlyStepTypes={true} />
           </div>
         </DialogContent>
       </Dialog>
