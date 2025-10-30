@@ -775,24 +775,45 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
                   onClick={async () => {
                     if (!currentProject) return;
                     
-                    // Save phases JSONB directly to database
-                    const { error } = await supabase
-                      .from('projects')
-                      .update({ 
-                        phases: currentProject.phases as any,
-                        updated_at: new Date().toISOString()
-                      })
-                      .eq('id', currentProject.id);
-                    
-                    if (error) {
-                      console.error('Error saving phases:', error);
+                    try {
+                      // Step 1: Save phases JSONB to database
+                      const { error: updateError } = await supabase
+                        .from('projects')
+                        .update({ 
+                          phases: currentProject.phases as any,
+                          updated_at: new Date().toISOString()
+                        })
+                        .eq('id', currentProject.id);
+                      
+                      if (updateError) {
+                        console.error('Error saving phases:', updateError);
+                        toast.error('Failed to save changes');
+                        return;
+                      }
+                      
+                      // Step 2: Sync custom phases to template_operations tables
+                      const { error: syncError } = await supabase.rpc(
+                        'sync_custom_phases_to_tables',
+                        { p_project_id: currentProject.id }
+                      );
+                      
+                      if (syncError) {
+                        console.error('Error syncing custom phases:', syncError);
+                        toast.error('Saved but failed to sync structure');
+                        return;
+                      }
+                      
+                      console.log('✅ Custom phases synced to tables');
+                      toast.success('Changes saved successfully');
+                      setEditingProject(false);
+                      
+                      // Refresh to show updated data
+                      fetchProjects();
+                    } catch (error) {
+                      console.error('Error saving:', error);
                       toast.error('Failed to save changes');
-                      return;
                     }
-                    
-                    toast.success('Changes saved successfully');
-                    setEditingProject(false);
-                  }} 
+                  }}
                   className="bg-green-600 hover:bg-green-700 text-white"
                 >
                   <Check className="w-4 h-4 mr-2" />
