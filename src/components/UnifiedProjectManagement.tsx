@@ -348,7 +348,6 @@ export function UnifiedProjectManagement() {
 
   const deleteDraftRevision = async (revisionId: string, revisionNumber: number) => {
     if (revisionNumber === 0) {
-      toast.error("Cannot delete the base revision (revision 0)");
       return;
     }
 
@@ -357,20 +356,43 @@ export function UnifiedProjectManagement() {
     }
 
     try {
+      // First try to delete related template data
+      const { data: operations } = await supabase
+        .from('template_operations')
+        .select('id')
+        .eq('project_id', revisionId);
+
+      if (operations && operations.length > 0) {
+        const operationIds = operations.map(op => op.id);
+        
+        // Delete template steps first
+        await supabase
+          .from('template_steps')
+          .delete()
+          .in('operation_id', operationIds);
+
+        // Delete template operations
+        await supabase
+          .from('template_operations')
+          .delete()
+          .eq('project_id', revisionId);
+      }
+
+      // Now delete the project
       const { error } = await supabase
         .from('projects')
         .delete()
         .eq('id', revisionId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting revision:', error);
+        return;
+      }
 
-      toast.success("Draft revision deleted successfully");
-
-      fetchProjects();
-      fetchProjectRevisions();
+      // Refresh the page on success
+      window.location.reload();
     } catch (error) {
       console.error('Error deleting revision:', error);
-      toast.error("Failed to delete draft revision");
     }
   };
 
