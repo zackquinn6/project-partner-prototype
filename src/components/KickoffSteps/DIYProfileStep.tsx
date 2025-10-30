@@ -248,7 +248,10 @@ export const DIYProfileStep: React.FC<DIYProfileStepProps> = ({ onComplete, isCo
           <div className="sticky bottom-0 bg-background pt-4 border-t mt-4">
             {!isCompleted && existingProfile && (
               <div>
-                <Button onClick={onComplete} className="w-full bg-green-600 hover:bg-green-700">
+                <Button onClick={() => {
+                  console.log('🎯 DIYProfileStep: onComplete called');
+                  onComplete();
+                }} className="w-full bg-green-600 hover:bg-green-700">
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Profile Complete - Continue
                 </Button>

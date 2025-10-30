@@ -7,6 +7,7 @@ import { useProject } from '@/contexts/ProjectContext';
 import { DIYProfileStep } from './KickoffSteps/DIYProfileStep';
 import { ProjectOverviewStep } from './KickoffSteps/ProjectOverviewStep';
 import { ProjectProfileStep } from './KickoffSteps/ProjectProfileStep';
+import { toast } from 'sonner';
 
 interface KickoffWorkflowProps {
   onKickoffComplete: () => void;
@@ -162,6 +163,21 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
       // Check if all kickoff steps are complete
       if (newCompletedKickoffSteps.size === kickoffSteps.length) {
         console.log("🎉 KickoffWorkflow - All steps complete, calling onKickoffComplete");
+        
+        // DEFENSIVE CHECK: Verify all 3 UI kickoff step IDs are in database
+        const kickoffStepIds = ['kickoff-step-1', 'kickoff-step-2', 'kickoff-step-3'];
+        const allIdsPresent = kickoffStepIds.every(id => newCompletedSteps.includes(id));
+        
+        if (!allIdsPresent) {
+          console.error('❌ Not all kickoff step IDs present in database:', {
+            expected: kickoffStepIds,
+            actual: newCompletedSteps.filter(id => kickoffStepIds.includes(id))
+          });
+          toast.error('Error: Kickoff steps not properly saved');
+          isCompletingStepRef.current = false;
+          return;
+        }
+        
         // Delay clearing flag and calling complete to ensure database update finishes
         setTimeout(() => {
           isCompletingStepRef.current = false;

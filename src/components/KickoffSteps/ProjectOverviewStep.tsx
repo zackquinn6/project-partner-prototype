@@ -190,7 +190,10 @@ export const ProjectOverviewStep: React.FC<ProjectOverviewStepProps> = ({
                   <XCircle className="w-4 h-4 mr-2" />
                   This isn't a good match
                 </Button>
-                <Button onClick={onComplete} className="flex-1 bg-green-600 hover:bg-green-700">
+                <Button onClick={() => {
+                  console.log('🎯 ProjectOverviewStep: onComplete called');
+                  onComplete();
+                }} className="flex-1 bg-green-600 hover:bg-green-700">
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Let's Go - Continue
                 </Button>
