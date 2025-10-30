@@ -3669,6 +3669,10 @@ export type Database = {
       }
       sanitize_input: { Args: { input_text: string }; Returns: string }
       start_admin_session: { Args: never; Returns: string }
+      sync_phases_to_templates: {
+        Args: { p_project_id: string }
+        Returns: undefined
+      }
       update_phase_revision_alert: {
         Args: { p_action: string; p_phase_id: string; p_project_id: string }
         Returns: undefined

@@ -360,63 +360,50 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
         currentName: currentProject.name,
         currentRevision: currentProject.revisionNumber,
         phasesCount: phaseCount,
-        phases: currentProject.phases?.map(p => ({ id: p.id, name: p.name, opsCount: p.operations?.length })),
-        phasesToSave: JSON.stringify(currentProject.phases).substring(0, 200) + '...'
+        phases: currentProject.phases?.map(p => ({ id: p.id, name: p.name, opsCount: p.operations?.length }))
       });
 
-      // Step 1: Mark current version as not current
-      const { error: markOldError } = await supabase
-        .from('projects')
-        .update({ 
-          is_current_version: false,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', currentProject.id);
+      // Step 1: Sync phases JSONB to normalized template tables
+      // This ensures custom phases are saved to template_operations/template_steps
+      console.log('📥 Syncing phases to template tables...');
+      const { error: syncError } = await supabase.rpc('sync_phases_to_templates', {
+        p_project_id: currentProject.id
+      });
 
-      if (markOldError) {
-        console.error('Error marking old version:', markOldError);
-        throw markOldError;
+      if (syncError) {
+        console.error('Error syncing phases:', syncError);
+        toast.error('Failed to sync phases. Please try again.');
+        throw syncError;
       }
 
-      console.log('✅ Marked old version as not current');
+      console.log('✅ Phases synced to template tables');
 
-      // Step 2: Create new revision with INSERT (not UPDATE)
-      const parentId = currentProject.parentProjectId || currentProject.id;
-      const newRevisionNumber = (currentProject.revisionNumber || 1) + 1;
-      
-      const { data: newRevisionData, error: insertError } = await supabase
+      // Step 2: Create revision using database function
+      // This properly copies from template_operations/template_steps and rebuilds phases JSONB
+      console.log('📝 Creating revision via database function...');
+      const { data: newRevisionId, error: revisionError } = await supabase.rpc('create_project_revision', {
+        source_project_id: currentProject.id,
+        revision_notes_text: revisionNotes || null
+      });
+
+      if (revisionError) {
+        console.error('Error creating revision:', revisionError);
+        toast.error('Failed to create revision. Please try again.');
+        throw revisionError;
+      }
+
+      console.log('✅ Revision created with ID:', newRevisionId);
+
+      // Step 3: Fetch the newly created revision
+      const { data: newRevisionData, error: fetchError } = await supabase
         .from('projects')
-        .insert({
-          name: currentProject.name,
-          description: currentProject.description,
-          diy_length_challenges: currentProject.diyLengthChallenges || null,
-          image: currentProject.image,
-          images: currentProject.images,
-          cover_image: currentProject.cover_image,
-          start_date: new Date().toISOString(),
-          plan_end_date: currentProject.planEndDate.toISOString(),
-          status: currentProject.status,
-          publish_status: 'draft',
-          category: currentProject.category,
-          effort_level: currentProject.effortLevel,
-          skill_level: currentProject.skillLevel,
-          estimated_time: currentProject.estimatedTime,
-          estimated_time_per_unit: currentProject.estimatedTimePerUnit,
-          scaling_unit: currentProject.scalingUnit,
-          phases: JSON.stringify(currentProject.phases), // CRITICAL: Copy ALL phases
-          parent_project_id: parentId,
-          revision_number: newRevisionNumber,
-          revision_notes: revisionNotes || '',
-          created_from_revision: currentProject.revisionNumber || 1,
-          is_current_version: true,
-          is_standard_template: currentProject.isStandardTemplate || false
-        })
-        .select()
+        .select('*')
+        .eq('id', newRevisionId)
         .single();
 
-      if (insertError) {
-        console.error('Error creating new revision:', insertError);
-        throw insertError;
+      if (fetchError) {
+        console.error('Error fetching new revision:', fetchError);
+        throw fetchError;
       }
 
       // Parse phases from the returned data
@@ -424,31 +411,31 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
       try {
         parsedPhases = typeof newRevisionData.phases === 'string' 
           ? JSON.parse(newRevisionData.phases) 
-          : newRevisionData.phases;
+          : newRevisionData.phases || [];
       } catch (e) {
         console.error('Failed to parse phases:', e);
         parsedPhases = [];
       }
 
       // CRITICAL: Verify phase count matches
-      if (parsedPhases.length !== phaseCount) {
+      const newPhaseCount = parsedPhases.length;
+      if (newPhaseCount !== phaseCount) {
         console.error('❌ PHASE LOSS DETECTED:', {
           originalCount: phaseCount,
-          savedCount: parsedPhases.length,
-          lost: phaseCount - parsedPhases.length
+          newCount: newPhaseCount,
+          lost: phaseCount - newPhaseCount,
+          originalPhases: currentProject.phases?.map(p => p.name),
+          newPhases: parsedPhases.map((p: any) => p.name)
         });
-        toast.error(`Phase loss detected! Expected ${phaseCount} phases but saved ${parsedPhases.length}`);
-        // Still continue but alert user
+        toast.error(`Phase loss detected! Expected ${phaseCount} phases but got ${newPhaseCount}`);
+      } else {
+        console.log('✅ All phases preserved:', {
+          phaseCount: newPhaseCount,
+          phaseNames: parsedPhases.map((p: any) => p.name)
+        });
       }
 
-      console.log('✅ New revision created:', {
-        newId: newRevisionData.id,
-        revisionNumber: newRevisionNumber,
-        phasesPreserved: parsedPhases.length,
-        phaseNames: parsedPhases.map((p: any) => p.name)
-      });
-
-      // Step 3: Manually construct the new project object from returned data
+      // Step 4: Construct the new project object
       const newRevisionProject: Project = {
         id: newRevisionData.id,
         name: newRevisionData.name,
@@ -478,10 +465,10 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
         isStandardTemplate: newRevisionData.is_standard_template
       };
 
-      // Set the new revision as current project immediately
+      // Set the new revision as current project
       setCurrentProject(newRevisionProject);
       
-      // Optimistically update projects cache to avoid race conditions
+      // Update projects cache
       const updatedProjects = projects.map(p => 
         p.id === currentProject.id 
           ? { ...p, is_current_version: false }
@@ -489,15 +476,15 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
       ).concat([newRevisionProject]);
       updateProjectsCache(updatedProjects);
 
-      console.log('✅ Projects cache updated optimistically with new revision');
+      console.log('✅ Projects cache updated with new revision');
 
-      // Deferred refetch to sync with server (non-blocking, allows UI to update first)
+      // Deferred refetch to sync with server
       setTimeout(() => {
         console.log('🔄 Syncing projects from server...');
         fetchProjects();
       }, 500);
 
-      toast.success(`Revision ${newRevisionNumber} created successfully`);
+      toast.success(`Revision ${newRevisionData.revision_number} created successfully with all phases preserved`);
       
     } catch (error) {
       console.error('❌ Error creating revision:', error);
