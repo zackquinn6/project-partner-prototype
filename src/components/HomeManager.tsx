@@ -363,24 +363,24 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
                             </CardTitle>
                           </div>
                         </div>
-                        <div className="flex gap-2 flex-shrink-0 ml-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex gap-1 flex-shrink-0 ml-1" onClick={(e) => e.stopPropagation()}>
                           <Button 
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleEdit(home)} 
-                            className="h-8 px-3 sm:h-9 sm:px-3 text-xs"
+                            className="h-7 px-2 text-[10px] sm:h-9 sm:px-3 sm:text-xs"
                             title="Edit Home"
                           >
-                            <span className="text-xs">Edit</span>
+                            Edit
                           </Button>
                           <Button 
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleDelete(home.id)} 
-                            className="h-8 w-8 p-0 sm:h-9 sm:w-9 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            className="h-7 w-7 p-0 sm:h-9 sm:w-9 text-destructive hover:text-destructive hover:bg-destructive/10"
                             title="Delete Home"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                           </Button>
                         </div>
                       </div>
