@@ -174,6 +174,17 @@ export const ProjectDataProvider: React.FC<ProjectDataProviderProps> = ({ childr
     cacheKey: 'projects'
   });
 
+  // Listen for refetch requests from cascade operations
+  useEffect(() => {
+    const handleRefetchRequest = () => {
+      console.log('🔄 ProjectDataContext: Refetching projects due to cascade');
+      refetchProjects();
+    };
+
+    window.addEventListener('refetch-projects', handleRefetchRequest);
+    return () => window.removeEventListener('refetch-projects', handleRefetchRequest);
+  }, [refetchProjects]);
+
   // Enrich projects with normalized data
   useEffect(() => {
     const enrichProjects = async () => {

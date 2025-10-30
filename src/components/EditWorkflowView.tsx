@@ -430,6 +430,16 @@ export default function EditWorkflowView({
             };
             
             console.log('SaveEdit: Cascade completed:', result);
+            
+            // Invalidate projects cache to ensure users see latest template data
+            console.log('🔄 SaveEdit: Refreshing projects cache to show latest changes');
+            try {
+              // Trigger a cache refresh by dispatching a custom event
+              window.dispatchEvent(new CustomEvent('refetch-projects'));
+            } catch (e) {
+              console.error('Failed to trigger cache refresh:', e);
+            }
+            
             toast.success(
               `Changes cascaded to ${result.templatesUpdated} template(s)`,
               { 
