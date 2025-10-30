@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -18,7 +18,8 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
   const [currentKickoffStep, setCurrentKickoffStep] = useState(0);
   const [completedKickoffSteps, setCompletedKickoffSteps] = useState<Set<number>>(new Set());
   const [checkedOutputs, setCheckedOutputs] = useState<Record<string, Set<string>>>({});
-  const [isCompletingStep, setIsCompletingStep] = useState(false);
+  // CRITICAL FIX: Use ref instead of state to avoid race conditions
+  const isCompletingStepRef = useRef(false);
 
   const kickoffSteps = [
     {
@@ -41,7 +42,7 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
   // Initialize completed steps from project run data
   useEffect(() => {
     // Don't overwrite state during step completion
-    if (isCompletingStep) {
+    if (isCompletingStepRef.current) {
       console.log("⏸️ KickoffWorkflow: Skipping initialization during step completion");
       return;
     }
@@ -78,7 +79,7 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
         setCurrentKickoffStep(2); // All complete, show last step (index 2 for 3 steps)
       }
     }
-  }, [currentProjectRun, isCompletingStep]);
+  }, [currentProjectRun]);
 
   const handleStepComplete = async (stepIndex: number) => {
     console.log("🎯 handleStepComplete called with stepIndex:", stepIndex);
@@ -89,7 +90,7 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
     }
 
     // Set flag to prevent useEffect from overwriting during completion
-    setIsCompletingStep(true);
+    isCompletingStepRef.current = true;
 
     try {
       const stepId = kickoffSteps[stepIndex].id;
@@ -168,8 +169,10 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
     } catch (error) {
       console.error("❌ Error completing kickoff step:", error);
     } finally {
-      // Always clear the flag
-      setIsCompletingStep(false);
+      // Always clear the flag with delay to ensure database update propagates
+      setTimeout(() => {
+        isCompletingStepRef.current = false;
+      }, 100);
     }
   };
 

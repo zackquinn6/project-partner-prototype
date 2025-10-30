@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -274,14 +274,14 @@ export default function UserView({
     )
   ) : [];
   
-  // Add ref to track if we're currently completing a step
-  const [isCompletingStep, setIsCompletingStep] = useState(false);
+  // CRITICAL FIX: Use ref instead of state to avoid race conditions
+  const isCompletingStepRef = useRef(false);
   
   // Initialize completed steps from project run data
   // CRITICAL: Re-initialize whenever currentProjectRun changes, but NOT during step completion
   useEffect(() => {
     // Don't overwrite local state while completing a step
-    if (isCompletingStep) {
+    if (isCompletingStepRef.current) {
       console.log("⏸️ UserView: Skipping completed steps initialization during step completion");
       return;
     }
@@ -316,7 +316,7 @@ export default function UserView({
       console.log("🔄 UserView: Clearing completed steps for new project run");
       setCompletedSteps(new Set());
     }
-  }, [currentProjectRun?.id, currentProjectRun?.completedSteps, allSteps.length, isCompletingStep]);
+  }, [currentProjectRun?.id, currentProjectRun?.completedSteps, allSteps.length]);
   
   // Navigate to first incomplete step when workflow opens - ENHANCED DEBUG VERSION
   useEffect(() => {
@@ -646,7 +646,7 @@ export default function UserView({
     if (!currentStep) return;
     
     // Set flag to prevent useEffect from overwriting state during completion
-    setIsCompletingStep(true);
+    isCompletingStepRef.current = true;
     
     try {
       console.log("🎯 handleStepComplete called for step:", {
@@ -785,7 +785,10 @@ export default function UserView({
       console.error("❌ Error completing step:", error);
     } finally {
       // Clear the flag regardless of success or failure
-      setIsCompletingStep(false);
+      // Use setTimeout to ensure database update propagates before clearing
+      setTimeout(() => {
+        isCompletingStepRef.current = false;
+      }, 100);
     }
   };
 
