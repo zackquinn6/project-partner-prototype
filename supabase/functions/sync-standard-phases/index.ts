@@ -88,24 +88,27 @@ Deno.serve(async (req) => {
     console.log('SYNC: ✓ Standard Project phases JSON rebuilt');
     result.details.push('✓ Standard Project phases JSON rebuilt successfully');
 
-    // Step 2: Get all project templates (not revisions, not Standard Project)
+    // Step 2: Get all project templates INCLUDING REVISIONS (not just parents)
+    // This ensures that the CURRENT/PUBLISHED versions get updated
     const { data: templates, error: templatesError } = await supabase
       .from('projects')
-      .select('id, name')
+      .select('id, name, revision_number, is_current_version, parent_project_id')
       .eq('is_standard_template', false)
-      .is('parent_project_id', null)
       .neq('id', standardProjectId);
 
     if (templatesError) {
       throw new Error(`Failed to fetch templates: ${templatesError.message}`);
     }
 
-    result.details.push(`Found ${templates?.length || 0} templates to update`);
+    result.details.push(`Found ${templates?.length || 0} templates to update (including all revisions)`);
 
-    // Step 3: Update each template
+    // Step 3: Update each template (including revisions)
     for (const template of templates || []) {
       try {
-        console.log(`SYNC: Updating template "${template.name}" (${template.id})`);
+        const revisionLabel = template.revision_number 
+          ? ` [Rev ${template.revision_number}${template.is_current_version ? ' ⭐CURRENT' : ''}]`
+          : '';
+        console.log(`SYNC: Updating template "${template.name}"${revisionLabel} (${template.id})`);
         
         // Get all standard operations from Standard Project
         const { data: standardOps, error: standardOpsError } = await supabase
@@ -230,17 +233,23 @@ Deno.serve(async (req) => {
         }
 
         result.templatesUpdated++;
-        result.details.push(`✓ Updated: ${template.name}`);
-        console.log(`SYNC: Successfully updated "${template.name}"`);
+        const revisionLabel = template.revision_number 
+          ? ` [Rev ${template.revision_number}${template.is_current_version ? ' ⭐CURRENT' : ''}]`
+          : '';
+        result.details.push(`✓ Updated: ${template.name}${revisionLabel}`);
+        console.log(`SYNC: Successfully updated "${template.name}"${revisionLabel}`);
       } catch (error) {
         result.templatesFailed++;
         const errorMessage = error instanceof Error ? error.message : String(error);
+        const revisionLabel = template.revision_number 
+          ? ` [Rev ${template.revision_number}]`
+          : '';
         result.failedTemplates.push({
-          name: template.name,
+          name: `${template.name}${revisionLabel}`,
           id: template.id,
           error: errorMessage,
         });
-        result.details.push(`✗ Failed: ${template.name} - ${errorMessage}`);
+        result.details.push(`✗ Failed: ${template.name}${revisionLabel} - ${errorMessage}`);
         console.error(`SYNC: Failed to update "${template.name}":`, error);
       }
     }
