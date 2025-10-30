@@ -39,7 +39,7 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
     }
   ];
 
-  // Initialize completed steps from project run data
+  // Initialize completed steps from project run data - ONLY on mount or when project changes
   useEffect(() => {
     // Don't overwrite state during step completion
     if (isCompletingStepRef.current) {
@@ -56,8 +56,16 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
         kickoffStepIds
       });
       
+      // Check BOTH kickoff step IDs AND actual workflow step IDs
       kickoffStepIds.forEach((stepId, index) => {
-        if (currentProjectRun.completedSteps.includes(stepId)) {
+        const isKickoffStepComplete = currentProjectRun.completedSteps.includes(stepId);
+        
+        // Also check if the actual workflow step is complete (for longer step IDs)
+        const hasWorkflowStepComplete = currentProjectRun.completedSteps.some(
+          completedId => completedId.length > 20 && completedId.includes('-')
+        );
+        
+        if (isKickoffStepComplete) {
           completedIndices.add(index);
           console.log(`KickoffWorkflow - Step ${index} (${stepId}) is complete`);
         } else {
@@ -67,19 +75,18 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
       
       setCompletedKickoffSteps(completedIndices);
       
-      // Set current step to first incomplete step or last step if all complete
-      const firstIncomplete = kickoffStepIds.findIndex(stepId => 
-        !currentProjectRun.completedSteps.includes(stepId)
-      );
-      if (firstIncomplete !== -1) {
-        console.log("KickoffWorkflow - Setting current step to first incomplete:", firstIncomplete);
-        setCurrentKickoffStep(firstIncomplete);
-      } else {
-        console.log("KickoffWorkflow - All steps complete, showing last step");
-        setCurrentKickoffStep(2); // All complete, show last step (index 2 for 3 steps)
+      // Only set current step if not all complete - otherwise let step completion handle it
+      if (completedIndices.size < kickoffSteps.length) {
+        const firstIncomplete = kickoffStepIds.findIndex((stepId, index) => 
+          !completedIndices.has(index)
+        );
+        if (firstIncomplete !== -1) {
+          console.log("KickoffWorkflow - Setting current step to first incomplete:", firstIncomplete);
+          setCurrentKickoffStep(firstIncomplete);
+        }
       }
     }
-  }, [currentProjectRun]);
+  }, [currentProjectRun?.id]); // Only re-run when project ID changes
 
   const handleStepComplete = async (stepIndex: number) => {
     console.log("🎯 handleStepComplete called with stepIndex:", stepIndex);
@@ -155,24 +162,26 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
       // Check if all kickoff steps are complete
       if (newCompletedKickoffSteps.size === kickoffSteps.length) {
         console.log("🎉 KickoffWorkflow - All steps complete, calling onKickoffComplete");
-        // Small delay to ensure state propagation
+        // Delay clearing flag and calling complete to ensure database update finishes
         setTimeout(() => {
+          isCompletingStepRef.current = false;
           onKickoffComplete();
-        }, 100);
+        }, 200);
       } else {
         console.log("KickoffWorkflow - Moving to next step");
         // Move to next step if not already there
         if (stepIndex === currentKickoffStep && stepIndex < kickoffSteps.length - 1) {
           setCurrentKickoffStep(stepIndex + 1);
         }
+        // Clear flag after short delay
+        setTimeout(() => {
+          isCompletingStepRef.current = false;
+        }, 200);
       }
     } catch (error) {
       console.error("❌ Error completing kickoff step:", error);
-    } finally {
-      // Always clear the flag with delay to ensure database update propagates
-      setTimeout(() => {
-        isCompletingStepRef.current = false;
-      }, 100);
+      // Clear flag on error
+      isCompletingStepRef.current = false;
     }
   };
 
