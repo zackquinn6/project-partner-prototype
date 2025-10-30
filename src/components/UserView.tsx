@@ -274,9 +274,18 @@ export default function UserView({
     )
   ) : [];
   
+  // Add ref to track if we're currently completing a step
+  const [isCompletingStep, setIsCompletingStep] = useState(false);
+  
   // Initialize completed steps from project run data
-  // CRITICAL: Re-initialize whenever currentProjectRun changes, not just completedSteps
+  // CRITICAL: Re-initialize whenever currentProjectRun changes, but NOT during step completion
   useEffect(() => {
+    // Don't overwrite local state while completing a step
+    if (isCompletingStep) {
+      console.log("⏸️ UserView: Skipping completed steps initialization during step completion");
+      return;
+    }
+    
     if (currentProjectRun?.completedSteps && Array.isArray(currentProjectRun.completedSteps)) {
       console.log("🔄 UserView: Initializing completed steps from project run:", {
         projectRunId: currentProjectRun.id,
@@ -286,20 +295,28 @@ export default function UserView({
         allStepsCount: allSteps.length
       });
       
-      // Force a fresh Set to ensure React detects the change
-      const newCompletedSteps = new Set(currentProjectRun.completedSteps);
-      setCompletedSteps(newCompletedSteps);
+      // Only update if the data is actually different to avoid unnecessary re-renders
+      const currentCompleted = Array.from(completedSteps).sort().join(',');
+      const dbCompleted = [...currentProjectRun.completedSteps].sort().join(',');
       
-      console.log("✅ UserView: Completed steps SET updated:", {
-        setSize: newCompletedSteps.size,
-        setContents: Array.from(newCompletedSteps)
-      });
-    } else if (currentProjectRun) {
+      if (currentCompleted !== dbCompleted) {
+        console.log("🔄 UserView: Database has different completed steps, updating local state");
+        const newCompletedSteps = new Set(currentProjectRun.completedSteps);
+        setCompletedSteps(newCompletedSteps);
+        
+        console.log("✅ UserView: Completed steps SET updated:", {
+          setSize: newCompletedSteps.size,
+          setContents: Array.from(newCompletedSteps)
+        });
+      } else {
+        console.log("✅ UserView: Completed steps already in sync with database");
+      }
+    } else if (currentProjectRun && completedSteps.size > 0) {
       // Clear completed steps if project run has no completed steps
       console.log("🔄 UserView: Clearing completed steps for new project run");
       setCompletedSteps(new Set());
     }
-  }, [currentProjectRun?.id, currentProjectRun?.completedSteps, allSteps.length]);
+  }, [currentProjectRun?.id, currentProjectRun?.completedSteps, allSteps.length, isCompletingStep]);
   
   // Navigate to first incomplete step when workflow opens - ENHANCED DEBUG VERSION
   useEffect(() => {
@@ -628,134 +645,147 @@ export default function UserView({
   const handleStepComplete = async () => {
     if (!currentStep) return;
     
-    console.log("🎯 handleStepComplete called for step:", {
-      stepId: currentStep.id,
-      stepName: currentStep.step,
-      stepPhase: currentStep.phaseName,
-      currentStepIndex,
-      totalSteps: allSteps.length,
-      allStepNames: allSteps.map((s, i) => ({ index: i, id: s.id, name: s.step, phase: s.phaseName }))
-    });
+    // Set flag to prevent useEffect from overwriting state during completion
+    setIsCompletingStep(true);
     
-    // CRITICAL DEBUG: Check if we're actually on the step the user thinks we're on
-    console.log("🔍 STEP MISMATCH DEBUG:", {
-      userExpectedPhase: "Ordering", // User says they're completing ordering
-      actualCurrentStep: {
-        id: currentStep.id,
-        name: currentStep.step,
-        phase: currentStep.phaseName,
-        index: currentStepIndex
-      },
-      orderingSteps: allSteps.filter(s => s.phaseName === 'Ordering').map((s, i) => ({
-        stepId: s.id,
-        stepName: s.step,
-        globalIndex: allSteps.findIndex(step => step.id === s.id)
-      }))
-    });
-    
-    // Check if all outputs for this step are completed
-    const stepOutputs = currentStep.outputs || [];
-    const stepCheckedOutputs = checkedOutputs[currentStep.id] || new Set();
-    const allOutputsCompleted = stepOutputs.length === 0 || stepOutputs.every(output => 
-      stepCheckedOutputs.has(output.id)
-    );
-    
-    if (allOutputsCompleted) {
-      console.log("🎯 Completing step:", currentStep.step, "ID:", currentStep.id);
+    try {
+      console.log("🎯 handleStepComplete called for step:", {
+        stepId: currentStep.id,
+        stepName: currentStep.step,
+        stepPhase: currentStep.phaseName,
+        currentStepIndex,
+        totalSteps: allSteps.length,
+        allStepNames: allSteps.map((s, i) => ({ index: i, id: s.id, name: s.step, phase: s.phaseName }))
+      });
       
-      // Add step to completed steps with immediate persistence
-      const newCompletedSteps = [...new Set([...completedSteps, currentStep.id])];
-      setCompletedSteps(new Set(newCompletedSteps));
+      // CRITICAL DEBUG: Check if we're actually on the step the user thinks we're on
+      console.log("🔍 STEP MISMATCH DEBUG:", {
+        userExpectedPhase: "Ordering", // User says they're completing ordering
+        actualCurrentStep: {
+          id: currentStep.id,
+          name: currentStep.step,
+          phase: currentStep.phaseName,
+          index: currentStepIndex
+        },
+        orderingSteps: allSteps.filter(s => s.phaseName === 'Ordering').map((s, i) => ({
+          stepId: s.id,
+          stepName: s.step,
+          globalIndex: allSteps.findIndex(step => step.id === s.id)
+        }))
+      });
       
-      // Immediately update the project run to persist the step completion
-      if (currentProjectRun) {
-        const kickoffStepIds = ['kickoff-step-1', 'kickoff-step-2', 'kickoff-step-3'];
-        const preservedKickoffSteps = currentProjectRun.completedSteps.filter(stepId => 
-          kickoffStepIds.includes(stepId)
-        );
-        
-        const workflowCompletedSteps = newCompletedSteps.filter(stepId => !stepId.startsWith('kickoff-'));
-        const allCompletedSteps = [...preservedKickoffSteps, ...workflowCompletedSteps];
-        const uniqueCompletedSteps = [...new Set(allCompletedSteps)];
-        
-        const totalSteps = allSteps.length;
-        const calculatedProgress = (workflowCompletedSteps.length / totalSteps) * 100;
-        
-        const updatedProjectRun = {
-          ...currentProjectRun,
-          completedSteps: uniqueCompletedSteps,
-          progress: Math.round(calculatedProgress),
-          updatedAt: new Date()
-        };
-        
-        console.log("🎯 Immediately persisting step completion:", {
-          stepId: currentStep.id,
-          newCompletedSteps: uniqueCompletedSteps,
-          progress: Math.round(calculatedProgress)
-        });
-        
-        await updateProjectRun(updatedProjectRun);
-      }
+      // Check if all outputs for this step are completed
+      const stepOutputs = currentStep.outputs || [];
+      const stepCheckedOutputs = checkedOutputs[currentStep.id] || new Set();
+      const allOutputsCompleted = stepOutputs.length === 0 || stepOutputs.every(output => 
+        stepCheckedOutputs.has(output.id)
+      );
       
-      // End time tracking for step
-      endTimeTracking('step', currentStep.id);
-      
-      // Check if this completes a phase - FIXED VERSION
-      console.log("🔍 Checking if step completion triggers phase completion...");
-      const currentPhase = getCurrentPhase();
-      
-      if (currentPhase) {
-        console.log("🔍 Current phase found:", currentPhase.name);
-        const phaseSteps = getAllStepsInPhase(currentPhase);
-        console.log("🔍 Phase steps:", phaseSteps.map(s => ({ id: s.id, name: s.step })));
+      if (allOutputsCompleted) {
+        console.log("🎯 Completing step:", currentStep.step, "ID:", currentStep.id);
         
-        const newCompletedStepsSet = new Set(newCompletedSteps);
-        const isPhaseComplete = phaseSteps.every(step => newCompletedStepsSet.has(step.id));
+        // Add step to completed steps with immediate persistence
+        const newCompletedSteps = [...new Set([...completedSteps, currentStep.id])];
+        setCompletedSteps(new Set(newCompletedSteps));
         
-        console.log("🔍 Phase completion check:", {
-          phaseName: currentPhase.name,
-          totalPhaseSteps: phaseSteps.length,
-          completedPhaseSteps: phaseSteps.filter(step => newCompletedStepsSet.has(step.id)).length,
-          isPhaseComplete,
-          currentStepName: currentStep.step,
-          currentStepPhase: currentStep.phaseName
-        });
-        
-        if (isPhaseComplete) {
-          console.log("🎯 Phase completed:", currentPhase.name);
+        // Immediately update the project run to persist the step completion
+        if (currentProjectRun) {
+          const kickoffStepIds = ['kickoff-step-1', 'kickoff-step-2', 'kickoff-step-3'];
+          const preservedKickoffSteps = currentProjectRun.completedSteps.filter(stepId => 
+            kickoffStepIds.includes(stepId)
+          );
           
-          // CRITICAL FIX: Store completed phase BEFORE navigation changes currentStep
-          setCompletedPhase(currentPhase);
-          setCurrentCompletedPhaseName(currentPhase.name);
+          const workflowCompletedSteps = newCompletedSteps.filter(stepId => !stepId.startsWith('kickoff-'));
+          const allCompletedSteps = [...preservedKickoffSteps, ...workflowCompletedSteps];
+          const uniqueCompletedSteps = [...new Set(allCompletedSteps)];
           
-          // End time tracking for phase
-          endTimeTracking('phase', currentPhase.id);
-          setPhaseCompletionOpen(true);
-        } else {
-          console.log("🔍 Phase not yet complete:", {
+          const totalSteps = allSteps.length;
+          const calculatedProgress = (workflowCompletedSteps.length / totalSteps) * 100;
+          
+          const updatedProjectRun = {
+            ...currentProjectRun,
+            completedSteps: uniqueCompletedSteps,
+            progress: Math.round(calculatedProgress),
+            updatedAt: new Date()
+          };
+          
+          console.log("🎯 Immediately persisting step completion:", {
+            stepId: currentStep.id,
+            newCompletedSteps: uniqueCompletedSteps,
+            progress: Math.round(calculatedProgress)
+          });
+          
+          // CRITICAL: Wait for database update to complete before clearing flag
+          await updateProjectRun(updatedProjectRun);
+          
+           console.log("✅ Step completion persisted to database successfully");
+        }
+        
+        // End time tracking for step
+        endTimeTracking('step', currentStep.id);
+        
+        // Check if this completes a phase - FIXED VERSION
+        console.log("🔍 Checking if step completion triggers phase completion...");
+        const currentPhase = getCurrentPhase();
+        
+        if (currentPhase) {
+          console.log("🔍 Current phase found:", currentPhase.name);
+          const phaseSteps = getAllStepsInPhase(currentPhase);
+          console.log("🔍 Phase steps:", phaseSteps.map(s => ({ id: s.id, name: s.step })));
+          
+          const newCompletedStepsSet = new Set(newCompletedSteps);
+          const isPhaseComplete = phaseSteps.every(step => newCompletedStepsSet.has(step.id));
+          
+          console.log("🔍 Phase completion check:", {
             phaseName: currentPhase.name,
-            remainingSteps: phaseSteps.filter(step => !newCompletedStepsSet.has(step.id)).map(s => s.step)
+            totalPhaseSteps: phaseSteps.length,
+            completedPhaseSteps: phaseSteps.filter(step => newCompletedStepsSet.has(step.id)).length,
+            isPhaseComplete,
+            currentStepName: currentStep.step,
+            currentStepPhase: currentStep.phaseName
+          });
+          
+          if (isPhaseComplete) {
+            console.log("🎯 Phase completed:", currentPhase.name);
+            
+            // CRITICAL FIX: Store completed phase BEFORE navigation changes currentStep
+            setCompletedPhase(currentPhase);
+            setCurrentCompletedPhaseName(currentPhase.name);
+            
+            // End time tracking for phase
+            endTimeTracking('phase', currentPhase.id);
+            setPhaseCompletionOpen(true);
+          } else {
+            console.log("🔍 Phase not yet complete:", {
+              phaseName: currentPhase.name,
+              remainingSteps: phaseSteps.filter(step => !newCompletedStepsSet.has(step.id)).map(s => s.step)
+            });
+          }
+        } else {
+          console.log("❌ No current phase found for step:", {
+            stepId: currentStep.id,
+            stepName: currentStep.step,
+            expectedPhase: currentStep.phaseName
           });
         }
+        
+        // Move to next step
+        if (currentStepIndex < allSteps.length - 1) {
+          console.log("🎯 Moving to next step");
+          handleNext();
+        } else {
+          console.log("🎯 All steps completed! Project finished.");
+          // Trigger completion certificate and survey
+          setCompletionCertificateOpen(true);
+        }
       } else {
-        console.log("❌ No current phase found for step:", {
-          stepId: currentStep.id,
-          stepName: currentStep.step,
-          expectedPhase: currentStep.phaseName
-        });
+        console.log("❌ Cannot complete step - not all outputs are completed");
       }
-      
-      // Move to next step
-      if (currentStepIndex < allSteps.length - 1) {
-        console.log("🎯 Moving to next step");
-        handleNext();
-      } else {
-        console.log("🎯 All steps completed! Project finished.");
-        // Trigger completion certificate and survey
-        setCompletionCertificateOpen(true);
-      }
-    } else {
-      console.log("❌ Cannot complete step - not all outputs are completed");
+    } catch (error) {
+      console.error("❌ Error completing step:", error);
+    } finally {
+      // Clear the flag regardless of success or failure
+      setIsCompletingStep(false);
     }
   };
 

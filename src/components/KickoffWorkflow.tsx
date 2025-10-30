@@ -18,6 +18,7 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
   const [currentKickoffStep, setCurrentKickoffStep] = useState(0);
   const [completedKickoffSteps, setCompletedKickoffSteps] = useState<Set<number>>(new Set());
   const [checkedOutputs, setCheckedOutputs] = useState<Record<string, Set<string>>>({});
+  const [isCompletingStep, setIsCompletingStep] = useState(false);
 
   const kickoffSteps = [
     {
@@ -39,6 +40,12 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
 
   // Initialize completed steps from project run data
   useEffect(() => {
+    // Don't overwrite state during step completion
+    if (isCompletingStep) {
+      console.log("⏸️ KickoffWorkflow: Skipping initialization during step completion");
+      return;
+    }
+    
     if (currentProjectRun?.completedSteps) {
       const kickoffStepIds = ['kickoff-step-1', 'kickoff-step-2', 'kickoff-step-3'];
       const completedIndices = new Set<number>();
@@ -71,7 +78,7 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
         setCurrentKickoffStep(2); // All complete, show last step (index 2 for 3 steps)
       }
     }
-  }, [currentProjectRun]);
+  }, [currentProjectRun, isCompletingStep]);
 
   const handleStepComplete = async (stepIndex: number) => {
     console.log("🎯 handleStepComplete called with stepIndex:", stepIndex);
@@ -81,46 +88,49 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
       return;
     }
 
-    const stepId = kickoffSteps[stepIndex].id;
-    const newCompletedSteps = [...(currentProjectRun.completedSteps || [])];
-    
-    console.log("KickoffWorkflow - Completing step:", {
-      stepIndex,
-      stepId,
-      currentCompletedSteps: currentProjectRun.completedSteps,
-      alreadyCompleted: newCompletedSteps.includes(stepId)
-    });
-    
-    // Find the actual workflow step ID in the Kickoff phase
-    const kickoffPhase = currentProjectRun.phases.find(p => p.name === 'Kickoff');
-    let actualStepId = stepId;
-    
-    if (kickoffPhase && kickoffPhase.operations && kickoffPhase.operations.length > 0) {
-      // Map kickoff step index to actual step in the workflow
-      const allKickoffSteps = kickoffPhase.operations.flatMap(op => op.steps || []);
-      if (allKickoffSteps[stepIndex]) {
-        actualStepId = allKickoffSteps[stepIndex].id;
-        console.log("KickoffWorkflow - Found actual workflow step ID:", actualStepId);
-      }
-    }
-    
-    // Add both the kickoff step ID and the actual workflow step ID
-    if (!newCompletedSteps.includes(stepId)) {
-      newCompletedSteps.push(stepId);
-    }
-    if (actualStepId !== stepId && !newCompletedSteps.includes(actualStepId)) {
-      newCompletedSteps.push(actualStepId);
-      console.log("KickoffWorkflow - Also marking actual step as complete:", actualStepId);
-    }
-
-    // Update completed kickoff steps state immediately
-    const newCompletedKickoffSteps = new Set(completedKickoffSteps);
-    newCompletedKickoffSteps.add(stepIndex);
-    setCompletedKickoffSteps(newCompletedKickoffSteps);
-
-    console.log("KickoffWorkflow - Updating project run with steps:", newCompletedSteps);
+    // Set flag to prevent useEffect from overwriting during completion
+    setIsCompletingStep(true);
 
     try {
+      const stepId = kickoffSteps[stepIndex].id;
+      const newCompletedSteps = [...(currentProjectRun.completedSteps || [])];
+      
+      console.log("KickoffWorkflow - Completing step:", {
+        stepIndex,
+        stepId,
+        currentCompletedSteps: currentProjectRun.completedSteps,
+        alreadyCompleted: newCompletedSteps.includes(stepId)
+      });
+      
+      // Find the actual workflow step ID in the Kickoff phase
+      const kickoffPhase = currentProjectRun.phases.find(p => p.name === 'Kickoff');
+      let actualStepId = stepId;
+      
+      if (kickoffPhase && kickoffPhase.operations && kickoffPhase.operations.length > 0) {
+        // Map kickoff step index to actual step in the workflow
+        const allKickoffSteps = kickoffPhase.operations.flatMap(op => op.steps || []);
+        if (allKickoffSteps[stepIndex]) {
+          actualStepId = allKickoffSteps[stepIndex].id;
+          console.log("KickoffWorkflow - Found actual workflow step ID:", actualStepId);
+        }
+      }
+      
+      // Add both the kickoff step ID and the actual workflow step ID
+      if (!newCompletedSteps.includes(stepId)) {
+        newCompletedSteps.push(stepId);
+      }
+      if (actualStepId !== stepId && !newCompletedSteps.includes(actualStepId)) {
+        newCompletedSteps.push(actualStepId);
+        console.log("KickoffWorkflow - Also marking actual step as complete:", actualStepId);
+      }
+
+      // Update completed kickoff steps state immediately
+      const newCompletedKickoffSteps = new Set(completedKickoffSteps);
+      newCompletedKickoffSteps.add(stepIndex);
+      setCompletedKickoffSteps(newCompletedKickoffSteps);
+
+      console.log("KickoffWorkflow - Updating project run with steps:", newCompletedSteps);
+
       // Update project run with completed step - WAIT for completion
       const updatedProjectRun = {
         ...currentProjectRun,
@@ -132,7 +142,7 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
       // Wait for database update to complete
       await updateProjectRun(updatedProjectRun);
       
-      console.log("✅ Database update completed");
+      console.log("✅ Kickoff step completion persisted to database");
 
       console.log("KickoffWorkflow - Checking if all kickoff complete:", {
         completedKickoffStepsSize: newCompletedKickoffSteps.size,
@@ -156,7 +166,10 @@ export const KickoffWorkflow: React.FC<KickoffWorkflowProps> = ({ onKickoffCompl
         }
       }
     } catch (error) {
-      console.error("❌ Error updating project run:", error);
+      console.error("❌ Error completing kickoff step:", error);
+    } finally {
+      // Always clear the flag
+      setIsCompletingStep(false);
     }
   };
 
