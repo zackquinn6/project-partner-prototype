@@ -2,9 +2,7 @@ import * as React from "react"
 import { useEffect } from "react"
 import { Dialog, DialogPortal, DialogOverlay, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useResponsive } from "@/hooks/useResponsive"
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 
 interface ScrollableDialogProps {
@@ -24,8 +22,6 @@ export function ScrollableDialog({
   children, 
   className 
 }: ScrollableDialogProps) {
-  const { isMobile } = useResponsive();
-
   // Enable scrolling within modal by preventing pointer events on overlay for wheel events
   useEffect(() => {
     if (open) {
@@ -103,33 +99,17 @@ export function ScrollableDialog({
             
             {/* Close button */}
             {(title || description) && (
-              <>
-                {isMobile ? (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenChange(false);
-                    }}
-                    className="ml-4 flex-shrink-0"
-                  >
-                    Close
-                  </Button>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenChange(false);
-                    }}
-                    className="h-8 w-8 p-0 ml-4 flex-shrink-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenChange(false);
+                }}
+                className="ml-4 flex-shrink-0"
+              >
+                Close
+              </Button>
             )}
           </div>
           
