@@ -452,13 +452,20 @@ export function UnifiedProjectManagement() {
 
       if (error) {
         console.error('Error deleting revision:', error);
+        toast.error("Failed to delete revision");
         return;
       }
 
-      // Refresh the page on success
-      window.location.reload();
+      toast.success("Revision deleted successfully");
+      
+      // Refresh data without closing the window
+      fetchProjects();
+      if (selectedProject) {
+        fetchProjectRevisions();
+      }
     } catch (error) {
       console.error('Error deleting revision:', error);
+      toast.error("Failed to delete revision");
     }
   };
 
