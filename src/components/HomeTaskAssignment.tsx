@@ -144,13 +144,110 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
     }
   }, [userId, homeId]);
 
+  const fetchExistingAssignments = useCallback(async () => {
+    // First get task IDs
+    let taskQuery = supabase
+      .from('home_tasks')
+      .select('id')
+      .eq('user_id', userId)
+      .neq('status', 'closed');
+
+    if (homeId) {
+      taskQuery = taskQuery.eq('home_id', homeId);
+    }
+
+    const { data: taskData } = await taskQuery;
+    if (!taskData || taskData.length === 0) return;
+
+    const taskIds = taskData.map(t => t.id);
+
+    // Fetch existing assignments from database
+    const { data: existingAssignments, error } = await supabase
+      .from('home_task_assignments')
+      .select('task_id, subtask_id, person_id, scheduled_date, scheduled_hours')
+      .in('task_id', taskIds)
+      .eq('user_id', userId);
+
+    if (error || !existingAssignments || existingAssignments.length === 0) {
+      return;
+    }
+
+    // Get task and subtask titles
+    const { data: tasksData } = await supabase
+      .from('home_tasks')
+      .select('id, title')
+      .in('id', taskIds);
+
+    const { data: subtasksData } = await supabase
+      .from('home_task_subtasks')
+      .select('id, title, task_id')
+      .in('task_id', taskIds);
+
+    const taskTitles: Record<string, string> = {};
+    tasksData?.forEach(t => {
+      taskTitles[t.id] = t.title;
+    });
+
+    const subtaskTitles: Record<string, string> = {};
+    subtasksData?.forEach(st => {
+      subtaskTitles[st.id] = st.title;
+    });
+
+    // Fetch people to ensure we have the current list
+    let peopleQuery = supabase
+      .from('home_task_people')
+      .select('id')
+      .eq('user_id', userId);
+
+    if (homeId) {
+      peopleQuery = peopleQuery.eq('home_id', homeId);
+    }
+
+    const { data: peopleData } = await peopleQuery;
+
+    // Group assignments by person
+    const assignmentsByPerson: Record<string, Assignment[]> = {};
+    
+    // Initialize with empty arrays for all people
+    peopleData?.forEach(person => {
+      assignmentsByPerson[person.id] = [];
+    });
+
+    // Add existing assignments
+    existingAssignments.forEach(assignment => {
+      if (!assignmentsByPerson[assignment.person_id]) {
+        assignmentsByPerson[assignment.person_id] = [];
+      }
+
+      const taskTitle = taskTitles[assignment.task_id] || 'Unknown Task';
+      const title = assignment.subtask_id 
+        ? subtaskTitles[assignment.subtask_id] || 'Unknown Subtask'
+        : taskTitle;
+
+      assignmentsByPerson[assignment.person_id].push({
+        taskId: assignment.task_id,
+        subtaskId: assignment.subtask_id || undefined,
+        personId: assignment.person_id,
+        title: title,
+        taskTitle: taskTitle
+      });
+    });
+
+    setAssignments(assignmentsByPerson);
+  }, [userId, homeId]);
+
   useEffect(() => {
     if (userId) {
-      fetchPeople();
-      fetchTasks();
-      fetchSubtasks();
+      const loadData = async () => {
+        await fetchPeople();
+        await fetchTasks();
+        await fetchSubtasks();
+        // Load existing assignments after people are loaded
+        await fetchExistingAssignments();
+      };
+      loadData();
     }
-  }, [userId, homeId, fetchPeople, fetchTasks, fetchSubtasks]);
+  }, [userId, homeId, fetchPeople, fetchTasks, fetchSubtasks, fetchExistingAssignments]);
 
   // Helper to compare DIY levels
   const diyLevelValue = (level: string): number => {
