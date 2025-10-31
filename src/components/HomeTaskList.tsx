@@ -314,7 +314,16 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog 
+        open={open} 
+        onOpenChange={(isOpen) => {
+          // Prevent closing Task Manager if Rapid Costing is open
+          if (!isOpen && showRapidCosting) {
+            return; // Don't close if child dialog is open
+          }
+          onOpenChange(isOpen);
+        }}
+      >
         <DialogContent className="w-full max-w-full md:max-w-[98vw] h-screen md:h-[98vh] p-0 overflow-hidden flex flex-col [&>button]:hidden">
           <DialogHeader className="px-2 md:px-4 py-1.5 md:py-2 border-b flex-shrink-0">
             <div className="flex items-center justify-between gap-2">

@@ -52,7 +52,11 @@ export function ScrollableDialog({
     <Dialog 
       open={open} 
       onOpenChange={(newOpen) => {
-        // Only close this specific dialog
+        // Prevent any event propagation that might affect parent dialogs
+        if (!newOpen) {
+          onOpenChange(false);
+          return;
+        }
         onOpenChange(newOpen);
       }} 
       modal={false}
