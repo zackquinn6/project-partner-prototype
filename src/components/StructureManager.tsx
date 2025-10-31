@@ -324,16 +324,32 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     if (!currentProject) return;
     
     console.group('🔄 Adding New Custom Phase');
+    
+    // FIX 1B: Explicitly mark custom phases correctly
     const newPhase: Phase = {
       id: `phase-${Date.now()}`,
       name: 'New Phase',
       description: 'Phase description',
-      operations: [],
-      isLinked: false,
-      isStandard: false
+      operations: [],  // CRITICAL: Must be an array (even if empty)
+      isLinked: false,  // CRITICAL: Not an incorporated phase
+      isStandard: false  // CRITICAL: Not a standard phase
     };
+    
+    // Validate phase structure before adding
+    if (!Array.isArray(newPhase.operations)) {
+      console.error('❌ Invalid phase structure: operations must be an array');
+      toast.error('Failed to create phase: invalid structure');
+      console.groupEnd();
+      return;
+    }
+    
     console.log('Phase:', newPhase.name);
     console.log('Project:', currentProject.name);
+    console.log('Phase flags:', { 
+      isStandard: newPhase.isStandard, 
+      isLinked: newPhase.isLinked,
+      hasOperations: Array.isArray(newPhase.operations)
+    });
 
     // Add new phase and enforce standard phase ordering
     const phasesWithNew = [...currentProject.phases, newPhase];

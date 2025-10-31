@@ -385,12 +385,51 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
           setCurrentProject(project);
         }
 
-        // Sync custom phases to template tables in background (don't block UI)
+        // FIX 1A: Sync custom phases to template tables SYNCHRONOUSLY with verification
         const { syncAllPhasesToDatabase } = await import('@/utils/phaseSynchronization');
-        syncAllPhasesToDatabase(project).catch(err => {
-          console.error('❌ Error syncing custom phases:', err);
-        });
-        console.log('✅ Custom phase sync initiated');
+        
+        try {
+          console.log('🔄 Syncing custom phases to database...');
+          await syncAllPhasesToDatabase(project);
+          
+          // Verify sync completed successfully
+          const customPhasesInJson = project.phases.filter(p => 
+            !p.isStandard && !p.isLinked
+          ).length;
+          
+          const { count, error: countError } = await supabase
+            .from('template_operations')
+            .select('*', { count: 'exact', head: true })
+            .eq('project_id', project.id)
+            .eq('is_custom_phase', true);
+          
+          if (countError) throw countError;
+          
+          if (customPhasesInJson !== (count || 0)) {
+            console.error('⚠️ Phase sync mismatch detected:', {
+              customPhasesInJson,
+              customPhasesInDB: count,
+              projectId: project.id
+            });
+            toast({
+              title: "Warning",
+              description: `Phase sync mismatch: ${customPhasesInJson} custom phases in project, but ${count || 0} in database. Revisions may not preserve all phases.`,
+              variant: "destructive",
+            });
+          } else {
+            console.log('✅ Custom phase sync verified:', {
+              customPhasesCount: customPhasesInJson,
+              projectId: project.id
+            });
+          }
+        } catch (syncError) {
+          console.error('❌ Error syncing custom phases:', syncError);
+          toast({
+            title: "Phase Sync Error",
+            description: "Failed to sync custom phases to database. Your changes were saved but revisions may not preserve custom phases.",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error('❌ Error updating project:', error);
