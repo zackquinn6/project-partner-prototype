@@ -93,10 +93,6 @@ export const AdminView: React.FC = () => {
     }
   };
 
-  // Ensure dialog is closed when component mounts (prevents persistence after navigation)
-  useEffect(() => {
-    setEditWorkflowOpen(false);
-  }, []);
   if (currentView === 'structure-manager') {
     return <StructureManager onBack={() => setCurrentView('admin')} />;
   }
@@ -145,23 +141,6 @@ export const AdminView: React.FC = () => {
             <CardContent className="mt-auto">
                <Button className="w-full" onClick={() => setEnhancedProjectManagementOpen(true)}>
                  Project Management
-               </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setEditWorkflowOpen(true)}>
-            <CardHeader className="text-center flex-1">
-              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                <Edit className="w-6 h-6 text-primary" />
-              </div>
-               <CardTitle>Edit Standard</CardTitle>
-               <CardDescription className="min-h-[3rem] flex items-center justify-center">
-                 Edit standard project foundation workflow
-               </CardDescription>
-            </CardHeader>
-            <CardContent className="mt-auto">
-               <Button className="w-full" onClick={() => setEditWorkflowOpen(true)}>
-                 Edit Standard
                </Button>
             </CardContent>
           </Card>
