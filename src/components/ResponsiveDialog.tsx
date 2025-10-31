@@ -29,7 +29,12 @@ export function ResponsiveDialog({
     return (
       <ScrollableDialog
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={(newOpen) => {
+          // Prevent this dialog from affecting parent dialogs
+          if (!newOpen) {
+            onOpenChange(false);
+          }
+        }}
         title={title}
         description={description}
         className={className}

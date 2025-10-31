@@ -599,12 +599,14 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
         />
       )}
 
-      {selectedTask && (
+      {selectedTask && showRapidCosting && (
         <ResponsiveDialog
           open={showRapidCosting}
-          onOpenChange={(open) => {
-            // Only close the Rapid Costing dialog, not the parent Task Manager
-            setShowRapidCosting(open);
+          onOpenChange={(isOpen) => {
+            // Only close the Rapid Costing dialog, prevent propagation to Task Manager
+            if (!isOpen) {
+              setShowRapidCosting(false);
+            }
           }}
           size="content-large"
           title={`Cost Assessment - ${selectedTask.title}`}

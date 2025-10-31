@@ -58,11 +58,11 @@ export function ScrollableDialog({
       modal={false}
     >
       <DialogPortal>
-        <DialogOverlay className="bg-black/60 backdrop-blur-md fixed inset-0 z-50" />
+        <DialogOverlay className="bg-black/60 backdrop-blur-md fixed inset-0 z-[100]" />
         <div
           data-dialog-content
           className={cn(
-            "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%]",
+            "fixed left-[50%] top-[50%] z-[101] translate-x-[-50%] translate-y-[-50%]",
             "w-[90vw] max-w-[90vw] h-[90vh] max-h-[90vh]",
             "bg-background border rounded-lg shadow-lg",
             "flex flex-col",
