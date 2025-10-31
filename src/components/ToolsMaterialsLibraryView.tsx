@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Camera, Wrench, Package, Eye, Save, Trash2, X } from "lucide-react";
+import { Search, Plus, Camera, Wrench, Package, Eye, Save, Trash2, X, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { UserToolsEditor } from "./UserToolsEditor";
+import { UserMaterialsEditor } from "./UserMaterialsEditor";
 
 interface Tool {
   id: string;
@@ -67,6 +69,7 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
   const [selectedType, setSelectedType] = useState<'tool' | 'material'>('tool');
   const [isLoading, setIsLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'library' | 'add'>('library');
   const { user } = useAuth();
 
   useEffect(() => {
@@ -319,9 +322,27 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
       <DialogContent className="w-full h-screen max-w-full max-h-full md:max-w-[90vw] md:h-[90vh] md:rounded-lg p-0 overflow-hidden flex flex-col [&>button]:hidden">
         <DialogHeader className="px-4 md:px-6 py-4 border-b flex-shrink-0">
           <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-lg md:text-xl font-bold">My Tools Library</DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">View and manage your personal collection of tools and materials.</p>
+            <div className="flex items-center gap-2">
+              {viewMode === 'add' && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setViewMode('library')}
+                  className="mr-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+              )}
+              <div>
+                <DialogTitle className="text-lg md:text-xl font-bold">
+                  {viewMode === 'add' ? 'Add to Library' : 'My Tools Library'}
+                </DialogTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {viewMode === 'add' 
+                    ? 'Add tools and materials to your personal library.' 
+                    : 'View and manage your personal collection of tools and materials.'}
+                </p>
+              </div>
             </div>
             <Button 
               variant="outline" 
@@ -334,8 +355,10 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 min-h-0">
+        <div className="flex-1 overflow-y-auto">
+          {viewMode === 'library' ? (
+            <div className="p-4 md:p-6">
+              <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 min-h-0">
             {/* Library Grid */}
             <div className="flex-1 space-y-4 min-w-0">
               <div className="flex items-center gap-4">
@@ -351,12 +374,7 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
                 <Button 
                   size="icon"
                   variant="outline" 
-                  onClick={() => {
-                    console.log('Add Tools button clicked in grid view');
-                    // Keep grid view open, just open add tools on top
-                    console.log('Dispatching show-tools-materials-editor event');
-                    window.dispatchEvent(new CustomEvent('show-tools-materials-editor'));
-                  }}
+                  onClick={() => setViewMode('add')}
                   title="Add Items"
                 >
                   <Plus className="w-4 h-4" />
@@ -611,7 +629,40 @@ export function ToolsMaterialsLibraryView({ open, onOpenChange, onEditMode, onAd
                 </div>
               </div>
             )}
-          </div>
+              </div>
+            </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 sm:p-6">
+              <Tabs defaultValue="tools" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-4 h-12">
+                  <TabsTrigger value="tools" className="text-sm px-3 py-2">Tools</TabsTrigger>
+                  <TabsTrigger value="materials" className="text-sm px-3 py-2">Materials</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="tools">
+                  <UserToolsEditor 
+                    initialMode="add-tools"
+                    onBackToLibrary={() => {
+                      setViewMode('library');
+                      fetchUserItems();
+                    }}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="materials">
+                  <UserMaterialsEditor 
+                    initialMode="add-materials"
+                    onBackToLibrary={() => {
+                      setViewMode('library');
+                      fetchUserItems();
+                    }}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

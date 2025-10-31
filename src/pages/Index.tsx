@@ -26,7 +26,6 @@ import { CommunityPostsWindow } from '@/components/CommunityPostsWindow';
 import { AIRepairWindow } from '@/components/AIRepairWindow';
 import { HomeManager } from '@/components/HomeManager';
 import { HomeMaintenanceWindow } from '@/components/HomeMaintenanceWindow';
-import { UserToolsMaterialsWindow } from '@/components/UserToolsMaterialsWindow';
 import { ToolsMaterialsLibraryView } from '@/components/ToolsMaterialsLibraryView';
 import ProfileManager from '@/components/ProfileManager';
 import { ExpertHelpWindow } from '@/components/ExpertHelpWindow';
@@ -54,8 +53,6 @@ const Index = () => {
   // Modal states - moved from Navigation to work on both mobile and desktop
   const [showKCExplainer, setShowKCExplainer] = useState(false);
   const [isHomeManagerOpen, setIsHomeManagerOpen] = useState(false);
-  const [isUserToolsLibraryOpen, setIsUserToolsLibraryOpen] = useState(false);
-  const [userToolsMode, setUserToolsMode] = useState<'library' | 'add-tools'>('library');
   const [isHomeMaintenanceOpen, setIsHomeMaintenanceOpen] = useState(false);
   const [isCommunityPostsOpen, setIsCommunityPostsOpen] = useState(false);
   const [isToolRentalsOpen, setIsToolRentalsOpen] = useState(false);
@@ -180,26 +177,6 @@ const Index = () => {
       setIsToolRentalsOpen(true);
     };
 
-    const handleUserToolsMaterialsEvent = (event: Event) => {
-      console.log('🔧 Opening User Tools/Materials - library mode');
-      event.stopPropagation();
-      setUserToolsMode('library');
-      setIsUserToolsLibraryOpen(true);
-    };
-
-    const handleToolsMaterialsEditorEvent = (event: Event) => {
-      console.log('🔧 Opening User Tools/Materials - add tools mode');
-      event.stopPropagation();
-      setUserToolsMode('add-tools');
-      setIsUserToolsLibraryOpen(true);
-    };
-
-    const handleCloseUserToolsMaterialsWindow = (event: Event) => {
-      console.log('🔧 Closing User Tools/Materials Window');
-      event.stopPropagation();
-      setIsUserToolsLibraryOpen(false);
-      setUserToolsMode('library'); // Reset mode for next time
-    };
 
     const handleAIRepairEvent = (event: Event) => {
       console.log('🤖 Opening AI Repair');
@@ -237,9 +214,8 @@ const Index = () => {
     window.addEventListener('open-profile-manager', handleProfileManagerEvent);
     window.addEventListener('show-community-posts', handleCommunityPostsEvent);
     window.addEventListener('show-tool-rentals', handleToolRentalsEvent);
-    window.addEventListener('show-user-tools-materials', handleUserToolsMaterialsEvent);
-    window.addEventListener('show-tools-materials-editor', handleToolsMaterialsEditorEvent);
-    window.addEventListener('close-user-tools-materials-window', handleCloseUserToolsMaterialsWindow);
+    window.addEventListener('show-user-tools-materials', handleToolsLibraryGridEvent);
+    window.addEventListener('show-tools-materials-editor', handleToolsLibraryGridEvent);
     window.addEventListener('show-ai-repair', handleAIRepairEvent);
     window.addEventListener('show-contractor-finder', handleContractorFinderEvent);
     window.addEventListener('show-expert-help', handleExpertHelpEvent);
@@ -252,9 +228,8 @@ const Index = () => {
       window.removeEventListener('open-profile-manager', handleProfileManagerEvent);
       window.removeEventListener('show-community-posts', handleCommunityPostsEvent);
       window.removeEventListener('show-tool-rentals', handleToolRentalsEvent);
-      window.removeEventListener('show-user-tools-materials', handleUserToolsMaterialsEvent);
-      window.removeEventListener('show-tools-materials-editor', handleToolsMaterialsEditorEvent);
-      window.removeEventListener('close-user-tools-materials-window', handleCloseUserToolsMaterialsWindow);
+      window.removeEventListener('show-user-tools-materials', handleToolsLibraryGridEvent);
+      window.removeEventListener('show-tools-materials-editor', handleToolsLibraryGridEvent);
       window.removeEventListener('show-ai-repair', handleAIRepairEvent);
       window.removeEventListener('show-contractor-finder', handleContractorFinderEvent);
       window.removeEventListener('show-expert-help', handleExpertHelpEvent);
@@ -555,16 +530,7 @@ const Index = () => {
         onOpenChange={setIsHomeManagerOpen}
       />
       
-      <UserToolsMaterialsWindow 
-        open={isUserToolsLibraryOpen}
-        onOpenChange={(open) => {
-          setIsUserToolsLibraryOpen(open);
-          if (!open) setUserToolsMode('library'); // Reset mode when closing
-        }}
-        initialToolsMode={userToolsMode}
-      />
-      
-      <HomeMaintenanceWindow 
+      <HomeMaintenanceWindow
         open={isHomeMaintenanceOpen}
         onOpenChange={setIsHomeMaintenanceOpen}
       />

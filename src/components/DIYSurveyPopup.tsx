@@ -11,7 +11,6 @@ import { ArrowRight, ArrowLeft, Sparkles, Wrench, CheckCircle2, Trophy, Target, 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
-import { UserToolsMaterialsWindow } from "./UserToolsMaterialsWindow";
 import { useTempQuiz } from "@/contexts/TempQuizContext";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -57,7 +56,6 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
   const [currentStep, setCurrentStep] = useState(mode === 'verify' ? 0 : (mode === 'personality' ? -1 : 1));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [showOwnedToolsEditor, setShowOwnedToolsEditor] = useState(false);
   const [personalityAnswers, setPersonalityAnswers] = useState<number[]>(Array(10).fill(0));
   const [personalityProfile, setPersonalityProfile] = useState<PersonalityProfile | null>(null);
   const { toast } = useToast();
@@ -914,7 +912,7 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => setShowOwnedToolsEditor(true)}
+                  onClick={() => window.dispatchEvent(new CustomEvent('show-tools-library-grid'))}
                   className="flex items-center gap-2"
                 >
                   <Wrench className="w-4 h-4" />
@@ -1017,12 +1015,6 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
         </DialogContent>
         </DialogPortal>
       </Dialog>
-
-      <UserToolsMaterialsWindow
-        open={showOwnedToolsEditor}
-        onOpenChange={setShowOwnedToolsEditor}
-        initialToolsMode="library"
-      />
     </>
   );
 }

@@ -45,7 +45,6 @@ import { MultiContentRenderer } from './MultiContentRenderer';
 import { CompactAppsSection } from './CompactAppsSection';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useStepInstructions } from '@/hooks/useStepInstructions';
-import { UserToolsMaterialsWindow } from './UserToolsMaterialsWindow';
 import { ToolRentalsWindow } from './ToolRentalsWindow';
 import { HomeManager } from './HomeManager';
 import { isKickoffPhaseComplete } from '@/utils/projectUtils';
@@ -136,7 +135,6 @@ export default function UserView({
   const [projectCustomizerMode, setProjectCustomizerMode] = useState<'initial-plan' | 'final-plan' | 'unplanned-work' | 'replan'>('replan');
   const [projectSchedulerOpen, setProjectSchedulerOpen] = useState(false);
   const [materialsSelectionOpen, setMaterialsSelectionOpen] = useState(false);
-  const [toolsWindowOpen, setToolsWindowOpen] = useState(false);
   const [toolRentalsOpen, setToolRentalsOpen] = useState(false);
   const [homeManagerOpen, setHomeManagerOpen] = useState(false);
   const [projectBudgetingOpen, setProjectBudgetingOpen] = useState(false);
@@ -980,7 +978,7 @@ export default function UserView({
         break;
       case 'my-tools':
         console.log('🔧 Launching My Tools app');
-        setToolsWindowOpen(true);
+        window.dispatchEvent(new CustomEvent('show-tools-library-grid'));
         break;
       case 'tool-access':
         console.log('🛠️ Launching Tool Access app');
@@ -2291,15 +2289,8 @@ export default function UserView({
         onOpenChange={setShowProfileManager}
       />
 
-      {/* Tools & Materials Window */}
-      <UserToolsMaterialsWindow 
-        open={toolsWindowOpen}
-        onOpenChange={setToolsWindowOpen}
-        initialToolsMode="library"
-      />
-
       {/* Tool Rentals Window */}
-      <ToolRentalsWindow 
+      <ToolRentalsWindow
         isOpen={toolRentalsOpen}
         onClose={() => setToolRentalsOpen(false)}
       />
