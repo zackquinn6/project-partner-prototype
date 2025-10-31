@@ -472,7 +472,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
       const operationCount = currentProject.phases[phaseIndex].operations.length;
       
-      // Insert operation into template_operations (trigger will rebuild phases JSON)
+      // Insert operation into template_operations
       const { error } = await supabase
         .from('template_operations')
         .insert({
@@ -488,22 +488,26 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
       if (error) throw error;
 
-      // Refetch project to get updated phases JSON
-      const { data: updatedProject, error: fetchError } = await supabase
+      // Rebuild phases JSON
+      const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_templates', {
+        p_project_id: currentProject.id
+      });
+
+      if (rebuildError) throw rebuildError;
+
+      // Enforce ordering and update
+      const orderedPhases = enforceStandardPhaseOrdering(rebuiltPhases as any);
+      
+      await supabase
         .from('projects')
-        .select('*')
-        .eq('id', currentProject.id)
-        .single();
+        .update({ phases: orderedPhases as any })
+        .eq('id', currentProject.id);
 
-      if (fetchError) throw fetchError;
-
-      if (updatedProject) {
-        updateProject({
-          ...currentProject,
-          phases: updatedProject.phases as any,
-          updatedAt: new Date(updatedProject.updated_at)
-        });
-      }
+      updateProject({
+        ...currentProject,
+        phases: orderedPhases as any,
+        updatedAt: new Date()
+      });
 
       toast.success('Operation added');
     } catch (error) {
@@ -531,19 +535,40 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     }
 
     try {
-      const phaseIndex = currentProject.phases.findIndex(p => p.id === phaseId);
-      if (phaseIndex === -1) return;
-      
-      const operationIndex = currentProject.phases[phaseIndex].operations.findIndex(o => o.id === operationId);
-      if (operationIndex === -1) return;
+      // Look up the actual database operation ID from template_operations
+      // The operationId in memory may not match the database ID
+      const { data: dbOperation, error: lookupError } = await supabase
+        .from('template_operations')
+        .select('id')
+        .eq('project_id', currentProject.id)
+        .eq('name', operation.name)
+        .or(
+          phase.isStandard 
+            ? `standard_phase_id.eq.${phaseId}` 
+            : `custom_phase_name.eq.${phase.name}`
+        )
+        .single();
 
-      const stepCount = currentProject.phases[phaseIndex].operations[operationIndex].steps.length;
+      if (lookupError || !dbOperation) {
+        console.error('Could not find operation in database:', lookupError);
+        throw new Error('Operation not found in database');
+      }
+
+      const actualOperationId = dbOperation.id;
       
-      // Insert step into template_steps (trigger will rebuild phases JSON)
+      // Get current step count for this operation
+      const { count } = await supabase
+        .from('template_steps')
+        .select('*', { count: 'exact', head: true })
+        .eq('operation_id', actualOperationId);
+
+      const stepCount = count || 0;
+      
+      // Insert step into template_steps using the actual database operation ID
       const { error } = await supabase
         .from('template_steps')
         .insert({
-          operation_id: operationId,
+          operation_id: actualOperationId,
           step_number: stepCount + 1,
           step_title: 'New Step',
           description: 'Step description',
@@ -560,22 +585,26 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
       if (error) throw error;
 
-      // Refetch project to get updated phases JSON
-      const { data: updatedProject, error: fetchError } = await supabase
+      // Rebuild phases JSON
+      const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_templates', {
+        p_project_id: currentProject.id
+      });
+
+      if (rebuildError) throw rebuildError;
+
+      // Enforce ordering and update
+      const orderedPhases = enforceStandardPhaseOrdering(rebuiltPhases as any);
+      
+      await supabase
         .from('projects')
-        .select('*')
-        .eq('id', currentProject.id)
-        .single();
+        .update({ phases: orderedPhases as any })
+        .eq('id', currentProject.id);
 
-      if (fetchError) throw fetchError;
-
-      if (updatedProject) {
-        updateProject({
-          ...currentProject,
-          phases: updatedProject.phases as any,
-          updatedAt: new Date(updatedProject.updated_at)
-        });
-      }
+      updateProject({
+        ...currentProject,
+        phases: orderedPhases as any,
+        updatedAt: new Date()
+      });
 
       toast.success('Step added');
     } catch (error) {
