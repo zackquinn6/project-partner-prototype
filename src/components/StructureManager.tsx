@@ -24,6 +24,7 @@ import { DecisionPointEditor } from './DecisionPointEditor';
 import { PhaseIncorporationDialog } from './PhaseIncorporationDialog';
 import { DecisionTreeManager } from './DecisionTreeManager';
 import { enforceStandardPhaseOrdering } from '@/utils/phaseOrderingUtils';
+import { supabase } from '@/integrations/supabase/client';
 interface StructureManagerProps {
   onBack: () => void;
 }
@@ -325,58 +326,65 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     
     console.group('🔄 Adding New Custom Phase');
     
-    // FIX 1B: Explicitly mark custom phases correctly
-    const newPhase: Phase = {
-      id: `phase-${Date.now()}`,
-      name: 'New Phase',
-      description: 'Phase description',
-      operations: [],  // CRITICAL: Must be an array (even if empty)
-      isLinked: false,  // CRITICAL: Not an incorporated phase
-      isStandard: false  // CRITICAL: Not a standard phase
-    };
+    const phaseName = 'New Phase';
+    const phaseDescription = 'Phase description';
+    const customPhaseCount = currentProject.phases.filter(p => !p.isStandard && !p.isLinked).length;
+    const displayOrder = 100 + (customPhaseCount * 10);
     
-    // Validate phase structure before adding
-    if (!Array.isArray(newPhase.operations)) {
-      console.error('❌ Invalid phase structure: operations must be an array');
-      toast.error('Failed to create phase: invalid structure');
-      console.groupEnd();
-      return;
-    }
-    
-    console.log('Phase:', newPhase.name);
-    console.log('Project:', currentProject.name);
-    console.log('Phase flags:', { 
-      isStandard: newPhase.isStandard, 
-      isLinked: newPhase.isLinked,
-      hasOperations: Array.isArray(newPhase.operations)
-    });
-
-    // Add new phase and enforce standard phase ordering
-    const phasesWithNew = [...currentProject.phases, newPhase];
-    const orderedPhases = enforceStandardPhaseOrdering(phasesWithNew);
-    const updatedProject = {
-      ...currentProject,
-      phases: orderedPhases,
-      updatedAt: new Date()
-    };
+    console.log('Adding phase to project:', currentProject.id);
+    console.log('Phase name:', phaseName);
+    console.log('Display order:', displayOrder);
 
     try {
-      // Update project in memory and database first
-      await updateProject(updatedProject);
-      console.log('✅ Project updated in database');
+      // Create a placeholder operation in template_operations to establish the custom phase
+      // The trigger will automatically rebuild the phases JSON
+      const { data: newOperation, error } = await supabase
+        .from('template_operations')
+        .insert({
+          project_id: currentProject.id,
+          name: 'First Operation',
+          description: 'Add your first operation',
+          custom_phase_name: phaseName,
+          custom_phase_description: phaseDescription,
+          custom_phase_display_order: displayOrder,
+          display_order: 0,
+          standard_phase_id: null  // null = custom phase
+        })
+        .select()
+        .single();
 
-      // Then explicitly sync to template tables
-      const { syncPhaseToDatabase } = await import('@/utils/phaseSynchronization');
-      const displayOrder = 100 + (orderedPhases.filter(p => !p.isStandard && !p.isLinked).length * 10);
-      await syncPhaseToDatabase(currentProject.id, newPhase, displayOrder);
+      if (error) {
+        console.error('❌ Error creating custom phase:', error);
+        throw error;
+      }
+
+      console.log('✅ Custom phase created in template_operations');
       
-      console.log('✅ Custom phase synced to template tables');
+      // Refetch the project to get the updated phases JSON (rebuilt by trigger)
+      const { data: updatedProject, error: fetchError } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', currentProject.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Update local state with the refreshed project
+      if (updatedProject) {
+        updateProject({
+          ...currentProject,
+          phases: updatedProject.phases as any,
+          updatedAt: new Date(updatedProject.updated_at)
+        });
+      }
+      
+      console.log('✅ Custom phase added successfully');
       console.groupEnd();
       toast.success('Custom phase added successfully');
     } catch (error) {
-      console.error('❌ Error adding/syncing phase:', error);
+      console.error('❌ Error adding custom phase:', error);
       console.groupEnd();
-      toast.error('Phase added but may not persist in revisions');
+      toast.error('Failed to add custom phase');
     }
   };
   const handleIncorporatePhase = (incorporatedPhase: Phase & {
@@ -423,65 +431,140 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     console.log('🔍 Updated project phases count:', updatedProject.phases.length);
     updateProject(updatedProject);
   };
-  const addOperation = (phaseId: string) => {
+
+  const addOperation = async (phaseId: string) => {
     if (!currentProject) return;
-
-    // Check if this is a standard phase
     const phase = displayPhases.find(p => p.id === phaseId);
+    if (!phase) return;
 
-    // Allow adding custom operations to standard phases in project templates
-    // (Standard Project itself still restricts, but individual templates can add custom work)
-    const newOperation: Operation = {
-      id: `operation-${Date.now()}`,
-      name: 'New Custom Operation',
-      description: 'Custom operation description',
-      steps: [],
-      isStandard: false // Mark as custom operation
-    };
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.map(phase => phase.id === phaseId ? {
-        ...phase,
-        operations: [...phase.operations, newOperation]
-      } : phase),
-      updatedAt: new Date()
-    };
-    updateProject(updatedProject);
-    toast.success(phase?.isStandard ? 'Custom operation added to standard phase' : 'Operation added successfully');
+    // Block adding operations to linked phases
+    if (phase.isLinked) {
+      toast.error('Cannot add operations to incorporated phases');
+      return;
+    }
+
+    // Block adding operations to standard phases unless editing Standard Project
+    if (phase.isStandard && !isEditingStandardProject) {
+      toast.error('Cannot add operations to standard phases');
+      return;
+    }
+
+    try {
+      const phaseIndex = currentProject.phases.findIndex(p => p.id === phaseId);
+      if (phaseIndex === -1) return;
+
+      const operationCount = currentProject.phases[phaseIndex].operations.length;
+      
+      // Insert operation into template_operations (trigger will rebuild phases JSON)
+      const { error } = await supabase
+        .from('template_operations')
+        .insert({
+          project_id: currentProject.id,
+          standard_phase_id: phase.isStandard ? phaseId : null,
+          custom_phase_name: phase.isStandard ? null : phase.name,
+          custom_phase_description: phase.isStandard ? null : phase.description,
+          custom_phase_display_order: phase.isStandard ? null : phaseIndex * 10,
+          name: 'New Operation',
+          description: 'Operation description',
+          display_order: operationCount
+        });
+
+      if (error) throw error;
+
+      // Refetch project to get updated phases JSON
+      const { data: updatedProject, error: fetchError } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', currentProject.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      if (updatedProject) {
+        updateProject({
+          ...currentProject,
+          phases: updatedProject.phases as any,
+          updatedAt: new Date(updatedProject.updated_at)
+        });
+      }
+
+      toast.success('Operation added');
+    } catch (error) {
+      console.error('Error adding operation:', error);
+      toast.error('Failed to add operation');
+    }
   };
-  const addStep = (phaseId: string, operationId: string) => {
+  const addStep = async (phaseId: string, operationId: string) => {
     if (!currentProject) return;
-
-    // Check if this is a standard phase
     const phase = displayPhases.find(p => p.id === phaseId);
+    if (!phase) return;
+    const operation = phase.operations.find(o => o.id === operationId);
+    if (!operation) return;
 
-    // Allow adding custom steps to standard phases in project templates
-    const newStep: WorkflowStep = {
-      id: `step-${Date.now()}`,
-      step: 'New Custom Step',
-      description: 'Custom step description',
-      contentType: 'text',
-      content: '',
-      materials: [],
-      tools: [],
-      outputs: [],
-      contentSections: [],
-      flowType: 'prime',
-      isStandard: false // Mark as custom step
-    };
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.map(phase => phase.id === phaseId ? {
-        ...phase,
-        operations: phase.operations.map(operation => operation.id === operationId ? {
-          ...operation,
-          steps: [...operation.steps, newStep]
-        } : operation)
-      } : phase),
-      updatedAt: new Date()
-    };
-    updateProject(updatedProject);
-    toast.success(phase?.isStandard ? 'Custom step added to standard phase' : 'Step added successfully');
+    // Block adding steps to linked phases
+    if (phase.isLinked) {
+      toast.error('Cannot add steps to incorporated phases');
+      return;
+    }
+
+    // Block adding steps to standard operations unless editing Standard Project
+    if (operation.isStandard && !isEditingStandardProject) {
+      toast.error('Cannot add steps to standard operations');
+      return;
+    }
+
+    try {
+      const phaseIndex = currentProject.phases.findIndex(p => p.id === phaseId);
+      if (phaseIndex === -1) return;
+      
+      const operationIndex = currentProject.phases[phaseIndex].operations.findIndex(o => o.id === operationId);
+      if (operationIndex === -1) return;
+
+      const stepCount = currentProject.phases[phaseIndex].operations[operationIndex].steps.length;
+      
+      // Insert step into template_steps (trigger will rebuild phases JSON)
+      const { error } = await supabase
+        .from('template_steps')
+        .insert({
+          operation_id: operationId,
+          step_number: stepCount + 1,
+          step_title: 'New Step',
+          description: 'Step description',
+          content_sections: JSON.stringify([]),
+          materials: JSON.stringify([]),
+          tools: JSON.stringify([]),
+          outputs: JSON.stringify([]),
+          apps: JSON.stringify([]),
+          estimated_time_minutes: 0,
+          display_order: stepCount,
+          flow_type: 'prime',
+          step_type: 'prime'
+        });
+
+      if (error) throw error;
+
+      // Refetch project to get updated phases JSON
+      const { data: updatedProject, error: fetchError } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', currentProject.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      if (updatedProject) {
+        updateProject({
+          ...currentProject,
+          phases: updatedProject.phases as any,
+          updatedAt: new Date(updatedProject.updated_at)
+        });
+      }
+
+      toast.success('Step added');
+    } catch (error) {
+      console.error('Error adding step:', error);
+      toast.error('Failed to add step');
+    }
   };
 
   // Delete operations - Allow deleting in Edit Standard mode

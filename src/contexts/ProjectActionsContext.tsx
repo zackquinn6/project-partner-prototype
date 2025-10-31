@@ -241,196 +241,105 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
     }
 
     try {
-      // Check if this is the Standard Project Foundation
-      const isStandardProject = project.id === '00000000-0000-0000-0000-000000000001' || project.isStandardTemplate;
-      
       console.log('🔧 updateProject called:', { 
         projectId: project.id, 
-        isStandardProject,
         phasesCount: project.phases?.length 
       });
       
-      if (isStandardProject) {
-        console.log('🔧 Updating Standard Project - phases and template tables');
-        console.log('🔧 Project ID:', project.id);
-        console.log('🔧 Phases to update:', project.phases.map(p => ({ 
-          id: p.id, 
-          name: p.name, 
-          opsCount: p.operations.length 
-        })));
+      // For all projects (including Standard Project), we DON'T update phases JSON
+      // The database triggers will automatically rebuild it from template_operations/template_steps
+      
+      // Update only the project metadata (not phases)
+      const { error: updateError } = await supabase
+        .from('projects')
+        .update({
+          name: project.name,
+          description: project.description,
+          category: project.category,
+          scaling_unit: project.scalingUnit,
+          estimated_time_per_unit: project.estimatedTimePerUnit,
+          skill_level: project.skillLevel,
+          effort_level: project.effortLevel,
+          estimated_time: project.estimatedTime,
+          diy_length_challenges: project.diyLengthChallenges,
+          image: project.image,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', project.id);
+
+      if (updateError) {
+        console.error('❌ Error updating project:', updateError);
+        throw updateError;
+      }
+
+      console.log('✅ Project metadata updated successfully');
+      
+      // Update display_order of template_operations and template_steps based on in-memory order
+      // The triggers will automatically rebuild the phases JSON after these updates
+      let updatedOpsCount = 0;
+      let updatedStepsCount = 0;
+      
+      for (let phaseIndex = 0; phaseIndex < project.phases.length; phaseIndex++) {
+        const phase = project.phases[phaseIndex];
         
-        // First update the phases JSON
-        const { error: phasesError } = await supabase
-          .from('projects')
-          .update({
-            phases: JSON.stringify(project.phases),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', project.id);
-
-        if (phasesError) {
-          console.error('❌ Error updating phases JSON:', phasesError);
-          throw phasesError;
-        }
-
-        console.log('✅ Phases JSON updated successfully');
-
-        // Then update display_order of template_operations and template_steps
-        let updatedOpsCount = 0;
-        let updatedStepsCount = 0;
-        
-        for (let phaseIndex = 0; phaseIndex < project.phases.length; phaseIndex++) {
-          const phase = project.phases[phaseIndex];
+        // Update operations within this phase
+        for (let opIndex = 0; opIndex < phase.operations.length; opIndex++) {
+          const operation = phase.operations[opIndex];
           
-          // Update operations within this phase
-          for (let opIndex = 0; opIndex < phase.operations.length; opIndex++) {
-            const operation = phase.operations[opIndex];
+          const { error: opError } = await supabase
+            .from('template_operations')
+            .update({ 
+              display_order: opIndex,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', operation.id)
+            .eq('project_id', project.id);
             
-            console.log('🔧 Updating operation:', {
-              operationId: operation.id,
-              name: operation.name,
-              phaseId: phase.id,
-              newDisplayOrder: opIndex,
-              projectId: project.id
-            });
+          if (opError) {
+            console.error('❌ Error updating operation display_order:', opError);
+          } else {
+            updatedOpsCount++;
+          }
+
+          // Update steps within this operation
+          for (let stepIndex = 0; stepIndex < operation.steps.length; stepIndex++) {
+            const step = operation.steps[stepIndex];
             
-            const { error: opError, data: opData } = await supabase
-              .from('template_operations')
+            const { error: stepError } = await supabase
+              .from('template_steps')
               .update({ 
-                display_order: opIndex,
+                display_order: stepIndex,
                 updated_at: new Date().toISOString()
               })
-              .eq('id', operation.id)
-              .eq('project_id', project.id)
-              .select();
+              .eq('id', step.id)
+              .eq('operation_id', operation.id);
             
-            if (opError) {
-              console.error('❌ Error updating operation display_order:', opError);
+            if (stepError) {
+              console.error('❌ Error updating step display_order:', stepError);
             } else {
-              updatedOpsCount++;
-              console.log('✅ Operation updated:', opData);
-            }
-
-            // Update steps within this operation
-            for (let stepIndex = 0; stepIndex < operation.steps.length; stepIndex++) {
-              const step = operation.steps[stepIndex];
-              
-              console.log('🔧 Updating step:', {
-                stepId: step.id,
-                title: step.step,
-                operationId: operation.id,
-                newDisplayOrder: stepIndex
-              });
-              
-              const { error: stepError, data: stepData } = await supabase
-                .from('template_steps')
-                .update({ 
-                  display_order: stepIndex,
-                  updated_at: new Date().toISOString()
-                })
-                .eq('id', step.id)
-                .eq('operation_id', operation.id)
-                .select();
-              
-              if (stepError) {
-                console.error('❌ Error updating step display_order:', stepError);
-              } else {
-                updatedStepsCount++;
-                console.log('✅ Step updated:', stepData);
-              }
+              updatedStepsCount++;
             }
           }
-        }
-        
-        console.log('✅ Template tables updated:', { 
-          operations: updatedOpsCount, 
-          steps: updatedStepsCount 
-        });
-        
-        toast({
-          title: "Success",
-          description: `Standard Project updated (${updatedOpsCount} operations, ${updatedStepsCount} steps)`,
-        });
-      } else {
-        // For regular projects, update phases JSON AND sync custom phases to database
-        const { error } = await supabase
-          .from('projects')
-          .update({
-            name: project.name,
-            description: project.description,
-            diy_length_challenges: project.diyLengthChallenges || null,
-            image: project.image,
-            start_date: project.startDate.toISOString(),
-            plan_end_date: project.planEndDate.toISOString(),
-            end_date: project.endDate?.toISOString(),
-            status: project.status,
-            publish_status: project.publishStatus,
-            category: project.category || null,
-            effort_level: project.effortLevel || null,
-            skill_level: project.skillLevel || null,
-            estimated_time: project.estimatedTime || null,
-            estimated_time_per_unit: project.estimatedTimePerUnit || null,
-            scaling_unit: project.scalingUnit || null,
-            phases: project.phases as any
-          })
-          .eq('id', project.id);
-
-        if (error) throw error;
-
-        // Optimistically update cache IMMEDIATELY for responsive UI
-        const updatedProjects = projects.map(p => p.id === project.id ? project : p);
-        updateProjectsCache(updatedProjects);
-        
-        if (currentProject?.id === project.id) {
-          setCurrentProject(project);
-        }
-
-        // FIX 1A: Sync custom phases to template tables SYNCHRONOUSLY with verification
-        const { syncAllPhasesToDatabase } = await import('@/utils/phaseSynchronization');
-        
-        try {
-          console.log('🔄 Syncing custom phases to database...');
-          await syncAllPhasesToDatabase(project);
-          
-          // Verify sync completed successfully
-          const customPhasesInJson = project.phases.filter(p => 
-            !p.isStandard && !p.isLinked
-          ).length;
-          
-          const { count, error: countError } = await supabase
-            .from('template_operations')
-            .select('*', { count: 'exact', head: true })
-            .eq('project_id', project.id)
-            .eq('is_custom_phase', true);
-          
-          if (countError) throw countError;
-          
-          if (customPhasesInJson !== (count || 0)) {
-            console.error('⚠️ Phase sync mismatch detected:', {
-              customPhasesInJson,
-              customPhasesInDB: count,
-              projectId: project.id
-            });
-            toast({
-              title: "Warning",
-              description: `Phase sync mismatch: ${customPhasesInJson} custom phases in project, but ${count || 0} in database. Revisions may not preserve all phases.`,
-              variant: "destructive",
-            });
-          } else {
-            console.log('✅ Custom phase sync verified:', {
-              customPhasesCount: customPhasesInJson,
-              projectId: project.id
-            });
-          }
-        } catch (syncError) {
-          console.error('❌ Error syncing custom phases:', syncError);
-          toast({
-            title: "Phase Sync Error",
-            description: "Failed to sync custom phases to database. Your changes were saved but revisions may not preserve custom phases.",
-            variant: "destructive",
-          });
         }
       }
+      
+      console.log('✅ Template tables updated:', { 
+        operations: updatedOpsCount, 
+        steps: updatedStepsCount 
+      });
+
+      // Optimistically update cache
+      const updatedProjects = projects.map(p => p.id === project.id ? project : p);
+      updateProjectsCache(updatedProjects);
+      
+      if (currentProject?.id === project.id) {
+        setCurrentProject(project);
+      }
+      
+      toast({
+        title: "Success",
+        description: "Project updated successfully",
+      });
     } catch (error) {
       console.error('❌ Error updating project:', error);
       toast({
