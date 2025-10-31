@@ -993,7 +993,14 @@ export function UnifiedProjectManagement() {
                           <CardTitle>Revision Control</CardTitle>
                           <div className="flex gap-2">
                             <Button
-                              onClick={() => setCreateRevisionDialogOpen(true)}
+                              onClick={() => {
+                                console.log('🔵 Create Revision button clicked', {
+                                  hasSelectedProject: !!selectedProject,
+                                  projectId: selectedProject?.id,
+                                  projectName: selectedProject?.name
+                                });
+                                setCreateRevisionDialogOpen(true);
+                              }}
                               variant="outline"
                               className="flex items-center gap-2"
                             >
@@ -1247,7 +1254,13 @@ export function UnifiedProjectManagement() {
       </Dialog>
 
       {/* Create Revision Dialog */}
-      <Dialog open={createRevisionDialogOpen} onOpenChange={setCreateRevisionDialogOpen}>
+      <Dialog 
+        open={createRevisionDialogOpen} 
+        onOpenChange={(open) => {
+          console.log('🟡 Create Revision Dialog open state changed:', open);
+          setCreateRevisionDialogOpen(open);
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -1275,7 +1288,12 @@ export function UnifiedProjectManagement() {
               <Button variant="outline" onClick={() => setCreateRevisionDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={createNewRevision}>
+              <Button 
+                onClick={() => {
+                  console.log('🟢 Create Draft Revision button (inside dialog) clicked');
+                  createNewRevision();
+                }}
+              >
                 Create Draft Revision
               </Button>
             </div>
