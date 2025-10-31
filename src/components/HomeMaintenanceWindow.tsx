@@ -254,16 +254,21 @@ export const HomeMaintenanceWindow: React.FC<HomeMaintenanceWindowProps> = ({
     }
   };
   return <>
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange} size="xlarge" className="[&>button]:md:block [&>button]:hidden h-[85vh] max-h-[85vh]">
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange} size="standard-window">
       <div className="flex flex-col h-full max-h-full overflow-hidden">
         {/* Header with title and close button */}
         <div className="px-4 md:px-6 py-4 border-b flex items-center justify-between flex-shrink-0">
           <h2 className="text-lg md:text-xl font-bold">Home Maintenance Tracker</h2>
           
-          {/* Close button - only show Close text on mobile */}
-          {isMobile && <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} className="ml-4 flex-shrink-0">
-              Close
-            </Button>}
+          {/* Close button - always visible */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => onOpenChange(false)} 
+            className="ml-4 flex-shrink-0"
+          >
+            Close
+          </Button>
         </div>
         
         {/* Home Selection - Fixed at top */}

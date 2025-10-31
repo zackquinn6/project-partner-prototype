@@ -305,11 +305,25 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
     <ResponsiveDialog 
       open={open} 
       onOpenChange={onOpenChange}
-      title="Manage Your Homes"
-      size="xlarge"
+      size="standard-window"
     >
+        <div className="flex flex-col h-full overflow-hidden">
+          {/* Header with close button */}
+          <div className="px-4 md:px-6 py-4 border-b flex items-center justify-between flex-shrink-0">
+            <h2 className="text-lg md:text-xl font-bold">Manage Your Homes</h2>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => onOpenChange(false)} 
+              className="ml-4 flex-shrink-0"
+            >
+              Close
+            </Button>
+          </div>
 
-        {!showForm ? <div className="space-y-6 p-6">
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto">
+            {!showForm ? <div className="space-y-6 p-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <p className="text-muted-foreground text-sm max-w-2xl">
@@ -411,8 +425,8 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
                     </CardContent>
                   </Card>)}
               </div>}
-          </div> : (/* Form */
-      <form onSubmit={handleSubmit} className="space-y-6 p-6">
+            </div> : (/* Form */
+        <form onSubmit={handleSubmit} className="space-y-6 p-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">
                 {editingHome ? 'Edit Home' : 'Add New Home'}
@@ -566,6 +580,8 @@ export const HomeManager: React.FC<HomeManagerProps> = ({
               </Button>
             </div>
           </form>)}
+          </div>
+        </div>
     </ResponsiveDialog>
     
     <HomeDetailsWindow

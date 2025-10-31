@@ -199,6 +199,7 @@ export default function ProfileManager({
       open={open} 
       onOpenChange={onOpenChange}
       title="My Profile"
+      className="w-full h-screen max-w-full max-h-full md:max-w-[98vw] md:h-[98vh]"
     >
       <div className="flex items-center justify-center py-8">
         <div className="text-center">Loading profile...</div>
@@ -210,6 +211,7 @@ export default function ProfileManager({
         open={open} 
         onOpenChange={onOpenChange}
         title="My Profile"
+        className="w-full h-screen max-w-full max-h-full md:max-w-[98vw] md:h-[98vh]"
       >
         <div className="py-6">
           {renderProfileView()}

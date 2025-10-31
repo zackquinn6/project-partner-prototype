@@ -65,6 +65,7 @@ export function ScrollableDialog({
         <DialogOverlay className="bg-black/60 backdrop-blur-md fixed inset-0 z-[100]" />
         <div
           data-dialog-content
+          onClick={(e) => e.stopPropagation()}
           className={cn(
             "fixed left-[50%] top-[50%] z-[101] translate-x-[-50%] translate-y-[-50%]",
             "w-[90vw] max-w-[90vw] h-[90vh] max-h-[90vh]",

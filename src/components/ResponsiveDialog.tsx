@@ -10,7 +10,7 @@ interface ResponsiveDialogProps {
   onOpenChange: (open: boolean) => void;
   title?: string;
   description?: string;
-  size?: 'default' | 'large' | 'xlarge' | 'modal-sm' | 'modal-md' | 'content-large' | 'content-full';
+  size?: 'default' | 'large' | 'xlarge' | 'modal-sm' | 'modal-md' | 'content-large' | 'content-full' | 'standard-window';
   children: React.ReactNode;
   className?: string;
 }
@@ -53,6 +53,7 @@ export function ResponsiveDialog({
     'modal-md': responsiveDialogClasses.modalMd,
     'content-large': responsiveDialogClasses.contentLarge,
     'content-full': responsiveDialogClasses.contentFull,
+    'standard-window': responsiveDialogClasses.standardWindow,
   };
 
   const paddingClasses = {
@@ -63,6 +64,7 @@ export function ResponsiveDialog({
     'modal-md': responsiveDialogClasses.padding,
     'content-large': responsiveDialogClasses.padding,
     'content-full': responsiveDialogClasses.padding,
+    'standard-window': 'p-0',
   };
 
   return (
