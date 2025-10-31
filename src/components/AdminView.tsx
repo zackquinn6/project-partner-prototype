@@ -6,7 +6,6 @@ import { ToolsMaterialsWindow } from '@/components/ToolsMaterialsWindow';
 import { HomeRiskManager } from '@/components/HomeRiskManager';
 import { AdminActionCenter } from '@/components/AdminActionCenter';
 import EditWorkflowView from '@/components/EditWorkflowView';
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -21,8 +20,6 @@ import { AdminDataRefresh } from './AdminDataRefresh';
 import { AdminGuideWindow } from './AdminGuideWindow';
 import { PFMEAManagement } from './PFMEAManagement';
 import { BetaModeToggle } from './BetaModeToggle';
-
-
 export const AdminView: React.FC = () => {
   const [enhancedProjectManagementOpen, setEnhancedProjectManagementOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
@@ -30,7 +27,6 @@ export const AdminView: React.FC = () => {
   const [toolsMaterialsOpen, setToolsMaterialsOpen] = useState(false);
   const [homeRiskManagerOpen, setHomeRiskManagerOpen] = useState(false);
   const [editWorkflowOpen, setEditWorkflowOpen] = useState(false);
-  
   const [processDesignOpen, setProcessDesignOpen] = useState(false);
   const [roadmapManagerOpen, setRoadmapManagerOpen] = useState(false);
   const [featureRequestManagerOpen, setFeatureRequestManagerOpen] = useState(false);
@@ -39,46 +35,42 @@ export const AdminView: React.FC = () => {
   const [actionCenterOpen, setActionCenterOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'admin' | 'structure-manager'>('admin');
   const [isSyncing, setIsSyncing] = useState(false);
-
   const handleSyncStandardPhases = async () => {
     setIsSyncing(true);
-    
+
     // Show initial loading toast
-    toast.loading('Syncing standard phases to all project templates...', { id: 'sync-phases' });
-
+    toast.loading('Syncing standard phases to all project templates...', {
+      id: 'sync-phases'
+    });
     try {
-      const { data, error } = await supabase.functions.invoke('sync-standard-phases', {
-        method: 'POST',
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('sync-standard-phases', {
+        method: 'POST'
       });
-
       if (error) {
         console.error('Edge function error:', error);
         throw error;
       }
-
       const result = data as {
         success: boolean;
         templatesUpdated: number;
         templatesFailed: number;
         details: string[];
       };
-
       console.log('Sync result:', result);
-
       if (result.success) {
         // Dismiss loading toast
         toast.dismiss('sync-phases');
-        
+
         // Wait a brief moment to ensure loading toast is dismissed
         setTimeout(() => {
           // Show prominent success toast with longer duration
-          toast.success(
-            `✅ Standard Phases Synced Successfully!`,
-            {
-              description: `${result.templatesUpdated} template(s) updated with latest standard phases. ${result.templatesFailed > 0 ? `⚠️ ${result.templatesFailed} failed.` : '✨ All templates updated successfully!'}`,
-              duration: 10000, // 10 seconds
-            }
-          );
+          toast.success(`✅ Standard Phases Synced Successfully!`, {
+            description: `${result.templatesUpdated} template(s) updated with latest standard phases. ${result.templatesFailed > 0 ? `⚠️ ${result.templatesFailed} failed.` : '✨ All templates updated successfully!'}`,
+            duration: 10000 // 10 seconds
+          });
         }, 100);
 
         // Show detailed results in console
@@ -88,14 +80,14 @@ export const AdminView: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to sync standard phases:', error);
-      
+
       // Dismiss loading toast
       toast.dismiss('sync-phases');
-      
+
       // Show error toast
       toast.error('Failed to sync standard phases', {
         description: error instanceof Error ? error.message : 'Unknown error occurred',
-        duration: 6000,
+        duration: 6000
       });
     } finally {
       setIsSyncing(false);
@@ -107,43 +99,24 @@ export const AdminView: React.FC = () => {
     const handleEditWorkflowNavigation = () => {
       setEditWorkflowOpen(true);
     };
-
     window.addEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
-    
     return () => {
       window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
     };
   }, []);
-
   if (currentView === 'structure-manager') {
     return <StructureManager onBack={() => setCurrentView('admin')} />;
   }
-
-  return (
-    <div className="min-h-screen bg-background p-6">
+  return <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-4">
             <h1 className="text-4xl font-bold text-primary">Administration Panel</h1>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAdminGuideOpen(true)}
-              className="text-xs"
-            >
+            <Button variant="outline" size="sm" onClick={() => setAdminGuideOpen(true)} className="text-xs">
               <FileText className="w-4 h-4 mr-2" />
               Admin Guide
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSyncStandardPhases}
-              disabled={isSyncing}
-              className="text-xs"
-            >
-              <RefreshCcw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-              Sync Standard Phases
-            </Button>
+            
           </div>
           <p className="text-lg text-muted-foreground">Manage projects, analytics, and user permissions</p>
         </div>
@@ -309,28 +282,15 @@ export const AdminView: React.FC = () => {
         {/* Beta Mode Toggle */}
         <BetaModeToggle />
 
-        <ScrollableDialog
-          open={enhancedProjectManagementOpen} 
-          onOpenChange={setEnhancedProjectManagementOpen}
-          title="Project Management & Revision Control"
-        >
+        <ScrollableDialog open={enhancedProjectManagementOpen} onOpenChange={setEnhancedProjectManagementOpen} title="Project Management & Revision Control">
           <UnifiedProjectManagement />
         </ScrollableDialog>
 
-        <ProjectAnalyticsWindow 
-          open={analyticsOpen} 
-          onOpenChange={setAnalyticsOpen} 
-        />
+        <ProjectAnalyticsWindow open={analyticsOpen} onOpenChange={setAnalyticsOpen} />
         
-        <UsersSecurityWindow 
-          open={usersSecurityOpen} 
-          onOpenChange={setUsersSecurityOpen} 
-        />
+        <UsersSecurityWindow open={usersSecurityOpen} onOpenChange={setUsersSecurityOpen} />
         
-        <ToolsMaterialsWindow 
-          open={toolsMaterialsOpen} 
-          onOpenChange={setToolsMaterialsOpen} 
-        />
+        <ToolsMaterialsWindow open={toolsMaterialsOpen} onOpenChange={setToolsMaterialsOpen} />
 
         <Dialog open={homeRiskManagerOpen} onOpenChange={setHomeRiskManagerOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -342,20 +302,11 @@ export const AdminView: React.FC = () => {
         </Dialog>
 
 
-        <AdminRoadmapManager
-          open={roadmapManagerOpen}
-          onOpenChange={setRoadmapManagerOpen}
-        />
+        <AdminRoadmapManager open={roadmapManagerOpen} onOpenChange={setRoadmapManagerOpen} />
 
-        <AdminFeatureRequestManager
-          open={featureRequestManagerOpen}
-          onOpenChange={setFeatureRequestManagerOpen}
-        />
+        <AdminFeatureRequestManager open={featureRequestManagerOpen} onOpenChange={setFeatureRequestManagerOpen} />
 
-        <AdminGuideWindow
-          open={adminGuideOpen}
-          onOpenChange={setAdminGuideOpen}
-        />
+        <AdminGuideWindow open={adminGuideOpen} onOpenChange={setAdminGuideOpen} />
 
         <Dialog open={processDesignOpen} onOpenChange={setProcessDesignOpen}>
           <DialogContent className="max-w-[95vw] max-h-[95vh] overflow-y-auto">
@@ -375,10 +326,7 @@ export const AdminView: React.FC = () => {
           </DialogContent>
         </Dialog>
 
-        <AdminActionCenter 
-          open={actionCenterOpen} 
-          onOpenChange={setActionCenterOpen}
-        />
+        <AdminActionCenter open={actionCenterOpen} onOpenChange={setActionCenterOpen} />
 
         <Dialog open={editWorkflowOpen} onOpenChange={setEditWorkflowOpen}>
           <DialogContent className="max-w-[98vw] max-h-[98vh] p-0">
@@ -386,6 +334,5 @@ export const AdminView: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
-  );
+    </div>;
 };
