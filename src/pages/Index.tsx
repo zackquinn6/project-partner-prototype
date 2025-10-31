@@ -46,7 +46,7 @@ const Index = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [currentView, setCurrentView] = useState<'home' | 'admin' | 'user' | 'editWorkflow'>('home');
-  const [mobileView, setMobileView] = useState<'home' | 'projects' | 'workflow'>('home');
+  const [mobileView, setMobileView] = useState<'home' | 'projects' | 'workflow' | 'catalog'>('home');
   const [resetUserView, setResetUserView] = useState(false);
   const [forceListingMode, setForceListingMode] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState<'home' | 'projects' | 'profile' | 'help' | 'expert'>('home');
@@ -435,13 +435,20 @@ const Index = () => {
       }
       
       switch (mobileView) {
+        case 'catalog':
+          console.log('🔍 RENDERING Index ProjectCatalog - mobileView is catalog');
+          return (
+            <div className="h-screen flex flex-col">
+              <ProjectCatalog />
+            </div>
+          );
         case 'projects':
           console.log('🔍 RENDERING Index MobileProjectListing - mobileView is projects');
           return (
             <div className="h-screen flex flex-col">
               <MobileProjectListing
                 onProjectSelect={handleMobileProjectSelect}
-                onNewProject={() => setMobileView('home')}
+                onNewProject={() => setMobileView('catalog')}
                 onClose={() => setMobileView('home')}
               />
               <MobileBottomNav

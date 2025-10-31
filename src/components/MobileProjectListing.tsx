@@ -118,8 +118,8 @@ export function MobileProjectListing({ onProjectSelect, onNewProject, onClose }:
             variant="default"
             size="sm"
             onClick={() => {
-              console.log('📱 MobileProjectListing: + button clicked, navigating to /projects');
-              navigate('/projects');
+              console.log('📱 MobileProjectListing: + button clicked, calling onNewProject');
+              onNewProject?.();
             }}
             className="px-3 h-10"
           >
