@@ -43,9 +43,11 @@ interface ProjectTemplate {
 }
 interface ProjectCatalogProps {
   isAdminMode?: boolean;
+  onClose?: () => void;
 }
 const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
-  isAdminMode = false
+  isAdminMode = false,
+  onClose
 }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -646,8 +648,14 @@ const ProjectCatalog: React.FC<ProjectCatalogProps> = ({
             variant="ghost" 
             size="sm"
             onClick={() => {
-              console.log('📱 ProjectCatalog: Close button clicked, navigating back to home');
-              navigate(-1); // Go back instead of navigate to '/'
+              console.log('📱 ProjectCatalog: Close button clicked');
+              if (onClose) {
+                console.log('📱 ProjectCatalog: Using onClose callback');
+                onClose();
+              } else {
+                console.log('📱 ProjectCatalog: Using navigate(-1) fallback');
+                navigate(-1);
+              }
             }}
             className="text-sm"
           >

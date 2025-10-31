@@ -439,7 +439,10 @@ const Index = () => {
           console.log('🔍 RENDERING Index ProjectCatalog - mobileView is catalog');
           return (
             <div className="h-screen flex flex-col">
-              <ProjectCatalog />
+              <ProjectCatalog onClose={() => {
+                console.log('📱 Index: ProjectCatalog closed, returning to projects');
+                setMobileView('projects');
+              }} />
             </div>
           );
         case 'projects':
