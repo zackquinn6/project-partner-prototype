@@ -745,36 +745,36 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
               </div>
               <RadioGroup value={answers.skillLevel} onValueChange={(value) => setAnswers(prev => ({ ...prev, skillLevel: value }))}>
                 <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="newbie" id="newbie" />
+                  <CardContent className="p-2.5 md:p-4">
+                    <div className="flex items-center space-x-2 md:space-x-3">
+                      <RadioGroupItem value="newbie" id="newbie" className="h-4 w-4 shrink-0" />
                       <Label htmlFor="newbie" className="flex-1 cursor-pointer">
-                        <div className="font-semibold">🔰 Newbie</div>
-                        <div className="text-sm text-muted-foreground">I'm just getting started—teach me everything.</div>
+                        <div className="font-semibold text-sm md:text-base">🔰 Newbie</div>
+                        <div className="text-xs md:text-sm text-muted-foreground">I'm just getting started—teach me everything.</div>
                       </Label>
                     </div>
                   </CardContent>
                 </Card>
                 
                 <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="confident" id="confident" />
+                  <CardContent className="p-2.5 md:p-4">
+                    <div className="flex items-center space-x-2 md:space-x-3">
+                      <RadioGroupItem value="confident" id="confident" className="h-4 w-4 shrink-0" />
                       <Label htmlFor="confident" className="flex-1 cursor-pointer">
-                        <div className="font-semibold">🧰 Confident-ish</div>
-                        <div className="text-sm text-muted-foreground">I've done a few projects and want to level up.</div>
+                        <div className="font-semibold text-sm md:text-base">🧰 Confident-ish</div>
+                        <div className="text-xs md:text-sm text-muted-foreground">I've done a few projects and want to level up.</div>
                       </Label>
                     </div>
                   </CardContent>
                 </Card>
                 
                 <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="hero" id="hero" />
+                  <CardContent className="p-2.5 md:p-4">
+                    <div className="flex items-center space-x-2 md:space-x-3">
+                      <RadioGroupItem value="hero" id="hero" className="h-4 w-4 shrink-0" />
                       <Label htmlFor="hero" className="flex-1 cursor-pointer">
-                        <div className="font-semibold">🛠️ Hands-on Hero</div>
-                        <div className="text-sm text-muted-foreground">I've tackled big stuff and want to go further.</div>
+                        <div className="font-semibold text-sm md:text-base">🛠️ Hands-on Hero</div>
+                        <div className="text-xs md:text-sm text-muted-foreground">I've tackled big stuff and want to go further.</div>
                       </Label>
                     </div>
                   </CardContent>
@@ -789,36 +789,36 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
               </div>
               <RadioGroup value={answers.physicalCapability} onValueChange={(value) => setAnswers(prev => ({ ...prev, physicalCapability: value }))}>
                 <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="light" id="light" />
+                  <CardContent className="p-2.5 md:p-4">
+                    <div className="flex items-center space-x-2 md:space-x-3">
+                      <RadioGroupItem value="light" id="light" className="h-4 w-4 shrink-0" />
                       <Label htmlFor="light" className="flex-1 cursor-pointer">
-                        <div className="font-semibold">Light-duty only</div>
-                        <div className="text-sm text-muted-foreground">I prefer short sessions - but hey every improvement counts!</div>
+                        <div className="font-semibold text-sm md:text-base">Light-duty only</div>
+                        <div className="text-xs md:text-sm text-muted-foreground">I prefer short sessions - but hey every improvement counts!</div>
                       </Label>
                     </div>
                   </CardContent>
                 </Card>
                 
                 <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="medium" id="medium" />
+                  <CardContent className="p-2.5 md:p-4">
+                    <div className="flex items-center space-x-2 md:space-x-3">
+                      <RadioGroupItem value="medium" id="medium" className="h-4 w-4 shrink-0" />
                       <Label htmlFor="medium" className="flex-1 cursor-pointer">
-                        <div className="font-semibold">Medium-duty</div>
-                        <div className="text-sm text-muted-foreground">I can lift 60lb+ and enough stamina for 1/2-day projects</div>
+                        <div className="font-semibold text-sm md:text-base">Medium-duty</div>
+                        <div className="text-xs md:text-sm text-muted-foreground">I can lift 60lb+ and enough stamina for 1/2-day projects</div>
                       </Label>
                     </div>
                   </CardContent>
                 </Card>
                 
                 <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="heavy" id="heavy" />
+                  <CardContent className="p-2.5 md:p-4">
+                    <div className="flex items-center space-x-2 md:space-x-3">
+                      <RadioGroupItem value="heavy" id="heavy" className="h-4 w-4 shrink-0" />
                       <Label htmlFor="heavy" className="flex-1 cursor-pointer">
-                        <div className="font-semibold">Heavy-duty</div>
-                        <div className="text-sm text-muted-foreground">I can run full-day projects with heavy lifting</div>
+                        <div className="font-semibold text-sm md:text-base">Heavy-duty</div>
+                        <div className="text-xs md:text-sm text-muted-foreground">I can run full-day projects with heavy lifting</div>
                       </Label>
                     </div>
                   </CardContent>
@@ -836,7 +836,7 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
               <p className="text-muted-foreground">Check all that apply:</p>
               <p className="text-sm text-muted-foreground">This helps us get a feel for what you aren't so comfortable with. We'll use this while helping you plan out your projects</p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 md:gap-3">
               {[
                 "Demo & heavy lifting",
                 "Drywall finishing",
@@ -848,14 +848,15 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
                 "High heights / ladders"
               ].map((project) => (
                 <Card key={project} className="hover:border-primary/50 transition-colors">
-                  <CardContent className="p-3">
-                    <div className="flex items-center space-x-3">
+                  <CardContent className="p-2 md:p-3">
+                    <div className="flex items-center space-x-2 md:space-x-3">
                       <Checkbox 
                         id={project}
                         checked={answers.avoidProjects.includes(project)}
                         onCheckedChange={(checked) => handleAvoidProjectChange(project, checked as boolean)}
+                        className="h-4 w-4 shrink-0"
                       />
-                      <Label htmlFor={project} className="cursor-pointer font-medium text-sm">
+                      <Label htmlFor={project} className="cursor-pointer font-medium text-xs md:text-sm leading-tight">
                         {project}
                       </Label>
                     </div>
@@ -873,21 +874,22 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
               <h3 className="text-2xl font-bold">📚 How do you prefer to learn?</h3>
               <p className="text-muted-foreground">Check all that apply:</p>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2 md:space-y-3">
               {[
                 "Videos",
                 "Written guides & photos", 
                 "Realtime guidance via phone or video calls"
               ].map((method) => (
                 <Card key={method} className="hover:border-primary/50 transition-colors">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
+                  <CardContent className="p-2.5 md:p-4">
+                    <div className="flex items-center space-x-2 md:space-x-3">
                       <Checkbox 
                         id={method}
                         checked={answers.preferredLearningMethods.includes(method)}
                         onCheckedChange={(checked) => handleLearningMethodChange(method, checked as boolean)}
+                        className="h-4 w-4 shrink-0"
                       />
-                      <Label htmlFor={method} className="cursor-pointer font-medium">
+                      <Label htmlFor={method} className="cursor-pointer font-medium text-sm md:text-base">
                         {method}
                       </Label>
                     </div>
@@ -955,14 +957,14 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogPortal>
           <DialogOverlay className="z-[100]" />
-          <DialogContent className="w-[90vw] max-w-4xl h-[85vh] flex flex-col z-[101]">
-            <DialogHeader className="text-center space-y-4 flex-shrink-0">
+          <DialogContent className="w-full h-screen max-w-full max-h-full md:w-[90vw] md:max-w-4xl md:h-[85vh] md:rounded-lg flex flex-col z-[101]">
+            <DialogHeader className="text-center space-y-2 md:space-y-4 flex-shrink-0 px-4 pt-4">
             <div className="flex items-center justify-center space-x-2">
-              <Sparkles className="w-6 h-6 text-primary" />
-              <DialogTitle className="text-2xl font-bold gradient-text">
+              <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+              <DialogTitle className="text-xl md:text-2xl font-bold gradient-text">
                 {mode === 'verify' ? "Update Your Profile" : (mode === 'personality' ? 'DIY Builder Profile' : "Build Your Profile")}
               </DialogTitle>
-              <Sparkles className="w-6 h-6 text-primary" />
+              <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-primary" />
             </div>
             {(currentStep > 0 || (mode === 'personality' && currentStep >= 0)) && (
               <div className="space-y-2">
@@ -977,14 +979,14 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
             )}
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto py-6">
+          <div className="flex-1 overflow-y-auto px-3 py-4 md:px-6 md:py-6">
             {renderStep()}
           </div>
 
           {(currentStep > 0 || (mode === 'personality' && currentStep >= 0)) && (
-            <div className="flex justify-between pt-6 border-t flex-shrink-0">
+            <div className="flex justify-between px-3 py-3 md:px-6 md:pt-6 border-t flex-shrink-0 gap-2">
               {((currentStep > 1 && mode !== 'verify') || (mode === 'personality' && currentStep >= 0) || (mode === 'verify' && currentStep === 1)) && (
-                <Button variant="outline" onClick={handleBack}>
+                <Button variant="outline" onClick={handleBack} size="sm" className="md:h-10">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   {mode === 'verify' && currentStep === 1 ? 'Back to Overview' : 'Back'}
                 </Button>
@@ -994,7 +996,8 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
                 <Button 
                   onClick={handleNext} 
                   disabled={!canProceed() || isSubmitting}
-                  className="flex items-center space-x-2 gradient-primary text-white"
+                  size="sm"
+                  className="flex items-center space-x-2 gradient-primary text-white md:h-10"
                 >
                   <span>
                     {isSubmitting ? "Saving..." : (
