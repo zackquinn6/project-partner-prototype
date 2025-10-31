@@ -1127,8 +1127,8 @@ export function UnifiedProjectManagement() {
                               phases: parsedPhases
                             });
                             
-                            // Dispatch event to open edit workflow view without closing this window
-                            window.dispatchEvent(new Event('navigate-to-edit-workflow'));
+                            // Close this dialog and notify user to use the "Edit Standard" button
+                            toast.info('Project selected. Use the "Edit Standard" button in the Admin Panel to edit the workflow.');
                           }}
                           className="flex items-center gap-1"
                         >

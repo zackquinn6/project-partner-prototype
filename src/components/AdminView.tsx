@@ -9,7 +9,7 @@ import EditWorkflowView from '@/components/EditWorkflowView';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Settings, BarChart3, Shield, Wrench, AlertTriangle, RefreshCw, Bell, FileText, MapPin, Cog, RefreshCcw } from 'lucide-react';
+import { Settings, BarChart3, Shield, Wrench, AlertTriangle, RefreshCw, Bell, FileText, MapPin, Cog, RefreshCcw, Edit } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { StructureManager } from './StructureManager';
@@ -93,15 +93,9 @@ export const AdminView: React.FC = () => {
     }
   };
 
-  // Listen for edit workflow navigation event
+  // Ensure dialog is closed when component mounts (prevents persistence after navigation)
   useEffect(() => {
-    const handleEditWorkflowNavigation = () => {
-      setEditWorkflowOpen(true);
-    };
-    window.addEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
-    return () => {
-      window.removeEventListener('navigate-to-edit-workflow', handleEditWorkflowNavigation);
-    };
+    setEditWorkflowOpen(false);
   }, []);
   if (currentView === 'structure-manager') {
     return <StructureManager onBack={() => setCurrentView('admin')} />;
@@ -151,6 +145,23 @@ export const AdminView: React.FC = () => {
             <CardContent className="mt-auto">
                <Button className="w-full" onClick={() => setEnhancedProjectManagementOpen(true)}>
                  Project Management
+               </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col" onClick={() => setEditWorkflowOpen(true)}>
+            <CardHeader className="text-center flex-1">
+              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                <Edit className="w-6 h-6 text-primary" />
+              </div>
+               <CardTitle>Edit Standard</CardTitle>
+               <CardDescription className="min-h-[3rem] flex items-center justify-center">
+                 Edit standard project foundation workflow
+               </CardDescription>
+            </CardHeader>
+            <CardContent className="mt-auto">
+               <Button className="w-full" onClick={() => setEditWorkflowOpen(true)}>
+                 Edit Standard
                </Button>
             </CardContent>
           </Card>
