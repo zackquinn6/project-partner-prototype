@@ -14,6 +14,7 @@ interface ResponsiveDialogProps {
   size?: 'default' | 'large' | 'xlarge' | 'modal-sm' | 'modal-md' | 'content-large' | 'content-full' | 'standard-window';
   children: React.ReactNode;
   className?: string;
+  modal?: boolean;
 }
 
 export function ResponsiveDialog({ 
@@ -23,7 +24,8 @@ export function ResponsiveDialog({
   description, 
   size = 'default',
   children, 
-  className 
+  className,
+  modal = true
 }: ResponsiveDialogProps) {
   // Use ScrollableDialog for content-large for proper scrolling and blur
   if (size === 'content-large') {
@@ -71,7 +73,7 @@ export function ResponsiveDialog({
   // For standard-window, manually control z-index to keep parent windows at z-50
   if (size === 'standard-window') {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={onOpenChange} modal={modal}>
         <DialogPortal>
           <DialogOverlay className="z-50" />
           <DialogPrimitive.Content

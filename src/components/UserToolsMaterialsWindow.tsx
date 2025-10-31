@@ -27,6 +27,7 @@ export function UserToolsMaterialsWindow({ open, onOpenChange, initialToolsMode 
       open={open}
       onOpenChange={onOpenChange}
       size="standard-window"
+      modal={false}
     >
       <div className="flex flex-col h-full overflow-hidden">
         {/* Header with close button */}

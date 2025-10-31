@@ -297,8 +297,8 @@ export function VariationEditor({ open, onOpenChange, variation, onSave }: Varia
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPortal>
-        <DialogOverlay className="!z-[9998] bg-black/80" />
-        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] !z-[9999] translate-x-[-50%] translate-y-[-50%] max-w-4xl max-h-[80vh] w-[90vw] overflow-y-auto bg-background border rounded-lg shadow-lg p-6">
+        <DialogOverlay className="z-[150] bg-black/80" />
+        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-[150] translate-x-[-50%] translate-y-[-50%] max-w-4xl max-h-[80vh] w-[90vw] overflow-y-auto bg-background border rounded-lg shadow-lg p-6">
         <DialogHeader>
           <DialogTitle>Edit Variation: {variation.name}</DialogTitle>
         </DialogHeader>
