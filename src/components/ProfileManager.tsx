@@ -176,20 +176,17 @@ export default function ProfileManager({
           </Card>
         </div>
 
-        {/* Achievements Section */}
-        <div className="mt-6">
-          <AchievementsSection />
-        </div>
-
-        <div className="flex justify-center gap-3">
+        {/* Edit Profile Button - Between Profile and Achievements */}
+        <div className="flex justify-center py-4">
           <Button onClick={handleStartEdit} className="flex items-center gap-2">
             <Edit3 className="w-4 h-4" />
-            Edit
+            Edit Profile
           </Button>
-          
-          <Button variant="default" onClick={() => onOpenChange(false)} className="bg-green-600 hover:bg-green-700">
-            Save
-          </Button>
+        </div>
+
+        {/* Achievements Section */}
+        <div>
+          <AchievementsSection />
         </div>
       </div>;
   };

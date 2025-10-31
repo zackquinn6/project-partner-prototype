@@ -232,27 +232,47 @@ export const FeatureRoadmapWindow: React.FC<FeatureRoadmapWindowProps> = ({
 
   if (loading) {
     return (
-      <ResponsiveDialog
-        open={open}
-        onOpenChange={onOpenChange}
-        size="content-large"
-        title="Loading..."
-      >
-        <div className="flex justify-center py-8">Loading roadmap...</div>
-      </ResponsiveDialog>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="w-full h-screen max-w-full max-h-full md:max-w-[90vw] md:h-[90vh] md:rounded-lg p-0 overflow-hidden flex flex-col [&>button]:hidden">
+          <div className="flex flex-col h-full">
+            <div className="px-4 md:px-6 py-4 border-b flex items-center justify-between flex-shrink-0">
+              <h2 className="text-lg md:text-xl font-bold">Loading...</h2>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => onOpenChange(false)} 
+                className="ml-4 flex-shrink-0"
+              >
+                Close
+              </Button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 py-6">
+              <div className="flex justify-center py-8">Loading roadmap...</div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     );
   }
 
   return (
     <>
-      <ResponsiveDialog
-        open={open}
-        onOpenChange={onOpenChange}
-        size="content-large"
-        title="Project Partner Roadmap"
-      >
-        
-        <div className="space-y-6">
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="w-full h-screen max-w-full max-h-full md:max-w-[90vw] md:h-[90vh] md:rounded-lg p-0 overflow-hidden flex flex-col [&>button]:hidden">
+          <div className="flex flex-col h-full">
+            <div className="px-4 md:px-6 py-4 border-b flex items-center justify-between flex-shrink-0">
+              <h2 className="text-lg md:text-xl font-bold">Project Partner Roadmap</h2>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => onOpenChange(false)} 
+                className="ml-4 flex-shrink-0"
+              >
+                Close
+              </Button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 py-6">
+              <div className="space-y-6">
           <div className="text-center">
             <p className="text-muted-foreground">
               See what's coming next and request new features for Project Partner
@@ -420,8 +440,11 @@ export const FeatureRoadmapWindow: React.FC<FeatureRoadmapWindowProps> = ({
               </div>
             </TabsContent>
           </Tabs>
-        </div>
-      </ResponsiveDialog>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Feature Request Form */}
       <Dialog open={showFeatureRequestForm} onOpenChange={setShowFeatureRequestForm}>

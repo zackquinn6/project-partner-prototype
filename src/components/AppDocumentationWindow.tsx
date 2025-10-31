@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -307,14 +308,22 @@ export function AppDocumentationWindow({ open, onOpenChange }: AppDocumentationW
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full h-full max-w-[100vw] max-h-[100vh] md:w-[95vw] md:h-[95vh] md:max-w-none md:max-h-none p-0 overflow-hidden rounded-none md:rounded-lg">
+      <DialogContent className="w-full h-screen max-w-full max-h-full md:max-w-[90vw] md:h-[90vh] md:rounded-lg p-0 overflow-hidden flex flex-col [&>button]:hidden">
         <div className="h-full flex flex-col">
-          <DialogHeader className="p-4 md:p-6 border-b bg-gradient-to-r from-primary/5 to-primary/10 flex-shrink-0">
-            <DialogTitle className="text-lg md:text-xl font-bold flex items-center gap-2">
+          <div className="px-4 md:px-6 py-4 border-b bg-gradient-to-r from-primary/5 to-primary/10 flex-shrink-0 flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-primary" />
-              <span>App Documentation & User Guide</span>
-            </DialogTitle>
-          </DialogHeader>
+              <h2 className="text-lg md:text-xl font-bold">App Documentation & User Guide</h2>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => onOpenChange(false)} 
+              className="ml-4 flex-shrink-0"
+            >
+              Close
+            </Button>
+          </div>
 
           <div className="flex-1 overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
