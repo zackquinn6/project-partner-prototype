@@ -306,7 +306,7 @@ export const ProjectProfileStep: React.FC<ProjectProfileStepProps> = ({ onComple
                 <div className="w-1/4" />
                 <Button onClick={handleSave} className="flex-1 bg-green-600 hover:bg-green-700">
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Profile Complete - Continue
+                  Project Profile Complete - Continue
                 </Button>
               </div>
             ) : (
