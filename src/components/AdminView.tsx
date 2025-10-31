@@ -329,7 +329,7 @@ export const AdminView: React.FC = () => {
         <AdminActionCenter open={actionCenterOpen} onOpenChange={setActionCenterOpen} />
 
         <Dialog open={editWorkflowOpen} onOpenChange={setEditWorkflowOpen}>
-          <DialogContent className="max-w-[98vw] max-h-[98vh] p-0">
+          <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
             <EditWorkflowView onBackToAdmin={() => setEditWorkflowOpen(false)} />
           </DialogContent>
         </Dialog>

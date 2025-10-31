@@ -197,11 +197,23 @@ export default function ProfileManager({
     return <ResponsiveDialog 
       open={open} 
       onOpenChange={onOpenChange}
-      title="My Profile"
       size="standard-window"
     >
-      <div className="flex items-center justify-center py-8">
-        <div className="text-center">Loading profile...</div>
+      <div className="flex flex-col h-full overflow-hidden">
+        <div className="px-4 md:px-6 py-4 border-b flex items-center justify-between flex-shrink-0">
+          <h2 className="text-lg md:text-xl font-bold">My Profile</h2>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => onOpenChange(false)} 
+            className="ml-4 flex-shrink-0"
+          >
+            Close
+          </Button>
+        </div>
+        <div className="flex items-center justify-center py-8 flex-1">
+          <div className="text-center">Loading profile...</div>
+        </div>
       </div>
     </ResponsiveDialog>;
   }
@@ -209,11 +221,26 @@ export default function ProfileManager({
       <ResponsiveDialog 
         open={open} 
         onOpenChange={onOpenChange}
-        title="My Profile"
         size="standard-window"
       >
-        <div className="overflow-y-auto flex-1 px-4 py-6">
-          {renderProfileView()}
+        <div className="flex flex-col h-full overflow-hidden">
+          {/* Header with close button */}
+          <div className="px-4 md:px-6 py-4 border-b flex items-center justify-between flex-shrink-0">
+            <h2 className="text-lg md:text-xl font-bold">My Profile</h2>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => onOpenChange(false)} 
+              className="ml-4 flex-shrink-0"
+            >
+              Close
+            </Button>
+          </div>
+          
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto px-4 py-6">
+            {renderProfileView()}
+          </div>
         </div>
       </ResponsiveDialog>
 

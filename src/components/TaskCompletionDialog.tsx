@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogPortal, DialogOverlay } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -161,7 +161,9 @@ export function TaskCompletionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md z-[100]">
+      <DialogPortal>
+        <DialogOverlay className="z-[100]" />
+        <DialogContent className="max-w-md z-[101]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-green-600" />
@@ -259,6 +261,7 @@ export function TaskCompletionDialog({
           </div>
         </div>
       </DialogContent>
+      </DialogPortal>
     </Dialog>
   );
 }

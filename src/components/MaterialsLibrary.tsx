@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Plus, Edit, Trash2, Image, ArrowUpDown } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogPortal, DialogOverlay } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { LibraryItemForm } from "./LibraryItemForm";
 import { BulkUpload } from "./BulkUpload";
@@ -188,16 +188,19 @@ export function MaterialsLibrary() {
               Add
             </Button>
           </DialogTrigger>
-          <DialogContent className="z-[100]">
-            <DialogHeader>
-              <DialogTitle>Add New Material</DialogTitle>
-            </DialogHeader>
-        <LibraryItemForm
-          type="materials"
-          onSave={handleSave}
-          onCancel={() => setShowAddDialog(false)}
-        />
-          </DialogContent>
+          <DialogPortal>
+            <DialogOverlay className="z-[100]" />
+            <DialogContent className="z-[101]">
+              <DialogHeader>
+                <DialogTitle>Add New Material</DialogTitle>
+              </DialogHeader>
+          <LibraryItemForm
+            type="materials"
+            onSave={handleSave}
+            onCancel={() => setShowAddDialog(false)}
+          />
+            </DialogContent>
+          </DialogPortal>
         </Dialog>
       </div>
 
@@ -313,22 +316,25 @@ export function MaterialsLibrary() {
       </div>
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="z-[100]">
-          <DialogHeader>
-            <DialogTitle>Edit Material</DialogTitle>
-          </DialogHeader>
-          {editingMaterial && (
-            <LibraryItemForm
-              type="materials"
-              item={editingMaterial}
-              onSave={handleSave}
-              onCancel={() => {
-                setShowEditDialog(false);
-                setEditingMaterial(null);
-              }}
-            />
-          )}
-        </DialogContent>
+        <DialogPortal>
+          <DialogOverlay className="z-[100]" />
+          <DialogContent className="z-[101]">
+            <DialogHeader>
+              <DialogTitle>Edit Material</DialogTitle>
+            </DialogHeader>
+            {editingMaterial && (
+              <LibraryItemForm
+                type="materials"
+                item={editingMaterial}
+                onSave={handleSave}
+                onCancel={() => {
+                  setShowEditDialog(false);
+                  setEditingMaterial(null);
+                }}
+              />
+            )}
+          </DialogContent>
+        </DialogPortal>
       </Dialog>
 
       <BulkUpload

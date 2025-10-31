@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogPortal, DialogOverlay } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -953,8 +953,10 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[90vw] max-w-4xl h-[85vh] flex flex-col z-[100]">
-          <DialogHeader className="text-center space-y-4 flex-shrink-0">
+        <DialogPortal>
+          <DialogOverlay className="z-[100]" />
+          <DialogContent className="w-[90vw] max-w-4xl h-[85vh] flex flex-col z-[101]">
+            <DialogHeader className="text-center space-y-4 flex-shrink-0">
             <div className="flex items-center justify-center space-x-2">
               <Sparkles className="w-6 h-6 text-primary" />
               <DialogTitle className="text-2xl font-bold gradient-text">
@@ -1010,6 +1012,7 @@ export default function DIYSurveyPopup({ open, onOpenChange, mode = 'new', initi
             </div>
           )}
         </DialogContent>
+        </DialogPortal>
       </Dialog>
 
       <UserToolsMaterialsWindow

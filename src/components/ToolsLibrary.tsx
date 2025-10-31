@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Plus, Edit, Trash2, Image, ArrowUpDown } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogPortal, DialogOverlay } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { LibraryItemForm } from "./LibraryItemForm";
 import { VariationViewer } from "./VariationViewer";
@@ -226,16 +226,19 @@ export function ToolsLibrary() {
               <Plus className="w-3 h-3" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="z-[100]">
-            <DialogHeader>
-              <DialogTitle>Add New Tool</DialogTitle>
-            </DialogHeader>
-        <LibraryItemForm
-          type="tools"
-          onSave={handleSave}
-          onCancel={() => setShowAddDialog(false)}
-        />
-          </DialogContent>
+          <DialogPortal>
+            <DialogOverlay className="z-[100]" />
+            <DialogContent className="z-[101]">
+              <DialogHeader>
+                <DialogTitle>Add New Tool</DialogTitle>
+              </DialogHeader>
+          <LibraryItemForm
+            type="tools"
+            onSave={handleSave}
+            onCancel={() => setShowAddDialog(false)}
+          />
+            </DialogContent>
+          </DialogPortal>
         </Dialog>
       </div>
 
@@ -370,24 +373,27 @@ export function ToolsLibrary() {
       </div>
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden z-[100]">
-          <DialogHeader>
-            <DialogTitle>Edit Tool</DialogTitle>
-          </DialogHeader>
-          <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
-            {editingTool && (
-              <LibraryItemForm
-                type="tools"
-                item={editingTool}
-                onSave={handleSave}
-                onCancel={() => {
-                  setShowEditDialog(false);
-                  setEditingTool(null);
-                }}
-              />
-            )}
-          </div>
-        </DialogContent>
+        <DialogPortal>
+          <DialogOverlay className="z-[100]" />
+          <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden z-[101]">
+            <DialogHeader>
+              <DialogTitle>Edit Tool</DialogTitle>
+            </DialogHeader>
+            <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+              {editingTool && (
+                <LibraryItemForm
+                  type="tools"
+                  item={editingTool}
+                  onSave={handleSave}
+                  onCancel={() => {
+                    setShowEditDialog(false);
+                    setEditingTool(null);
+                  }}
+                />
+              )}
+            </div>
+          </DialogContent>
+        </DialogPortal>
       </Dialog>
 
       <ToolsImportManager

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogPortal, DialogOverlay } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -190,7 +190,9 @@ export function AddMaintenanceTaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden z-[100]">
+      <DialogPortal>
+        <DialogOverlay className="z-[100]" />
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden z-[101]">
         <DialogHeader>
           <DialogTitle>Add Maintenance Task</DialogTitle>
         </DialogHeader>
@@ -349,6 +351,7 @@ export function AddMaintenanceTaskDialog({
           </TabsContent>
         </Tabs>
       </DialogContent>
+      </DialogPortal>
     </Dialog>
   );
 }
