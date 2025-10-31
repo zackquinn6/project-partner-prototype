@@ -71,7 +71,7 @@ export function AchievementsSection() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-6 w-6 text-primary" />
-            Your Achievements
+            My Achievements
           </CardTitle>
           <CardDescription>
             Track your DIY journey and unlock badges
