@@ -16,6 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogPortal,
+  DialogOverlay,
 } from '@/components/ui/dialog';
 import { clearAllToolVariations, clearAllMaterialVariations } from '@/utils/variationUtils';
 
@@ -623,7 +625,9 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
                     Add Attribute
                   </Button>
                 </DialogTrigger>
-                  <DialogContent>
+                <DialogPortal>
+                  <DialogOverlay className="z-[150]" />
+                  <DialogContent className="z-[151]">
                     <DialogHeader>
                       <DialogTitle>Create New Attribute</DialogTitle>
                     </DialogHeader>
@@ -676,6 +680,7 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
                       </div>
                     </div>
                   </DialogContent>
+                </DialogPortal>
               </Dialog>
 
               <Dialog open={showValueDialog} onOpenChange={setShowValueDialog}>
@@ -685,10 +690,12 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
                     Add Value
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add Attribute Value</DialogTitle>
-                  </DialogHeader>
+                <DialogPortal>
+                  <DialogOverlay className="z-[150]" />
+                  <DialogContent className="z-[151]">
+                    <DialogHeader>
+                      <DialogTitle>Add Attribute Value</DialogTitle>
+                    </DialogHeader>
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="select-attr">Attribute</Label>
@@ -724,6 +731,7 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
                     </div>
                   </div>
                 </DialogContent>
+                </DialogPortal>
               </Dialog>
             </div>
           </CardTitle>
@@ -782,10 +790,12 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
                   Create
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Create New Variation</DialogTitle>
-                </DialogHeader>
+              <DialogPortal>
+                <DialogOverlay className="z-[150]" />
+                <DialogContent className="max-w-2xl z-[151]">
+                  <DialogHeader>
+                    <DialogTitle>Create New Variation</DialogTitle>
+                  </DialogHeader>
                 <div className="space-y-4">
                   {/* Attribute Selection */}
                   <div className="space-y-3">
@@ -931,6 +941,7 @@ export function VariationManager({ coreItemId, itemType, coreItemName, onVariati
                   </div>
                 </div>
               </DialogContent>
+              </DialogPortal>
               </Dialog>
             </div>
           </CardTitle>
