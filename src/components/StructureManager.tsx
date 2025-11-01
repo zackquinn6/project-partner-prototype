@@ -322,95 +322,60 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
   // CRUD operations
   const addPhase = async () => {
-    console.log('🔧 addPhase called');
     if (!currentProject) {
-      console.error('❌ No current project');
+      toast.error('No project selected');
       return;
     }
-    
-    console.log('📋 Current project:', currentProject.id);
     
     const phaseName = 'New Phase';
     const phaseDescription = 'Phase description';
     const customPhaseCount = currentProject.phases.filter(p => !p.isStandard && !p.isLinked).length;
     
-    // Calculate display order: custom phases go after standard phases but before Close Project
-    // Standard phases: Kickoff(0), Planning(10), Ordering(20), then custom phases start at 100
+    // Calculate display order for custom phases (between standard phases)
     const displayOrder = 100 + (customPhaseCount * 10);
     
-    console.log('📊 Custom phase count:', customPhaseCount, 'Display order:', displayOrder);
-    
     try {
-      console.log('🔄 Inserting phase marker...');
-      // Create the custom phase WITHOUT any operations
-      // We mark it with a flag to identify it's a custom phase container
-      // NOTE: is_custom_phase is a generated column, so we don't set it
-      const { data: insertData, error: insertError } = await supabase
-        .from('template_operations')
+      // Insert directly into project_phases table (new architecture)
+      const { data: newPhase, error: insertError } = await supabase
+        .from('project_phases')
         .insert({
           project_id: currentProject.id,
-          name: '__PHASE_MARKER__',
-          description: '__PHASE_MARKER__',
-          custom_phase_name: phaseName,
-          custom_phase_description: phaseDescription,
-          custom_phase_display_order: displayOrder,
-          display_order: 0,
+          name: phaseName,
+          description: phaseDescription,
+          display_order: displayOrder,
+          is_standard: false,
           standard_phase_id: null
         })
-        .select();
+        .select()
+        .single();
 
-      if (insertError) {
-        console.error('❌ Insert error:', insertError);
-        throw insertError;
-      }
-      
-      console.log('✅ Phase marker inserted:', insertData);
+      if (insertError) throw insertError;
 
-      console.log('🔄 Rebuilding phases...');
-      // Rebuild and enforce ordering in one optimized call
-      const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_templates', {
+      // Rebuild phases JSON from relational data
+      const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_project_phases', {
         p_project_id: currentProject.id
       });
 
-      if (rebuildError) {
-        console.error('❌ Rebuild error:', rebuildError);
-        throw rebuildError;
-      }
-      
-      console.log('✅ Phases rebuilt:', rebuiltPhases);
+      if (rebuildError) throw rebuildError;
 
-      console.log('🔄 Enforcing standard phase ordering...');
-      // Enforce standard phase ordering
-      const orderedPhases = enforceStandardPhaseOrdering(rebuiltPhases as any);
-      
-      console.log('✅ Phases ordered:', orderedPhases);
-      
-      console.log('🔄 Updating project in database...');
-      // Update project with ordered phases
+      // Update project with rebuilt phases
       const { error: updateError } = await supabase
         .from('projects')
-        .update({ phases: orderedPhases as any })
+        .update({ phases: rebuiltPhases as any })
         .eq('id', currentProject.id);
         
-      if (updateError) {
-        console.error('❌ Update error:', updateError);
-        throw updateError;
-      }
-      
-      console.log('✅ Project updated in database');
+      if (updateError) throw updateError;
 
-      console.log('🔄 Updating local context...');
       // Update local context
       updateProject({
         ...currentProject,
-        phases: orderedPhases as any,
+        phases: rebuiltPhases as any,
         updatedAt: new Date()
       });
       
-      console.log('✅ Add phase complete!');
       toast.success('Phase added successfully');
     } catch (error) {
-      console.error('❌ Error adding phase:', error);
+      console.error('Error adding phase:', error);
       toast.error('Failed to add phase');
     }
   };
@@ -482,15 +447,13 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
       const operationCount = currentProject.phases[phaseIndex].operations.length;
       
-      // Insert operation into template_operations
+      // Insert operation into template_operations using phase_id
       const { error } = await supabase
         .from('template_operations')
         .insert({
           project_id: currentProject.id,
-          standard_phase_id: phase.isStandard ? phaseId : null,
-          custom_phase_name: phase.isStandard ? null : phase.name,
-          custom_phase_description: phase.isStandard ? null : phase.description,
-          custom_phase_display_order: phase.isStandard ? null : phaseIndex * 10,
+          phase_id: phaseId,
+          standard_phase_id: phase.isStandard ? (phase as any).standardPhaseId : null,
           name: 'New Operation',
           description: 'Operation description',
           display_order: operationCount
@@ -498,24 +461,22 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
       if (error) throw error;
 
-      // Rebuild phases JSON
-      const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_templates', {
+      // Rebuild phases JSON from project_phases
+      const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_project_phases', {
         p_project_id: currentProject.id
       });
 
       if (rebuildError) throw rebuildError;
 
-      // Enforce ordering and update
-      const orderedPhases = enforceStandardPhaseOrdering(rebuiltPhases as any);
-      
+      // Update project with rebuilt phases
       await supabase
         .from('projects')
-        .update({ phases: orderedPhases as any })
+        .update({ phases: rebuiltPhases as any })
         .eq('id', currentProject.id);
 
       updateProject({
         ...currentProject,
-        phases: orderedPhases as any,
+        phases: rebuiltPhases as any,
         updatedAt: new Date()
       });
 
@@ -578,23 +539,22 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
 
       if (error) throw error;
 
-      // Rebuild and enforce ordering
-      const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_templates', {
+      // Rebuild and enforce ordering using new function
+      const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_project_phases', {
         p_project_id: currentProject.id
       });
 
       if (rebuildError) throw rebuildError;
 
-      const orderedPhases = enforceStandardPhaseOrdering(rebuiltPhases as any);
-      
+      // Update project
       await supabase
         .from('projects')
-        .update({ phases: orderedPhases as any })
+        .update({ phases: rebuiltPhases as any })
         .eq('id', currentProject.id);
 
       updateProject({
         ...currentProject,
-        phases: orderedPhases as any,
+        phases: rebuiltPhases as any,
         updatedAt: new Date()
       });
 

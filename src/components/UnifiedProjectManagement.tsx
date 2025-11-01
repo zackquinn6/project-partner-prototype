@@ -95,7 +95,6 @@ export function UnifiedProjectManagement({ onEditWorkflow }: UnifiedProjectManag
   const [editedProject, setEditedProject] = useState<Partial<Project>>({});
   const [activeView, setActiveView] = useState<'details' | 'revisions'>('details');
   const [projectSearch, setProjectSearch] = useState('');
-  const [customPhasesSyncStatus, setCustomPhasesSyncStatus] = useState<{[projectId: string]: boolean}>({});
   
   // Dialog states
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
@@ -130,32 +129,8 @@ export function UnifiedProjectManagement({ onEditWorkflow }: UnifiedProjectManag
   useEffect(() => {
     if (selectedProject) {
       fetchProjectRevisions();
-      validateCustomPhaseSync(selectedProject.id);
     }
   }, [selectedProject]);
-
-  const validateCustomPhaseSync = async (projectId: string) => {
-    try {
-      const { data: ops, error } = await supabase
-        .from('template_operations')
-        .select('custom_phase_name')
-        .eq('project_id', projectId)
-        .eq('is_custom_phase', true);
-      
-      if (error) throw error;
-      
-      const uniqueCustomPhases = new Set(
-        ops?.map(o => o.custom_phase_name).filter(Boolean)
-      ).size;
-      
-      setCustomPhasesSyncStatus(prev => ({
-        ...prev,
-        [projectId]: uniqueCustomPhases > 0
-      }));
-    } catch (error) {
-      console.error('Error validating custom phase sync:', error);
-    }
-  };
 
   const fetchProjects = async () => {
     try {
@@ -331,14 +306,7 @@ export function UnifiedProjectManagement({ onEditWorkflow }: UnifiedProjectManag
   };
 
   const createNewRevision = async () => {
-    console.log('🎯 createNewRevision called', { 
-      hasSelectedProject: !!selectedProject, 
-      projectId: selectedProject?.id,
-      revisionNotes 
-    });
-    
     if (!selectedProject) {
-      console.error('❌ No selected project');
       toast.error("No project selected");
       return;
     }
@@ -346,32 +314,17 @@ export function UnifiedProjectManagement({ onEditWorkflow }: UnifiedProjectManag
     toast.loading("Creating revision...");
 
     try {
-      // CRITICAL FIX: Force rebuild of phases JSON before creating revision
-      // This ensures custom phases are up-to-date in the database before copying
-      console.log('🔄 Force rebuilding phases JSON before revision...');
-      const { error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_templates', {
-        p_project_id: selectedProject.id
-      });
-      
-      if (rebuildError) {
-        console.error('❌ Rebuild error:', rebuildError);
-        throw new Error(`Failed to rebuild phases: ${rebuildError.message}`);
-      }
-      
-      console.log('✅ Phases JSON rebuilt successfully');
-      
-      console.log('🚀 Calling create_project_revision RPC...');
-      const { data, error } = await supabase.rpc('create_project_revision', {
+      // Use new v2 revision function that properly handles project_phases architecture
+      const { data, error } = await supabase.rpc('create_project_revision_v2', {
         source_project_id: selectedProject.id,
         revision_notes_text: revisionNotes || null,
       });
 
       if (error) {
-        console.error('❌ RPC error:', error);
+        console.error('Revision creation error:', error);
         throw error;
       }
 
-      console.log('✅ Revision created successfully:', data);
       toast.dismiss();
       toast.success("Revision created successfully!");
 
@@ -744,17 +697,9 @@ export function UnifiedProjectManagement({ onEditWorkflow }: UnifiedProjectManag
                             ) : (
                               <div className="space-y-2">
                                 <div className="p-2 bg-muted rounded text-sm">{selectedProject.name}</div>
-                                {selectedProject.phases && Array.isArray(selectedProject.phases) && selectedProject.phases.filter((p: any) => !p.isStandard && !p.isLinked).length > 0 && (
-                                  <div className="flex items-center gap-2">
-                                    {customPhasesSyncStatus[selectedProject.id] ? (
-                                      <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/20">
-                                        ✓ Custom phases synced
-                                      </Badge>
-                                    ) : (
-                                      <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/20">
-                                        ⚠ Custom phases not synced
-                                      </Badge>
-                                    )}
+                                {selectedProject.phases && Array.isArray(selectedProject.phases) && (
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    {selectedProject.phases.filter((p: any) => p.isStandard).length} standard phases, {selectedProject.phases.filter((p: any) => !p.isStandard && !p.isLinked).length} custom phases
                                   </div>
                                 )}
                               </div>

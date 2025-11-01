@@ -72,19 +72,13 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
     }
 
     try {
-      // Use database function to create project with proper template architecture
+      // Use new v2 database function for proper project_phases architecture
       const { data: projectId, error } = await supabase
-        .rpc('create_project_with_standard_foundation', {
+        .rpc('create_project_with_standard_foundation_v2', {
           p_project_name: projectData.name,
-          p_description: projectData.description || null,
-          p_categories: projectData.category || null,
-          p_difficulty: null,
-          p_effort_level: projectData.effortLevel || null,
-          p_skill_level: projectData.skillLevel || null,
-          p_estimated_time: projectData.estimatedTime || null,
-          p_scaling_unit: projectData.scalingUnit || null,
-          p_diy_length_challenges: projectData.diyLengthChallenges || null,
-          p_image: projectData.image || null
+          p_project_description: projectData.description || null,
+          p_category: Array.isArray(projectData.category) ? projectData.category[0] : projectData.category || 'general',
+          p_created_by: user.id
         });
 
       if (error) throw error;

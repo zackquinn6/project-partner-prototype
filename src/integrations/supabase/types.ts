@@ -2076,6 +2076,57 @@ export type Database = {
           },
         ]
       }
+      project_phases: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_standard: boolean
+          name: string
+          project_id: string
+          standard_phase_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order: number
+          id?: string
+          is_standard?: boolean
+          name: string
+          project_id: string
+          standard_phase_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_standard?: boolean
+          name?: string
+          project_id?: string
+          standard_phase_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_phases_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_phases_standard_phase_id_fkey"
+            columns: ["standard_phase_id"]
+            isOneToOne: false
+            referencedRelation: "standard_phases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_plans: {
         Row: {
           contingency_percent: number
@@ -2636,6 +2687,54 @@ export type Database = {
         }
         Relationships: []
       }
+      standard_phase_updates: {
+        Row: {
+          change_description: string | null
+          change_type: string
+          id: string
+          operation_id: string | null
+          propagated: boolean
+          propagated_at: string | null
+          standard_phase_id: string
+          updated_at: string
+        }
+        Insert: {
+          change_description?: string | null
+          change_type: string
+          id?: string
+          operation_id?: string | null
+          propagated?: boolean
+          propagated_at?: string | null
+          standard_phase_id: string
+          updated_at?: string
+        }
+        Update: {
+          change_description?: string | null
+          change_type?: string
+          id?: string
+          operation_id?: string | null
+          propagated?: boolean
+          propagated_at?: string | null
+          standard_phase_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "standard_phase_updates_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "template_operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standard_phase_updates_standard_phase_id_fkey"
+            columns: ["standard_phase_id"]
+            isOneToOne: false
+            referencedRelation: "standard_phases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       standard_phases: {
         Row: {
           created_at: string | null
@@ -2721,6 +2820,7 @@ export type Database = {
           id: string
           is_custom_phase: boolean | null
           name: string
+          phase_id: string | null
           project_id: string
           standard_phase_id: string | null
           updated_at: string | null
@@ -2739,6 +2839,7 @@ export type Database = {
           id?: string
           is_custom_phase?: boolean | null
           name: string
+          phase_id?: string | null
           project_id: string
           standard_phase_id?: string | null
           updated_at?: string | null
@@ -2757,6 +2858,7 @@ export type Database = {
           id?: string
           is_custom_phase?: boolean | null
           name?: string
+          phase_id?: string | null
           project_id?: string
           standard_phase_id?: string | null
           updated_at?: string | null
@@ -2768,6 +2870,13 @@ export type Database = {
             columns: ["dependent_on"]
             isOneToOne: false
             referencedRelation: "template_operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_operations_phase_id_fkey"
+            columns: ["phase_id"]
+            isOneToOne: false
+            referencedRelation: "project_phases"
             referencedColumns: ["id"]
           },
           {
@@ -3388,6 +3497,10 @@ export type Database = {
         Args: { failure_mode_uuid: string }
         Returns: number
       }
+      cascade_standard_phase_updates: {
+        Args: { p_standard_phase_id: string; p_target_project_ids?: string[] }
+        Returns: number
+      }
       check_phase_revision_updates: {
         Args: never
         Returns: {
@@ -3407,6 +3520,10 @@ export type Database = {
       cleanup_old_sessions: { Args: never; Returns: number }
       cleanup_security_logs: { Args: never; Returns: number }
       create_project_revision: {
+        Args: { revision_notes_text?: string; source_project_id: string }
+        Returns: string
+      }
+      create_project_revision_v2: {
         Args: { revision_notes_text?: string; source_project_id: string }
         Returns: string
       }
@@ -3473,6 +3590,15 @@ export type Database = {
             }
             Returns: string
           }
+      create_project_with_standard_foundation_v2: {
+        Args: {
+          p_category?: string
+          p_created_by?: string
+          p_project_description: string
+          p_project_name: string
+        }
+        Returns: string
+      }
       delete_user_data: { Args: { user_uuid: string }; Returns: string }
       detect_suspicious_activity: {
         Args: never
@@ -3655,6 +3781,11 @@ export type Database = {
           accessed_user_id: string
         }
         Returns: undefined
+      }
+      migrate_phases_from_json_to_table: { Args: never; Returns: undefined }
+      rebuild_phases_json_from_project_phases: {
+        Args: { p_project_id: string }
+        Returns: Json
       }
       rebuild_phases_json_from_templates: {
         Args: { p_project_id: string }
