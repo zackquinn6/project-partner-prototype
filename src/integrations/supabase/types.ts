@@ -2803,6 +2803,44 @@ export type Database = {
           },
         ]
       }
+      task_shopping_list: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          material_name: string
+          task_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          material_name: string
+          task_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          material_name?: string
+          task_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_shopping_list_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "home_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       template_operations: {
         Row: {
           alternate_group: string | null

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Home as HomeIcon, X, GripVertical, List, ListOrdered } from "lucide-react";
+import { Plus, Home as HomeIcon, X, GripVertical, List, ListOrdered, ShoppingCart } from "lucide-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,6 +18,8 @@ import { HomeTaskScheduler } from "./HomeTaskScheduler";
 import { HomeTaskProjectLink } from "./HomeTaskProjectLink";
 import { RapidProjectAssessment } from "./RapidProjectAssessment";
 import { ResponsiveDialog } from "./ResponsiveDialog";
+import { TaskShoppingListDialog } from "./TaskShoppingListDialog";
+import { ShoppingListManager } from "./ShoppingListManager";
 
 interface HomeTask {
   id: string;
@@ -51,6 +53,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   const [selectedTask, setSelectedTask] = useState<HomeTask | null>(null);
   const [showProjectLink, setShowProjectLink] = useState(false);
   const [showRapidCosting, setShowRapidCosting] = useState(false);
+  const [showTaskShoppingList, setShowTaskShoppingList] = useState(false);
   const [activeTab, setActiveTab] = useState('tasks');
   const [subtasksOrdered, setSubtasksOrdered] = useState(false);
   const [subtasks, setSubtasks] = useState<Array<{ 
@@ -367,8 +370,9 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
               <div className="flex-shrink-0 px-2 md:px-4 pt-3 pb-4 md:pb-5 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div className="mb-0">
-                  <TabsList className="w-full grid grid-cols-4 text-xs md:text-sm h-9 md:h-10 p-1 gap-1 bg-muted/50 rounded-lg">
+                  <TabsList className="w-full grid grid-cols-5 text-xs md:text-sm h-9 md:h-10 p-1 gap-1 bg-muted/50 rounded-lg">
                     <TabsTrigger value="tasks" className="text-xs md:text-sm px-2 md:px-3 py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Tasks</TabsTrigger>
+                    <TabsTrigger value="shopping" className="text-xs md:text-sm px-2 md:px-3 py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Shopping</TabsTrigger>
                     <TabsTrigger value="people" className="text-xs md:text-sm px-2 md:px-3 py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Team</TabsTrigger>
                     <TabsTrigger value="assignment" className="text-xs md:text-sm px-2 md:px-3 py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Assign</TabsTrigger>
                     <TabsTrigger value="schedule" className="text-xs md:text-sm px-2 md:px-3 py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Schedule</TabsTrigger>
@@ -530,6 +534,23 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                               </DragDropContext>
                             )}
                           </div>
+
+                        {/* Shopping List Button - Only show when editing existing task */}
+                        {editingTask && (
+                          <div className="border-t pt-3">
+                            <Button 
+                              type="button"
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => setShowTaskShoppingList(true)} 
+                              className="h-8 text-xs w-full"
+                            >
+                              <ShoppingCart className="h-3 w-3 mr-2" />
+                              Manage Shopping List
+                            </Button>
+                          </div>
+                        )}
+
                         <div className="flex gap-2 justify-end">
                           <Button variant="outline" onClick={resetForm} size="sm" className="h-8 text-xs">
                             Cancel
@@ -555,6 +576,10 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                     onProjectNavigate={() => onOpenChange(false)}
                     onTaskUpdate={fetchTasks}
                   />
+                </TabsContent>
+
+                <TabsContent value="shopping" className="mt-0 h-full">
+                  <ShoppingListManager />
                 </TabsContent>
 
                 <TabsContent value="people" className="mt-0 h-full">
@@ -630,6 +655,15 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
             }}
           />
         </ResponsiveDialog>
+      )}
+
+      {editingTask && (
+        <TaskShoppingListDialog
+          open={showTaskShoppingList}
+          onOpenChange={setShowTaskShoppingList}
+          taskId={editingTask.id}
+          taskTitle={editingTask.title}
+        />
       )}
     </>
   );
