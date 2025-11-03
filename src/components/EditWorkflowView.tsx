@@ -60,19 +60,32 @@ export default function EditWorkflowView({
     return ['Kickoff', 'Planning', 'Ordering', 'Close Project'].includes(phaseName);
   };
 
-  // Debug log to check phases
+  // Debug log to check phases and show helpful message if empty
   useEffect(() => {
     if (currentProject) {
+      const hasPhases = currentProject.phases && currentProject.phases.length > 0;
+      const hasOperations = hasPhases && currentProject.phases.some(p => p.operations && p.operations.length > 0);
+      
       console.log('🔍 EditWorkflowView - Project loaded:', {
         projectId: currentProject.id,
         projectName: currentProject.name,
         isEditingStandardProject,
-        phases: currentProject.phases.map(p => ({
+        hasPhases,
+        hasOperations,
+        phaseCount: currentProject.phases?.length || 0,
+        phases: currentProject.phases?.map(p => ({
           name: p.name,
           isStandard: p.isStandard,
-          operationCount: p.operations.length
+          operationCount: p.operations?.length || 0
         }))
       });
+
+      // Show warning if no phases
+      if (!hasPhases) {
+        toast.error('This project has no phases. The project data may be corrupted.');
+      } else if (!hasOperations) {
+        toast.error('This project has phases but no operations. The project structure may be incomplete.');
+      }
     }
   }, [currentProject?.id, isEditingStandardProject]);
   const [viewMode, setViewMode] = useState<'steps' | 'structure'>('steps');
@@ -612,6 +625,9 @@ export default function EditWorkflowView({
       </div>;
   }
   if (allSteps.length === 0) {
+    const hasPhases = displayPhases.length > 0;
+    const hasOperations = hasPhases && displayPhases.some(p => p.operations && p.operations.length > 0);
+    
     return <div className="fixed inset-0 bg-background overflow-auto z-50">
         <div className="w-full px-6 py-6">
           <div className="flex items-center justify-between mb-6">
@@ -633,14 +649,40 @@ export default function EditWorkflowView({
             </div>
           </div>
           <Card>
-            <CardContent className="text-center py-8">
-              <p className="text-muted-foreground mb-4">
-                This project has no workflow steps. Use Structure Manager to add phases, operations, and steps.
-              </p>
-              <Button onClick={() => setViewMode('structure')} className="flex items-center gap-2">
-                <List className="w-4 h-4" />
-                Go to Structure Manager
-              </Button>
+            <CardHeader>
+              <CardTitle>Project Structure Setup Required</CardTitle>
+              <CardDescription>
+                This project needs workflow steps to be added
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-muted rounded-lg space-y-2">
+                <p className="font-medium">Current Status:</p>
+                <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                  <li>Phases: {hasPhases ? `✓ ${displayPhases.length} phases found` : '✗ No phases'}</li>
+                  <li>Operations: {hasOperations ? '✓ Operations exist' : '✗ No operations in phases'}</li>
+                  <li>Steps: ✗ No workflow steps</li>
+                </ul>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="text-sm">
+                  {!hasPhases && "This project has no phases. "}
+                  {hasPhases && !hasOperations && "This project has phases but no operations. "}
+                  {hasOperations && "This project has operations but no steps. "}
+                  Use the Structure Manager to build your project workflow.
+                </p>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button onClick={() => setViewMode('structure')} className="flex items-center gap-2 flex-1">
+                  <List className="w-4 h-4" />
+                  Open Structure Manager
+                </Button>
+                <Button onClick={onBackToAdmin} variant="outline">
+                  Back to Projects
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

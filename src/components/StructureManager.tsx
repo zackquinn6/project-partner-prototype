@@ -144,7 +144,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     return <div>No project selected</div>;
   }
 
-  // Get phases directly from project and ensure no duplicates
+  // Get phases directly from project and ensure no duplicates, then enforce ordering
   const deduplicatePhases = (phases: Phase[]): Phase[] => {
     console.log('🔍 Deduplicating phases. Input count:', phases.length);
     const seen = new Set<string>();
@@ -162,8 +162,11 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
     console.log('🔍 Deduplicated phases. Output count:', result.length);
     return result;
   };
-  const displayPhases = deduplicatePhases(currentProject?.phases || []);
-  console.log('🔍 Display phases count:', displayPhases.length);
+  
+  // Enforce standard phase ordering
+  const rawPhases = deduplicatePhases(currentProject?.phases || []);
+  const displayPhases = enforceStandardPhaseOrdering(rawPhases);
+  console.log('🔍 Display phases count after ordering:', displayPhases.length);
 
   // Toggle functions for collapsible sections
   const togglePhaseExpansion = (phaseId: string) => {
@@ -566,7 +569,7 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
   };
 
   // Delete operations - Allow deleting in Edit Standard mode
-  const deletePhase = (phaseId: string) => {
+  const deletePhase = async (phaseId: string) => {
     if (!currentProject) return;
 
     // Check if this is a standard phase
@@ -577,15 +580,67 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       toast.error('Cannot delete standard phases. Use Edit Standard to modify standard phases.');
       return;
     }
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.filter(phase => phase.id !== phaseId),
-      updatedAt: new Date()
-    };
-    updateProject(updatedProject);
-    toast.success('Phase deleted');
+
+    if (!confirm('Are you sure you want to delete this phase? This will also delete all its operations and steps.')) {
+      return;
+    }
+
+    try {
+      // Delete from database - get operations first
+      const { data: operations } = await supabase
+        .from('template_operations')
+        .select('id')
+        .eq('project_id', currentProject.id)
+        .eq('phase_id', phaseId);
+
+      if (operations && operations.length > 0) {
+        const operationIds = operations.map(op => op.id);
+        
+        // Delete steps first
+        await supabase
+          .from('template_steps')
+          .delete()
+          .in('operation_id', operationIds);
+
+        // Delete operations
+        await supabase
+          .from('template_operations')
+          .delete()
+          .eq('phase_id', phaseId);
+      }
+
+      // Delete phase
+      await supabase
+        .from('project_phases')
+        .delete()
+        .eq('id', phaseId);
+
+      // Rebuild phases JSON
+      const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_project_phases', {
+        p_project_id: currentProject.id
+      });
+
+      if (rebuildError) throw rebuildError;
+
+      // Update project
+      await supabase
+        .from('projects')
+        .update({ phases: rebuiltPhases as any })
+        .eq('id', currentProject.id);
+
+      updateProject({
+        ...currentProject,
+        phases: rebuiltPhases as any,
+        updatedAt: new Date()
+      });
+
+      toast.success('Phase deleted');
+    } catch (error) {
+      console.error('Error deleting phase:', error);
+      toast.error('Failed to delete phase');
+    }
   };
-  const deleteOperation = (phaseId: string, operationId: string) => {
+  const deleteOperation = async (phaseId: string, operationId: string) => {
     if (!currentProject) return;
     const phase = currentProject.phases.find(p => p.id === phaseId);
     const operation = phase?.operations.find(op => op.id === operationId);
@@ -595,18 +650,50 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       toast.error('Cannot delete standard operations. Use Edit Standard to modify standard phases.');
       return;
     }
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.map(phase => phase.id === phaseId ? {
-        ...phase,
-        operations: phase.operations.filter(op => op.id !== operationId)
-      } : phase),
-      updatedAt: new Date()
-    };
-    updateProject(updatedProject);
-    toast.success('Operation deleted');
+
+    if (!confirm('Are you sure you want to delete this operation? This will also delete all its steps.')) {
+      return;
+    }
+
+    try {
+      // Delete steps first
+      await supabase
+        .from('template_steps')
+        .delete()
+        .eq('operation_id', operationId);
+
+      // Delete operation
+      await supabase
+        .from('template_operations')
+        .delete()
+        .eq('id', operationId);
+
+      // Rebuild phases JSON
+      const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_project_phases', {
+        p_project_id: currentProject.id
+      });
+
+      if (rebuildError) throw rebuildError;
+
+      // Update project
+      await supabase
+        .from('projects')
+        .update({ phases: rebuiltPhases as any })
+        .eq('id', currentProject.id);
+
+      updateProject({
+        ...currentProject,
+        phases: rebuiltPhases as any,
+        updatedAt: new Date()
+      });
+
+      toast.success('Operation deleted');
+    } catch (error) {
+      console.error('Error deleting operation:', error);
+      toast.error('Failed to delete operation');
+    }
   };
-  const deleteStep = (phaseId: string, operationId: string, stepId: string) => {
+  const deleteStep = async (phaseId: string, operationId: string, stepId: string) => {
     if (!currentProject) return;
     const phase = currentProject.phases.find(p => p.id === phaseId);
     const operation = phase?.operations.find(op => op.id === operationId);
@@ -617,19 +704,42 @@ export const StructureManager: React.FC<StructureManagerProps> = ({
       toast.error('Cannot delete standard steps. Use Edit Standard to modify standard phases.');
       return;
     }
-    const updatedProject = {
-      ...currentProject,
-      phases: currentProject.phases.map(phase => phase.id === phaseId ? {
-        ...phase,
-        operations: phase.operations.map(operation => operation.id === operationId ? {
-          ...operation,
-          steps: operation.steps.filter(step => step.id !== stepId)
-        } : operation)
-      } : phase),
-      updatedAt: new Date()
-    };
-    updateProject(updatedProject);
-    toast.success('Step deleted');
+
+    if (!confirm('Are you sure you want to delete this step?')) {
+      return;
+    }
+
+    try {
+      // Delete step from database
+      await supabase
+        .from('template_steps')
+        .delete()
+        .eq('id', stepId);
+
+      // Rebuild phases JSON
+      const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_project_phases', {
+        p_project_id: currentProject.id
+      });
+
+      if (rebuildError) throw rebuildError;
+
+      // Update project
+      await supabase
+        .from('projects')
+        .update({ phases: rebuiltPhases as any })
+        .eq('id', currentProject.id);
+
+      updateProject({
+        ...currentProject,
+        phases: rebuiltPhases as any,
+        updatedAt: new Date()
+      });
+
+      toast.success('Step deleted');
+    } catch (error) {
+      console.error('Error deleting step:', error);
+      toast.error('Failed to delete step');
+    }
   };
 
   // Edit operations - Allow editing in Edit Standard mode

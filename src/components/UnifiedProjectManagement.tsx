@@ -325,8 +325,49 @@ export function UnifiedProjectManagement({ onEditWorkflow }: UnifiedProjectManag
         throw error;
       }
 
+      const newRevisionId = data;
+
       toast.dismiss();
       toast.success("Revision created successfully!");
+
+      // Fetch the newly created revision to verify it has phases
+      const { data: newRevision, error: fetchError } = await supabase
+        .from('projects')
+        .select('id, name, phases, description, created_at, updated_at, publish_status')
+        .eq('id', newRevisionId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching new revision:', fetchError);
+      } else {
+        console.log('🔍 New revision created:', {
+          id: newRevision.id,
+          name: newRevision.name,
+          phaseCount: Array.isArray(newRevision.phases) ? newRevision.phases.length : 0,
+          phases: newRevision.phases
+        });
+
+        // If phases are empty, try to rebuild
+        if (!newRevision.phases || (Array.isArray(newRevision.phases) && newRevision.phases.length === 0)) {
+          console.warn('⚠️ New revision has no phases, attempting to rebuild...');
+          const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_project_phases', {
+            p_project_id: newRevisionId
+          });
+
+          if (rebuildError) {
+            console.error('Error rebuilding phases:', rebuildError);
+            toast.error('Revision created but phases could not be loaded. Please refresh.');
+          } else if (rebuiltPhases && Array.isArray(rebuiltPhases) && rebuiltPhases.length > 0) {
+            // Update the revision with rebuilt phases
+            await supabase
+              .from('projects')
+              .update({ phases: rebuiltPhases })
+              .eq('id', newRevisionId);
+            
+            console.log('✅ Successfully rebuilt phases:', rebuiltPhases.length);
+          }
+        }
+      }
 
       setCreateRevisionDialogOpen(false);
       setRevisionNotes('');

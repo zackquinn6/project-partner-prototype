@@ -146,7 +146,9 @@ export const ProjectActionsProvider: React.FC<ProjectActionsProviderProps> = ({ 
           category: Array.isArray(project.category) ? project.category.join(', ') : project.category,
           effort_level: project.effortLevel,
           skill_level: project.skillLevel,
-          estimated_time: project.estimatedTime
+          estimated_time: project.estimatedTime,
+          scaling_unit: project.scalingUnit,
+          estimated_time_per_unit: project.estimatedTimePerUnit
         })
         .select()
         .single();
