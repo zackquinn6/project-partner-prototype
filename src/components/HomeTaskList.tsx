@@ -18,7 +18,6 @@ import { HomeTaskScheduler } from "./HomeTaskScheduler";
 import { HomeTaskProjectLink } from "./HomeTaskProjectLink";
 import { RapidProjectAssessment } from "./RapidProjectAssessment";
 import { ResponsiveDialog } from "./ResponsiveDialog";
-import { TaskShoppingListDialog } from "./TaskShoppingListDialog";
 import { ShoppingListManager } from "./ShoppingListManager";
 
 interface HomeTask {
@@ -53,7 +52,6 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   const [selectedTask, setSelectedTask] = useState<HomeTask | null>(null);
   const [showProjectLink, setShowProjectLink] = useState(false);
   const [showRapidCosting, setShowRapidCosting] = useState(false);
-  const [showTaskShoppingList, setShowTaskShoppingList] = useState(false);
   const [activeTab, setActiveTab] = useState('tasks');
   const [subtasksOrdered, setSubtasksOrdered] = useState(false);
   const [subtasks, setSubtasks] = useState<Array<{ 
@@ -62,6 +60,10 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
     estimated_hours: number; 
     diy_level: 'beginner' | 'intermediate' | 'advanced' | 'pro';
     assigned_person_id: string | null;
+  }>>([]);
+  const [materials, setMaterials] = useState<Array<{ 
+    id: string; 
+    material_name: string;
   }>>([]);
   
   const [formData, setFormData] = useState<{
@@ -177,6 +179,24 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
             if (subtaskError) throw subtaskError;
           }
         }
+
+        // Delete existing materials and insert new ones
+        await supabase.from('task_shopping_list').delete().eq('task_id', editingTask.id);
+        
+        if (materials.length > 0) {
+          const materialsToInsert = materials.filter(m => m.material_name.trim()).map(m => ({
+            task_id: editingTask.id,
+            user_id: user.id,
+            material_name: m.material_name
+          }));
+          
+          if (materialsToInsert.length > 0) {
+            const { error: materialError } = await supabase
+              .from('task_shopping_list')
+              .insert(materialsToInsert);
+            if (materialError) throw materialError;
+          }
+        }
       } else {
         const { data: newTask, error } = await supabase
           .from("home_tasks")
@@ -203,6 +223,22 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
               .from('home_task_subtasks')
               .insert(subtasksToInsert);
             if (subtaskError) throw subtaskError;
+          }
+        }
+
+        // Insert materials if any
+        if (materials.length > 0 && newTask) {
+          const materialsToInsert = materials.filter(m => m.material_name.trim()).map(m => ({
+            task_id: newTask.id,
+            user_id: user.id,
+            material_name: m.material_name
+          }));
+          
+          if (materialsToInsert.length > 0) {
+            const { error: materialError } = await supabase
+              .from('task_shopping_list')
+              .insert(materialsToInsert);
+            if (materialError) throw materialError;
           }
         }
       }
@@ -237,6 +273,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
       task_type: "diy",
     });
     setSubtasks([]);
+    setMaterials([]);
     setEditingTask(null);
     setShowAddTask(false);
   };
@@ -267,6 +304,19 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
         estimated_hours: st.estimated_hours,
         diy_level: st.diy_level as 'beginner' | 'intermediate' | 'advanced' | 'pro',
         assigned_person_id: st.assigned_person_id
+      })));
+    }
+    
+    // Fetch existing materials
+    const { data: existingMaterials } = await supabase
+      .from('task_shopping_list')
+      .select('id, material_name')
+      .eq('task_id', task.id);
+    
+    if (existingMaterials) {
+      setMaterials(existingMaterials.map(m => ({
+        id: m.id,
+        material_name: m.material_name
       })));
     }
     
@@ -313,6 +363,21 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
     items.splice(result.destination.index, 0, reorderedItem);
     
     setSubtasks(items);
+  };
+
+  const addMaterial = () => {
+    setMaterials([...materials, { 
+      id: crypto.randomUUID(), 
+      material_name: ""
+    }]);
+  };
+
+  const updateMaterial = (id: string, value: string) => {
+    setMaterials(materials.map(m => m.id === id ? { ...m, material_name: value } : m));
+  };
+
+  const removeMaterial = (id: string) => {
+    setMaterials(materials.filter(m => m.id !== id));
   };
 
   return (
@@ -532,26 +597,53 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                                   </Droppable>
                                 </div>
                               </DragDropContext>
-                            )}
-                          </div>
+                             )}
+                           </div>
 
-                        {/* Shopping List Button - Only show when editing existing task */}
-                        {editingTask && (
-                          <div className="border-t pt-3">
-                            <Button 
-                              type="button"
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => setShowTaskShoppingList(true)} 
-                              className="h-8 text-xs w-full"
-                            >
-                              <ShoppingCart className="h-3 w-3 mr-2" />
-                              Manage Shopping List
+                        {/* Materials Section */}
+                        <div className="space-y-2 border-t pt-3">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-medium">Materials</label>
+                            <Button type="button" variant="outline" size="sm" onClick={addMaterial} className="h-7 text-xs">
+                              <Plus className="h-3 w-3 mr-1" />
+                              Add Material
                             </Button>
                           </div>
-                        )}
+                          {materials.length > 0 && (
+                            <div className="border rounded-md overflow-hidden">
+                              <div className="grid grid-cols-[auto_32px] gap-2 p-2 bg-muted text-xs font-medium">
+                                <div>Material Name</div>
+                                <div></div>
+                              </div>
+                              <div>
+                                {materials.map((material) => (
+                                  <div
+                                    key={material.id}
+                                    className="grid grid-cols-[auto_32px] gap-2 p-2 border-t items-center"
+                                  >
+                                    <Input
+                                      value={material.material_name}
+                                      onChange={(e) => updateMaterial(material.id, e.target.value)}
+                                      placeholder="Material name"
+                                      className="h-7 text-xs"
+                                    />
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => removeMaterial(material.id)}
+                                      className="h-6 w-6 p-0 text-destructive"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
 
-                        <div className="flex gap-2 justify-end">
+                         <div className="flex gap-2 justify-end">
                           <Button variant="outline" onClick={resetForm} size="sm" className="h-8 text-xs">
                             Cancel
                           </Button>
@@ -655,15 +747,6 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
             }}
           />
         </ResponsiveDialog>
-      )}
-
-      {editingTask && (
-        <TaskShoppingListDialog
-          open={showTaskShoppingList}
-          onOpenChange={setShowTaskShoppingList}
-          taskId={editingTask.id}
-          taskTitle={editingTask.title}
-        />
       )}
     </>
   );
