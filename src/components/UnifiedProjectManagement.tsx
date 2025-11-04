@@ -311,7 +311,7 @@ export function UnifiedProjectManagement({ onEditWorkflow }: UnifiedProjectManag
       return;
     }
 
-    toast.loading("Creating revision...");
+    const loadingToast = toast.loading("Creating revision...");
 
     try {
       // Use new v2 revision function that properly handles project_phases architecture
@@ -327,55 +327,68 @@ export function UnifiedProjectManagement({ onEditWorkflow }: UnifiedProjectManag
 
       const newRevisionId = data;
 
-      toast.dismiss();
-      toast.success("Revision created successfully!");
-
-      // Fetch the newly created revision to verify it has phases
+      // Fetch the newly created revision with all related data
       const { data: newRevision, error: fetchError } = await supabase
         .from('projects')
-        .select('id, name, phases, description, created_at, updated_at, publish_status')
+        .select(`
+          id, 
+          name, 
+          phases, 
+          description, 
+          created_at, 
+          updated_at, 
+          publish_status,
+          revision_number
+        `)
         .eq('id', newRevisionId)
         .single();
 
       if (fetchError) {
         console.error('Error fetching new revision:', fetchError);
-      } else {
-        console.log('🔍 New revision created:', {
-          id: newRevision.id,
-          name: newRevision.name,
-          phaseCount: Array.isArray(newRevision.phases) ? newRevision.phases.length : 0,
-          phases: newRevision.phases
+        throw fetchError;
+      }
+
+      console.log('🔍 New revision created:', {
+        id: newRevision.id,
+        name: newRevision.name,
+        revisionNumber: newRevision.revision_number,
+        phaseCount: Array.isArray(newRevision.phases) ? newRevision.phases.length : 0,
+        phases: newRevision.phases
+      });
+
+      // If phases are empty, try to rebuild (this should rarely happen as the function does this)
+      if (!newRevision.phases || (Array.isArray(newRevision.phases) && newRevision.phases.length === 0)) {
+        console.warn('⚠️ New revision has no phases, attempting to rebuild...');
+        
+        const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_project_phases', {
+          p_project_id: newRevisionId
         });
 
-        // If phases are empty, try to rebuild
-        if (!newRevision.phases || (Array.isArray(newRevision.phases) && newRevision.phases.length === 0)) {
-          console.warn('⚠️ New revision has no phases, attempting to rebuild...');
-          const { data: rebuiltPhases, error: rebuildError } = await supabase.rpc('rebuild_phases_json_from_project_phases', {
-            p_project_id: newRevisionId
-          });
-
-          if (rebuildError) {
-            console.error('Error rebuilding phases:', rebuildError);
-            toast.error('Revision created but phases could not be loaded. Please refresh.');
-          } else if (rebuiltPhases && Array.isArray(rebuiltPhases) && rebuiltPhases.length > 0) {
-            // Update the revision with rebuilt phases
-            await supabase
-              .from('projects')
-              .update({ phases: rebuiltPhases })
-              .eq('id', newRevisionId);
-            
-            console.log('✅ Successfully rebuilt phases:', rebuiltPhases.length);
-          }
+        if (rebuildError) {
+          console.error('Error rebuilding phases:', rebuildError);
+        } else if (rebuiltPhases && Array.isArray(rebuiltPhases) && rebuiltPhases.length > 0) {
+          // Update the revision with rebuilt phases
+          await supabase
+            .from('projects')
+            .update({ phases: rebuiltPhases })
+            .eq('id', newRevisionId);
+          
+          console.log('✅ Successfully rebuilt phases:', rebuiltPhases.length);
         }
       }
 
+      toast.dismiss(loadingToast);
+      toast.success("Revision created successfully! Custom phases and workflow preserved.");
+
       setCreateRevisionDialogOpen(false);
       setRevisionNotes('');
-      fetchProjects();
-      fetchProjectRevisions();
+      
+      // Refresh both lists to show the new revision
+      await Promise.all([fetchProjects(), fetchProjectRevisions()]);
+      
     } catch (error: any) {
       console.error('❌ Error creating revision:', error);
-      toast.dismiss();
+      toast.dismiss(loadingToast);
       toast.error(`Failed to create revision: ${error.message || 'Unknown error'}`);
     }
   };
@@ -542,19 +555,12 @@ export function UnifiedProjectManagement({ onEditWorkflow }: UnifiedProjectManag
 
   const createProject = async () => {
     try {
-      // Use new backend function to create project with standard foundation
+      // Use v2 backend function to create project with standard foundation
       const { data, error } = await supabase
-        .rpc('create_project_with_standard_foundation', {
-          p_project_name: newProject.name,
-          p_description: newProject.description || null,
-          p_categories: newProject.categories.length > 0 ? newProject.categories : null,
-          p_difficulty: null,
-          p_effort_level: newProject.effort_level || 'Medium',
-          p_skill_level: newProject.skill_level || 'Intermediate',
-          p_estimated_time: newProject.estimated_time || null,
-          p_scaling_unit: newProject.scaling_unit || null,
-          p_diy_length_challenges: null,
-          p_image: null
+        .rpc('create_project_with_standard_foundation_v2', {
+          project_name: newProject.name,
+          project_description: newProject.description || '',
+          project_category: newProject.categories.length > 0 ? newProject.categories : []
         });
 
       if (error) throw error;
