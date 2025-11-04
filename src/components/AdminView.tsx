@@ -97,7 +97,8 @@ export const AdminView: React.FC = () => {
   if (currentView === 'structure-manager') {
     return <StructureManager onBack={() => setCurrentView('admin')} />;
   }
-  return <div className="min-h-screen bg-background p-6">
+  return (
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-4">
@@ -403,5 +404,6 @@ export const AdminView: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </div>;
+    </div>
+  );
 };
