@@ -1297,6 +1297,25 @@ export default function UserView({
     return acc;
   }, {} as Record<string, Record<string, any[]>>) || {};
   
+  // Debug the phase structure in detail
+  console.log("🔍 WorkflowPhases detailed structure:", {
+    workflowPhasesCount: workflowPhases.length,
+    phasesWithOperations: workflowPhases.map(p => ({
+      phaseName: p.name,
+      operationsCount: p.operations?.length || 0,
+      operations: p.operations?.map(op => ({
+        operationName: op.name,
+        stepsCount: op.steps?.length || 0,
+        stepNames: op.steps?.map(s => s.step).slice(0, 3)
+      })) || []
+    })),
+    groupedStepsKeys: Object.keys(groupedSteps),
+    groupedStepsSample: Object.entries(groupedSteps).slice(0, 2).map(([phase, ops]) => ({
+      phase,
+      operations: Object.keys(ops as any)
+    }))
+  });
+  
   console.log("🔍 Debug phase structure:", {
     originalPhases: activeProject?.phases.length || 0,
     workflowPhases: workflowPhases.length,

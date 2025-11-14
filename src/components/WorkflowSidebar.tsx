@@ -43,6 +43,19 @@ export function WorkflowSidebar({
     state
   } = useSidebar();
   const collapsed = state === "collapsed";
+  
+  // Debug logging
+  console.log('🔍 WorkflowSidebar Debug:', {
+    allStepsLength: allSteps.length,
+    groupedStepsKeys: Object.keys(groupedSteps || {}),
+    groupedStepsPhases: Object.entries(groupedSteps || {}).map(([phase, ops]) => ({
+      phase,
+      operationsCount: Object.keys(ops as any).length,
+      operations: Object.keys(ops as any)
+    })),
+    isKickoffComplete,
+    collapsed
+  });
   const [showStepTypesInfo, setShowStepTypesInfo] = useState(false);
   const [showComingSoon, setShowComingSoon] = useState(false);
   return <Sidebar collapsible="icon">
