@@ -1293,7 +1293,16 @@ export default function UserView({
 
   // Group steps by phase and operation for sidebar navigation - FIXED: Use workflowPhases to match allSteps
   const groupedSteps = workflowPhases.reduce((acc, phase) => {
+    if (!phase || !phase.name || !phase.operations || !Array.isArray(phase.operations)) {
+      console.warn('⚠️ Invalid phase structure:', phase);
+      return acc;
+    }
+    
     acc[phase.name] = phase.operations.reduce((opAcc, operation) => {
+      if (!operation || !operation.name || !operation.steps || !Array.isArray(operation.steps)) {
+        console.warn('⚠️ Invalid operation structure:', operation);
+        return opAcc;
+      }
       opAcc[operation.name] = operation.steps;
       return opAcc;
     }, {} as Record<string, any[]>);

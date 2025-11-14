@@ -128,26 +128,37 @@ export function WorkflowSidebar({
 
                 {/* Step Navigation */}
                 <div className="space-y-3 max-h-[50vh] overflow-y-auto">
-                  {Object.entries(groupedSteps).map(([phase, operations]) => <div key={phase} className="space-y-2">
+                  {!groupedSteps || Object.keys(groupedSteps).length === 0 ? (
+                    <div className="text-xs text-muted-foreground text-center py-4">
+                      No workflow steps available. Please check project structure.
+                    </div>
+                  ) : (
+                    Object.entries(groupedSteps).map(([phase, operations]) => <div key={phase} className="space-y-2">
                       <h4 className="font-semibold text-primary text-sm">{phase}</h4>
-                      {Object.entries(operations as any).map(([operation, opSteps]) => <div key={operation} className="ml-2 space-y-1">
+                      {Object.entries(operations as any).map(([operation, opSteps]) => {
+                        if (!Array.isArray(opSteps) || opSteps.length === 0) {
+                          return null;
+                        }
+                        return <div key={operation} className="ml-2 space-y-1">
                           <h5 className="text-xs font-medium text-muted-foreground">{operation}</h5>
-                          {(opSteps as any[]).map(step => {
-                    const stepIndex = allSteps.findIndex(s => s.id === step.id);
-                    return <div key={step.id} className={`ml-2 p-2 rounded text-xs cursor-pointer transition-fast border ${step.id === currentStep?.id ? 'bg-primary/10 text-primary border-primary/20' : completedSteps.has(step.id) ? 'bg-green-50 text-green-700 border-green-200' : 'hover:bg-muted/50 border-transparent hover:border-muted-foreground/20'}`} onClick={() => {
-                      if (stepIndex >= 0 && isKickoffComplete) {
-                        onStepClick(stepIndex, step);
-                      }
-                    }}>
-                                <div className="flex items-center gap-2">
-                                  {getStepIndicator(step.stepType || 'prime')}
-                                  {completedSteps.has(step.id) && <CheckCircle className="w-3 h-3" />}
-                                  <span className="truncate">{step.step}</span>
-                                </div>
-                              </div>;
-                  })}
-                        </div>)}
-                    </div>)}
+                          {opSteps.map(step => {
+                            const stepIndex = allSteps.findIndex(s => s.id === step.id);
+                            return <div key={step.id} className={`ml-2 p-2 rounded text-xs cursor-pointer transition-fast border ${step.id === currentStep?.id ? 'bg-primary/10 text-primary border-primary/20' : completedSteps.has(step.id) ? 'bg-green-50 text-green-700 border-green-200' : 'hover:bg-muted/50 border-transparent hover:border-muted-foreground/20'}`} onClick={() => {
+                              if (stepIndex >= 0 && isKickoffComplete) {
+                                onStepClick(stepIndex, step);
+                              }
+                            }}>
+                              <div className="flex items-center gap-2">
+                                {getStepIndicator(step.stepType || 'prime')}
+                                {completedSteps.has(step.id) && <CheckCircle className="w-3 h-3" />}
+                                <span className="truncate">{step.step}</span>
+                              </div>
+                            </div>;
+                          })}
+                        </div>;
+                      })}
+                    </div>)
+                  )}
                 </div>
 
                 {/* Step Types Button - Moved to Bottom */}
