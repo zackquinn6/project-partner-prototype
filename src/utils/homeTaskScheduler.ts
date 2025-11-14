@@ -5,6 +5,7 @@ interface Task {
   priority?: 'high' | 'medium' | 'low';
   ordered?: boolean;
   subtasks: Subtask[];
+  due_date?: string | null;
 }
 
 interface Subtask {
@@ -39,6 +40,7 @@ interface Assignment {
 interface ScheduleResult {
   assignments: Assignment[];
   unassigned: Array<{ taskId: string; taskTitle: string; subtaskId: string | null; reason: string }>;
+  professionalTasks: Array<{ taskId: string; taskTitle: string; subtaskId: string | null; subtaskTitle: string; dueDate: string | null }>;
   warnings: string[];
 }
 
@@ -77,11 +79,12 @@ export function scheduleHomeTasksOptimized(
 ): ScheduleResult {
   const assignments: Assignment[] = [];
   const unassigned: Array<{ taskId: string; taskTitle: string; subtaskId: string | null; reason: string }> = [];
+  const professionalTasks: Array<{ taskId: string; taskTitle: string; subtaskId: string | null; subtaskTitle: string; dueDate: string | null }> = [];
   const warnings: string[] = [];
 
   if (people.length === 0) {
     warnings.push('No team members available. Add people to enable scheduling.');
-    return { assignments: [], unassigned: [], warnings };
+    return { assignments: [], unassigned: [], professionalTasks: [], warnings };
   }
 
   // Create a map of existing assignments by subtask/task
@@ -236,6 +239,19 @@ export function scheduleHomeTasksOptimized(
 
   // Assign work units
   for (const unit of workUnits) {
+    // Check if this is a professional-level task
+    if (unit.diyLevel === 'pro') {
+      const task = tasks.find(t => t.id === unit.taskId);
+      professionalTasks.push({
+        taskId: unit.taskId,
+        taskTitle: unit.taskTitle,
+        subtaskId: unit.subtaskId,
+        subtaskTitle: unit.subtaskTitle,
+        dueDate: task?.due_date || null
+      });
+      continue; // Professional tasks are not assigned to team
+    }
+
     // Check if this unit has an ordering dependency
     if (unit.ordered && unit.dependsOn && !completedSubtasks.has(unit.dependsOn)) {
       unassigned.push({
@@ -368,5 +384,9 @@ export function scheduleHomeTasksOptimized(
     warnings.push(`${unassigned.length} work item(s) could not be fully scheduled`);
   }
 
-  return { assignments, unassigned, warnings };
+  if (professionalTasks.length > 0) {
+    warnings.push(`${professionalTasks.length} professional task(s) require contractor/pro - see Professional Tasks section`);
+  }
+
+  return { assignments, unassigned, professionalTasks, warnings };
 }

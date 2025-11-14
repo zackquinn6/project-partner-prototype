@@ -86,9 +86,17 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
 
     setIsSubmitting(true);
     try {
-      // Auto-set end_date to today if complete and no end date provided
-      const shouldAutoSetEndDate = (validatedStatus === 'complete' || progress === 100) && !formData.endDate;
-      const finalEndDate = shouldAutoSetEndDate ? new Date().toISOString().split('T')[0] : formData.endDate;
+      // Determine end_date: use provided endDate, or auto-set if complete, or null
+      let finalEndDate: string | null = null;
+      
+      if (formData.endDate && formData.endDate.trim() !== '') {
+        // User provided an end date, use it
+        finalEndDate = formData.endDate;
+      } else if (validatedStatus === 'complete' || progress === 100) {
+        // Project is complete but no end date provided, auto-set to today
+        finalEndDate = new Date().toISOString().split('T')[0];
+      }
+      // Otherwise, finalEndDate remains null
       
       const projectData = {
         user_id: user.id,
@@ -102,7 +110,7 @@ export function ManualProjectDialog({ open, onOpenChange, onProjectCreated }: Ma
         project_leader: formData.projectLeader || null,
         start_date: formData.startDate ? new Date(formData.startDate).toISOString() : new Date().toISOString(),
         end_date: finalEndDate ? new Date(finalEndDate).toISOString() : null,
-        plan_end_date: finalEndDate ? new Date(finalEndDate).toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        plan_end_date: finalEndDate ? new Date(finalEndDate).toISOString() : (formData.startDate ? new Date(new Date(formData.startDate).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()),
         is_manual_entry: true,
         phases: [],
         completed_steps: []

@@ -54,6 +54,8 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   const [showRapidCosting, setShowRapidCosting] = useState(false);
   const [activeTab, setActiveTab] = useState('tasks');
   const [subtasksOrdered, setSubtasksOrdered] = useState(false);
+  const [showTeamWindow, setShowTeamWindow] = useState(false);
+  const [showAssignWindow, setShowAssignWindow] = useState(false);
   const [subtasks, setSubtasks] = useState<Array<{ 
     id: string; 
     title: string; 
@@ -64,6 +66,7 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   const [materials, setMaterials] = useState<Array<{ 
     id: string; 
     material_name: string;
+    quantity: number;
   }>>([]);
   
   const [formData, setFormData] = useState<{
@@ -187,7 +190,8 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
           const materialsToInsert = materials.filter(m => m.material_name.trim()).map(m => ({
             task_id: editingTask.id,
             user_id: user.id,
-            material_name: m.material_name
+            material_name: m.material_name,
+            quantity: m.quantity || 1
           }));
           
           if (materialsToInsert.length > 0) {
@@ -231,7 +235,8 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
           const materialsToInsert = materials.filter(m => m.material_name.trim()).map(m => ({
             task_id: newTask.id,
             user_id: user.id,
-            material_name: m.material_name
+            material_name: m.material_name,
+            quantity: m.quantity || 1
           }));
           
           if (materialsToInsert.length > 0) {
@@ -310,13 +315,14 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
     // Fetch existing materials
     const { data: existingMaterials } = await supabase
       .from('task_shopping_list')
-      .select('id, material_name')
+      .select('id, material_name, quantity')
       .eq('task_id', task.id);
     
     if (existingMaterials) {
       setMaterials(existingMaterials.map(m => ({
         id: m.id,
-        material_name: m.material_name
+        material_name: m.material_name,
+        quantity: m.quantity || 1
       })));
     }
     
@@ -368,12 +374,13 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
   const addMaterial = () => {
     setMaterials([...materials, { 
       id: crypto.randomUUID(), 
-      material_name: ""
+      material_name: "",
+      quantity: 1
     }]);
   };
 
-  const updateMaterial = (id: string, value: string) => {
-    setMaterials(materials.map(m => m.id === id ? { ...m, material_name: value } : m));
+  const updateMaterial = (id: string, field: 'material_name' | 'quantity', value: string | number) => {
+    setMaterials(materials.map(m => m.id === id ? { ...m, [field]: value } : m));
   };
 
   const removeMaterial = (id: string) => {
@@ -435,11 +442,9 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
               <div className="flex-shrink-0 px-2 md:px-4 pt-3 pb-4 md:pb-5 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div className="mb-0">
-                  <TabsList className="w-full grid grid-cols-5 text-xs md:text-sm h-9 md:h-10 p-1 gap-1 bg-muted/50 rounded-lg">
+                  <TabsList className="w-full grid grid-cols-3 text-xs md:text-sm h-9 md:h-10 p-1 gap-1 bg-muted/50 rounded-lg">
                     <TabsTrigger value="tasks" className="text-xs md:text-sm px-2 md:px-3 py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Tasks</TabsTrigger>
                     <TabsTrigger value="shopping" className="text-xs md:text-sm px-2 md:px-3 py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Shopping</TabsTrigger>
-                    <TabsTrigger value="people" className="text-xs md:text-sm px-2 md:px-3 py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Team</TabsTrigger>
-                    <TabsTrigger value="assignment" className="text-xs md:text-sm px-2 md:px-3 py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Assign</TabsTrigger>
                     <TabsTrigger value="schedule" className="text-xs md:text-sm px-2 md:px-3 py-2 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-md">Schedule</TabsTrigger>
                   </TabsList>
                 </div>
@@ -611,20 +616,29 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                           </div>
                           {materials.length > 0 && (
                             <div className="border rounded-md overflow-hidden">
-                              <div className="grid grid-cols-[auto_32px] gap-2 p-2 bg-muted text-xs font-medium">
+                              <div className="grid grid-cols-[1fr_80px_32px] gap-2 p-2 bg-muted text-xs font-medium">
                                 <div>Material Name</div>
+                                <div>Quantity</div>
                                 <div></div>
                               </div>
                               <div>
                                 {materials.map((material) => (
                                   <div
                                     key={material.id}
-                                    className="grid grid-cols-[auto_32px] gap-2 p-2 border-t items-center"
+                                    className="grid grid-cols-[1fr_80px_32px] gap-2 p-2 border-t items-center"
                                   >
                                     <Input
                                       value={material.material_name}
-                                      onChange={(e) => updateMaterial(material.id, e.target.value)}
+                                      onChange={(e) => updateMaterial(material.id, 'material_name', e.target.value)}
                                       placeholder="Material name"
+                                      className="h-7 text-xs"
+                                    />
+                                    <Input
+                                      type="number"
+                                      min="1"
+                                      value={material.quantity}
+                                      onChange={(e) => updateMaterial(material.id, 'quantity', parseInt(e.target.value) || 1)}
+                                      placeholder="Qty"
                                       className="h-7 text-xs"
                                     />
                                     <Button
@@ -674,25 +688,30 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
                   <ShoppingListManager />
                 </TabsContent>
 
-                <TabsContent value="people" className="mt-0 h-full">
-                  {user && (
-                    <HomeTaskPeople
-                      userId={user.id}
-                      homeId={selectedHomeId === 'all' ? null : selectedHomeId}
-                    />
-                  )}
-                </TabsContent>
+                <TabsContent value="schedule" className="mt-0 h-full space-y-4">
+                  {/* Top buttons for Team and Assign windows */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAssignWindow(true)}
+                      className="flex-1"
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Assign Tasks
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowTeamWindow(true)}
+                      className="flex-1"
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Team Availability
+                    </Button>
+                  </div>
 
-                <TabsContent value="assignment" className="mt-0 h-full">
-                  {user && (
-                    <HomeTaskAssignment
-                      userId={user.id}
-                      homeId={selectedHomeId === 'all' ? null : selectedHomeId}
-                    />
-                  )}
-                </TabsContent>
-
-                <TabsContent value="schedule" className="mt-0 h-full">
+                  {/* Schedule content */}
                   {user && (
                     <HomeTaskScheduler
                       userId={user.id}
@@ -748,6 +767,60 @@ export function HomeTaskList({ open, onOpenChange }: { open: boolean; onOpenChan
           />
         </ResponsiveDialog>
       )}
+
+      {/* Team Availability Window */}
+      <Dialog open={showTeamWindow} onOpenChange={setShowTeamWindow}>
+        <DialogContent className="w-full h-screen max-w-full max-h-full md:max-w-[90vw] md:h-[90vh] md:rounded-lg p-0 overflow-hidden flex flex-col [&>button]:hidden">
+          <DialogHeader className="px-2 md:px-4 py-1.5 md:py-2 border-b flex-shrink-0">
+            <div className="flex items-center justify-between gap-2">
+              <DialogTitle className="text-lg md:text-xl font-bold">Team Availability</DialogTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowTeamWindow(false)} 
+                className="h-7 px-2 text-[9px] md:text-xs"
+              >
+                Close
+              </Button>
+            </div>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto px-2 md:px-4 py-3 md:py-4">
+            {user && (
+              <HomeTaskPeople
+                userId={user.id}
+                homeId={selectedHomeId === 'all' ? null : selectedHomeId}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Task Assignment Window */}
+      <Dialog open={showAssignWindow} onOpenChange={setShowAssignWindow}>
+        <DialogContent className="w-full h-screen max-w-full max-h-full md:max-w-[90vw] md:h-[90vh] md:rounded-lg p-0 overflow-hidden flex flex-col [&>button]:hidden">
+          <DialogHeader className="px-2 md:px-4 py-1.5 md:py-2 border-b flex-shrink-0">
+            <div className="flex items-center justify-between gap-2">
+              <DialogTitle className="text-lg md:text-xl font-bold">Assign Tasks</DialogTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowAssignWindow(false)} 
+                className="h-7 px-2 text-[9px] md:text-xs"
+              >
+                Close
+              </Button>
+            </div>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto px-2 md:px-4 py-3 md:py-4">
+            {user && (
+              <HomeTaskAssignment
+                userId={user.id}
+                homeId={selectedHomeId === 'all' ? null : selectedHomeId}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

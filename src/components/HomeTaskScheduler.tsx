@@ -20,7 +20,13 @@ interface HomeTaskSchedulerProps {
 export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [schedule, setSchedule] = useState<any>(null);
-  const [startDate, setStartDate] = useState<Date>(new Date());
+  // Initialize start date to tomorrow to avoid generating schedules in the past
+  const [startDate, setStartDate] = useState<Date>(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [isEmailing, setIsEmailing] = useState(false);
   const [currentScheduleId, setCurrentScheduleId] = useState<string | null>(null);
@@ -105,7 +111,7 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
       // Fetch tasks with subtasks
       let tasksQuery = supabase
         .from('home_tasks')
-        .select('id, title, diy_level, status, priority')
+        .select('id, title, diy_level, status, priority, due_date')
         .eq('user_id', userId)
         .in('status', ['open', 'in_progress']);
 
@@ -187,7 +193,8 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
           assignments: scheduleData.assignments.map((a: any) => ({
             ...a,
             scheduledDate: a.scheduledDate.toISOString()
-          }))
+          })),
+          professionalTasks: scheduleData.professionalTasks || []
         },
         assignments_count: scheduleData.assignments.length,
         warnings: scheduleData.warnings || [],
@@ -413,6 +420,26 @@ export function HomeTaskScheduler({ userId, homeId }: HomeTaskSchedulerProps) {
             <div className="font-semibold">Unassigned Work:</div>
             {schedule.unassigned.map((item: any, idx: number) => (
               <div key={idx}>• {item.taskTitle}: {item.reason}</div>
+            ))}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {schedule?.professionalTasks && schedule.professionalTasks.length > 0 && (
+        <Alert className="border-orange-200 bg-orange-50">
+          <Users className="h-3 w-3 md:h-4 md:w-4 text-orange-600" />
+          <AlertDescription className="text-[10px] md:text-xs space-y-1">
+            <div className="font-semibold text-orange-900">Professional Tasks to be Completed:</div>
+            <div className="text-orange-800">These tasks require professional contractors and won't be assigned to your team.</div>
+            {schedule.professionalTasks.map((item: any, idx: number) => (
+              <div key={idx} className="flex justify-between items-center text-orange-900">
+                <span>• {item.subtaskTitle || item.taskTitle}</span>
+                {item.dueDate && (
+                  <span className="text-[9px] md:text-[10px] font-medium">
+                    Due: {new Date(item.dueDate).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
             ))}
           </AlertDescription>
         </Alert>

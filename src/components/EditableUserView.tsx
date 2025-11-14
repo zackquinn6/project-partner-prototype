@@ -913,7 +913,9 @@ export default function EditableUserView({ onBackToAdmin, isAdminEditing = false
                                    <div className="flex-1 min-w-0">
                                      <div className="flex items-center gap-2">
                                        <div className="text-sm font-medium">{output.name}</div>
-                                       <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
+                                       {output.type !== 'none' && (
+                                         <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
+                                       )}
                                        <button
                                          onClick={() => {
                                            setSelectedOutput(output);

@@ -197,12 +197,14 @@ export function KeyCharacteristicsWindow({ open, onOpenChange, operations, curre
                                 <h5 className="font-semibold text-sm leading-tight">
                                   {output.name}
                                 </h5>
-                                <div className="flex items-center gap-1">
-                                  {getOutputIcon(output.type)}
-                                  <Badge variant="secondary" className="text-xs px-2 py-0">
-                                    {getOutputTypeLabel(output.type)}
-                                  </Badge>
-                                </div>
+                                {output.type !== 'none' && (
+                                  <div className="flex items-center gap-1">
+                                    {getOutputIcon(output.type)}
+                                    <Badge variant="secondary" className="text-xs px-2 py-0">
+                                      {getOutputTypeLabel(output.type)}
+                                    </Badge>
+                                  </div>
+                                )}
                               </div>
                             </div>
                             
@@ -281,12 +283,14 @@ export function KeyCharacteristicsWindow({ open, onOpenChange, operations, curre
                   <DialogTitle className="text-lg font-bold leading-tight">
                     {selectedOutput.name}
                   </DialogTitle>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    {getOutputIcon(selectedOutput.type)}
-                    <Badge variant="secondary" className="text-xs px-2 py-0">
-                      {getOutputTypeLabel(selectedOutput.type)}
-                    </Badge>
-                  </div>
+                  {selectedOutput.type !== 'none' && (
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {getOutputIcon(selectedOutput.type)}
+                      <Badge variant="secondary" className="text-xs px-2 py-0">
+                        {getOutputTypeLabel(selectedOutput.type)}
+                      </Badge>
+                    </div>
+                  )}
                 </div>
               </DialogHeader>
               

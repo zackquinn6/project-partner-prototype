@@ -55,15 +55,17 @@ export const OutputDetailPopup: React.FC<OutputDetailPopupProps> = ({
         
         <div className="space-y-4">
           {/* Output Type */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Type:</span>
-            <Badge 
-              variant="outline" 
-              className={`${getTypeColor(output.type)} font-medium`}
-            >
-              {output.type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-            </Badge>
-          </div>
+          {output.type !== 'none' && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Type:</span>
+              <Badge 
+                variant="outline" 
+                className={`${getTypeColor(output.type)} font-medium`}
+              >
+                {output.type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </Badge>
+            </div>
+          )}
 
           {/* Description */}
           {output.description && (

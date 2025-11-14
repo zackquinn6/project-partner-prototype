@@ -81,10 +81,9 @@ export function HomeTaskAssignment({ userId, homeId }: HomeTaskAssignmentProps) 
   const fetchTasks = useCallback(async () => {
     let query = supabase
       .from('home_tasks')
-      .select('id, title, diy_level')
+      .select('id, title, diy_level, status')
       .eq('user_id', userId)
-      .neq('status', 'closed')
-      .neq('status', 'completed');
+      .in('status', ['open', 'in_progress']); // Only show open and in-progress tasks
 
     if (homeId) {
       query = query.eq('home_id', homeId);

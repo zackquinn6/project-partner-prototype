@@ -314,7 +314,7 @@ export function UnifiedProjectManagement({ onEditWorkflow }: UnifiedProjectManag
     const loadingToast = toast.loading("Creating revision...");
 
     try {
-      // Use new v2 revision function that properly handles project_phases architecture
+      // Use revision function that properly handles project_phases architecture
       const { data, error } = await supabase.rpc('create_project_revision_v2', {
         source_project_id: selectedProject.id,
         revision_notes_text: revisionNotes || null,
@@ -562,7 +562,7 @@ export function UnifiedProjectManagement({ onEditWorkflow }: UnifiedProjectManag
     try {
       console.log('🔨 Creating project:', newProject);
       
-      // Use v2 backend function to create project with standard foundation
+      // Use backend function to create project with standard foundation
       const { data, error } = await supabase
         .rpc('create_project_with_standard_foundation_v2', {
           project_name: newProject.name,

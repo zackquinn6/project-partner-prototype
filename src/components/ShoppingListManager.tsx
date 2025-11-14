@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface ShoppingListItem {
   id: string;
   material_name: string;
+  quantity: number;
   completed: boolean;
   task_id: string;
   task_title: string;
@@ -40,6 +41,7 @@ export function ShoppingListManager() {
         .select(`
           id,
           material_name,
+          quantity,
           completed,
           task_id
         `)
@@ -159,6 +161,7 @@ export function ShoppingListManager() {
                     Material <SortIcon field="material_name" />
                   </Button>
                 </TableHead>
+                <TableHead className="w-20 text-xs font-medium">Qty</TableHead>
                 <TableHead className="min-w-[200px]">
                   <Button
                     variant="ghost"
@@ -174,7 +177,7 @@ export function ShoppingListManager() {
             <TableBody>
               {sortedItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8 text-xs text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-8 text-xs text-muted-foreground">
                     No materials in shopping list. Add materials to tasks to see them here.
                   </TableCell>
                 </TableRow>
@@ -199,6 +202,9 @@ export function ShoppingListManager() {
                       >
                         {item.completed ? '✓ ' : ''}{item.material_name}
                       </span>
+                    </TableCell>
+                    <TableCell className="text-xs text-center">
+                      {item.quantity || 1}
                     </TableCell>
                     <TableCell className="text-xs">
                       {item.task_title}

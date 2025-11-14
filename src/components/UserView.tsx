@@ -1288,9 +1288,8 @@ export default function UserView({
     }
   };
 
-  // Group steps by phase and operation for sidebar navigation - FIXED: Use processed phases with standard phases
-  const processedPhases = activeProject ? activeProject.phases : [];
-  const groupedSteps = processedPhases.reduce((acc, phase) => {
+  // Group steps by phase and operation for sidebar navigation - FIXED: Use workflowPhases to match allSteps
+  const groupedSteps = workflowPhases.reduce((acc, phase) => {
     acc[phase.name] = phase.operations.reduce((opAcc, operation) => {
       opAcc[operation.name] = operation.steps;
       return opAcc;
@@ -1300,8 +1299,8 @@ export default function UserView({
   
   console.log("🔍 Debug phase structure:", {
     originalPhases: activeProject?.phases.length || 0,
-    processedPhases: processedPhases.length,
-    phaseNames: processedPhases.map(p => p.name),
+    workflowPhases: workflowPhases.length,
+    phaseNames: workflowPhases.map(p => p.name),
     currentStepId: currentStep?.id,
     currentStepName: currentStep?.step,
     currentStepIndex,
@@ -1815,7 +1814,9 @@ export default function UserView({
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2">
                                     <div className="text-sm font-medium">{output.name}</div>
-                                    <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
+                                    {output.type !== 'none' && (
+                                      <Badge variant="outline" className="text-xs capitalize">{output.type}</Badge>
+                                    )}
                                     <button
                                       onClick={() => {
                                         setSelectedOutput(output);

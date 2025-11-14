@@ -351,8 +351,8 @@ export const ProjectManagementWindow: React.FC<ProjectManagementWindowProps> = (
     try {
       console.log('🔄 Creating revision from project:', currentProject.id);
       
-      // Simple revision creation - just copy everything as-is
-      const { data: newRevisionId, error } = await supabase.rpc('create_project_revision', {
+      // Use revision function that properly handles project_phases architecture
+      const { data: newRevisionId, error } = await supabase.rpc('create_project_revision_v2', {
         source_project_id: currentProject.id,
         revision_notes_text: revisionNotes || null
       });

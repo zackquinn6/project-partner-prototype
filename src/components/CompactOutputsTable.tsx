@@ -86,9 +86,13 @@ export function CompactOutputsTable({ outputs, onOutputsChange, onAddOutput, onE
                     >
                       <SelectTrigger className="h-6 text-xs">
                         <SelectValue>
-                          <Badge className={`text-[10px] px-1 py-0 ${getTypeColor(output.type)}`}>
-                            {getTypeLabel(output.type)}
-                          </Badge>
+                          {output.type !== 'none' ? (
+                            <Badge className={`text-[10px] px-1 py-0 ${getTypeColor(output.type)}`}>
+                              {getTypeLabel(output.type)}
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Select type</span>
+                          )}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>

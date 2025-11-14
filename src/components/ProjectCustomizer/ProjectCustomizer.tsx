@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ResponsiveDialog } from '../ResponsiveDialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -13,9 +14,11 @@ import { SpaceDecisionFlow } from './SpaceDecisionFlow';
 import { ProjectRun } from '../../interfaces/ProjectRun';
 import { Project, Phase } from '../../interfaces/Project';
 import { useProject } from '../../contexts/ProjectContext';
-import { Settings, GitBranch, Plus, Clock, AlertTriangle } from 'lucide-react';
+import { Settings, GitBranch, Plus, Clock, AlertTriangle, Home, Edit2 } from 'lucide-react';
 import { useIsMobile } from '../../hooks/use-mobile';
 import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { KickoffWorkflow } from '../KickoffWorkflow';
 
 interface ProjectCustomizerProps {
   open: boolean;
@@ -55,7 +58,7 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
   mode = 'initial-plan'
 }) => {
   const { projects, updateProjectRun } = useProject();
-  const [activeTab, setActiveTab] = useState(mode === 'unplanned-work' ? 'custom-work' : 'spaces');
+  const [activeTab, setActiveTab] = useState(mode === 'unplanned-work' ? 'custom-work' : 'decisions');
   const [customizationState, setCustomizationState] = useState<CustomizationState>({
     spaces: [],
     spaceDecisions: {},
@@ -69,6 +72,9 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
 
   const [showPhaseBrowser, setShowPhaseBrowser] = useState(false);
   const [showCustomWorkManager, setShowCustomWorkManager] = useState(false);
+  const [showSpacesWindow, setShowSpacesWindow] = useState(false);
+  const [homeName, setHomeName] = useState<string>('');
+  const [showKickoffEdit, setShowKickoffEdit] = useState(false);
 
   // Load customization decisions from database on mount
   useEffect(() => {
@@ -85,6 +91,31 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
       workflowOrder: savedData.workflowOrder || []
     });
   }, [open, currentProjectRun]);
+
+  // Load home name
+  useEffect(() => {
+    if (open && currentProjectRun?.home_id) {
+      fetchHomeName();
+    }
+  }, [open, currentProjectRun?.home_id]);
+
+  const fetchHomeName = async () => {
+    if (!currentProjectRun?.home_id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('homes')
+        .select('name')
+        .eq('id', currentProjectRun.home_id)
+        .maybeSingle();
+
+      if (error) throw error;
+      setHomeName(data?.name || 'Unknown Home');
+    } catch (error) {
+      console.error('Error fetching home:', error);
+      setHomeName('Unknown Home');
+    }
+  };
 
   // Initialize workflow order from current project run
   useEffect(() => {
@@ -351,22 +382,33 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
         size={isMobile ? "content-full" : "large"}
       >
         <div className="flex flex-col h-full px-4 pb-4">
+          {/* Home Selection Display */}
+          {homeName && currentProjectRun?.home_id && (
+            <div className="mb-3 py-2 px-3 bg-muted/50 rounded-lg border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Home className="w-4 h-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Project Home:</span>
+                <Badge variant="outline" className="text-xs">{homeName}</Badge>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowKickoffEdit(true)}
+                className="h-6 w-6 p-0"
+                title="Change home"
+              >
+                <Edit2 className="w-3 h-3" />
+              </Button>
+            </div>
+          )}
+
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
             {/* Tab Headers - Positioned directly after header */}
             <div className="shrink-0 border-b bg-background pb-4">
-              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1' : 'grid-cols-3'} ${isMobile ? 'h-auto' : 'h-12'}`}>
+              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} ${isMobile ? 'h-auto' : 'h-12'}`}>
                 {isMobile ? (
                   // Mobile: Dropdown-style tab selection
                   <div className="space-y-2 p-2">
-                    <Button
-                      variant={activeTab === 'spaces' ? 'default' : 'outline'}
-                      onClick={() => setActiveTab('spaces')}
-                      className="w-full justify-start text-sm py-3"
-                      size="sm"
-                    >
-                      <Settings className="w-4 h-4 mr-2" />
-                      Define Spaces
-                    </Button>
                     <Button
                       variant={activeTab === 'decisions' ? 'default' : 'outline'}
                       onClick={() => setActiveTab('decisions')}
@@ -374,7 +416,7 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
                       size="sm"
                     >
                       <Settings className="w-4 h-4 mr-2" />
-                      Space Decisions
+                      Project Choices
                     </Button>
                     <Button
                       variant={activeTab === 'custom-work' ? 'default' : 'outline'}
@@ -389,13 +431,9 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
                 ) : (
                   // Desktop: Traditional tabs
                   <>
-                    <TabsTrigger value="spaces" className="text-xs md:text-sm px-2 py-2">
-                      <Settings className="w-4 h-4 mr-2" />
-                      Define Spaces
-                    </TabsTrigger>
                     <TabsTrigger value="decisions" className="text-xs md:text-sm px-2 py-2">
                       <Settings className="w-4 h-4 mr-2" />
-                      Space Decisions
+                      Project Choices
                     </TabsTrigger>
                     <TabsTrigger value="custom-work" className="text-xs md:text-sm px-2 py-2">
                       <Plus className="w-4 h-4 mr-2" />
@@ -408,23 +446,32 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
 
             {/* Tab Content - Consistent height containers */}
             <div className="flex-1 min-h-0 relative">
-              <TabsContent value="spaces" className="absolute inset-0 data-[state=active]:block data-[state=inactive]:hidden">
-                <ScrollArea className="h-full">
-                  <div className={`${isMobile ? 'p-3' : 'p-4'} space-y-4`}>
-                    <SpaceSelector
-                      projectRunId={currentProjectRun.id}
-                      projectRunHomeId={currentProjectRun.home_id}
-                      selectedSpaces={customizationState.spaces}
-                      onSpacesChange={handleSpacesChange}
-                      projectScaleUnit="square foot"
-                    />
-                  </div>
-                </ScrollArea>
-              </TabsContent>
-
               <TabsContent value="decisions" className="absolute inset-0 data-[state=active]:block data-[state=inactive]:hidden">
                 <ScrollArea className="h-full">
                   <div className={`${isMobile ? 'p-3' : 'p-4'} space-y-4`}>
+                    {/* Project Spaces Button */}
+                    <Card className="bg-blue-50 border-blue-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-sm mb-1">Project Spaces</h4>
+                            <p className="text-xs text-muted-foreground mb-3">
+                              Use this when the project will have unique spaces or rooms
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowSpacesWindow(true)}
+                              className="text-xs"
+                            >
+                              <Settings className="w-3 h-3 mr-2" />
+                              Manage Project Spaces
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
                     <SpaceDecisionFlow
                       spaces={customizationState.spaces}
                       projectRun={currentProjectRun}
@@ -457,30 +504,6 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
                         className="w-full sm:w-auto"
                       >
                         Browse Related Project Phases
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  {/* Novel Work Section */}
-                  <Card className="border-orange-200 bg-orange-50/50">
-                    <CardHeader className={isMobile ? 'pb-3' : ''}>
-                      <CardTitle className={`flex items-center gap-2 text-orange-800 ${isMobile ? 'text-base' : ''}`}>
-                        <AlertTriangle className="w-5 h-5" />
-                        Add Custom Steps
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className={`text-orange-700 mb-4 ${isMobile ? 'text-sm' : 'text-sm'}`}>
-                        Create completely new work that's not in our standard project library. 
-                        Use with caution - this may affect project timeline and safety.
-                      </p>
-                      <Button 
-                        onClick={() => setShowCustomWorkManager(true)} 
-                        variant="outline" 
-                        size={isMobile ? "default" : "sm"}
-                        className="w-full sm:w-auto"
-                      >
-                        Create Custom Work
                       </Button>
                     </CardContent>
                   </Card>
@@ -571,6 +594,10 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
         availableProjects={projects}
         onSelectPhases={handleAddCustomPlannedWork}
         currentProjectId={currentProjectRun.templateId}
+        onAddCustomWork={() => {
+          setShowPhaseBrowser(false);
+          setShowCustomWorkManager(true);
+        }}
       />
 
       <SimplifiedCustomWorkManager
@@ -578,6 +605,45 @@ export const ProjectCustomizer: React.FC<ProjectCustomizerProps> = ({
         onOpenChange={setShowCustomWorkManager}
         onCreateCustomWork={handleAddCustomUnplannedWork}
       />
+
+      {/* Project Spaces Window */}
+      <Dialog open={showSpacesWindow} onOpenChange={setShowSpacesWindow}>
+        <DialogContent className="w-full h-screen max-w-full max-h-full md:max-w-[90vw] md:h-[90vh] md:rounded-lg p-0 overflow-hidden flex flex-col [&>button]:hidden">
+          <DialogHeader className="px-2 md:px-4 py-1.5 md:py-2 border-b flex-shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="flex items-center justify-between gap-2">
+              <DialogTitle className="text-lg md:text-xl font-bold">Project Spaces</DialogTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowSpacesWindow(false)} 
+                className="h-7 px-2 text-[9px] md:text-xs"
+              >
+                Close
+              </Button>
+            </div>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto px-2 md:px-4 py-3 md:py-4">
+            <SpaceSelector
+              projectRunId={currentProjectRun.id}
+              projectRunHomeId={currentProjectRun.home_id}
+              selectedSpaces={customizationState.spaces}
+              onSpacesChange={handleSpacesChange}
+              projectScaleUnit="square foot"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Kickoff Edit Window - opens to step 3 (Project Profile) */}
+      {showKickoffEdit && currentProjectRun && (
+        <KickoffWorkflow
+          onKickoffComplete={() => {
+            setShowKickoffEdit(false);
+            fetchHomeName(); // Refresh home name after edit
+          }}
+          onExit={() => setShowKickoffEdit(false)}
+        />
+      )}
     </>
   );
 };

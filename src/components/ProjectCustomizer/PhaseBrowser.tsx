@@ -8,7 +8,7 @@ import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Project, Phase } from '../../interfaces/Project';
-import { Search, Package, Clock, Filter, X } from 'lucide-react';
+import { Search, Package, Clock, Filter, X, Plus } from 'lucide-react';
 import { useIsMobile } from '../../hooks/use-mobile';
 
 interface PhaseBrowserProps {
@@ -17,6 +17,7 @@ interface PhaseBrowserProps {
   availableProjects: Project[];
   onSelectPhases: (phases: Phase[], insertAfterPhaseId?: string) => void;
   currentProjectId: string;
+  onAddCustomWork?: () => void;
 }
 
 interface PhaseWithProject extends Phase {
@@ -30,7 +31,8 @@ export const PhaseBrowser: React.FC<PhaseBrowserProps> = ({
   onOpenChange,
   availableProjects,
   onSelectPhases,
-  currentProjectId
+  currentProjectId,
+  onAddCustomWork
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -231,6 +233,34 @@ export const PhaseBrowser: React.FC<PhaseBrowserProps> = ({
                   className="pl-9"
                 />
               </div>
+
+              {/* Add Custom Work Button */}
+              {onAddCustomWork && (
+                <Card className="border-orange-200 bg-orange-50/50">
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm text-orange-900">Add Custom Work</h4>
+                        <p className="text-xs text-orange-700 mt-0.5">
+                          Use this when you can't find work content in our catalog
+                        </p>
+                      </div>
+                      <Button 
+                        onClick={() => {
+                          onAddCustomWork();
+                          onOpenChange(false);
+                        }} 
+                        variant="outline" 
+                        size="sm"
+                        className="border-orange-300 text-orange-800 hover:bg-orange-100"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Custom
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Project List */}

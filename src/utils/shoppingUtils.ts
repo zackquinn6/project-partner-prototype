@@ -1,5 +1,5 @@
 import { ProjectRun } from '@/interfaces/ProjectRun';
-import { addStandardPhasesToProjectRun } from './projectUtils';
+// Removed deprecated addStandardPhasesToProjectRun import - project runs already have standard phases
 
 interface NeedDate {
   itemId: string;
@@ -48,7 +48,8 @@ export function extractNeedDatesFromSchedule(projectRun: ProjectRun): NeedDate[]
     const eventEnd = event.end ? new Date(event.end) : eventStart;
 
     // Find the step in the project phases to get its materials and tools
-    const processedPhases = addStandardPhasesToProjectRun(projectRun.phases || []);
+    // Project runs already have standard phases from the database, no need to add them
+    const processedPhases = projectRun.phases || [];
     
     processedPhases.forEach((phase) => {
       phase.operations?.forEach((operation) => {
@@ -244,7 +245,8 @@ export function isShoppingNeededAfterReplan(
  * Extracts all tools and materials needed for a project run
  */
 export function extractProjectToolsAndMaterials(projectRun: ProjectRun) {
-  const processedPhases = addStandardPhasesToProjectRun(projectRun.phases || []);
+  // Project runs already have standard phases from the database, no need to add them
+  const processedPhases = projectRun.phases || [];
   
   const materialsMap = new Map<string, any>();
   const toolsMap = new Map<string, any>();
@@ -326,7 +328,8 @@ export function markOrderingStepIncompleteIfNeeded(
   
   if (shoppingNeeded) {
     // Find ordering step and mark as incomplete
-    const processedPhases = addStandardPhasesToProjectRun(projectRun.phases || []);
+    // Project runs already have standard phases from the database, no need to add them
+    const processedPhases = projectRun.phases || [];
     
     processedPhases.forEach((phase, phaseIndex) => {
       if (!phase.operations || !Array.isArray(phase.operations)) {

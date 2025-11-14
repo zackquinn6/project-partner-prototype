@@ -161,9 +161,11 @@ export function PhaseCompletionPopup({
                              <div className="flex-1 space-y-2">
                                <div className="flex items-center gap-2">
                                  <span className="font-medium">{output.name}</span>
-                                 <Badge variant="outline" className="text-xs">
-                                   {output.type}
-                                 </Badge>
+                                 {output.type !== 'none' && (
+                                   <Badge variant="outline" className="text-xs">
+                                     {output.type}
+                                   </Badge>
+                                 )}
                                  {(output.name.toLowerCase().includes('shopping') || 
                                    output.name.toLowerCase().includes('order') ||
                                    output.description?.toLowerCase().includes('shopping') ||

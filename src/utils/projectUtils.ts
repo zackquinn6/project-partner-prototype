@@ -433,9 +433,16 @@ export const hasAllStandardPhases = (phases: Phase[]): boolean => {
   return requiredPhases.every(name => phaseNames.includes(name));
 };
 
-// DEPRECATED: Use ensureStandardPhasesForNewProject for new projects, direct phase access for display
+/**
+ * @deprecated This function is no longer used. 
+ * - For new projects: Use ensureStandardPhasesForNewProject
+ * - For project runs: Standard phases are already included from the database
+ * - For display: Use phases directly from project/projectRun
+ * 
+ * This function will be removed in a future version.
+ */
 export const addStandardPhasesToProjectRun = (phases: Phase[]): Phase[] => {
-  console.warn('addStandardPhasesToProjectRun is deprecated. Standard phases should be saved in the database, not added dynamically.');
+  console.warn('addStandardPhasesToProjectRun is deprecated and should not be used. Standard phases are now stored in the database.');
   
   let processedPhases = [...phases];
   
@@ -485,7 +492,10 @@ export const addStandardPhasesToProjectRun = (phases: Phase[]): Phase[] => {
   return processedPhases;
 };
 
-// Keep the old function for backward compatibility
+/**
+ * @deprecated This is an alias for addStandardPhasesToProjectRun which is also deprecated.
+ * This function will be removed in a future version.
+ */
 export const addKickoffPhaseToProjectRun = addStandardPhasesToProjectRun;
 
 export const isKickoffPhaseComplete = (completedSteps: string[]): boolean => {

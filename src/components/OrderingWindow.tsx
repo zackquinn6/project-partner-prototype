@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, ChevronRight, ShoppingCart, Eye, EyeOff, ExternalLink, Globe, Check, Maximize, Info, Calendar, AlertTriangle } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShoppingCart, Eye, EyeOff, ExternalLink, Globe, Check, Maximize, Info, Calendar, AlertTriangle, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -477,10 +477,21 @@ export function OrderingWindow({
   } = useResponsive();
   return <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="" size={isMobile ? "content-full" : "large"}>
       <div className="flex flex-col h-full space-y-2">
-        {/* Custom Title */}
-        <h2 className="text-lg md:text-xl font-bold mb-2">
-          {selectedMaterials && (selectedMaterials.materials.length > 0 || selectedMaterials.tools.length > 0) ? 'Shopping Checklist - New Materials Needed' : 'Shopping Checklist'}
-        </h2>
+        {/* Custom Title with Close Button */}
+        <div className="flex items-center justify-between mb-2 pb-3 border-b sticky top-0 bg-background z-10">
+          <h2 className="text-lg md:text-xl font-bold">
+            {selectedMaterials && (selectedMaterials.materials.length > 0 || selectedMaterials.tools.length > 0) ? 'Shopping Checklist - New Materials Needed' : 'Shopping Checklist'}
+          </h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onOpenChange(false)}
+            className="h-8 px-3 text-xs font-medium"
+          >
+            <X className="w-4 h-4 mr-1" />
+            Close
+          </Button>
+        </div>
         
         {/* Schedule Status */}
         {!isScheduled && <Alert className="mb-2">
